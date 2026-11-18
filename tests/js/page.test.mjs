@@ -129,7 +129,7 @@ test('the banner sentences exist in EN, FR, ES and carry the time / the sources'
     }
     assert.match(b.more(3), /3/)
   }
-  assert.equal(messages.fr.banner.stale('14:32'), 'Données de 14:32, la lecture échoue.')
+  assert.equal(messages.fr.banner.stale('14:32'), 'Données de 14:32 : l’actualisation échoue.')
 })
 }
 

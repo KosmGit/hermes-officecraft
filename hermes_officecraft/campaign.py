@@ -46,8 +46,11 @@ MAX_BODY = 8_000          # the worker reads 8 192 characters of a card body (ka
 MIN_RUNTIME, MAX_RUNTIME = 900, 86_400
 CREATED_BY = "officecraft"
 KEY_PREFIX = "oc-camp:"
-LAUNCH_RESULT = "Lancée depuis Officecraft"
-GUARD_BODY = "Carte-garde d'Officecraft : rien ne part avant « Lancer ». Ne pas débloquer."
+# what Officecraft writes on a guard card is English for every user (a kanban is shared, and read by agents). A guard is
+# RECOGNISED by its key (``is_guard_row``), never by these texts: a campaign written with the earlier French wording
+# (« Garde — <goal> », « Garde phase B — <name> ») still reads, launches and cancels.
+LAUNCH_RESULT = "Launched from Officecraft"
+GUARD_BODY = 'Officecraft guard card: nothing starts until you press "Launch". Do not unblock it.'
 REASONS = (
     "unknown_board", "archived_board", "board_exists", "bad_slug", "no_workdir", "unknown_profile", "cycle",
     "no_head_guard", "bad_guard", "unguarded", "too_many_cards", "bad_parent", "readback_mismatch", "hermes_error",
@@ -282,7 +285,7 @@ def plan_graph(c: CampaignIn) -> list[CardIn]:
 
 
 def guard_titles(c: CampaignIn) -> dict[int, str]:
-    return {0: f"Garde — {c.goal}", **{k: f"Garde phase {_letter(k)} — {c.phases[k].name}" for k in range(1, len(c.phases))}}
+    return {0: f"Guard — {c.goal}", **{k: f"Guard phase {_letter(k)} — {c.phases[k].name}" for k in range(1, len(c.phases))}}
 
 
 def card_key(campaign_id: str, card: CardIn) -> str:

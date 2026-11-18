@@ -293,7 +293,7 @@ test('i18n: every choice has its label, explanation, confirmation effect and res
   for (const lang of ['en', 'fr', 'es']) {
     const a = messages[lang].approvals
     for (const c of CHOICES) {
-      assert.ok(typeof a.choice[c] === 'string' && a.choice[c].length >= 5, `${lang} choice.${c}`)
+      assert.ok(typeof a.choice[c] === 'string' && a.choice[c].length >= 4, `${lang} choice.${c}`)
       for (const k of ['explain', 'effect']) assert.ok(typeof a[k][c] === 'string' && a[k][c].length > 8, `${lang} ${k}.${c}`)
       assert.match(a.done[c]('X'), /X/, `${lang} done.${c} names the target`)
     }
@@ -326,11 +326,11 @@ const { CHOICES, answerReread } = await import('../../src/core/approvals.js')
 const { messages } = await import('../../src/i18n/index.js')
 const { readFileSync } = await import('node:fs')
 
-test('« no longer pending (read back) » is said only when the re-read saw the request gone, never after a failed re-read', () => {
+test('« no longer pending (verified) » is said only when the re-read saw the request gone, never after a failed re-read', () => {
   assert.equal(answerReread({ ok: true, gone: true }), true)
   assert.equal(answerReread({ ok: true, gone: null }), false, 'a failed re-read is not a read-back')
   assert.equal(answerReread({ ok: true }), false)
-  const READ_BACK = { en: /read back\)/, fr: /\(relu\)/, es: /\(releído\)/ }
+  const READ_BACK = { en: /\(verified\)/, fr: /\(vérifié\)/, es: /\(verificado\)/ }
   for (const lang of ['en', 'fr', 'es']) {
     const a = messages[lang].approvals
     for (const c of CHOICES) assert.match(a.done[c]('X'), READ_BACK[lang], `${lang} done.${c} claims the read-back`)

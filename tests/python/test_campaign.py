@@ -291,7 +291,8 @@ def test_a_valid_graph_is_written_in_one_go_and_read_back_identical(world):
     assert rows[ref["a2"]]["assignee"] == "bravo" and rows[ref["a2"]]["model_override"] == "m-x" and rows[ref["a2"]]["provider_override"] == "p-y"
     assert rows[ref["a3"]]["body"] == "Do the thing.\nTwice."
     assert rows[ref["g0"]]["assignee"] is None and rows[ref["g1"]]["assignee"] is None and rows[ref["g0"]]["status"] == "blocked"
-    assert rows[ref["g0"]]["title"] == "Garde — Ship the thing" and rows[ref["g1"]]["title"] == "Garde phase B — Ship"
+    assert rows[ref["g0"]]["title"] == "Guard — Ship the thing" and rows[ref["g1"]]["title"] == "Guard phase B — Ship"
+    assert rows[ref["g0"]]["body"] == rows[ref["g1"]]["body"] == 'Officecraft guard card: nothing starts until you press "Launch". Do not unblock it.'
     assert all(r["created_by"] == "officecraft" for r in rows.values())
     links = {(r["parent_id"], r["child_id"]) for r in world.fake.rows("sandbox", "SELECT * FROM task_links")}
     assert links == {(ref[p], ref[c]) for p, c in [("g0", "a1"), ("a1", "a2"), ("g0", "a3"), ("a2", "g1"), ("a3", "g1"), ("g1", "b1"), ("b1", "b2")]}
@@ -808,6 +809,50 @@ def test_cancel_replay(world):
     oid = uid()
     assert order(world, "cancel_campaign", "sandbox", ref["g0"], oid=oid).json()["result"] == "done"
     assert order(world, "cancel_campaign", "sandbox", ref["g0"], oid=oid).json()["replayed"] is True
+
+
+# ------------------------------------------------------------------ campaigns written with the earlier French guard texts
+
+OLD_GUARD_BODY = "Carte-garde d'Officecraft : rien ne part avant « Lancer ». Ne pas débloquer."
+
+
+def _as_written_before(world, ref):
+    """The guards of this campaign as an earlier version wrote them: French titles and body."""
+    world.fake.exec("sandbox", "UPDATE tasks SET title = ?, body = ? WHERE id = ?", "Garde — Ship the thing", OLD_GUARD_BODY, ref["g0"])
+    world.fake.exec("sandbox", "UPDATE tasks SET title = ?, body = ? WHERE id = ?", "Garde phase B — Ship", OLD_GUARD_BODY, ref["g1"])
+
+
+@pytest.mark.parametrize("old", [False, True])
+def test_a_guard_is_read_launched_and_protected_whatever_the_language_of_its_texts(world, old):
+    ref = make(world)
+    if old:
+        _as_written_before(world, ref)
+    snapshot = _m("snapshot")
+    by_id = {t["id"]: t for t in snapshot.read_board(world.fake.path("sandbox"), "sandbox")["tasks"]}
+    assert by_id[ref["g0"]]["guard"] is True and by_id[ref["g0"]]["head"] is True and by_id[ref["g0"]]["campaignSize"] == 7
+    assert by_id[ref["g1"]]["guard"] is True and by_id[ref["g1"]]["head"] is False
+    (camp,) = snapshot.read_notify_extras(world.fake.path("sandbox"), "sandbox")["campaigns"]
+    assert camp["name"] == "Ship the thing" and [(p["phase"], p["name"]) for p in camp["phases"]] == [(0, "")]
+    out = order(world, "unblock", "sandbox", ref["g0"]).json()
+    assert out["result"] == "refused" and out["reason"] == "guard"
+    out = order(world, "launch", "sandbox", ref["g0"]).json()
+    assert out["result"] == "done" and out["after"] == {"status": "done", "ready": 2}
+    for name in ("a1", "a2", "a3"):
+        world.fake.exec("sandbox", "UPDATE tasks SET status='done' WHERE id=?", ref[name])
+    (camp,) = snapshot.read_notify_extras(world.fake.path("sandbox"), "sandbox")["campaigns"]
+    assert [(p["phase"], p["name"]) for p in camp["phases"]] == [(1, "Ship")]
+    out = order(world, "launch", "sandbox", ref["g1"]).json()
+    assert out["result"] == "done" and out["after"] == {"status": "done", "ready": 1}
+
+
+@pytest.mark.parametrize("old", [False, True])
+def test_a_campaign_is_cancelled_whatever_the_language_of_its_guard_texts(world, old):
+    ref = make(world)
+    if old:
+        _as_written_before(world, ref)
+    out = order(world, "cancel_campaign", "sandbox", ref["g0"]).json()
+    assert out["result"] == "done" and out["after"] == {"status": "archived", "archived": 7, "ready": 0, "running": 0}
+    assert world.fake.by_status("sandbox") == {"archived": 7}
 
 
 # ------------------------------------------------------------------ the guards are marked in /live

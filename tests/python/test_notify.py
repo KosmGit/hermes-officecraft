@@ -209,7 +209,7 @@ def test_facts_that_arrive_together_leave_in_one_message():
     assert len(w.sent) == 1
     text = w.sent[0][1]
     # a first line that says the essential, then the facts grouped by type, one short line each
-    assert text.startswith("<b>4 facts</b> · b\n") and text.count("\n") == 4 + 3        # 4 facts + 3 group headers
+    assert text.startswith("<b>4 events</b> · b\n") and text.count("\n") == 4 + 3        # 4 facts + 3 group headers
     assert "⏸ <b>2 decisions</b>" in text and "🔇 <b>1 agent silent</b>" in text and "⏰ <b>1 scheduled job failed</b>" in text
 
 
@@ -479,6 +479,6 @@ def test_each_language_writes_its_own_punctuation_and_words():
     assert N.format_line(fact, "fr", now=NOW) == "Nightly · a · il y a 12\u00a0min"      # the number and its unit stay together in French
     assert N.format_line(fact, "es", now=NOW) == "Nightly · a · hace 12 min"
     degraded = {"state": "degraded", "title": "telegram"}
-    assert N.format_line(degraded, "fr") == "la messagerie telegram demande de l’attention"
-    assert N.format_line(degraded, "es") == "la mensajería telegram necesita atención"
+    assert N.format_line(degraded, "fr") == "la messagerie telegram est en difficulté"
+    assert N.format_line(degraded, "es") == "la app de mensajería telegram necesita atención"
     assert set(N.WORDS["en"]) == set(N.WORDS["fr"]) == set(N.WORDS["es"])

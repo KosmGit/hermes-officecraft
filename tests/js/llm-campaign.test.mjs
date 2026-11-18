@@ -456,7 +456,8 @@ test('every cost the window shows carries its currency (a bare « 0,0054 » said
   const shown = [...assist.matchAll(/formatUsd\(/g)].length
   assert.ok(shown >= 2, 'the proposal and the review show a cost')
   assert.equal([...assist.matchAll(/t\('llm\.cg\.usd', formatUsd\(/g)].length, shown, 'each formatted amount goes through llm.cg.usd')
-  for (const l of LANGS) assert.equal(T(l, 'llm.cg.usd', '0,0054'), '0,0054\u00a0$')   // no-break, the amount never leaves its unit on the next line
+  assert.equal(T('en', 'llm.cg.usd', '0.0054'), '$0.0054')                                // English: the sign first, no space
+  for (const l of LANGS.filter(l => l !== 'en')) assert.equal(T(l, 'llm.cg.usd', '0,0054'), '0,0054\u00a0$')   // no-break, the amount never leaves its unit on the next line
 })
 
 test('« Ignore » and « Apply to <card> » of rewritten instructions stay together (the primary button wrapped alone on a line at 1440 px)', () => {

@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useId, useMemo, useReducer, useRef, u
 
 import {
   HEAD, MAX_BODY, MAX_GOAL, MAX_NAME, MAX_TITLE, MAX_WORK_CARDS, TEMPLATES, addCard, addGuard, addPhase, applyTemplate, codes, createdOf, draftIsEmpty,
-  draftIssues, draftNotes, duplicateCard, effective, eligibleParents, initialWindow, isGuard, keepSession, letter, newDraft, patchCard, recallSession, removeCard, removeLastPhase,
+  draftIssues, draftNotes, duplicateCard, effective, eligibleParents, guardTitle, initialWindow, isGuard, keepSession, letter, newDraft, patchCard, recallSession, removeCard, removeLastPhase,
   renamePhase, clearSession, slugState, slugify, summary, templateCards, toggleParent, windowReducer, workCards
 } from '../core/campaign.js'
 import { depthOf } from '../core/campaignLayout.js'
@@ -323,7 +323,7 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
   const created = win.created
   const launched = created?.launched
   const cancelled = created?.cancelled
-  const guardItem = created ? { board: created.board, id: created.head, title: `Garde — ${created.goal}`, head: true, campaignSize: created.size } : null
+  const guardItem = created ? { board: created.board, id: created.head, title: guardTitle(created.goal), head: true, campaignSize: created.size } : null
   const status = useMemo(() => {
     if (win.step !== 'created' || !created) return null
     const m = new Map()

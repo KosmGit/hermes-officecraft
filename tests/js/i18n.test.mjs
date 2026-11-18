@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
 import { LANGUAGE_PREFS, SUPPORTED_LOCALES, normalizeLocale, resolveLocale } from '../../src/core/locale.js'
@@ -71,4 +72,24 @@ test('relative times are written in the plugin language', () => {
   assert.match(formatRelative(threeHoursAgo, now, 'fr'), /il y a 3 heures/)
   assert.match(formatRelative(threeHoursAgo, now, 'es'), /hace 3 horas/)
   assert.equal(formatRelative(undefined, now, 'en'), '')
+})
+
+test('recruit: the hint about the copied skills agrees with one skill and with several', () => {
+  const hint = (lang, n) => translate(messages, lang, 'recruit.skillsHint', [n, 'alpha'])
+  assert.match(hint('en', 1), /^The other skill of alpha is copied too\./)
+  assert.match(hint('en', 3), /^The other 3 skills of alpha are copied too\./)
+  assert.match(hint('fr', 1), /^L’autre skill d’alpha est copié aussi/)
+  assert.match(hint('fr', 3), /^Les 3 autres skills d’alpha sont copiés aussi/)
+  assert.match(hint('es', 1), /^El otro skill de alpha se copia también/)
+  assert.match(hint('es', 3), /^Los otros 3 skills de alpha se copian también/)
+})
+
+test('the path to the auxiliary models is the one Hermes Desktop labels, in the three languages', () => {
+  const PATH = { en: 'Settings → Model → Auxiliary models', fr: 'Paramètres → Modèle → Modèles auxiliaires', es: 'Configuración → Modelo → Modelos auxiliares' }
+  const OLD = /Models → Auxiliary\b|Modèles → Auxiliaire\b|Modelos → Auxiliar\b/
+  for (const lang of SUPPORTED_LOCALES) {
+    const llm = messages[lang].llm
+    for (const text of [llm.unknownPrice(1, 2), llm.chipTipHost('strong'), llm.chipTipHost('light'), llm.grant.tipFall, llm.grant.tooOld]) assert.ok(text.includes(PATH[lang]), `${lang}: ${text}`)
+    assert.doesNotMatch(readFileSync(new URL(`../../src/i18n/${lang}.js`, import.meta.url), 'utf8'), OLD, `${lang}: the earlier path is gone`)
+  }
 })

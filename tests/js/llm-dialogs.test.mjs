@@ -83,11 +83,12 @@ test('a proposed text is read whole before « Apply »: the two « after » fiel
 
 test('380 px: the duplicate button keeps one line and the amount keeps its unit', () => {
   assert.match(src('ui/dialogStyles.js'), /\.oc-lm-dup \.oc-btn\{flex:0 0 auto;white-space:nowrap;margin-left:auto\}/)
-  for (const l of ['en', 'fr', 'es']) assert.equal(translate(messages, l, 'llm.cg.usd', ['0.0054']), '0.0054\u00a0$', l)
+  assert.equal(translate(messages, 'en', 'llm.cg.usd', ['0.0054']), '$0.0054', 'en')   // the sign first, no space to break at
+  for (const l of ['fr', 'es']) assert.equal(translate(messages, l, 'llm.cg.usd', ['0.0054']), '0.0054\u00a0$', l)
 })
 
 test('the note under « Apply » says the 6 s start after the click (it read as a countdown already running)', () => {
-  const said = { en: /after the click, 6 s/, fr: /après le clic, 6 s/, es: /tras el clic, 6 s/ }
+  const said = { en: /After you click, you have 6 s/, fr: /après le clic, vous avez 6 s/, es: /tras el clic, 6 s/ }
   for (const l of ['en', 'fr', 'es']) assert.match(translate(messages, l, 'llm.revise.note', []), said[l], l)
 })
 }

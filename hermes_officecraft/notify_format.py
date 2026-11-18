@@ -1,6 +1,6 @@
 """The words of a notification: what the user reads on a phone, in two seconds.
 
-One message = a first line that says the essential (« ⏸ 2 decisions wait for you · alpha »), then the facts
+One message = a first line that says the essential (« ⏸ 2 decisions are waiting for you · alpha »), then the facts
 grouped by type, one short line per fact: the card CODE (first word of the title, ``API3``, never the ``t_…`` id), the title
 cut cleanly (≤ 50 characters), the agent, how long (« for 12 min »), the project only when the message has several.
 One symbol per type, readable without colour. Numbers and times lead.
@@ -57,8 +57,8 @@ _STATES = {"blocked": "decision", "approval": "decision", "silent": "silent", "s
 
 # the words of a message, per language (the page sends its language with the settings)
 WORDS = {
-    "en": {"facts1": "1 fact", "factsn": "{n} facts", "projects": "{n} projects", "more": "+{n} more",
-           "decision1": "1 decision waits for you", "decisionn": "{n} decisions wait for you", "decision_s1": "1 decision", "decision_sn": "{n} decisions",
+    "en": {"facts1": "1 event", "factsn": "{n} events", "projects": "{n} projects", "more": "+{n} more",
+           "decision1": "1 decision is waiting for you", "decisionn": "{n} decisions are waiting for you", "decision_s1": "1 decision", "decision_sn": "{n} decisions",
            "silent1": "1 agent silent", "silentn": "{n} agents silent",
            "gateway1": "1 gateway alert", "gatewayn": "{n} gateway alerts",
            "cron1": "1 scheduled job failed", "cronn": "{n} scheduled jobs failed",
@@ -72,10 +72,10 @@ WORDS = {
            "llm_90": "{pct} of the cap · {used} of {cap}", "llm_cap": "cap reached · {used} of {cap}",
            "llm_calls_90": "{pct} of the cap · {used} of {cap} calls", "llm_calls_cap": "cap reached · {used} of {cap} calls",
            "tier": "{tier} tier", "bronze": "bronze", "silver": "silver", "gold": "gold",
-           "quiet": "Quiet hours {start}–{end}: {n} to look at", "resolved": " · {m} resolved meanwhile", "resolved1": " · 1 resolved meanwhile",
+           "quiet": "Quiet hours {start}–{end}: {n} to review", "resolved": " · {m} resolved since", "resolved1": " · 1 resolved since",
            "test": "test", "sample_decision": "Sample decision to review", "sample_silent": "Sample silent card",
            "sample_cron": "nightly-sample", "sample_camp": "Sample campaign", "min": "min", "h": "h", "d": "d", "s": "s", "dollar": "${}", "pct": "{}%", "dec": "."},
-    "fr": {"facts1": "1 fait", "factsn": "{n} faits", "projects": "{n} projets", "more": "+{n} autres",
+    "fr": {"facts1": "1 événement", "factsn": "{n} événements", "projects": "{n} projets", "more": "+{n} autres",
            "decision1": "1 décision vous attend", "decisionn": "{n} décisions vous attendent", "decision_s1": "1 décision", "decision_sn": "{n} décisions",
            "silent1": "1 agent silencieux", "silentn": "{n} agents silencieux",
            "gateway1": "1 alerte gateway", "gatewayn": "{n} alertes gateway",
@@ -85,31 +85,31 @@ WORDS = {
            "llm_cap1": "1 alerte de budget LLM", "llm_capn": "{n} alertes de budget LLM",
            "trophy1": "1 trophée débloqué", "trophyn": "{n} trophées débloqués",
            "since": "depuis {span}", "ago": "il y a {span}", "approval": "demande d’approbation en attente", "review_blocked": "le relecteur attend votre décision",
-           "stopped": "arrêté de {start} à {end} · {span}", "degraded": "la messagerie {name} demande de l’attention",
+           "stopped": "arrêté de {start} à {end} · {span}", "degraded": "la messagerie {name} est en difficulté",
            "camp_ready": "prête à lancer · {n} cartes", "camp_phase": "phase {letter}{name} prête à lancer · {n} cartes", "camp_done": "terminée · {n} cartes",
            "llm_90": "{pct} du plafond · {used} sur {cap}", "llm_cap": "plafond atteint · {used} sur {cap}",
            "llm_calls_90": "{pct} du plafond · {used} appels sur {cap}", "llm_calls_cap": "plafond atteint · {used} appels sur {cap}",
            "tier": "palier {tier}", "bronze": "bronze", "silver": "argent", "gold": "or",
-           "quiet": "Pendant les heures calmes {start}–{end}\u00a0: {n} à voir", "resolved": " · {m} résolus entre-temps", "resolved1": " · 1 résolu entre-temps",
-           "test": "essai", "sample_decision": "Exemple de décision à prendre", "sample_silent": "Exemple de carte silencieuse",
+           "quiet": "Heures calmes {start}–{end}\u00a0: {n} à voir", "resolved": " · {m} résolus entre-temps", "resolved1": " · 1 résolu entre-temps",
+           "test": "test", "sample_decision": "Exemple de décision à prendre", "sample_silent": "Exemple de carte silencieuse",
            "sample_cron": "nuit-exemple", "sample_camp": "Campagne d’exemple", "min": "min", "h": "h", "d": "j", "s": "s", "dollar": "{} $", "pct": "{} %", "dec": ","},
-    "es": {"facts1": "1 hecho", "factsn": "{n} hechos", "projects": "{n} proyectos", "more": "+{n} más",
+    "es": {"facts1": "1 evento", "factsn": "{n} eventos", "projects": "{n} proyectos", "more": "+{n} más",
            "decision1": "1 decisión te espera", "decisionn": "{n} decisiones te esperan", "decision_s1": "1 decisión", "decision_sn": "{n} decisiones",
            "silent1": "1 agente en silencio", "silentn": "{n} agentes en silencio",
            "gateway1": "1 alerta del gateway", "gatewayn": "{n} alertas del gateway",
            "cron1": "1 tarea programada fallida", "cronn": "{n} tareas programadas fallidas",
            "campaign1": "1 novedad de campaña", "campaignn": "{n} novedades de campaña",
-           "review1": "1 revisión rechazada", "reviewn": "{n} revisiones rechazadas",
+           "review1": "1 revisión devuelta", "reviewn": "{n} revisiones devueltas",
            "llm_cap1": "1 alerta de presupuesto LLM", "llm_capn": "{n} alertas de presupuesto LLM",
            "trophy1": "1 trofeo desbloqueado", "trophyn": "{n} trofeos desbloqueados",
            "since": "desde hace {span}", "ago": "hace {span}", "approval": "solicitud de aprobación en espera", "review_blocked": "el revisor espera tu decisión",
-           "stopped": "detenido de {start} a {end} · {span}", "degraded": "la mensajería {name} necesita atención",
+           "stopped": "detenido de {start} a {end} · {span}", "degraded": "la app de mensajería {name} necesita atención",
            "camp_ready": "lista para lanzar · {n} tarjetas", "camp_phase": "fase {letter}{name} lista para lanzar · {n} tarjetas", "camp_done": "terminada · {n} tarjetas",
-           "llm_90": "{pct} del tope · {used} de {cap}", "llm_cap": "tope alcanzado · {used} de {cap}",
-           "llm_calls_90": "{pct} del tope · {used} llamadas de {cap}", "llm_calls_cap": "tope alcanzado · {used} llamadas de {cap}",
-           "tier": "nivel {tier}", "bronze": "bronce", "silver": "plata", "gold": "oro",
-           "quiet": "Horas de silencio {start}–{end}: {n} por ver", "resolved": " · {m} resueltos entretanto", "resolved1": " · 1 resuelto entretanto",
-           "test": "prueba", "sample_decision": "Decisión de ejemplo por tomar", "sample_silent": "Tarjeta silenciosa de ejemplo",
+           "llm_90": "{pct} del límite · {used} de {cap}", "llm_cap": "límite alcanzado · {used} de {cap}",
+           "llm_calls_90": "{pct} del límite · {used} llamadas de {cap}", "llm_calls_cap": "límite alcanzado · {used} llamadas de {cap}",
+           "tier": "categoría {tier}", "bronze": "bronce", "silver": "plata", "gold": "oro",
+           "quiet": "Horas de silencio {start}–{end}: {n} por revisar", "resolved": " · {m} resueltos entretanto", "resolved1": " · 1 resuelto entretanto",
+           "test": "prueba", "sample_decision": "Decisión de ejemplo por tomar", "sample_silent": "Tarjeta en silencio de ejemplo",
            "sample_cron": "noche-ejemplo", "sample_camp": "Campaña de ejemplo", "min": "min", "h": "h", "d": "d", "s": "s", "dollar": "{} $", "pct": "{} %", "dec": ","},
 }
 NBSP = "\u00a0"
@@ -379,7 +379,7 @@ def format_message(facts: list[dict], lang: str = "en", label: str = LABEL_DEFAU
 
 
 def sample_facts(lang: str, now: float) -> list[dict]:
-    """The example facts of the test message: the real format, every card code and project marked « test »/« essai »."""
+    """The example facts of the test message: the real format, every card code and project marked « test »."""
     w = WORDS.get(lang, WORDS["en"])
     mark = w["test"].upper()
     return [

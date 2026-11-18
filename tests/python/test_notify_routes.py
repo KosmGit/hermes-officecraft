@@ -276,7 +276,7 @@ def test_during_quiet_hours_facts_are_kept_then_one_summary_leaves_at_the_end():
     w.tick(0)
     assert len(w.sent) == 2                                                     # ONE summary per recipient
     for _, text in w.sent:
-        assert "Pendant les heures calmes 22:00–07:00" in text and "2 à voir" in text and "1 résolu entre-temps" in text
+        assert "Heures calmes 22:00–07:00" in text and "2 à voir" in text and "1 résolu entre-temps" in text
         assert "API3" in text and "API5" in text and "API4" not in text        # only what is still true
     w.tick(30)
     assert len(w.sent) == 2 and w.store.get(N.STATE_KEY)["held"][T1] == {}
@@ -377,13 +377,14 @@ def test_the_reader_finds_the_real_kanban_sources_of_a_refused_review(tmp_path):
     assert "SECRET-REASON" not in json.dumps(ex)                                      # ids, kinds and times only
 
 
-def test_the_reader_finds_campaigns_ready_to_launch_and_finished(tmp_path):
+@pytest.mark.parametrize("word", ["Guard", "Garde"])   # what is written now, and what earlier campaigns hold
+def test_the_reader_finds_campaigns_ready_to_launch_and_finished(tmp_path, word):
     from importlib import import_module
     snap = import_module(SN + ".snapshot")
     k = lambda ref: f"oc-camp:{CID}:{ref}"    # noqa: E731
     db = tmp_path / "kanban.db"
-    kdb(db, [("t_g0000000", "Garde — Onboarding redesign", "blocked", None, k("G0"), OFFICECRAFT),
-             ("t_g0000001", "Garde phase B — The page", "blocked", None, k("G1"), OFFICECRAFT),
+    kdb(db, [("t_g0000000", f"{word} — Onboarding redesign", "blocked", None, k("G0"), OFFICECRAFT),
+             ("t_g0000001", f"{word} phase B — The page", "blocked", None, k("G1"), OFFICECRAFT),
              ("t_c0000001", "Card 1", "done", "backend", k("c1"), OFFICECRAFT), ("t_c0000002", "Card 2", "done", "backend", k("c2"), OFFICECRAFT),
              ("t_c0000003", "Card 3", "todo", "frontend", k("c3"), OFFICECRAFT),
              ("t_f0000000", "Fake guard", "blocked", None, k("G2"), "someone-else")],       # not written by Officecraft: ignored
@@ -423,7 +424,7 @@ def test_campaign_facts_ready_phase_and_finished_with_their_fields_and_exclusion
 
 
 def test_a_ready_guard_is_said_by_the_campaign_type_and_not_twice_as_a_decision():
-    guard = {**task("t_g0000000", "blocked", "Garde — Redesign", None), "guard": True, "head": True, "campaign": "0123abcd"}
+    guard = {**task("t_g0000000", "blocked", "Guard — Redesign", None), "guard": True, "head": True, "campaign": "0123abcd"}
     ex = [{"slug": "alpha", "campaigns": [{"id": "0123abcd", "name": "Redesign", "cards": 2, "done": False, "phases": [{"phase": 0, "name": "", "count": 2}]}]}]
     w = W2({"decision": [T1], "campaign": [T1]})
     w.boards = [board("alpha")]
@@ -438,7 +439,7 @@ def test_a_ready_guard_is_said_by_the_campaign_type_and_not_twice_as_a_decision(
     w2.boards = [board("alpha", guard)]
     w2.extra = {"extras": ex}
     w2.tick(30)
-    assert len(w2.sent) == 1 and "1 decision waits for you" in w2.sent[0][1]
+    assert len(w2.sent) == 1 and "1 decision is waiting for you" in w2.sent[0][1]
 
 
 def test_review_facts_come_from_the_events_and_the_test_pool_and_sandbox_are_excluded():
@@ -546,11 +547,11 @@ def test_the_test_message_is_one_realistic_message_marked_as_a_test():
     status, body, _, journal, sent = run_test(store=store)
     assert (status, body) == (200, {"ok": True, "error": None}) and len(sent) == 1 and sent[0][0] == "telegram:1"
     text = sent[0][1]
-    assert text.startswith("[test Officecraft] 4 faits") is False and "[test Officecraft]" in text.splitlines()[0]
-    assert "ESSAI-1" in text and "ESSAI-2" in text and "Exemple de décision" in text and "il y a 3\u00a0min" in text
+    assert text.startswith("[test Officecraft] 4 événements") is False and "[test Officecraft]" in text.splitlines()[0]
+    assert "TEST-1" in text and "TEST-2" in text and "Exemple de décision" in text and "il y a 3\u00a0min" in text
     assert text.count("\n") >= 6 and "<b>" in text                                          # the real format (Telegram: bold headings)
     assert journal and journal[0]["verb"] == "notify_test" and journal[0]["result"] == "done" and journal[0]["id"] == T1
-    assert "ESSAI" not in json.dumps(journal) and "Exemple" not in json.dumps(journal)       # the journal never holds the content
+    assert "TEST-" not in json.dumps(journal) and "Exemple" not in json.dumps(journal)       # the journal never holds the content
 
 
 def test_the_test_message_is_limited_to_one_per_minute_and_ten_per_day():
@@ -627,7 +628,7 @@ def msg(facts, lang="fr", platform=None, **kw):
 def test_case_1_one_decision_reads_in_two_lines_with_the_code_not_the_id():
     assert msg([D1], "fr") == ("⏸ 1 décision vous attend · alpha\n"
                                "API3 Leftovers of S4 : launches, preview and settings… · frontend · depuis 12\u00a0min")
-    assert msg([D1], "en") == "⏸ 1 decision waits for you · alpha\nAPI3 Leftovers of S4 : launches, preview and settings… · frontend · for 12 min"
+    assert msg([D1], "en") == "⏸ 1 decision is waiting for you · alpha\nAPI3 Leftovers of S4 : launches, preview and settings… · frontend · for 12 min"
     assert msg([D1], "es") == "⏸ 1 decisión te espera · alpha\nAPI3 Leftovers of S4 : launches, preview and settings… · frontend · desde hace 12 min"
     assert "t_ab12cd34" not in msg([D1]) and "[" not in msg([D1]) and msg([D1]).count("\n") == 1
 
@@ -638,25 +639,25 @@ def test_case_2_three_decisions_on_two_projects_name_the_project_on_each_line():
     assert fr[2] == "DOCS1 User guide 2 : the agent half and readable… · backend · depuis 3\u00a0h\u00a05\u00a0min · alpha"
     assert fr[3] == "Q7 Choose the icon set of screen 3 · design · depuis 47\u00a0min · beta"
     assert msg([D1], "fr").count("alpha") == 1                                  # a single project is said once, in the first line
-    assert msg([D1, D2, D3], "en").splitlines()[0] == "⏸ 3 decisions wait for you · 2 projects"
+    assert msg([D1, D2, D3], "en").splitlines()[0] == "⏸ 3 decisions are waiting for you · 2 projects"
     assert msg([D1, D2, D3], "es").splitlines()[0] == "⏸ 3 decisiones te esperan · 2 proyectos"
 
 
 def test_case_3_silence_and_cron_are_grouped_by_type_with_one_symbol_each():
-    assert msg([SILENT, CRON], "fr") == ("2 faits · alpha\n🔇 1 agent silencieux\nDOCS2 The page · frontend · depuis 7\u00a0min\n"
+    assert msg([SILENT, CRON], "fr") == ("2 événements · alpha\n🔇 1 agent silencieux\nDOCS2 The page · frontend · depuis 7\u00a0min\n"
                                          "⏰ 1 tâche planifiée en échec\nnightly-digest · digest · il y a 3\u00a0min")
-    assert msg([SILENT, CRON], "en").splitlines()[0] == "2 facts · alpha" and "🔇 1 agent silent" in msg([SILENT, CRON], "en")
+    assert msg([SILENT, CRON], "en").splitlines()[0] == "2 events · alpha" and "🔇 1 agent silent" in msg([SILENT, CRON], "en")
     assert "⏰ 1 tarea programada fallida" in msg([SILENT, CRON], "es") and "hace 3 min" in msg([SILENT, CRON], "es")
 
 
 def test_case_4_the_summary_of_the_end_of_quiet_hours_says_what_is_left_and_what_was_resolved():
     facts = [card("blocked", "alpha", "API3 — Leftovers of S4 : launches", "frontend", 410), card("silent", "alpha", "OPS9 — Cleanup", "devops", 95), CRON]
     fr = msg(facts, "fr", quiet=QUIET_HEAD).splitlines()
-    assert fr[0] == "🌙 Pendant les heures calmes 22:00–07:00\u00a0: 3 à voir · 2 résolus entre-temps · alpha"
+    assert fr[0] == "🌙 Heures calmes 22:00–07:00\u00a0: 3 à voir · 2 résolus entre-temps · alpha"
     assert fr[1:] == ["⏸ 1 décision", "API3 Leftovers of S4 : launches · frontend · depuis 6\u00a0h\u00a050\u00a0min", "🔇 1 agent silencieux",
                       "OPS9 Cleanup · devops · depuis 1\u00a0h\u00a035\u00a0min", "⏰ 1 tâche planifiée en échec", "nightly-digest · digest · il y a 3\u00a0min"]
-    assert msg(facts, "en", quiet=QUIET_HEAD).splitlines()[0] == "🌙 Quiet hours 22:00–07:00: 3 to look at · 2 resolved meanwhile · alpha"
-    assert msg(facts, "es", quiet=QUIET_HEAD).splitlines()[0].startswith("🌙 Horas de silencio 22:00–07:00: 3 por ver · 2 resueltos entretanto")
+    assert msg(facts, "en", quiet=QUIET_HEAD).splitlines()[0] == "🌙 Quiet hours 22:00–07:00: 3 to review · 2 resolved since · alpha"
+    assert msg(facts, "es", quiet=QUIET_HEAD).splitlines()[0].startswith("🌙 Horas de silencio 22:00–07:00: 3 por revisar · 2 resueltos entretanto")
     assert "résolus" not in msg(facts, "fr", quiet={**QUIET_HEAD, "resolved": 0})
 
 
@@ -666,7 +667,7 @@ def test_one_resolved_is_singular_in_every_language():
     facts = [card("blocked", "alpha", "API3 — Leftovers", "frontend", 10)]
     assert msg(facts, "fr", quiet=one).splitlines()[0].endswith(": 1 à voir · 1 résolu entre-temps · alpha")
     assert " · 1 resuelto entretanto · " in msg(facts, "es", quiet=one).splitlines()[0]
-    assert " · 1 resolved meanwhile · " in msg(facts, "en", quiet=one).splitlines()[0]
+    assert " · 1 resolved since · " in msg(facts, "en", quiet=one).splitlines()[0]
 
 
 def test_a_duration_in_hours_never_reads_as_a_time_of_day():
@@ -678,7 +679,7 @@ def test_a_duration_in_hours_never_reads_as_a_time_of_day():
 
 def test_case_5_a_campaign_ready_and_a_refused_review():
     fr = msg([CAMP, REVIEW], "fr")
-    assert fr == ("2 faits · alpha\n🚀 1 nouveauté de campagne\nOnboarding redesign · phase B (The page) prête à lancer · 4 cartes\n"
+    assert fr == ("2 événements · alpha\n🚀 1 nouveauté de campagne\nOnboarding redesign · phase B (The page) prête à lancer · 4 cartes\n"
                   "↩ 1 revue refusée\nR-DOCS1 Review of the agent half · backend · il y a 4\u00a0min")
     done = msg([{"state": "camp_done", "board": "alpha", "name": "Redesign", "count": 12}], "en")
     assert done == "🚀 1 campaign update · alpha\nRedesign · finished · 12 cards"
@@ -692,7 +693,7 @@ def test_the_other_lines_numbers_lead_and_french_typography_holds():
     assert msg([{**llm, "state": "llm_cap", "pct": 100, "used": 5.0}], "en").endswith("cap reached · $5 of $5")
     assert msg([{"state": "stopped", "start": NOW - 600, "end": NOW - 30}], "fr").splitlines()[1].endswith("· 9\u00a0min")
     gold = {"state": "trophy", "name": "Clean sweep", "tier": "gold"}
-    assert msg([gold], "fr").splitlines()[1] == "Clean sweep · palier or" and msg([gold], "es").splitlines()[1] == "Clean sweep · nivel oro"
+    assert msg([gold], "fr").splitlines()[1] == "Clean sweep · palier or" and msg([gold], "es").splitlines()[1] == "Clean sweep · categoría oro"
     for lang in ("fr", "es", "en"):
         for line in msg([D1, D2, SILENT, CRON, CAMP, REVIEW, llm, gold], lang).splitlines():
             assert len(line) <= 120, line                                               # short lines on a phone
@@ -756,8 +757,8 @@ def test_telegram_escapes_html_and_discord_escapes_markdown_but_slack_and_email_
     t = "A & B <c> *d* _e_"
     fact = {"state": "blocked", "board": "b", "title": "API1 — " + t, "agent": "my_agent", "since": NOW - 60}
     tg, ds, sl, em = (msg([fact], "en", p) for p in ("telegram", "discord", "slack", "email"))
-    assert "<b>1 decision waits for you</b>" in tg and "A &amp; B ‹c› *d* _e_" in tg and "<b>API1</b>" in tg
-    assert "**1 decision waits for you**" in ds and "A & B ‹c› \\*d\\* \\_e\\_" in ds and "my\\_agent" in ds and "**API1**" in ds
+    assert "<b>1 decision is waiting for you</b>" in tg and "A &amp; B ‹c› *d* _e_" in tg and "<b>API1</b>" in tg
+    assert "**1 decision is waiting for you**" in ds and "A & B ‹c› \\*d\\* \\_e\\_" in ds and "my\\_agent" in ds and "**API1**" in ds
     assert "*" not in sl.replace("*d*", "") and "<b>" not in sl and "**" not in em and "<b>" not in em and "A & B ‹c› *d* _e_" in em
     assert sl == em                                                                          # plain text: the same words everywhere it is not rendered safely
 

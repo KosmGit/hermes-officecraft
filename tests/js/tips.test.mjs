@@ -135,7 +135,7 @@ test('gateway, mail, crons, desk, clock cite the right facts and sources', () =>
   assert.match(render(tipOf(by('gateway'), full, ctx('en')).fact, 'en'), /degraded/)
   assert.equal(render(tipOf(by('mail'), full, ctx('en')).fact, 'en'), '2 messaging platforms: 1 connected, 1 reconnecting or failing')
   assert.equal(render(tipOf(by('crons'), full, ctx('en')).fact, 'en'), '1 active scheduled job, 1 failing')
-  assert.equal(render(tipOf(by('desk'), full, ctx('en')).fact, 'en'), '1 decision waits for you (a blocked card).')
+  assert.equal(render(tipOf(by('desk'), full, ctx('en')).fact, 'en'), '1 decision is waiting for you (a blocked card).')
   assert.match(render(tipOf(by('clock'), full, ctx('en')).fact, 'en'), /shows \d/)
 })
 
@@ -151,7 +151,7 @@ test('roster-only mode: infrastructure tooltips say the agent half is missing in
     const sp = spotsOf(roster).find(x => x.kind === kind)
     const tp = tipOf(sp, roster, ctx('en'))
     assert.match(render(tp.source, 'en'), /agent half/)
-    assert.match(render(tp.fact, 'en'), /not known/)
+    assert.match(render(tp.fact, 'en'), /is unknown/)
   }
 })
 
@@ -173,7 +173,7 @@ test('clockText: hours and minutes in the plugin language, empty without a time'
 
 test('model badge tooltip: an unknown default model is said, not invented (profiles.list may send an empty model)', () => {
   const tp = badgeTip({ name: 'a', code: 'S3.2', card: 'example/model-large', default: '', board: 'b' })
-  assert.match(render(tp.fact, 'en'), /default model is not known$/)
+  assert.match(render(tp.fact, 'en'), /default model is unknown$/)
   assert.match(render(tp.fact, 'fr'), /inconnu$/)
   assert.match(render(tp.fact, 'es'), /desconocido$/)
 })

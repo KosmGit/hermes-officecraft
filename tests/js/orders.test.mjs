@@ -365,9 +365,9 @@ test('coming back: the machine starts idle WITH the cancelled outcome, and nothi
 })
 test('the line says what was not sent and the target, in EN, FR, ES', () => {
   const what = 'Unblock sandbox-demo · S2.F'
-  assert.equal(messages.en.orders.cancelledLeft(what), 'Order not sent: you left the page (Unblock sandbox-demo · S2.F).')
-  assert.equal(messages.fr.orders.cancelledLeft(what), 'Ordre non envoyé : vous avez quitté la page (Unblock sandbox-demo · S2.F).')
-  assert.match(messages.es.orders.cancelledLeft(what), /Orden no enviada: .*página.*S2\.F/)
+  assert.equal(messages.en.orders.cancelledLeft(what), 'Not sent: you left the page (Unblock sandbox-demo · S2.F).')
+  assert.equal(messages.fr.orders.cancelledLeft(what), 'Action non envoyée : vous avez quitté la page (Unblock sandbox-demo · S2.F).')
+  assert.match(messages.es.orders.cancelledLeft(what), /Acción no enviada: .*página.*S2\.F/)
 })
 }
 
@@ -422,7 +422,7 @@ test('a lost answer is an unknown outcome, never « did not go through »', () =
 // « Launch » never leaves without the named confirmation. The editor's `preconfirmed` shortcut
 // (its review step IS the confirmation of the `campaign` order) is not a flag any order may carry: a
 // launch, a cancel or an unblock built with it would go straight to the 6 s window. Only the `campaign` order may skip it.
-const item = { board: 'sandbox-demo', id: 't_g0', title: 'Garde — Ship <img src=x onerror=alert(1)>', head: true, campaignSize: 3 }
+const item = { board: 'sandbox-demo', id: 't_g0', title: 'Guard — Ship <img src=x onerror=alert(1)>', head: true, campaignSize: 3 }
 
 test('launch, cancel_campaign and unblock always stop at the confirmation, even when the order carries preconfirmed', () => {
   for (const verb of ['launch', 'cancel_campaign']) {

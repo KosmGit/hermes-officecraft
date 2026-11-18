@@ -605,8 +605,13 @@ export function createdOf(outcome, draft) {
 
 /* ---------- the guard of a campaign, as a decision (the card of « Décisions ») ---------- */
 
-/** « Garde — <goal> » / « Garde phase B — <name> » -> the campaign's goal or phase name (the title the agent wrote). */
-export const guardName = title => String(title ?? '').replace(/^Garde(?: phase [A-H])?\s+[—–-]\s+/, '').trim() || String(title ?? '')
+/** The title the agent half writes on a guard card (`guard_titles` of hermes_officecraft/campaign.py): « Guard — <goal> » for the
+ * start guard, « Guard phase B — <name> » for a phase guard. English for every user: the kanban is shared. */
+export const guardTitle = (goal, phase = 0, name = '') => (phase > 0 ? `Guard phase ${letter(phase)} — ${name}` : `Guard — ${goal}`)
+
+/** « Guard — <goal> » / « Guard phase B — <name> » -> the campaign's goal or phase name. The earlier French titles
+ * (« Garde — … », « Garde phase B — … ») are read too: a campaign created before the titles became English keeps its name. */
+export const guardName = title => String(title ?? '').replace(/^(?:Guard|Garde)(?: phase [A-H])?\s+[—–-]\s+/, '').trim() || String(title ?? '')
 
 /** The order a guard's button names (the confirmation, the 6 s window, the outcome): the board, and the campaign by its name. */
 export const guardTarget = (verb, item, id) => ({ id, verb, board: item.board, task: item.id, code: guardName(item.fullTitle ?? item.title), head: item.head === true, size: item.campaignSize ?? null })

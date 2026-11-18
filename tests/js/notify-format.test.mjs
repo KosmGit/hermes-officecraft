@@ -110,8 +110,8 @@ test('preview: a safe message on every platform (no tag, no link, no attachment,
 
 test('preview: the style of the platform decides the bold, the preview style marks it', () => {
   const f = [{ state: 'blocked', board: 'p', title: 'AB1 — x', agent: 'z', since: NOW - 60 }]
-  assert.match(formatMessage(f, 'en', { platform: 'telegram', now: NOW }), /<b>1 decision waits for you<\/b>/)
-  assert.match(formatMessage(f, 'en', { platform: 'discord', now: NOW }), /\*\*1 decision waits for you\*\*/)
+  assert.match(formatMessage(f, 'en', { platform: 'telegram', now: NOW }), /<b>1 decision is waiting for you<\/b>/)
+  assert.match(formatMessage(f, 'en', { platform: 'discord', now: NOW }), /\*\*1 decision is waiting for you\*\*/)
   assert.doesNotMatch(formatMessage(f, 'en', { platform: 'slack', now: NOW }), /<b>|\*\*/)
   assert.equal(styleFor('telegram').kind, 'html')
 })

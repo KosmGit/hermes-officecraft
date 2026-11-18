@@ -73,15 +73,15 @@ Officecraft has two halves, installed together:
 | Half | What it does |
 |---|---|
 | **Desktop** (`desktop/plugin.js`) | The page, in Hermes Desktop and the Hermes Webapp. Built from `src/` with esbuild; imports only the Hermes plugin SDK and React. |
-| **Agent** (`hermes_officecraft/`) | Routes under `/api/plugins/hermes-officecraft/`: read-only views of the kanban, profiles and usage, the orders you send, notifications and the optional LLM functions. |
+| **Agent** (`hermes_officecraft/`) | Routes under `/api/plugins/hermes-officecraft/`: read-only views of the kanban, profiles and usage, the actions you send, notifications and the optional LLM functions. |
 
-Every order that writes follows the same rules: a risk class shown in words (*No risk*, *Reversible*, *Final*), a confirmation that names the target, **6 seconds to cancel**, one order at a time, and the real state read back before anything is reported as done.
+Every action that writes follows the same rules: a risk class shown in words (*No risk*, *Reversible*, *Final*), a confirmation that names the target, **6 seconds to cancel**, one action at a time, and the real state read back before anything is reported as done.
 
 ## Privacy and safety
 
-- **Reads by default, writes only what you order.** Nothing runs in the background except the notifications and LLM functions you switched on.
+- **Reads by default, writes only what you ask for.** Nothing runs in the background except the notifications and LLM functions you switched on.
 - **Whitelisted fields only.** Shown: profile names, states, counters, timestamps, card and session titles. Never read or shown: card bodies, comments, message contents, file paths, keys, the `SOUL.md` of an existing bot, the command of an approval.
-- **Every order is journaled** in an `audit.jsonl` readable by you only, in the data folder Hermes gives the plugin. It never holds a comment's text, a title or a command.
+- **Every action is logged** in an `audit.jsonl` readable by you only, in the data folder Hermes gives the plugin. It never holds a comment's text, a title or a command.
 - **LLM functions are opt-in**, each with its own switch. The settings list exactly which fields each one sends to the model. A monthly cap (1 $ and 300 calls by default) is checked before every call.
 - **No telemetry, no network call of its own.** The plugin talks to your Hermes backend and to nothing else.
 
@@ -102,7 +102,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 |---|---|
 | `src/` | Desktop sources. `src/core/` and `src/scene/` are pure logic, tested under `node --test`. |
 | `desktop/plugin.js` | Generated bundle loaded by Hermes. Never edit by hand. |
-| `hermes_officecraft/` | Agent half (FastAPI routes, kanban reads, orders, notifier, LLM functions). |
+| `hermes_officecraft/` | Agent half (FastAPI routes, kanban reads, actions, notifier, LLM functions). |
 | `dashboard/` | How Hermes mounts the agent half's routes. |
 | `plugin.yaml`, `__init__.py` | Plugin manifest and entry point. |
 | `dev/`, `tests/` | Build tooling and test suites. |

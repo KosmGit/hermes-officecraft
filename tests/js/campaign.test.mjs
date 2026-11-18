@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { HEAD, MAX_WORK_CARDS, TEMPLATES, addCard, addGuard, addPhase, applyTemplate, codes, createdOf, draftIsEmpty, draftIssues, draftNotes, duplicateCard, effective, eligibleParents, guardName, guardTarget, initialWindow, newDraft, patchCard, printable, readCampaign, removeCard, removeLastPhase, slugState, slugify, summary, templateCards, toRequest, toggleParent, validateRequest, windowReducer, workCards, campaignBoardNote, newDraft as freshDraft } from '../../src/core/campaign.js'
+import { HEAD, MAX_WORK_CARDS, TEMPLATES, addCard, addGuard, addPhase, applyTemplate, codes, createdOf, draftIsEmpty, draftIssues, draftNotes, duplicateCard, effective, eligibleParents, guardName, guardTarget, guardTitle, initialWindow, newDraft, patchCard, printable, readCampaign, removeCard, removeLastPhase, slugState, slugify, summary, templateCards, toRequest, toggleParent, validateRequest, windowReducer, workCards, campaignBoardNote, newDraft as freshDraft } from '../../src/core/campaign.js'
 import { edgesOverCards, foldCards, graphOf, overlapping, EDGE_CLEAR, edgeClearance, EDGE_GAP } from '../../src/core/campaignLayout.js'
 import { initialOrderState, orderReducer, readAnswer } from '../../src/core/orders.js'
 import { inboxItems, topStats } from '../../src/core/panel.js'
@@ -423,11 +423,44 @@ test('the window: compose -> review -> created; a refused or failed creation lea
 })
 
 test('guards of a campaign as decisions: the name is the goal, the order names board, campaign and size', () => {
+  assert.equal(guardName('Guard — Migrate the sign-in'), 'Migrate the sign-in')
+  assert.equal(guardName('Guard phase B — Tests'), 'Tests')
+  assert.equal(guardName('Some card'), 'Some card')
+  const t = guardTarget('launch', { board: 'alpha', id: 't_x', title: 'Guard — Goal', head: true, campaignSize: 9 }, 'id1')
+  assert.deepEqual(t, { id: 'id1', verb: 'launch', board: 'alpha', task: 't_x', code: 'Goal', head: true, size: 9 })
+})
+
+test('guard titles are written in English, and the French titles of earlier campaigns are still read', async () => {
+  assert.equal(guardTitle('Migrate the sign-in'), 'Guard — Migrate the sign-in')
+  assert.equal(guardTitle('Migrate the sign-in', 1, 'Tests'), 'Guard phase B — Tests')
+  assert.equal(guardTitle('x', 7, 'Last'), 'Guard phase H — Last')
+  // what is written is read back to the goal or the phase name, for every phase letter
+  assert.equal(guardName(guardTitle('Migrate the sign-in')), 'Migrate the sign-in')
+  for (let k = 1; k < 8; k++) assert.equal(guardName(guardTitle('g', k, `Phase ${k}`)), `Phase ${k}`)
+  // a campaign created before the titles became English: same name, same order target
   assert.equal(guardName('Garde — Migrate the sign-in'), 'Migrate the sign-in')
   assert.equal(guardName('Garde phase B — Tests'), 'Tests')
-  assert.equal(guardName('Some card'), 'Some card')
-  const t = guardTarget('launch', { board: 'alpha', id: 't_x', title: 'Garde — Goal', head: true, campaignSize: 9 }, 'id1')
-  assert.deepEqual(t, { id: 'id1', verb: 'launch', board: 'alpha', task: 't_x', code: 'Goal', head: true, size: 9 })
+  assert.equal(guardName('Garde phase H – Last'), 'Last')
+  for (const title of ['Garde — Goal', 'Guard — Goal']) {
+    assert.deepEqual(guardTarget('cancel_campaign', { board: 'alpha', id: 't_x', title, head: true, campaignSize: 9 }, 'id1'),
+      { id: 'id1', verb: 'cancel_campaign', board: 'alpha', task: 't_x', code: 'Goal', head: true, size: 9 })
+  }
+  // only a guard prefix is stripped: a goal that merely contains the word stays whole
+  assert.equal(guardName('Guard — Garde — nested'), 'Garde — nested')
+  assert.equal(guardName('Guardian — Goal'), 'Guardian — Goal')
+  assert.equal(guardName('Gardes — Goal'), 'Gardes — Goal')
+  // the page shows the text the agent half writes: same two templates in hermes_officecraft/campaign.py, same body label as the button
+  const { readFileSync } = await import('node:fs')
+  const py = readFileSync(new URL('../../hermes_officecraft/campaign.py', import.meta.url), 'utf8')
+  assert.ok(py.includes(`f"${guardTitle('{c.goal}')}"`), 'start guard title')
+  assert.ok(py.includes(`f"${guardTitle('', 1, '{c.phases[k].name}').replace('B', '{_letter(k)}')}"`), 'phase guard title')
+  assert.doesNotMatch(py, /f"Garde/)
+  const body = /^GUARD_BODY = '([^']+)'$/m.exec(py)?.[1]
+  assert.ok(body && body.includes(`"${en.orders.verb.launch}"`), 'the body quotes the Launch button as the page labels it')
+  assert.doesNotMatch(body, /[«»]|Lancer|Carte/)
+  const dialog = readFileSync(new URL('../../src/ui/CampaignDialog.jsx', import.meta.url), 'utf8')
+  assert.match(dialog, /title: guardTitle\(created\.goal\)/)
+  assert.doesNotMatch(dialog, /Garde|Guard —/)
 })
 
 /* ---------- the preview's layout ---------- */
@@ -535,8 +568,8 @@ test('validateRequest: a work card must have the head guard among its ancestors,
 })
 
 test('decisions: a phase guard waits out of the list and the counter while the head guard of its campaign still waits', () => {
-  const g0 = { id: 't_g0', title: 'Garde — Ship', createdMs: 1, guard: true, head: true, campaign: 'abcd1234', campaignSize: 6 }
-  const g1 = { id: 't_g1', title: 'Garde phase B — Build', createdMs: 2, guard: true, head: false, campaign: 'abcd1234' }
+  const g0 = { id: 't_g0', title: 'Guard — Ship', createdMs: 1, guard: true, head: true, campaign: 'abcd1234', campaignSize: 6 }
+  const g1 = { id: 't_g1', title: 'Guard phase B — Build', createdMs: 2, guard: true, head: false, campaign: 'abcd1234' }
   const other = { id: 't_x', title: 'Blocked card', createdMs: 3 }
   const office = blocked => ({ mode: 'live', agents: [], boards: [{ slug: 'alpha', blocked, open: [], total: blocked.length }] })
   assert.deepEqual(inboxItems(office([g0, g1, other])).map(i => i.id).sort(), ['t_g0', 't_x'])
@@ -548,7 +581,7 @@ test('decisions: a phase guard waits out of the list and the counter while the h
   assert.equal(topStats(office([g0, { ...g1, campaign: 'ffff0000' }])).decisions, 2)
   // the head guard's decision carries what its card says (the campaign's size, its full title)
   const head = inboxItems(office([g0])).find(i => i.id === 't_g0')
-  assert.deepEqual([head.guard, head.head, head.campaignSize, head.fullTitle], [true, true, 6, 'Garde — Ship'])
+  assert.deepEqual([head.guard, head.head, head.campaignSize, head.fullTitle], [true, true, 6, 'Guard — Ship'])
 })
 
 test('the campaign order: the review step was its confirmation (straight to the 6 s), and its body (titles, instructions) is dropped once it has left', () => {
@@ -603,12 +636,12 @@ test('finish: the review never cuts the project it names, a full-size preview no
 //  2.  the Journal cut a project chip at the 140 px of the page's chips (« sandbox-website… », 120 > 110 px of text) although the chip
 //      has its own line in the row (finish check: 130 clipped chips over the matrix).
 const ONE = {
-  en: { counts: '1 card · 1 guard · 1 link', existing: 'existing · 1 card already', head: 'Head guard · campaign of 1 card' },
-  fr: { counts: '1 carte · 1 garde · 1 lien', existing: 'existant · 1 carte déjà', head: 'Garde de tête · campagne de 1 carte' },
-  es: { counts: '1 tarjeta · 1 guarda · 1 enlace', existing: 'existente · ya tiene 1 tarjeta', head: 'Guarda de cabeza · campaña de 1 tarjeta' }
+  en: { counts: '1 card · 1 guard · 1 link', existing: 'existing · 1 card already', head: 'Start guard · campaign of 1 card' },
+  fr: { counts: '1 carte · 1 verrou · 1 lien', existing: 'existant · 1 carte déjà', head: 'Verrou de départ · campagne de 1 carte' },
+  es: { counts: '1 tarjeta · 1 barrera · 1 enlace', existing: 'existente · ya tiene 1 tarjeta', head: 'Barrera inicial · campaña de 1 tarjeta' }
 }
 const MANY = {
-  en: '6 cards · 2 guards · 6 links', fr: '6 cartes · 2 gardes · 6 liens', es: '6 tarjetas · 2 guardas · 6 enlaces'
+  en: '6 cards · 2 guards · 6 links', fr: '6 cartes · 2 verrous · 6 liens', es: '6 tarjetas · 2 barreras · 6 enlaces'
 }
 
 for (const [lang, b] of Object.entries({ en, fr, es })) {
