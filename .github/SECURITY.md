@@ -21,9 +21,9 @@ Officecraft runs inside Hermes Agent: its routes are mounted and authenticated b
 page runs in Hermes Desktop or the Hermes Webapp. In scope, for example:
 
 - a route of the agent half that serves a field outside its whitelist (card bodies, comments, paths, keys…);
-- text written by a bot (a card title, a profile name, a model's answer) that becomes markup, a link, an order
+- text written by a bot (a card title, a profile name, a model's answer) that becomes markup, a link, an action
   or a file attachment;
-- a way past the confirmation of an order, the monthly LLM cap or the limits of the notifier.
+- a way past the confirmation of an action, the monthly LLM cap or the limits of the notifier.
 
 A problem in the authentication or transport of Hermes itself belongs to
 [Hermes Agent](https://github.com/NousResearch/hermes-agent).
