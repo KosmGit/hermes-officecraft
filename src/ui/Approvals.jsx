@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { CHOICES, choiceRisk } from '../core/approvals.js'
+import { CHOICES, choiceRisk, commandLine, commandPanel } from '../core/approvals.js'
 import { isBusy } from '../core/orders.js'
 import { DecisionFrame } from './DecisionCard.jsx'
 import { Icon } from './icons.jsx'
@@ -8,11 +8,32 @@ import { OrderConfirm, OrderProgress, RiskDot } from './Orders.jsx'
 
 /**
  * The approvals Hermes asks for, inside the decision list. One card per request: who asks, in which session, Hermes' own one-line
- * summary of it (never the command: the session's approval card shows that), how long it has waited, and the answers it allows, each with
+ * summary of it, the first line of the command, how long it has waited, and the answers it allows, each with
  * its risk class (a pip) and what it does said to the screen reader and in the list's « ? ». « Refuse » and « Allow once » are on the card,
  * the broader answers (for the session, always) one click further. The answer goes through the same order machine as every other order
- * (6 s to cancel, one at a time, re-read from `approval.pending`).
+ * (6 s to cancel, one at a time, re-read from `approval.pending`). The confirmation of an allowing answer shows the command.
  */
+
+/**
+ * The command Hermes asks about, inside the confirmation of an allowing answer: read from the row of the in-memory store while
+ * it is drawn (the order never carries it), as plain text in a block that wraps and scrolls. When it was cut, or when Hermes gave
+ * none, a line says where the exact command is.
+ */
+function CommandBlock({ req, choice, t }) {
+  const panel = commandPanel(req, choice)
+  if (!panel) return null
+  const id = `oc-cmd-${req.requestId}`
+  return (
+    <div className="ux-cmd" data-approval-command>
+      <p id={id} className="lbl">{t('approvals.commandLabel')}</p>
+      {panel.missing
+        ? <p className="fine" data-approval-command-missing>{t('approvals.commandMissing')}</p>
+        : <pre className="ux-cmd-x ux-mono" tabIndex={0} role="group" aria-labelledby={id}>{panel.text}</pre>}
+      {panel.cut ? <p className="fine" data-approval-command-cut>{t('approvals.commandCut')}</p> : null}
+    </div>
+  )
+}
+
 export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFollowUp, t }) {
   const req = row.req
   const o = orders.state.order
@@ -40,6 +61,7 @@ export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onM
     </button>
   )
   const showConfirm = mine && phase === 'confirm'
+  const firstLine = showConfirm ? '' : commandLine(req.command)   // the confirmation shows the whole command just below
   const showProgress = mine && (phase === 'counting' || phase === 'sending' || phase === 'verifying' || phase === 'done')
   return (
     <DecisionFrame
@@ -50,6 +72,7 @@ export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onM
       kind="approval"
       title={where}
       summary={req.summary || t('approvals.noSummary')}
+      detail={firstLine ? <p className="ux-dc-c ux-mono" data-approval-command-line>{firstLine}</p> : null}
       sinceMs={req.firstSeenMs}
       ageTip={t('approvals.asked', t.ago(req.firstSeenMs))}
       nowMs={nowMs}
@@ -73,7 +96,7 @@ export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onM
         </div>
       ) : null}
       {more && rest.length && !showConfirm ? <div className="ux-ch-extra">{rest.map(button)}</div> : null}
-      {showConfirm ? <OrderConfirm orders={orders} /> : null}
+      {showConfirm ? <OrderConfirm orders={orders}><CommandBlock req={req} choice={o.choice} t={t} /></OrderConfirm> : null}
       {showProgress ? <OrderProgress orders={orders} onModelFollowUp={onModelFollowUp} /> : null}
     </DecisionFrame>
   )

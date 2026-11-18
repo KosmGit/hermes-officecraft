@@ -99,13 +99,13 @@ function Draft({ item, orders, t }) {
   )
 }
 
-/** The same confirmation for the approval rows and the recruitment window (reads `t` itself). */
-export function OrderConfirm({ orders }) {
-  return <Confirm orders={orders} t={useT()} />
+/** The same confirmation for the approval rows and the recruitment window (reads `t` itself). `children`: what the caller shows of the target, above the effect. */
+export function OrderConfirm({ orders, children = null }) {
+  return <Confirm orders={orders} t={useT()}>{children}</Confirm>
 }
 
 /** The explicit confirmation of a final order: names the project and the card (or the agent and the session), says what happens, then Confirm or Back. */
-function Confirm({ orders, t }) {
+function Confirm({ orders, t, children = null }) {
   const { state, act } = orders
   const o = state.order
   const ref = useRef(null)
@@ -124,6 +124,7 @@ function Confirm({ orders, t }) {
     <div className="ux-cf oc-confirm" role="group" aria-label={t('orders.confirmLabel', `${verb} ${target(o)}`)} data-confirm onKeyDown={onKey}>
       <p className="ctitle"><b>{t('orders.confirmTitle', verb)}</b> <RiskTag risk={riskOf(o)} t={t} /></p>
       <p>{t(approval ? 'approvals.target' : recruit ? 'recruit.target' : 'orders.target')} <b className="ux-mono">{target(o)}</b></p>
+      {children}
       {o.verb === 'recruitModel' && o.message ? <p className="oc-hermesmsg" data-hermes-message>{t('recruit.hermesSays')} {o.message}</p> : null}
       <p>{effect}</p>
       <p className="fine">{t('orders.undoNote', UNDO_SECONDS)}</p>

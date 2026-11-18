@@ -63,8 +63,30 @@ var choiceConfirms = (choice) => choiceRisk(choice) !== "safe";
 var DESCRIPTION_MAX = 160;
 var SESSIONS_MAX = 10;
 var REQUESTS_MAX = 50;
+var COMMAND_MAX_LINES = 12;
+var COMMAND_MAX_CHARS = 1200;
+var COMMAND_CUT_MARK = " …";
 var str = (v) => typeof v === "string" ? v : "";
 var oneLine = (s) => str(s).replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ").replace(/\p{Cf}/gu, "").replace(/\s+/g, " ").trim();
+function cleanCommand(value) {
+  const all = str(value).replace(/\r\n?|[\u0085\u2028\u2029]/g, "\n").replace(/\p{Cf}/gu, "").replace(/[^\P{Cc}\n\t]/gu, "").replace(/^(?:[ \t]*\n)+/, "").trimEnd();
+  let text3 = all;
+  const lines = text3.split("\n");
+  if (lines.length > COMMAND_MAX_LINES) text3 = lines.slice(0, COMMAND_MAX_LINES).join("\n");
+  if (text3.length > COMMAND_MAX_CHARS) text3 = text3.slice(0, COMMAND_MAX_CHARS).replace(/[\uD800-\uDBFF]$/, "");
+  const cut3 = text3.length < all.length;
+  return { text: cut3 ? text3.trimEnd() + COMMAND_CUT_MARK : text3, cut: cut3 };
+}
+function commandLine(command) {
+  const lines = str(command).split("\n").map((line) => line.trim()).filter(Boolean);
+  if (!lines.length) return "";
+  return lines.length > 1 && !lines[0].endsWith(COMMAND_CUT_MARK) ? lines[0] + COMMAND_CUT_MARK : lines[0];
+}
+function commandPanel(req, choice) {
+  if (!CHOICES.includes(choice) || !choiceConfirms(choice)) return null;
+  const text3 = str(req?.command);
+  return { text: text3, cut: Boolean(text3) && req?.commandCut === true, missing: !text3 };
+}
 function choicesOf(raw) {
   if (!raw || typeof raw !== "object") return ["deny"];
   const listed = Array.isArray(raw?.choices) ? raw.choices.filter((c) => CHOICES.includes(c)) : null;
@@ -85,12 +107,16 @@ function normalizeRequest(raw, { sessionId, profile = "", nowMs = 0 } = {}) {
   const sid = str(sessionId).trim();
   const rid = str(raw.request_id).trim() || str(raw.prompt_id).trim();
   if (!sid || !rid) return null;
+  const command = cleanCommand(raw.command);
   return {
     key: `${sid}/${rid}`,
     sessionId: sid,
     requestId: rid,
     profile: oneLine(profile).slice(0, 64),
     summary: oneLine(raw.description).slice(0, DESCRIPTION_MAX),
+    command: command.text,
+    // memory and screen only: see the header
+    commandCut: command.cut,
     choices: choicesOf(raw),
     smartDenied: raw.smart_denied === true,
     firstSeenMs: nowMs
@@ -104,7 +130,7 @@ function approvalsReducer(state2, action) {
       const r = normalizeRequest(action.raw, action);
       if (!r) return state2;
       const known2 = by4[r.key];
-      by4[r.key] = known2 ? { ...r, firstSeenMs: known2.firstSeenMs, profile: r.profile || known2.profile } : r;
+      by4[r.key] = known2 ? { ...keepCommand(r, known2), firstSeenMs: known2.firstSeenMs, profile: r.profile || known2.profile } : r;
       return { ...state2, byKey: capRequests(by4), unreadable: dropKey(state2.unreadable, r.sessionId) };
     }
     case "settled": {
@@ -122,7 +148,7 @@ function approvalsReducer(state2, action) {
         if (!r) continue;
         seen.add(r.key);
         const known2 = by4[r.key];
-        by4[r.key] = known2 ? { ...r, firstSeenMs: known2.firstSeenMs, profile: known2.profile || r.profile } : r;
+        by4[r.key] = known2 ? { ...keepCommand(r, known2), firstSeenMs: known2.firstSeenMs, profile: known2.profile || r.profile } : r;
       }
       for (const key of Object.keys(by4)) if (by4[key].sessionId === sid && !seen.has(key)) delete by4[key];
       return { ...state2, byKey: capRequests(by4), unreadable: dropKey(state2.unreadable, sid) };
@@ -144,6 +170,7 @@ function approvalsReducer(state2, action) {
       return state2;
   }
 }
+var keepCommand = (r, known2) => r.command || !known2.command ? r : { ...r, command: known2.command, commandCut: known2.commandCut };
 function dropKey(obj, key) {
   if (!(key in obj)) return obj;
   const next = { ...obj };
@@ -5202,7 +5229,7 @@ var en = {
     modelHeld: "Hermes asked for confirmation of the chosen model, so it was not applied. The bot inherits the main model.",
     checkList: "The bot may exist: check the Bots tab before trying again."
   },
-  // approvals Hermes asks for. The summary is Hermes' own one-liner; the command is never shown here (the session's approval card has it).
+  // approvals Hermes asks for. The summary is Hermes' own one-liner; the command is shown in the confirmation of an allowing answer, never anywhere else.
   approvals: {
     verb: "Approval",
     verbChoice: (choice) => `Approval: ${choice}`,
@@ -5220,7 +5247,10 @@ var en = {
       session: "This kind of command runs without asking until the session ends.",
       always: "This kind of command runs without asking, in every session of this agent, until you remove it from its allowlist."
     },
-    commandNote: "The exact command is shown on the approval card in the session, not here.",
+    commandNote: "Before you confirm an “Allow” answer, this page shows the command as Hermes sends it, with the secrets Hermes recognises already masked. The command is never stored or logged here.",
+    commandLabel: "Command",
+    commandCut: "Shortened here. The full command is on the approval card in the session.",
+    commandMissing: "Hermes sent no command with this request. The exact command is on the approval card in the session.",
     target: "Request from:",
     effect: {
       deny: "The command will not run.",
@@ -6794,7 +6824,7 @@ var es = {
     journalNote: "Lo más reciente primero. El registro guarda el proyecto, la tarjeta, el resultado y los estados, nunca el texto de un comentario.",
     journalAfter: (status) => `→ ${status}`
   },
-  // aprobaciones que pide Hermes. El resumen es el de Hermes; el comando nunca se muestra aquí (lo muestra la tarjeta de aprobación de la sesión).
+  // aprobaciones que pide Hermes. El resumen es el de Hermes; el comando se muestra en la confirmación de un permiso, nunca en otro sitio.
   // reclutar un bot desde la oficina (`profiles.create` y luego `profiles.configure`). Sin campo de personalidad: un bot copiado conserva la suya.
   // el marco común de las ventanas del plugin
   dlg: {
@@ -6916,7 +6946,10 @@ var es = {
       session: "Este tipo de comando se ejecuta sin preguntar hasta que termine la sesión.",
       always: "Este tipo de comando se ejecuta sin preguntar, en todas las sesiones de este agente, hasta que lo quites de su lista de permitidos."
     },
-    commandNote: "El comando exacto lo muestra la tarjeta de aprobación de la propia sesión, no esta página.",
+    commandNote: "Antes de que confirmes un permiso, esta página muestra el comando tal como lo envía Hermes, con los secretos que Hermes reconoce ya ocultos. El comando nunca se guarda ni se registra aquí.",
+    commandLabel: "Comando",
+    commandCut: "Se muestra recortado. El comando completo está en la tarjeta de aprobación de la sesión.",
+    commandMissing: "Hermes no envió ningún comando con esta solicitud. El comando exacto está en la tarjeta de aprobación de la sesión.",
     target: "Solicitud de:",
     effect: {
       deny: "El comando no se ejecutará.",
@@ -8491,7 +8524,7 @@ var fr = {
     journalNote: "Du plus récent au plus ancien. Le journal conserve le projet, la carte, le résultat et les statuts, jamais le texte d’un commentaire.",
     journalAfter: (status) => `→ ${status}`
   },
-  // approbations demandées par Hermes. Le résumé est celui de Hermes ; la commande n’est jamais montrée ici (la carte d’approbation de la session l’affiche).
+  // approbations demandées par Hermes. Le résumé est celui de Hermes ; la commande s’affiche dans la confirmation d’une autorisation, jamais ailleurs.
   // recruter un bot depuis le bureau (`profiles.create` puis `profiles.configure`). Aucun champ de personnalité : un bot copié garde la sienne.
   // le cadre commun des fenêtres du plugin
   dlg: {
@@ -8613,7 +8646,10 @@ var fr = {
       session: "Ce type de commande s’exécute sans demander jusqu’à la fin de la session.",
       always: "Ce type de commande s’exécute sans demander, dans toutes les sessions de cet agent, jusqu’à ce que vous le retiriez de sa liste d’autorisations."
     },
-    commandNote: "La commande exacte est affichée par la carte d’approbation de la session, pas ici.",
+    commandNote: "Avant que vous confirmiez une autorisation, cette page affiche la commande telle que Hermes la transmet, les secrets reconnus par Hermes étant déjà masqués. La commande n’est jamais enregistrée ni journalisée ici.",
+    commandLabel: "Commande",
+    commandCut: "Affichage tronqué. La commande complète figure sur la carte d’approbation de la session.",
+    commandMissing: "Hermes n’a transmis aucune commande avec cette demande. La commande exacte figure sur la carte d’approbation de la session.",
     target: "Demande de :",
     effect: {
       deny: "La commande ne sera pas exécutée.",
@@ -17026,10 +17062,10 @@ function Draft({ item, orders, t }) {
     ] })
   ] });
 }
-function OrderConfirm({ orders }) {
-  return /* @__PURE__ */ jsx10(Confirm, { orders, t: useT() });
+function OrderConfirm({ orders, children = null }) {
+  return /* @__PURE__ */ jsx10(Confirm, { orders, t: useT(), children });
 }
-function Confirm({ orders, t }) {
+function Confirm({ orders, t, children = null }) {
   const { state: state2, act } = orders;
   const o = state2.order;
   const ref = useRef10(null);
@@ -17058,6 +17094,7 @@ function Confirm({ orders, t }) {
       " ",
       /* @__PURE__ */ jsx10("b", { className: "ux-mono", children: target(o) })
     ] }),
+    children,
     o.verb === "recruitModel" && o.message ? /* @__PURE__ */ jsxs9("p", { className: "oc-hermesmsg", "data-hermes-message": true, children: [
       t("recruit.hermesSays"),
       " ",
@@ -18651,7 +18688,7 @@ import { useState as useState12 } from "react";
 
 // src/ui/DecisionCard.jsx
 import { jsx as jsx19, jsxs as jsxs16 } from "react/jsx-runtime";
-function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary: summary2, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
+function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary: summary2, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
   const style = useProjectStyle(board);
   const old = isOld({ sinceMs }, nowMs);
   const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || "none"}`) : "";
@@ -18668,6 +18705,7 @@ function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summ
     ] }),
     /* @__PURE__ */ jsx19("p", { className: "ux-dc-t", title, children: title }),
     summary2 ? /* @__PURE__ */ jsx19("p", { className: "ux-dc-s", "data-approval-summary": true, children: summary2 }) : null,
+    detail,
     /* @__PURE__ */ jsxs16("div", { className: "ux-dc-who", children: [
       sceneAgent ? /* @__PURE__ */ jsx19(Portrait, { agent: sceneAgent }) : null,
       /* @__PURE__ */ jsx19("span", { className: "nm", children: whoText ?? who }),
@@ -18682,6 +18720,16 @@ function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summ
 
 // src/ui/Approvals.jsx
 import { jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
+function CommandBlock({ req, choice, t }) {
+  const panel = commandPanel(req, choice);
+  if (!panel) return null;
+  const id = `oc-cmd-${req.requestId}`;
+  return /* @__PURE__ */ jsxs17("div", { className: "ux-cmd", "data-approval-command": true, children: [
+    /* @__PURE__ */ jsx20("p", { id, className: "lbl", children: t("approvals.commandLabel") }),
+    panel.missing ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-missing": true, children: t("approvals.commandMissing") }) : /* @__PURE__ */ jsx20("pre", { className: "ux-cmd-x ux-mono", tabIndex: 0, role: "group", "aria-labelledby": id, children: panel.text }),
+    panel.cut ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-cut": true, children: t("approvals.commandCut") }) : null
+  ] });
+}
 function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFollowUp, t }) {
   const req = row.req;
   const o = orders.state.order;
@@ -18711,6 +18759,7 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
     c
   );
   const showConfirm = mine && phase === "confirm";
+  const firstLine = showConfirm ? "" : commandLine(req.command);
   const showProgress = mine && (phase === "counting" || phase === "sending" || phase === "verifying" || phase === "done");
   return /* @__PURE__ */ jsxs17(
     DecisionFrame,
@@ -18722,6 +18771,7 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
       kind: "approval",
       title: where,
       summary: req.summary || t("approvals.noSummary"),
+      detail: firstLine ? /* @__PURE__ */ jsx20("p", { className: "ux-dc-c ux-mono", "data-approval-command-line": true, children: firstLine }) : null,
       sinceMs: req.firstSeenMs,
       ageTip: t("approvals.asked", t.ago(req.firstSeenMs)),
       nowMs,
@@ -18739,7 +18789,7 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
           rest3.length ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-b sm ico more", "aria-expanded": more, "aria-label": t("ux.dec.moreChoices"), onClick: () => setMore((v) => !v), children: /* @__PURE__ */ jsx20(Icon, { name: "more", size: 14 }) }) : null
         ] }) : null,
         more && rest3.length && !showConfirm ? /* @__PURE__ */ jsx20("div", { className: "ux-ch-extra", children: rest3.map(button) }) : null,
-        showConfirm ? /* @__PURE__ */ jsx20(OrderConfirm, { orders }) : null,
+        showConfirm ? /* @__PURE__ */ jsx20(OrderConfirm, { orders, children: /* @__PURE__ */ jsx20(CommandBlock, { req, choice: o.choice, t }) }) : null,
         showProgress ? /* @__PURE__ */ jsx20(OrderProgress, { orders, onModelFollowUp }) : null
       ]
     }
@@ -20630,6 +20680,7 @@ var PAGE_CSS = `
 .ux-dc-top .ux-b.op:hover{color:var(--foreground)}
 .ux-dc-t{margin:0;font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-s{margin:0;font-size:12px;line-height:1.4;color:${T22};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.ux-dc-c{margin:0;min-width:0;font-size:11.5px;line-height:1.4;color:${T22};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
 .ux-dc-who{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:${T22}}
 .ux-dc-who .oc-portrait{width:20px;height:20px;border-radius:5px;border:0}
 .ux-dc-who .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -20647,6 +20698,10 @@ var PAGE_CSS = `
 .ux-cf{display:flex;flex-direction:column;gap:8px;padding:8px 12px;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE2};animation:ux-in .14s ease both}
 .ux-cf p{margin:0;font-size:12.5px;overflow-wrap:anywhere}
 .ux-cf .ctitle{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ux-cmd{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ux-cmd .lbl{font-size:11.5px;font-weight:600;color:${T22}}
+.ux-cmd-x{box-sizing:border-box;max-width:100%;max-height:min(168px,30vh);margin:0;padding:8px;overflow-x:hidden;overflow-y:auto;font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;tab-size:4;color:var(--foreground);background:${CARD};border:1px solid ${EDGE2};border-radius:6px}
+.ux-cmd-x:focus-visible{${RING_FOCUS}}
 .ux-cf .fine{font-size:12px;color:${T32}}
 .ux-cf .row{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 .ux-cf textarea{display:block;width:100%;min-height:72px;max-height:220px;padding:8px;font:inherit;color:var(--foreground);background:${CARD};border:1px solid var(--ui-stroke-secondary);border-radius:6px;resize:vertical}

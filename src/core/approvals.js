@@ -3,9 +3,16 @@
  * Source: the RPC `approval.pending` / `approval.respond` and the events `approval.request` /
  * `approval.settled`.
  *
- * What is kept of a request: who asks (profile), in which session, the one-line SUMMARY Hermes gives it (`description`,
- * already redacted by Hermes), the choices it allows, and when the page first saw it. NEVER the command: the native
- * approval card of Hermes shows it, the desk does not repeat it; « Open session » leads there.
+ * What is kept of a request: who asks (profile), in which session, the one-line SUMMARY Hermes gives it (`description`),
+ * the COMMAND it asks about (`command`), the choices it allows, and when the page first saw it. Hermes redacts both texts
+ * before they leave the gateway (`tui_gateway/server.py::_approval_request_payload`); the command is the text its own approval
+ * card shows.
+ *
+ * The command exists so that nobody allows a request without having read it: the confirmation of the three allowing answers
+ * shows it. It lives in the in-memory store and on screen, nowhere else. It is never put in an order (`approvalTarget`), in
+ * the audit journal (`auditBody`), in storage, in a notification, in a tooltip or an accessible name, in an outcome line, nor
+ * in any text handed to a model. It is bounded and cleaned for display (`cleanCommand`); when it was cut, or when Hermes gave
+ * none, the confirmation says the exact command is on the approval card in the session.
  */
 
 /** The four answers of `approval.respond`, in the order the box offers them (safest first). */
@@ -28,10 +35,58 @@ export const SESSIONS_MAX = 10
 /** Requests kept at most, whatever the sources say. */
 export const REQUESTS_MAX = 50
 
+/** A command is shown on at most this many lines and characters; a longer one is cut, marked, and flagged (`commandCut`). */
+export const COMMAND_MAX_LINES = 12
+export const COMMAND_MAX_CHARS = 1200
+/** What ends a command that was cut. */
+export const COMMAND_CUT_MARK = ' …'
+
 const str = v => (typeof v === 'string' ? v : '')
 // control characters, line separators and runs of blanks -> one space (a summary is one line); format characters (bidi overrides,
 // zero-width) are dropped: a session title comes straight from Hermes and must not reorder or hide the text of a confirmation
 const oneLine = s => str(s).replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').replace(/\p{Cf}/gu, '').replace(/\s+/g, ' ').trim()
+
+/**
+ * A command as the confirmation shows it: `{ text, cut }`. Line breaks are kept (a command can span lines) and every line
+ * separator becomes a plain newline, so a carriage return cannot draw one line over another. Format characters (bidi
+ * overrides, zero-width) and control characters other than newline and tab are dropped: what is read is what would run.
+ * At most COMMAND_MAX_LINES lines and COMMAND_MAX_CHARS characters; `cut` says the text was shortened (it then ends with
+ * COMMAND_CUT_MARK). Anything that is not a string gives an empty text.
+ */
+export function cleanCommand(value) {
+  const all = str(value)
+    .replace(/\r\n?|[\u0085\u2028\u2029]/g, '\n')
+    .replace(/\p{Cf}/gu, '')
+    .replace(/[^\P{Cc}\n\t]/gu, '')
+    .replace(/^(?:[ \t]*\n)+/, '')
+    .trimEnd()
+  let text = all
+  const lines = text.split('\n')
+  if (lines.length > COMMAND_MAX_LINES) text = lines.slice(0, COMMAND_MAX_LINES).join('\n')
+  if (text.length > COMMAND_MAX_CHARS) text = text.slice(0, COMMAND_MAX_CHARS).replace(/[\uD800-\uDBFF]$/, '')   // never half a surrogate pair
+  const cut = text.length < all.length
+  return { text: cut ? text.trimEnd() + COMMAND_CUT_MARK : text, cut }
+}
+
+/**
+ * The first line of a kept command (the request row shows it on one line), '' when there is none. A command that goes on
+ * below ends with COMMAND_CUT_MARK: one line never passes for the whole command.
+ */
+export function commandLine(command) {
+  const lines = str(command).split('\n').map(line => line.trim()).filter(Boolean)
+  if (!lines.length) return ''
+  return lines.length > 1 && !lines[0].endsWith(COMMAND_CUT_MARK) ? lines[0] + COMMAND_CUT_MARK : lines[0]
+}
+
+/**
+ * What the confirmation of an answer shows of the command, or null when it shows none: refusing runs nothing and has no
+ * confirmation, and nothing outside the three allowing answers is ever confirmed. `missing` = Hermes gave no command.
+ */
+export function commandPanel(req, choice) {
+  if (!CHOICES.includes(choice) || !choiceConfirms(choice)) return null
+  const text = str(req?.command)
+  return { text, cut: Boolean(text) && req?.commandCut === true, missing: !text }
+}
 
 /**
  * The choices a request allows. Hermes lists them in `choices` (or leaves them to `allow_session` / `allow_permanent`:
@@ -59,12 +114,15 @@ export function normalizeRequest(raw, { sessionId, profile = '', nowMs = 0 } = {
   const sid = str(sessionId).trim()
   const rid = str(raw.request_id).trim() || str(raw.prompt_id).trim()
   if (!sid || !rid) return null
+  const command = cleanCommand(raw.command)
   return {
     key: `${sid}/${rid}`,
     sessionId: sid,
     requestId: rid,
     profile: oneLine(profile).slice(0, 64),
     summary: oneLine(raw.description).slice(0, DESCRIPTION_MAX),
+    command: command.text,       // memory and screen only: see the header
+    commandCut: command.cut,
     choices: choicesOf(raw),
     smartDenied: raw.smart_denied === true,
     firstSeenMs: nowMs
@@ -92,7 +150,7 @@ export function approvalsReducer(state, action) {
       const r = normalizeRequest(action.raw, action)
       if (!r) return state
       const known = by[r.key]
-      by[r.key] = known ? { ...r, firstSeenMs: known.firstSeenMs, profile: r.profile || known.profile } : r
+      by[r.key] = known ? { ...keepCommand(r, known), firstSeenMs: known.firstSeenMs, profile: r.profile || known.profile } : r
       return { ...state, byKey: capRequests(by), unreadable: dropKey(state.unreadable, r.sessionId) }
     }
     case 'settled': {
@@ -110,7 +168,7 @@ export function approvalsReducer(state, action) {
         if (!r) continue
         seen.add(r.key)
         const known = by[r.key]
-        by[r.key] = known ? { ...r, firstSeenMs: known.firstSeenMs, profile: known.profile || r.profile } : r
+        by[r.key] = known ? { ...keepCommand(r, known), firstSeenMs: known.firstSeenMs, profile: known.profile || r.profile } : r
       }
       for (const key of Object.keys(by)) if (by[key].sessionId === sid && !seen.has(key)) delete by[key]
       return { ...state, byKey: capRequests(by), unreadable: dropKey(state.unreadable, sid) }
@@ -132,6 +190,9 @@ export function approvalsReducer(state, action) {
       return state
   }
 }
+
+/** The same request seen again without its command keeps the one already known (one request id, one command). */
+const keepCommand = (r, known) => (r.command || !known.command ? r : { ...r, command: known.command, commandCut: known.commandCut })
 
 function dropKey(obj, key) {
   if (!(key in obj)) return obj
@@ -223,7 +284,10 @@ export function readRespond(res) {
  */
 export const answerReread = outcome => outcome?.gone === true
 
-/** The request as the order machine names it (never the command). */
+/**
+ * The request as the order machine names it. Never the command: an order is copied into its outcome and into the memory of
+ * an order left behind, so the confirmation reads the command from the store's row instead (`commandPanel`).
+ */
 export const approvalTarget = (req, id, choice) => ({
   id, verb: 'approval', choice, sessionId: req.sessionId, requestId: req.requestId,
   code: req.title || req.profile || '', agent: req.profile || '', title: req.title || ''
@@ -239,7 +303,7 @@ export const REQUEST_RE = /^[A-Za-z0-9_-]{8,128}$/
  */
 export const requestStamp = (order, wasPending) => (wasPending === true && typeof order?.requestId === 'string' && REQUEST_RE.test(order.requestId) ? order.requestId : null)
 
-/** The body of `POST /audit` for an approval: closed fields, no command, no summary, no title. `request` = requestStamp(). */
+/** The body of `POST /audit` for an approval: closed fields built one by one, so no command, no summary, no title can ride along. `request` = requestStamp(). */
 export function auditBody(order, answer, request = null) {
   const result = answer?.result === 'done' ? 'done' : answer?.result === 'refused' ? 'refused' : 'failed'
   const body = { id: order.id, verb: 'approval', risk: choiceRisk(order.choice) === 'safe' ? 'safe' : 'final', result, choice: order.choice }

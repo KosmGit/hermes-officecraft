@@ -445,7 +445,7 @@ export const fr = {
     journalNote: 'Du plus récent au plus ancien. Le journal conserve le projet, la carte, le résultat et les statuts, jamais le texte d’un commentaire.',
     journalAfter: status => `→ ${status}`
   },
-  // approbations demandées par Hermes. Le résumé est celui de Hermes ; la commande n’est jamais montrée ici (la carte d’approbation de la session l’affiche).
+  // approbations demandées par Hermes. Le résumé est celui de Hermes ; la commande s’affiche dans la confirmation d’une autorisation, jamais ailleurs.
   // recruter un bot depuis le bureau (`profiles.create` puis `profiles.configure`). Aucun champ de personnalité : un bot copié garde la sienne.
   // le cadre commun des fenêtres du plugin
   dlg: {
@@ -567,7 +567,10 @@ export const fr = {
       session: 'Ce type de commande s’exécute sans demander jusqu’à la fin de la session.',
       always: 'Ce type de commande s’exécute sans demander, dans toutes les sessions de cet agent, jusqu’à ce que vous le retiriez de sa liste d’autorisations.'
     },
-    commandNote: 'La commande exacte est affichée par la carte d’approbation de la session, pas ici.',
+    commandNote: 'Avant que vous confirmiez une autorisation, cette page affiche la commande telle que Hermes la transmet, les secrets reconnus par Hermes étant déjà masqués. La commande n’est jamais enregistrée ni journalisée ici.',
+    commandLabel: 'Commande',
+    commandCut: 'Affichage tronqué. La commande complète figure sur la carte d’approbation de la session.',
+    commandMissing: 'Hermes n’a transmis aucune commande avec cette demande. La commande exacte figure sur la carte d’approbation de la session.',
     target: 'Demande de :',
     effect: {
       deny: 'La commande ne sera pas exécutée.',

@@ -189,6 +189,7 @@ export const PAGE_CSS = `
 .ux-dc-top .ux-b.op:hover{color:var(--foreground)}
 .ux-dc-t{margin:0;font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-s{margin:0;font-size:12px;line-height:1.4;color:${T2};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.ux-dc-c{margin:0;min-width:0;font-size:11.5px;line-height:1.4;color:${T2};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
 .ux-dc-who{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:${T2}}
 .ux-dc-who .oc-portrait{width:20px;height:20px;border-radius:5px;border:0}
 .ux-dc-who .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -206,6 +207,10 @@ export const PAGE_CSS = `
 .ux-cf{display:flex;flex-direction:column;gap:8px;padding:8px 12px;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};animation:ux-in .14s ease both}
 .ux-cf p{margin:0;font-size:12.5px;overflow-wrap:anywhere}
 .ux-cf .ctitle{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ux-cmd{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ux-cmd .lbl{font-size:11.5px;font-weight:600;color:${T2}}
+.ux-cmd-x{box-sizing:border-box;max-width:100%;max-height:min(168px,30vh);margin:0;padding:8px;overflow-x:hidden;overflow-y:auto;font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;tab-size:4;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:6px}
+.ux-cmd-x:focus-visible{${RING_FOCUS}}
 .ux-cf .fine{font-size:12px;color:${T3}}
 .ux-cf .row{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 .ux-cf textarea{display:block;width:100%;min-height:72px;max-height:220px;padding:8px;font:inherit;color:var(--foreground);background:${CARD};border:1px solid var(--ui-stroke-secondary);border-radius:6px;resize:vertical}

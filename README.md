@@ -80,10 +80,25 @@ Every action that writes follows the same rules: a risk class shown in words (*N
 ## Privacy and safety
 
 - **Reads by default, writes only what you ask for.** Nothing runs in the background except the notifications and LLM functions you switched on.
-- **Whitelisted fields only.** Shown: profile names, states, counters, timestamps, card and session titles. Never read or shown: card bodies, comments, message contents, file paths, keys, the `SOUL.md` of an existing bot, the command of an approval.
+- **Whitelisted fields only.** Shown: profile names, states, counters, timestamps, card and session titles. Never read or shown: card bodies, comments, message contents, file paths, keys, the `SOUL.md` of an existing bot.
+- **You see what you approve.** Before you allow an approval request from the office, the confirmation shows the command exactly as Hermes provides it (already redacted). It is shown, never stored.
 - **Every action is logged** in an `audit.jsonl` readable by you only, in the data folder Hermes gives the plugin. It never holds a comment's text, a title or a command.
-- **LLM functions are opt-in**, each with its own switch. The settings list exactly which fields each one sends to the model. A monthly cap (1 $ and 300 calls by default) is checked before every call.
+- **LLM functions are opt-in**, each with its own switch. The settings list exactly which fields each one sends to the model. A monthly cap ($1 and 300 calls by default) is checked before every call.
 - **No telemetry, no network call of its own.** The plugin talks to your Hermes backend and to nothing else.
+
+### What the plugin touches
+
+| | |
+|---|---|
+| **Reads, outside its own folder** | The kanban boards (cards, runs, events), the list of profiles and the headers of their skills, session metadata and token usage in each profile's `state.db`, the gateway status and the scheduled jobs. All read-only. |
+| **Writes, only on your action** | Kanban cards through Hermes (unblock, comment, create the cards of a campaign, launch or cancel it), a new profile when you recruit a bot, your answer to an approval request. |
+| **Writes, in its own data folder** | `audit.jsonl`, the notifier's state, the LLM spending counter. Page settings stay in the browser's local storage. |
+| **Sends** | Notifications through Hermes' own messaging, to the recipients you picked. Off until you choose one. |
+| **Calls a model** | Only for the LLM functions you switched on, through Hermes' plugin LLM API, with the model set in Hermes (or the one you pick, if you grant the plugin that permission). |
+| **Hooks** | `on_kanban_dispatch_tick` (notifications without the page open), `pre_approval_request`, `post_approval_response`. |
+| **Never** | Shell commands, credentials or `.env` files, third-party services, self-update. |
+
+Hermes has no public API yet for some of these reads (kanban history, sessions, usage), so the agent half imports a few internal Hermes modules. `hermes plugins validate` reports them as a warning; a Hermes release can break them, and the plugin then says which data is missing rather than inventing it.
 
 Found a vulnerability? See [SECURITY.md](.github/SECURITY.md).
 

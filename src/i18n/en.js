@@ -547,7 +547,7 @@ export const en = {
     modelHeld: 'Hermes asked for confirmation of the chosen model, so it was not applied. The bot inherits the main model.',
     checkList: 'The bot may exist: check the Bots tab before trying again.'
   },
-  // approvals Hermes asks for. The summary is Hermes' own one-liner; the command is never shown here (the session's approval card has it).
+  // approvals Hermes asks for. The summary is Hermes' own one-liner; the command is shown in the confirmation of an allowing answer, never anywhere else.
   approvals: {
     verb: 'Approval',
     verbChoice: choice => `Approval: ${choice}`,
@@ -565,7 +565,10 @@ export const en = {
       session: 'This kind of command runs without asking until the session ends.',
       always: 'This kind of command runs without asking, in every session of this agent, until you remove it from its allowlist.'
     },
-    commandNote: 'The exact command is shown on the approval card in the session, not here.',
+    commandNote: 'Before you confirm an “Allow” answer, this page shows the command as Hermes sends it, with the secrets Hermes recognises already masked. The command is never stored or logged here.',
+    commandLabel: 'Command',
+    commandCut: 'Shortened here. The full command is on the approval card in the session.',
+    commandMissing: 'Hermes sent no command with this request. The exact command is on the approval card in the session.',
     target: 'Request from:',
     effect: {
       deny: 'The command will not run.',

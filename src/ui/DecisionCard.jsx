@@ -6,10 +6,11 @@ import { ProjectChip, useProjectStyle } from './ProjectChip.jsx'
 
 /**
  * The frame of one decision: the project's stripe, then on one line the project (unless the group header already says it),
- * the code (or « Approval »), the age (orange past 24 h) and the « open » icon; the title; the line of the agent (portrait, name, role);
+ * the code (or « Approval »), the age (orange past 24 h) and the « open » icon; the title; for an approval Hermes' summary and one line of
+ * detail; the line of the agent (portrait, name, role);
  * then whatever the caller puts below (the orders, a confirmation, the 6 s window). One card = one decision.
  */
-export function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target, unverified, children, t }) {
+export function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target, unverified, children, t }) {
   const style = useProjectStyle(board)
   const old = isOld({ sinceMs }, nowMs)   // the rule of the age is src/core/decisions.js' (one place, tested)
   const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || 'none'}`) : ''
@@ -28,6 +29,7 @@ export function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, titl
       </div>
       <p className="ux-dc-t" title={title}>{title}</p>
       {summary ? <p className="ux-dc-s" data-approval-summary>{summary}</p> : null}
+      {detail}
       <div className="ux-dc-who">
         {sceneAgent ? <Portrait agent={sceneAgent} /> : null}
         <span className="nm">{whoText ?? who}</span>

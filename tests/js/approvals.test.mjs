@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { CHOICES, CHOICE_RISK, DESCRIPTION_MAX, REQUESTS_MAX, SESSIONS_MAX, approvalTarget, approvalsReducer, auditBody, choiceConfirms, choiceRisk, choicesOf, emptyApprovals, normalizeRequest, pendingView, readLiveSessions, readRespond, sessionGone, sessionsToRead, withProfile } from '../../src/core/approvals.js'
+import { CHOICES, CHOICE_RISK, COMMAND_CUT_MARK, COMMAND_MAX_CHARS, COMMAND_MAX_LINES, DESCRIPTION_MAX, REQUESTS_MAX, SESSIONS_MAX, approvalTarget, approvalsReducer, auditBody, choiceConfirms, choiceRisk, choicesOf, cleanCommand, commandLine, commandPanel, emptyApprovals, normalizeRequest, pendingView, readLiveSessions, readRespond, requestStamp, sessionGone, sessionsToRead, withProfile } from '../../src/core/approvals.js'
 import { REASONS, UNDO_SECONDS, WRITE_VERBS, initialOrderState, isBusy, offeredWrites, orderReducer, riskOf, toJournal } from '../../src/core/orders.js'
+import { leftBehind, leftOutcome } from '../../src/core/orderflow.js'
 import { messages } from '../../src/i18n/index.js'
 import { register } from 'node:module'
 
@@ -59,13 +60,16 @@ test('contract: the real `approval.pending` row (measured on tools/approval.py) 
   assert.deepEqual(r.choices, ['deny', 'once', 'session', 'always'])
   assert.equal(r.requestId, 'r-real')
   assert.equal(r.summary, 'recursive delete')
-  assert.doesNotMatch(JSON.stringify(r), /rm -rf|oc-demo/)
+  assert.equal(r.command, 'rm -rf /tmp/oc-demo-never-run', 'the command Hermes asks about is kept for the confirmation')
+  assert.equal(r.commandCut, false)
 })
 
-test('privacy: a request keeps the summary, never the command; summary is one bounded line', () => {
+test('privacy: a request keeps the summary and the command, nothing else of the payload; summary is one bounded line; the order never carries the command', () => {
   assert.equal(REQ.summary, 'recursive delete')
-  assert.doesNotMatch(JSON.stringify(REQ), /rm -rf|SECRET_TOKEN|abc123|\/tmp/)
-  assert.ok(!('command' in REQ) && !('pattern_key' in REQ))
+  assert.equal(REQ.command, PENDING_ROW.command, 'kept as Hermes gave it (Hermes redacts it before it leaves the gateway)')
+  assert.deepEqual(Object.keys(REQ).sort(), ['choices', 'command', 'commandCut', 'firstSeenMs', 'key', 'profile', 'requestId', 'sessionId', 'smartDenied', 'summary'])
+  assert.ok(!('pattern_key' in REQ) && !('pattern_keys' in REQ))
+  assert.doesNotMatch(REQ.summary, /rm -rf|SECRET_TOKEN/, 'the summary is the description, never the command')
   const long = normalizeRequest({ request_id: 'x', description: `line one\n\tline\u0000two ${'y'.repeat(400)}` }, { sessionId: 's', nowMs: 1 })
   assert.equal(long.summary.length, DESCRIPTION_MAX)
   assert.doesNotMatch(long.summary, /[\n\t\u0000]/)
@@ -75,8 +79,94 @@ test('privacy: a request keeps the summary, never the command; summary is one bo
   assert.equal(normalizeRequest(null, { sessionId: 's' }), null)
   // the canonical protocol names the id `prompt_id` (and copies it to request_id)
   assert.equal(normalizeRequest({ prompt_id: 'p-9' }, { sessionId: 's' }).requestId, 'p-9')
-  // a unit request's target never carries the command
-  assert.doesNotMatch(JSON.stringify(approvalTarget(REQ, 'oid', 'deny')), /rm -rf|SECRET/)
+  // the order of an answer never carries the command, whatever the choice, even from the row the box lists
+  const listed = pendingView(approvalsReducer(emptyApprovals(), { type: 'received', raw: PENDING_ROW, sessionId: 'sess-A', profile: 'oc-test-one', nowMs: T0 }), T0)[0]
+  assert.equal(listed.command, PENDING_ROW.command)
+  for (const c of CHOICES) {
+    const order = approvalTarget(listed, 'oid', c)
+    assert.doesNotMatch(JSON.stringify(order), /rm -rf|SECRET|abc123|\/tmp/, c)
+    assert.ok(!('command' in order) && !('commandCut' in order), c)
+  }
+})
+
+test('command: kept with its line breaks, cleaned of bidi, zero-width and control characters, every line separator a plain newline', () => {
+  assert.deepEqual(cleanCommand('ls -la'), { text: 'ls -la', cut: false })
+  assert.deepEqual(cleanCommand('cd /srv &&\n\tmake deploy'), { text: 'cd /srv &&\n\tmake deploy', cut: false }, 'newline and tab are kept')
+  assert.equal(cleanCommand('a\r\nb\rc\u2028d\u2029e\u0085f').text, 'a\nb\nc\nd\ne\nf')
+  assert.equal(cleanCommand('echo ok\rrm -rf /data').text, 'echo ok\nrm -rf /data', 'a carriage return cannot draw one line over another')
+  assert.equal(cleanCommand('rm \u202e/ fr- \u2066x\u2069\u200b\u200d\ufeff\u00ad!').text, 'rm / fr- x!', 'bidi overrides and zero-width characters are dropped')
+  assert.equal(cleanCommand('a\u0000b\u0007c\u001b[31md\u007fe\u009bf').text, 'abc[31mdef', 'control characters other than newline and tab are dropped')
+  assert.equal(cleanCommand('\n \n\t\nls\n\n  ').text, 'ls', 'blank lines around the command are not shown')
+  assert.equal(cleanCommand('a\n\nb').text, 'a\n\nb', 'a blank line inside is kept')
+  const r = normalizeRequest({ request_id: 'x', command: 'git push\u202e --force\r\n# done\u0007', description: 'push' }, { sessionId: 's', nowMs: 1 })
+  assert.equal(r.command, 'git push --force\n# done')
+  assert.equal(r.commandCut, false)
+  assert.equal(r.summary, 'push', 'the summary stays the description')
+})
+
+test('command: at most 12 lines and 1 200 characters, cut with a visible mark and flagged', () => {
+  assert.equal(COMMAND_MAX_LINES, 12)
+  assert.equal(COMMAND_MAX_CHARS, 1200)
+  assert.ok(COMMAND_CUT_MARK.includes('…'))
+  const lines = Array.from({ length: 30 }, (_, i) => `step ${i + 1}`).join('\n')
+  const byLines = cleanCommand(lines)
+  assert.equal(byLines.cut, true)
+  assert.equal(byLines.text.split('\n').length, COMMAND_MAX_LINES)
+  assert.ok(byLines.text.endsWith(`step 12${COMMAND_CUT_MARK}`))
+  const byChars = cleanCommand('x'.repeat(COMMAND_MAX_CHARS + 1))
+  assert.equal(byChars.cut, true)
+  assert.equal(byChars.text, 'x'.repeat(COMMAND_MAX_CHARS) + COMMAND_CUT_MARK)
+  const exact = cleanCommand(Array.from({ length: COMMAND_MAX_LINES }, () => 'y'.repeat(COMMAND_MAX_CHARS / COMMAND_MAX_LINES - 1)).join('\n'))
+  assert.equal(exact.cut, false, 'a command at the limits is whole')
+  assert.equal(exact.text.length, COMMAND_MAX_CHARS - 1)
+  assert.doesNotMatch(exact.text, /…/)
+  // characters dropped by the cleaning do not count as a cut, and a cut never leaves half a surrogate pair
+  assert.equal(cleanCommand(`ls${'\u200b'.repeat(5000)}`).cut, false)
+  const pair = cleanCommand('z'.repeat(COMMAND_MAX_CHARS - 1) + '\u{1F600}'.repeat(3))
+  assert.equal(pair.text, 'z'.repeat(COMMAND_MAX_CHARS - 1) + COMMAND_CUT_MARK)
+  const req = normalizeRequest({ request_id: 'x', command: lines }, { sessionId: 's', nowMs: 1 })
+  assert.equal(req.commandCut, true)
+  assert.equal(req.command, byLines.text)
+  // the row shows one line, and says when the command goes on below it
+  assert.equal(commandLine('ls -la'), 'ls -la')
+  assert.equal(commandLine('  make build\nmake deploy'), `make build${COMMAND_CUT_MARK}`)
+  assert.equal(commandLine(byLines.text), `step 1${COMMAND_CUT_MARK}`)
+  assert.equal(commandLine(''), '')
+  assert.equal(commandLine(undefined), '')
+})
+
+test('command: empty when Hermes gives none or something that is not a string; the confirmation then says so', () => {
+  for (const command of [undefined, null, '', '   \n\t', 42, ['rm'], { cmd: 'rm' }, true]) {
+    const r = normalizeRequest({ request_id: 'x', description: 'd', command }, { sessionId: 's', nowMs: 1 })
+    assert.equal(r.command, '', String(command))
+    assert.equal(r.commandCut, false)
+    assert.deepEqual(commandPanel(r, 'once'), { text: '', cut: false, missing: true })
+  }
+  assert.equal(normalizeRequest({ request_id: 'x' }, { sessionId: 's' }).command, '')
+  assert.deepEqual(commandPanel(null, 'always'), { text: '', cut: false, missing: true }, 'an unknown request shows no command and says so')
+})
+
+test('command: shown by the confirmation of the three allowing answers only, never for a refusal or an unknown choice', () => {
+  for (const c of ['once', 'session', 'always']) assert.deepEqual(commandPanel(REQ, c), { text: PENDING_ROW.command, cut: false, missing: false }, c)
+  assert.equal(commandPanel(REQ, 'deny'), null, 'refusing runs nothing: no confirmation, no command')
+  for (const c of ['rm', '', undefined, null, 'ALWAYS']) assert.equal(commandPanel(REQ, c), null, String(c))
+  // a refusal never reaches the confirmation step at all, the other three always do
+  assert.equal(run(initialOrderState(), { type: 'request', order: approvalTarget(REQ, 'o', 'deny'), now: T0 }).phase, 'counting')
+  for (const c of ['once', 'session', 'always']) assert.equal(run(initialOrderState(), { type: 'request', order: approvalTarget(REQ, 'o', c), now: T0 }).phase, 'confirm', c)
+  const long = normalizeRequest({ request_id: 'x', command: 'a\n'.repeat(40) }, { sessionId: 's', nowMs: 1 })
+  assert.equal(commandPanel(long, 'always').cut, true, 'a cut command is said to be cut')
+})
+
+test('store: the command lives in the store row; the same request seen again without it keeps the one known; a settled request takes it away', () => {
+  let s = approvalsReducer(emptyApprovals(), { type: 'received', raw: PENDING_ROW, sessionId: 'sess-A', profile: 'oc-test-one', nowMs: T0 })
+  assert.equal(pendingView(s, T0)[0].command, PENDING_ROW.command)
+  const { command, ...bare } = PENDING_ROW
+  assert.equal(approvalsReducer(s, { type: 'received', raw: bare, sessionId: 'sess-A', nowMs: T0 + 1 }).byKey['sess-A/req-1'].command, command)
+  assert.equal(approvalsReducer(s, { type: 'snapshot', sessionId: 'sess-A', rows: [bare], nowMs: T0 + 1 }).byKey['sess-A/req-1'].command, command)
+  const other = approvalsReducer(s, { type: 'snapshot', sessionId: 'sess-A', rows: [{ ...PENDING_ROW, command: 'ls' }], nowMs: T0 + 1 })
+  assert.equal(other.byKey['sess-A/req-1'].command, 'ls', 'what Hermes says now replaces what was known')
+  s = approvalsReducer(s, { type: 'settled', sessionId: 'sess-A', requestId: 'req-1' })
+  assert.doesNotMatch(JSON.stringify(s), /rm -rf|SECRET_TOKEN/, 'nothing of the command outlives its request')
 })
 
 test('store: received / settled / snapshot keep the list true (a read is the truth for its session)', () => {
@@ -244,6 +334,7 @@ test('failures are said: already settled (resolved 0), stale window, lost answer
 /* ---------- audit and journal ---------- */
 
 test('audit: closed fields, risk from the choice, never the command, the summary or a title', () => {
+  assert.match(REQ.command, /rm -rf/, 'the request these orders are built for does hold a command')
   const order = approvalTarget({ ...REQ, title: 'Fix the build' }, 'b3b1c8d2-0000-4000-8000-000000000001', 'deny')
   const b = auditBody(order, { result: 'done', reason: null })
   assert.deepEqual(b, { id: 'b3b1c8d2-0000-4000-8000-000000000001', verb: 'approval', risk: 'safe', result: 'done', choice: 'deny' })
@@ -260,9 +351,39 @@ test('audit: closed fields, risk from the choice, never the command, the summary
   assert.doesNotMatch(JSON.stringify(j), /rm -rf/)
 })
 
+test('the command never leaves the store: not in the audit body, the order, its outcome, the order left behind, nor the journal the Log tab reads', () => {
+  const LEAK = /rm -rf|SECRET_TOKEN|abc123|oc-never-run|commandCut|"command"/
+  const row = { ...REQ, title: 'Fix the build' }
+  for (const c of CHOICES) {
+    const order = approvalTarget(row, `b3b1c8d2-0000-4000-8000-00000000000${CHOICES.indexOf(c)}`, c)
+    // the journal line, with and without the request id, whatever the answer; even an order someone stuffed with the command
+    for (const answer of [{ result: 'done' }, { result: 'refused', reason: 'already_settled' }, { result: 'failed', reason: 'stale' }, null]) {
+      for (const stamp of [null, requestStamp({ requestId: '0123456789abcdef' }, true)]) {
+        assert.doesNotMatch(JSON.stringify(auditBody(order, answer, stamp)), LEAK, c)
+        const stuffed = auditBody({ ...order, command: row.command, commandCut: true, summary: row.summary }, { ...answer, command: row.command }, stamp)
+        assert.doesNotMatch(JSON.stringify(stuffed), LEAK, `${c}: the body is built field by field`)
+        for (const k of Object.keys(stuffed)) assert.ok(['id', 'verb', 'risk', 'result', 'reason', 'choice', 'request'].includes(k), k)
+      }
+    }
+    // every state of the order machine: confirmation, 6 s window, departure, read back, cancelled, left behind
+    let s = run(initialOrderState(), { type: 'request', order, now: T0 })
+    const seen = [s]
+    if (choiceConfirms(c)) { s = run(s, { type: 'confirm', now: T0 }); seen.push(s) }
+    seen.push(run(s, { type: 'cancel' }), leftOutcome(leftBehind(s)))
+    s = run(s, { type: 'tick', now: T0 + 6000 }); seen.push(s)
+    s = run(s, answered); seen.push(s)
+    for (const gone of [true, false, null]) seen.push(run(s, { type: 'read', liveOk: true, gone }))
+    for (const state of seen) assert.doesNotMatch(JSON.stringify(state), LEAK, c)
+  }
+  // what the Log tab draws is `toJournal` of GET /orders: closed fields, so a line that carried a command would lose it
+  const j = toJournal({ ok: true, entries: [{ ts: 100, id: 'x', verb: 'approval', risk: 'final', result: 'done', choice: 'always', source: 'page', command: row.command, commandCut: true, summary: row.command, title: row.command }] })
+  assert.equal(j.entries.length, 1)
+  assert.doesNotMatch(JSON.stringify(j), LEAK)
+})
+
 /* ---------- source guards and i18n ---------- */
 
-test('source: approvals never read the command; one timer-free poll >= 5 s with every flag off; the events are tapped by register()', () => {
+test('source: the command is read in one place, drawn as text in the confirmation only, never stored; one timer-free poll >= 5 s with every flag off; the events are tapped by register()', () => {
   const data = readFileSync(new URL('../../src/data/approvals.js', import.meta.url), 'utf8')
   const core = readFileSync(new URL('../../src/core/approvals.js', import.meta.url), 'utf8')
   const ui = readFileSync(new URL('../../src/ui/Approvals.jsx', import.meta.url), 'utf8')
@@ -271,9 +392,41 @@ test('source: approvals never read the command; one timer-free poll >= 5 s with 
     assert.doesNotMatch(src, /console\./)
     assert.doesNotMatch(src, /localStorage|sessionStorage|ctx\.storage/)
   }
-  assert.doesNotMatch(ui, /\.command\b|\bcommand=|\{command\}/, 'the row never shows the command')
-  assert.doesNotMatch(data, /\.command\b/)
-  assert.doesNotMatch(core.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, ''), /raw\.command|\.command\b/, 'the command is never read, so it cannot be kept')
+  // the command is read from the payload in ONE place (the cleaning of `normalizeRequest`); the module that talks to Hermes
+  // and to the journal never touches it
+  const code = core.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+  assert.deepEqual(code.match(/raw\.command\b/g), ['raw.command'])
+  assert.match(code, /const command = cleanCommand\(raw\.command\)/)
+  assert.doesNotMatch(data.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, ''), /command/i, 'the data module never reads the command')
+  for (const fn of ['approvalTarget', 'auditBody', 'requestStamp']) {
+    const body = code.split(`export const ${fn} =`)[1]?.split('\n\n')[0] ?? code.split(`export function ${fn}(`)[1].split('\n}\n')[0]
+    assert.doesNotMatch(body, /command/i, `${fn} never names the command`)
+  }
+  // on screen: a text node inside the confirmation (and one line of the row), read from the store's row; never markup, a link,
+  // a tooltip or an accessible name
+  const orderUi = readFileSync(new URL('../../src/ui/Orders.jsx', import.meta.url), 'utf8')
+  const frame = readFileSync(new URL('../../src/ui/DecisionCard.jsx', import.meta.url), 'utf8')
+  assert.match(ui, /const panel = commandPanel\(req, choice\)/)
+  assert.match(ui, /<pre className="ux-cmd-x ux-mono"[^>]*>\{panel\.text\}<\/pre>/)
+  assert.match(ui, /<OrderConfirm orders=\{orders\}><CommandBlock req=\{req\} choice=\{o\.choice\} t=\{t\} \/><\/OrderConfirm>/)
+  assert.match(ui, /data-approval-command-line>\{firstLine\}<\/p>/)
+  assert.deepEqual(ui.match(/(?:req|panel)\.(?:command\w*|text)/g).sort(), ['panel.text', 'req.command'], 'the only two reads of the command in the row')
+  for (const src of [ui, orderUi, frame]) {
+    assert.doesNotMatch(src, /dangerouslySetInnerHTML|innerHTML/)
+    assert.doesNotMatch(src, /<a\b|href=/)
+    assert.doesNotMatch(src, /(?:title|aria-label|aria-description|alt|placeholder)=\{[^}]*(?:command|firstLine|panel)/i, 'never a tooltip or an accessible name')
+  }
+  assert.doesNotMatch(orderUi, /\.command\b|commandPanel|commandLine/, 'the confirmation gets the block of its caller, the order has no command')
+  assert.match(ui, /t\('approvals\.commandLabel'\)/)
+  assert.match(ui, /panel\.cut \? <p[^>]*>\{t\('approvals\.commandCut'\)\}/)
+  assert.match(ui, /panel\.missing\s*\? <p[^>]*>\{t\('approvals\.commandMissing'\)\}/)
+  // the block wraps, scrolls on its own and never grows past the pane
+  const css = readFileSync(new URL('../../src/ui/pageStyles.js', import.meta.url), 'utf8')
+  const rule = css.match(/^\.ux-cmd-x\{(.*)\}$/m)[1]
+  for (const decl of ['white-space:pre-wrap', 'overflow-wrap:anywhere', 'overflow-y:auto', 'overflow-x:hidden', 'max-width:100%']) assert.ok(rule.includes(decl), decl)
+  assert.match(rule, /max-height:min\(\d+px,\d+vh\)/)
+  const line = css.match(/^\.ux-dc-c\{(.*)\}$/m)[1]
+  for (const decl of ['white-space:nowrap', 'text-overflow:ellipsis', 'overflow:hidden', 'min-width:0']) assert.ok(line.includes(decl), decl)
   const block = data.split('useQuery({')[1].split('\n  })')[0]
   assert.match(block, /refetchIntervalInBackground: false/)
   assert.match(block, /refetchOnReconnect: false/)
@@ -298,10 +451,21 @@ test('i18n: every choice has its label, explanation, confirmation effect and res
       assert.match(a.done[c]('X'), /X/, `${lang} done.${c} names the target`)
     }
     for (const r of ['already_settled', 'stale', 'still_pending']) assert.ok(messages[lang].orders.reason[r].length > 20, `${lang} reason ${r}`)
-    for (const k of ['verb', 'untitled', 'noSummary', 'unverified', 'commandNote', 'target', 'notReread']) assert.ok(a[k], `${lang} ${k}`)
+    for (const k of ['verb', 'untitled', 'noSummary', 'unverified', 'commandNote', 'commandLabel', 'commandCut', 'commandMissing', 'target', 'notReread']) assert.ok(a[k], `${lang} ${k}`)
     assert.match(a.asked('X'), /X/)
     assert.match(a.choicesLabel('X'), /X/)
     assert.notEqual(messages[lang].orders.risk[choiceRisk('deny')], messages[lang].orders.risk[choiceRisk('always')])
+  }
+  // the command: a short label; a cut or absent command points at the approval card of the session; no text says it is hidden here
+  const CARD = { en: /approval card in the session/, fr: /carte d’approbation de la session/, es: /tarjeta de aprobación de la sesión/ }
+  const WORD = { en: /command/i, fr: /commande/i, es: /comando/i }
+  for (const lang of ['en', 'fr', 'es']) {
+    const a = messages[lang].approvals
+    assert.ok(a.commandLabel.length <= 12, `${lang} label`)
+    for (const k of ['commandLabel', 'commandCut', 'commandMissing', 'commandNote']) assert.match(a[k], WORD[lang], `${lang} ${k}`)
+    for (const k of ['commandCut', 'commandMissing']) assert.match(a[k], CARD[lang], `${lang} ${k}`)
+    assert.doesNotMatch(a.commandNote, /not here|pas ici|no esta página/)
+    assert.notEqual(a.commandCut, a.commandMissing)
   }
   // the permanent choice says it is permanent, in every language
   assert.match(messages.en.approvals.effect.always, /permanent/i)
@@ -406,6 +570,20 @@ test('a refusal of a request the page saw pending is journaled with its request 
   const act = await sendApproval(j.ctx, order, true)
   assert.equal(act.answer.audited, true)
   assert.deepEqual(j.posted, [{ id: 'order-1', verb: 'approval', risk: 'safe', result: 'done', choice: 'deny', request: REQ }])
+})
+test('an allowed request whose command the store holds: neither the answer sent to Hermes nor the journal line carries the command', async () => {
+  resetApprovals()
+  dispatchApprovals({ type: 'received', raw: { request_id: REQ, description: 'recursive delete', command: 'rm -rf /tmp/oc-never-run SECRET_TOKEN=abc123' }, sessionId: 'sess-A', profile: 'oc-test', nowMs: 1 })
+  const sent = []
+  globalThis.__ocHost = async (m, p) => { sent.push({ m, p }); return { resolved: 1 } }
+  for (const choice of ['once', 'session', 'always']) {
+    const j = journal()
+    const act = await sendApproval(j.ctx, { ...order, choice }, true)
+    assert.deepEqual(j.posted, [{ id: 'order-1', verb: 'approval', risk: 'final', result: 'done', choice, request: REQ }])
+    assert.doesNotMatch(JSON.stringify([j.posted, act]), /rm -rf|SECRET_TOKEN|abc123|command/, choice)
+  }
+  assert.deepEqual(sent.map(c => Object.keys(c.p).sort()), Array(3).fill(['choice', 'profile', 'request_id', 'session_id']))
+  assert.doesNotMatch(JSON.stringify(sent), /rm -rf|SECRET_TOKEN|abc123|command/)
 })
 test('a request the page never listed is journaled without it (so it never unlocks « Guardian »)', async () => {
   resetApprovals(); hermes(1)

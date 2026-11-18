@@ -12,7 +12,10 @@ import { safeRequest } from './rpc.js'
  *     (a request that arrived is kept, so the box shows it when the page opens);
  *   - a READ while the page is mounted and visible: `session.active_list` (which sessions are live) then `approval.pending`
  *     for each, which also catches a request whose event this window did not see and drops one answered elsewhere.
- * What the store keeps is in src/core/approvals.js: never the command.
+ * What the store keeps is in src/core/approvals.js. It includes the command Hermes asks about (already redacted by Hermes),
+ * shown in the confirmation of an allowing answer. The store is this module's memory and nothing else: the command is never
+ * written to storage, to the journal (`auditBody` has closed fields), to a notification or to a model, and this file never
+ * reads it (the answer that leaves carries the session, the request id and the choice).
  */
 let state = emptyApprovals()
 const listeners = new Set()
