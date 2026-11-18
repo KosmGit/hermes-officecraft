@@ -1,0 +1,22 @@
+name: Feature request
+description: An idea for Officecraft
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you are trying to do
+      description: The situation and what is missing today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like
+    validations:
+      required: true
+  - type: textarea
+    id: fact
+    attributes:
+      label: Which Hermes fact is behind it
+      description: Officecraft shows nothing simulated. If you know which data of Hermes the feature would read, say so.

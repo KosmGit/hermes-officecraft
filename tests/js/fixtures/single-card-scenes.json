@@ -1,0 +1,727 @@
+[
+ {
+  "name": "w1",
+  "state": "working",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "working",
+   "ref": "S3.2",
+   "span": "12 min"
+  },
+  "cardProgress": {
+   "f": 0.4,
+   "late": false
+  },
+  "sinceOf": {
+   "kind": "working",
+   "ms": 1799999280000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": null,
+    "provider": null,
+    "cardId": "t1",
+    "board": "alpha"
+   },
+   "actual": {
+    "model": "example/model-fast"
+   },
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "w1",
+   "label": "w1",
+   "state": "working",
+   "roleId": null,
+   "since": {
+    "kind": "working",
+    "ms": 1799999280000
+   },
+   "current": {
+    "board": "alpha",
+    "code": "S3.2",
+    "title": "Alpha job",
+    "startedMs": 1799999280000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "w2",
+  "state": "working",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "working",
+   "ref": "",
+   "span": "1 h 30"
+  },
+  "cardProgress": {
+   "f": 1,
+   "late": true
+  },
+  "sinceOf": {
+   "kind": "working",
+   "ms": 1799994600000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": "example/model-large",
+    "provider": null,
+    "cardId": "t2",
+    "board": "alpha"
+   },
+   "actual": {
+    "model": "example/model-large"
+   },
+   "differs": true
+  },
+  "inspectorOf": {
+   "name": "w2",
+   "label": "w2",
+   "state": "working",
+   "roleId": null,
+   "since": {
+    "kind": "working",
+    "ms": 1799994600000
+   },
+   "current": {
+    "board": "alpha",
+    "code": "t2",
+    "title": "plain title with no code",
+    "startedMs": 1799994600000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": {
+    "card": "example/model-large",
+    "default": "example/model-fast",
+    "actual": "example/model-large"
+   },
+   "grade": null
+  }
+ },
+ {
+  "name": "w3",
+  "state": "working",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "working",
+   "ref": "R-API3",
+   "span": "3 min"
+  },
+  "cardProgress": {
+   "f": 0.1,
+   "late": false
+  },
+  "sinceOf": {
+   "kind": "working",
+   "ms": 1799999820000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": null,
+    "provider": "acme-cloud",
+    "cardId": "t3",
+    "board": "alpha"
+   },
+   "actual": null,
+   "differs": true
+  },
+  "inspectorOf": {
+   "name": "w3",
+   "label": "w3",
+   "state": "working",
+   "roleId": null,
+   "since": {
+    "kind": "working",
+    "ms": 1799999820000
+   },
+   "current": {
+    "board": "alpha",
+    "code": "R-API3",
+    "title": "Review",
+    "startedMs": 1799999820000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": {
+    "card": "acme-cloud",
+    "default": "example/model-fast",
+    "actual": null
+   },
+   "grade": null
+  }
+ },
+ {
+  "name": "st",
+  "state": "stale",
+  "silentMs": 720000,
+  "taskTag": {
+   "kind": "stale",
+   "span": "12 min",
+   "ref": "T4.2"
+  },
+  "cardProgress": null,
+  "sinceOf": {
+   "kind": "stale",
+   "ms": 1799999280000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": null,
+    "provider": null,
+    "cardId": "t4",
+    "board": "alpha"
+   },
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "st",
+   "label": "st",
+   "state": "stale",
+   "roleId": null,
+   "since": {
+    "kind": "stale",
+    "ms": 1799999280000
+   },
+   "current": {
+    "board": "alpha",
+    "code": "T4.2",
+    "title": "Silent job",
+    "startedMs": 1799997600000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "wa",
+  "state": "waiting",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "waiting",
+   "ref": "Q9",
+   "n": 2
+  },
+  "cardProgress": null,
+  "sinceOf": {
+   "kind": "waiting",
+   "ms": 1799995000000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": null,
+    "provider": null,
+    "cardId": "t5",
+    "board": "alpha"
+   },
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "wa",
+   "label": "wa",
+   "state": "waiting",
+   "roleId": null,
+   "since": {
+    "kind": "waiting",
+    "ms": 1799995000000
+   },
+   "current": {
+    "board": "alpha",
+    "code": "A1",
+    "title": "Running while blocked card waits",
+    "startedMs": 1799999520000
+   },
+   "waiting": [
+    {
+     "board": "alpha",
+     "code": "Q9",
+     "title": "Needs you",
+     "createdMs": 1799995000000,
+     "blockedMs": null
+    },
+    {
+     "board": "alpha",
+     "code": "Q10",
+     "title": "Needs you too",
+     "createdMs": 1799995000000,
+     "blockedMs": null
+    }
+   ],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "id",
+  "state": "idle",
+  "silentMs": null,
+  "taskTag": null,
+  "cardProgress": null,
+  "sinceOf": null,
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": null,
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "id",
+   "label": "id",
+   "state": "idle",
+   "roleId": null,
+   "since": null,
+   "current": null,
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "nw",
+  "state": "new",
+  "silentMs": null,
+  "taskTag": null,
+  "cardProgress": null,
+  "sinceOf": null,
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": null,
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "nw",
+   "label": "nw",
+   "state": "new",
+   "roleId": null,
+   "since": null,
+   "current": null,
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "ac",
+  "state": "active",
+  "silentMs": null,
+  "taskTag": null,
+  "cardProgress": null,
+  "sinceOf": null,
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": null,
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "ac",
+   "label": "ac",
+   "state": "active",
+   "roleId": null,
+   "since": null,
+   "current": null,
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "a",
+  "state": "working",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "working",
+   "ref": "X1",
+   "span": "20 min"
+  },
+  "cardProgress": {
+   "f": 0.6666666666666666,
+   "late": false
+  },
+  "sinceOf": {
+   "kind": "working",
+   "ms": 1799998800000
+  },
+  "modelOf": {
+   "default": {
+    "model": "",
+    "provider": ""
+   },
+   "card": {
+    "model": "other/model-x",
+    "provider": null,
+    "cardId": "t1",
+    "board": "zeta"
+   },
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "a",
+   "label": "a",
+   "state": "working",
+   "roleId": null,
+   "since": {
+    "kind": "working",
+    "ms": 1799998800000
+   },
+   "current": {
+    "board": "zeta",
+    "code": "X1",
+    "title": "Zeta",
+    "startedMs": 1799998800000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "b",
+  "state": "working",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "working",
+   "ref": "Z3",
+   "span": "2 min"
+  },
+  "cardProgress": {
+   "f": 0.06666666666666667,
+   "late": false
+  },
+  "sinceOf": {
+   "kind": "working",
+   "ms": 1799999880000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": null,
+    "provider": null,
+    "cardId": "t3",
+    "board": "beta"
+   },
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "b",
+   "label": "b",
+   "state": "working",
+   "roleId": null,
+   "since": {
+    "kind": "working",
+    "ms": 1799999880000
+   },
+   "current": {
+    "board": "beta",
+    "code": "Z3",
+    "title": "Beta",
+    "startedMs": 1799999880000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "c",
+  "state": "stale",
+  "silentMs": 1200000,
+  "taskTag": {
+   "kind": "stale",
+   "span": "20 min",
+   "ref": "Y2"
+  },
+  "cardProgress": null,
+  "sinceOf": {
+   "kind": "stale",
+   "ms": 1799998800000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": null,
+    "provider": null,
+    "cardId": "t2",
+    "board": "zeta"
+   },
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "c",
+   "label": "c",
+   "state": "stale",
+   "roleId": null,
+   "since": {
+    "kind": "stale",
+    "ms": 1799998800000
+   },
+   "current": {
+    "board": "zeta",
+    "code": "Y2",
+    "title": "Zeta silent",
+    "startedMs": 1799998020000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "d",
+  "state": "waiting",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "waiting",
+   "ref": "B7",
+   "n": 1
+  },
+  "cardProgress": null,
+  "sinceOf": {
+   "kind": "waiting",
+   "ms": 1799995000000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": null,
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "d",
+   "label": "d",
+   "state": "waiting",
+   "roleId": null,
+   "since": {
+    "kind": "waiting",
+    "ms": 1799995000000
+   },
+   "current": null,
+   "waiting": [
+    {
+     "board": "beta",
+     "code": "B7",
+     "title": "decision",
+     "createdMs": 1799995000000,
+     "blockedMs": null
+    }
+   ],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "p",
+  "state": "idle",
+  "silentMs": null,
+  "taskTag": null,
+  "cardProgress": null,
+  "sinceOf": null,
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": null,
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "p",
+   "label": "p",
+   "state": "idle",
+   "roleId": null,
+   "since": null,
+   "current": null,
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "q",
+  "state": "working",
+  "silentMs": null,
+  "taskTag": {
+   "kind": "working",
+   "ref": "K1",
+   "span": "1 min"
+  },
+  "cardProgress": {
+   "f": 0.03333333333333333,
+   "late": false
+  },
+  "sinceOf": {
+   "kind": "working",
+   "ms": 1799999940000
+  },
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": {
+    "model": null,
+    "provider": null,
+    "cardId": "t2",
+    "board": "solo"
+   },
+   "actual": {
+    "model": "example/model-fast"
+   },
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "q",
+   "label": "q",
+   "state": "working",
+   "roleId": null,
+   "since": {
+    "kind": "working",
+    "ms": 1799999940000
+   },
+   "current": {
+    "board": "solo",
+    "code": "K1",
+    "title": "K1",
+    "startedMs": 1799999940000
+   },
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ },
+ {
+  "name": "r",
+  "state": "active",
+  "silentMs": null,
+  "taskTag": null,
+  "cardProgress": null,
+  "sinceOf": null,
+  "modelOf": {
+   "default": {
+    "model": "example/model-fast",
+    "provider": "example"
+   },
+   "card": null,
+   "actual": null,
+   "differs": false
+  },
+  "inspectorOf": {
+   "name": "r",
+   "label": "r",
+   "state": "active",
+   "roleId": null,
+   "since": null,
+   "current": null,
+   "waiting": [],
+   "waitingMore": 0,
+   "session": null,
+   "skills": [],
+   "skillsMore": 0,
+   "model": null,
+   "grade": null
+  }
+ }
+]

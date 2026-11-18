@@ -1,0 +1,50 @@
+[
+ {
+  "name": "backend",
+  "description": "Server and data specialist: APIs, databases, scripts, integrations, deployment, system debugging. Tests every rule it adds and reports the real output of the test run. Does not touch the visual design."
+ },
+ {
+  "name": "compliance",
+  "description": "Privacy and legal compliance: licence notices, privacy mentions, consent, dated plan limits, dead links, consistency with the terms of the product, legal pages. Relies on the automatic checks of the project and reports their real output. Does not write the content, does not change"
+ },
+ {
+  "name": "design",
+  "description": "Art direction and visual critique: judges the real rendering (screenshots) on composition, hierarchy, staging, light, colours, typography, animations and visual accessibility, comparing it with the reference of the project. Findings are measured and located, each one with a"
+ },
+ {
+  "name": "devops",
+  "description": "Delivery and operations: CI/CD, reproducible builds, packaging and installation, releases, backups, monitoring and operation scripts. Proves each change by a real run. No destructive action and no change of infrastructure or of a service in production without an explicit"
+ },
+ {
+  "name": "frontend",
+  "description": "Interface specialist: HTML/CSS/JS, design system, animations, responsive layout, accessibility. Builds pages that are visual and alive, not walls of grey text."
+ },
+ {
+  "name": "planner",
+  "description": "Conductor: breaks a goal into sub-tasks, routes them to the profiles whose description fits, sets the dependencies, settles the blockers, gathers the results. Produces no code and no deliverable itself."
+ },
+ {
+  "name": "qa",
+  "description": "Tests and quality of use: tests the real application as a user would (journeys, edge cases, screen sizes, keyboard, themes, languages, failures, perceived performance) in a real browser and writes the missing non-regression tests. Every bug has its steps to reproduce it, what was"
+ },
+ {
+  "name": "research",
+  "description": "Factual research and monitoring: products, versions, prices, markets, competitors, regulation. Produces notes where every figure has its source and its date. Writes no article, publishes nothing, never invents a figure: what is not verified is marked as not verified."
+ },
+ {
+  "name": "reviewer",
+  "description": "Quality reviewer: reads the work of the others, checks it against the contract of the card, looks for bugs, regressions and obvious flaws, measures by itself instead of trusting the report. Does not rewrite the deliverable: it validates, asks for changes or blocks."
+ },
+ {
+  "name": "security",
+  "description": "Application security: audits code and configuration for flaws (injections, XSS, authentication and authorisation, data exposure, secrets, dependencies, network surface). Every finding carries a reproducible proof and a severity. Exploits nothing outside the test environment"
+ },
+ {
+  "name": "seo",
+  "description": "SEO strategy and technique: search intent, keyword clusters, content briefs, metadata, structured data, internal linking, cannibalisation, sitemap, technical audits. Produces briefs for the writers and tickets for frontend and backend. Does not write the final content itself and"
+ },
+ {
+  "name": "writer",
+  "description": "Technical and editorial writer: documentation, README, guides, release notes, articles, interface copy and translations (English, French, Spanish, others on request). Writes from sources that can be checked (code, data, notes), invents nothing and follows the tone and the format"
+ }
+]

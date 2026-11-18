@@ -1,0 +1,18 @@
+name: hermes-officecraft
+version: 0.1.0
+description: Officecraft - the pixel-art office & kanban control room for Hermes Agent. See what your agents and kanban chains are doing, and act on them.
+author: Kosm (KosmGit)
+license: MIT
+manifest_version: 1
+requires_hermes: ">=0.23.0"
+kind: standalone
+provides_tools: []
+provides_hooks:
+  - on_kanban_dispatch_tick
+  - pre_approval_request
+  - post_approval_response
+provides_middleware: []
+requires_env: []
+capabilities:
+  - llm.model_override
+  - llm.provider_override

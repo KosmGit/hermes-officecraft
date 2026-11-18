@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/KosmGit/hermes-officecraft/security/advisories/new
+    about: Report it privately, never in a public issue.
+  - name: Hermes Agent
+    url: https://github.com/NousResearch/hermes-agent
+    about: Questions about Hermes itself (install, gateway, kanban, plugins) belong there.

@@ -1,0 +1,272 @@
+{
+ "case": "C2",
+ "route": "cheap",
+ "sent_chars": 5430,
+ "provider": "acme-cloud",
+ "model": "example/model-fast",
+ "content_type": "json",
+ "parsed": {
+  "phases": [
+   "Scoping and validated mock-up",
+   "Server foundation (plans, schemas, limits)",
+   "Web interface (pricing page and upgrade)",
+   "Copy, tests and security audit",
+   "Acceptance and delivery"
+  ],
+  "cards": [
+   {
+    "ref": "c1",
+    "phase": 0,
+    "title": "Scoping: perimeter, contract of the plan data, breakdown",
+    "who": "planner",
+    "parents": [],
+    "body": "Scope: frame the new pricing page of Acme Notes and its upgrade dialog, for the web app only. Steps: 1) write what the page shows (three plans, two periods, a comparison table) and what the dialog does (a request, never a charge); 2) write the contract of the plan data and of the upgrade request, and split the work into cards with their dependencies; 3) route each piece of work to the bot whose description fits it; 4) set the dependencies so that a review always follows the card it reviews; 5) produce no code and no deliverable yourself; 6) keep the plan short enough to be read in five minutes; 7) say what a human has to decide, and when. Out of scope: writing code, writing the content, judging the design. Acceptance criteria: every piece of work has an owner, a dependency and a way to be checked, and nothing is left implicit. Proof: the plan as one document, with the list of the cards and their dependencies. If something outside the scope looks wrong, write it down in the report and leave it as it is. Stop and ask if a criterion cannot be measured."
+   },
+   {
+    "ref": "c2",
+    "phase": 0,
+    "title": "Inventory of what exists and of the patterns of a page that compares, then confirms",
+    "who": "research",
+    "parents": [
+     "c1"
+    ],
+    "body": "Scope: what the app already has about plans, and how comparable note-taking products present theirs. Steps: 1) list the existing settings screen, the plan flags of the API and the texts that mention a plan; 2) describe five public pricing pages (number of plans, period switch, comparison, confirmation step), each with its source and the date it was read; 3) mark what is not verified as not verified, never guess; 4) write no article and publish nothing; 5) prefer the primary source to a page that quotes it; 6) end with a short list of what remains uncertain; 7) give every figure its source and the date it was read. Out of scope: judging the design, changing the code. Acceptance criteria: no figure without a source and a date, and the summary says nothing the notes do not. Proof: the notes with their sources, placed in the folder of the section. Stop and ask if a criterion cannot be measured. A human validates at the end of this phase. Keep the report short: findings first, method after."
+   },
+   {
+    "ref": "c3",
+    "phase": 0,
+    "title": "Mock-up of the pricing page and of the upgrade dialog (to validate before development)",
+    "who": "design",
+    "parents": [
+     "c1"
+    ],
+    "body": "Scope: a static mock-up in mockups/pricing.html, faithful to the design system of the app. Steps: 1) draw the page with the three plans Free, Plus and Team, the switch of period and the comparison table; 2) draw the dialog in each of its states (choice, summary, error, limit reached, done) at 360 px and 1280 px; 3) say for each finding what would fix it, in one precise sentence; 4) compare with the reference of the project and name the gap; 5) end with one clear verdict; 6) judge the real rendering on screenshots, never the code; 7) give each finding a place, a measure and a severity (blocking, important, minor). Out of scope: changing the code or the mock-up yourself, writing copy. Acceptance criteria: every finding is located, measured and comes with a precise recommendation, and the verdict is unambiguous. Proof: a report with the annotated screenshots. A human validates at the end of this phase. Keep the report short: findings first, method after. If something outside the scope looks wrong, write it down in the report and leave it as it is."
+   },
+   {
+    "ref": "c4",
+    "phase": 0,
+    "title": "Review of the mock-up and of the data contract",
+    "who": "reviewer",
+    "parents": [
+     "c2",
+     "c3"
+    ],
+    "body": "Scope: the contract of c1, the inventory of c2 and the mock-up of c3. Steps: 1) check that each field of the contract is shown somewhere and that nothing shown is missing from it; 2) open the mock-up at both widths and compare each state with the list of the scoping; 3) number each finding and say how to reproduce it; 4) end with a verdict: validated, changes requested or blocked; 5) measure it yourself instead of trusting the report of the card; 6) run the build and the tests again and quote their real output; 7) look for a regression next to the change, not only in it. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run. Keep the report short: findings first, method after. If something outside the scope looks wrong, write it down in the report and leave it as it is. Stop and ask if a criterion cannot be measured."
+   },
+   {
+    "ref": "c5",
+    "phase": 1,
+    "title": "Closed schemas of the plans and the seat limit",
+    "who": "backend",
+    "parents": [
+     "c4"
+    ],
+    "body": "Scope: the models of api/billing, from the validated contract. Steps: 1) write the closed schema of a plan and of an upgrade request, extra fields refused; 2) implement the seat limit of each plan as a pure function with its tests; 3) run the whole test suite before handing over; 4) keep the change behind the existing module boundaries and add no dependency; 5) cover the nominal case, each refusal and one malformed input with a test; 6) log nothing that identifies a user or the content of a note; 7) write the short note of the choices made, next to the code. Out of scope: the interface, the visual design, any change of infrastructure. Acceptance criteria: the tests pass, extra fields are refused, each refusal has its own code and no behaviour outside the scope changes. Proof: the real output of the test run and the list of the files changed. If something outside the scope looks wrong, write it down in the report and leave it as it is."
+   },
+   {
+    "ref": "c6",
+    "phase": 1,
+    "title": "Billing client, price computation and an injectable fake client",
+    "who": "backend",
+    "parents": [
+     "c5"
+    ],
+    "body": "Scope: the module that talks to the billing provider, behind an interface the tests can replace. Steps: 1) build the request from an upgrade (plan, period, seats) with the price computed on the server; 2) write a fake client that records what it is sent and can answer a refusal, an error or a timeout; 3) keep the change behind the existing module boundaries and add no dependency; 4) cover the nominal case, each refusal and one malformed input with a test; 5) log nothing that identifies a user or the content of a note; 6) write the short note of the choices made, next to the code; 7) run the whole test suite before handing over. Out of scope: the web pages, the copy, the deployment. Acceptance criteria: the contract is respected field by field, the tests cover each rule and the suite is green. Proof: the diff, the output of the tests and one example of each answer. Stop and ask if a criterion cannot be measured."
+   },
+   {
+    "ref": "c7",
+    "phase": 1,
+    "title": "API routes for the list of plans and for the upgrade request",
+    "who": "backend",
+    "parents": [
+     "c6"
+    ],
+    "body": "Scope: two routes in api/billing, on top of the schemas of c5 and the client of c6. Steps: 1) serve the list of plans with their prices and limits, read from one table; 2) record an upgrade request after validation and answer each refusal with a code; 3) cover the nominal case, each refusal and one malformed input with a test; 4) log nothing that identifies a user or the content of a note; 5) write the short note of the choices made, next to the code; 6) run the whole test suite before handing over; 7) keep the change behind the existing module boundaries and add no dependency. Out of scope: the interface, the visual design, any change of infrastructure. Acceptance criteria: the tests pass, extra fields are refused, each refusal has its own code and no behaviour outside the scope changes. Proof: the real output of the test run and the list of the files changed."
+   },
+   {
+    "ref": "c8",
+    "phase": 1,
+    "title": "Security audit: what is sent to the billing provider",
+    "who": "security",
+    "parents": [
+     "c7"
+    ],
+    "body": "Scope: the client of c6 and the routes of c7. Steps: 1) trace each field that leaves the server and compare it with the list of the contract; 2) look for a secret, an e-mail address or a note title in the request, in the logs and in the errors; 3) check the logs and the error messages for a secret or a personal detail; 4) read the dependencies added by the change; 5) say for each finding what closes it; 6) give each finding a severity and a proof that can be replayed; 7) stay inside the test environment and exploit nothing outside it. Out of scope: any change of infrastructure, any real payment. Acceptance criteria: nothing leaves the server that the contract does not list and no secret appears anywhere. Proof: the findings, their proofs and the list of what was checked. Keep the report short: findings first, method after. If something outside the scope looks wrong, write it down in the report and leave it as it is."
+   },
+   {
+    "ref": "c9",
+    "phase": 1,
+    "title": "Review of the server code (schemas, billing client, routes)",
+    "who": "reviewer",
+    "parents": [
+     "c7"
+    ],
+    "body": "Scope: the diff of the cards c5, c6 and c7. Steps: 1) check the schemas field by field against the contract and try a request with an extra field; 2) run pytest and read the tests of the limit, the refusal and the timeout; 3) number each finding and say how to reproduce it; 4) end with a verdict: validated, changes requested or blocked; 5) measure it yourself instead of trusting the report of the card; 6) run the build and the tests again and quote their real output; 7) look for a regression next to the change, not only in it. Out of scope: rewriting the deliverable, widening the scope of the card reviewed. Acceptance criteria: a global verdict with numbered findings, each one reproducible, and nothing validated that was not checked. Proof: the review report with the real output of the build and of the tests."
+   },
+   {
+    "ref": "c10",
+    "phase": 1,
+    "title": "Server fixes after the security audit and the review",
+    "who": "backend",
+    "parents": [
+     "c8",
+     "c9"
+    ],
+    "body": "Scope: the findings of c8 and c9, and only them. Steps: 1) treat each finding in its order of severity and name the change that answers it; 2) add the test that proves each fix; 3) run the whole test suite before handing over; 4) keep the change behind the existing module boundaries and add no dependency; 5) cover the nominal case, each refusal and one malformed input with a test; 6) log nothing that identifies a user or the content of a note; 7) write the short note of the choices made, next to the code. Out of scope: the web pages, the copy, the deployment. Acceptance criteria: the contract is respected field by field, the tests cover each rule and the suite is green. Proof: the diff, the output of the tests and one example of each answer."
+   },
+   {
+    "ref": "c11",
+    "phase": 2,
+    "title": "Pure logic in web/core: payload, validation, states of the upgrade",
+    "who": "frontend",
+    "parents": [
+     "c10"
+    ],
+    "body": "Scope: the pure functions of the page and of the dialog, with no network and no DOM. Steps: 1) compute the price shown for a plan, a period and a number of seats, and build the payload of the request; 2) describe the states of the dialog as a small state machine, with its node tests; 3) keep the existing components and class names where they already do the job; 4) check the result at 380 px and 1440 px, with the keyboard and with a pointer; 5) leave no error or warning in the console of the browser; 6) respect the reduced-motion preference for anything that moves. Out of scope: the server code, the copy of the interface, any new dependency. Acceptance criteria: the build passes, the rendering matches the reference on every screen named and nothing shifts while the page loads. Proof: the output of the build and screenshots of each state at both widths."
+   },
+   {
+    "ref": "c12",
+    "phase": 2,
+    "title": "PricingPage: plan cards, monthly or yearly switch, comparison",
+    "who": "frontend",
+    "parents": [
+     "c11"
+    ],
+    "body": "Scope: the page web/pages/PricingPage, faithful to the validated mock-up. Steps: 1) render the three plans and the comparison table from the list of the API; 2) switch the period without a reload and keep the layout stable while the list loads; 3) check the result at 380 px and 1440 px, with the keyboard and with a pointer; 4) leave no error or warning in the console of the browser; 5) respect the reduced-motion preference for anything that moves; 6) run the build and the tests before handing over; 7) keep the existing components and class names where they already do the job. Out of scope: the API, the content, a redesign of the screens that are not named. Acceptance criteria: no regression of the existing screens, keyboard use works end to end and the console stays empty. Proof: the diff, the output of the tests and before and after screenshots. Keep the report short: findings first, method after."
+   },
+   {
+    "ref": "c13",
+    "phase": 2,
+    "title": "UpgradeDialog: plan, seats, summary, request sent after a click",
+    "who": "frontend",
+    "parents": [
+     "c12"
+    ],
+    "body": "Scope: the dialog web/pages/UpgradeDialog, opened from a plan card. Steps: 1) show the plan, the seats and the summary with the price of the pure logic; 2) send nothing before the confirmation click and keep what the user typed after an error; 3) leave no error or warning in the console of the browser; 4) respect the reduced-motion preference for anything that moves; 5) run the build and the tests before handing over; 6) keep the existing components and class names where they already do the job; 7) check the result at 380 px and 1440 px, with the keyboard and with a pointer. Out of scope: the server code, the copy of the interface, any new dependency. Acceptance criteria: the build passes, the rendering matches the reference on every screen named and nothing shifts while the page loads. Proof: the output of the build and screenshots of each state at both widths. If something outside the scope looks wrong, write it down in the report and leave it as it is."
+   },
+   {
+    "ref": "c14",
+    "phase": 2,
+    "title": "API wiring: HTTP client, errors, seat limit, cancellation",
+    "who": "frontend",
+    "parents": [
+     "c13"
+    ],
+    "body": "Scope: the calls of the page and of the dialog to the routes of c7. Steps: 1) map each refusal code of the API to a message of the interface; 2) cancel a pending request when the dialog closes and never send the same request twice; 3) respect the reduced-motion preference for anything that moves; 4) run the build and the tests before handing over; 5) keep the existing components and class names where they already do the job; 6) check the result at 380 px and 1440 px, with the keyboard and with a pointer. Out of scope: the API, the content, a redesign of the screens that are not named. Acceptance criteria: no regression of the existing screens, keyboard use works end to end and the console stays empty. Proof: the diff, the output of the tests and before and after screenshots."
+   },
+   {
+    "ref": "c15",
+    "phase": 2,
+    "title": "Visual critique of the page and of the dialog on real screenshots",
+    "who": "design",
+    "parents": [
+     "c14"
+    ],
+    "body": "Scope: the real page and dialog in a browser, compared with the validated mock-up. Steps: 1) capture each state at 360 px and 1280 px, in the light and the dark theme; 2) list each gap with its place, its measure and a severity; 3) end with one clear verdict; 4) judge the real rendering on screenshots, never the code; 5) give each finding a place, a measure and a severity (blocking, important, minor); 6) say for each finding what would fix it, in one precise sentence; 7) compare with the reference of the project and name the gap. Out of scope: changing the code or the mock-up yourself, writing copy. Acceptance criteria: every finding is located, measured and comes with a precise recommendation, and the verdict is unambiguous. Proof: a report with the annotated screenshots. A human validates at the end of this phase."
+   },
+   {
+    "ref": "c16",
+    "phase": 2,
+    "title": "Review of the front-end code and of the API integration",
+    "who": "reviewer",
+    "parents": [
+     "c14"
+    ],
+    "body": "Scope: the diff of the cards c11 to c14. Steps: 1) check that the page computes no price by itself and reads everything from the pure logic; 2) run the node tests and try each error of the API by hand; 3) measure it yourself instead of trusting the report of the card; 4) run the build and the tests again and quote their real output; 5) look for a regression next to the change, not only in it; 6) number each finding and say how to reproduce it; 7) end with a verdict: validated, changes requested or blocked. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run. Keep the report short: findings first, method after."
+   },
+   {
+    "ref": "c17",
+    "phase": 2,
+    "title": "Front-end fixes after the visual critique and the review",
+    "who": "frontend",
+    "parents": [
+     "c15",
+     "c16"
+    ],
+    "body": "Scope: the findings of c15 and c16, and only them. Steps: 1) treat each finding and say which change answers it; 2) take the screenshots of the critique again; 3) check the result at 380 px and 1440 px, with the keyboard and with a pointer; 4) leave no error or warning in the console of the browser; 5) respect the reduced-motion preference for anything that moves; 6) run the build and the tests before handing over. Out of scope: the server code, the copy of the interface, any new dependency. Acceptance criteria: the build passes, the rendering matches the reference on every screen named and nothing shifts while the page loads. Proof: the output of the build and screenshots of each state at both widths."
+   },
+   {
+    "ref": "c18",
+    "phase": 3,
+    "title": "Interface copy en/fr/es for the page and the dialog",
+    "who": "writer",
+    "parents": [
+     "c17"
+    ],
+    "body": "Scope: every text of the page and of the dialog, in English, French and Spanish. Steps: 1) collect each label, help text, error and confirmation from the code and from the mock-up; 2) write the three languages with stable keys and check that each text fits its button; 3) keep the names of the interface exactly as the app shows them; 4) read the text once more against the real behaviour; 5) list what could not be verified; 6) write from what can be checked in the code, the data or the briefs, and invent nothing; 7) follow the tone and the format of the existing texts of the project. Out of scope: the layout of the pages, the technical integration. Acceptance criteria: each text answers its brief, no sentence is invented and the lengths fit where they go. Proof: the texts, with for each one the brief or the source it comes from."
+   },
+   {
+    "ref": "c19",
+    "phase": 3,
+    "title": "Usage tests and browser non-regression",
+    "who": "qa",
+    "parents": [
+     "c18"
+    ],
+    "body": "Scope: the page and the dialog in a real browser, in the three languages. Steps: 1) run the journeys compare, choose, change the seats, confirm, cancel and retry after an error; 2) write the non-regression tests that are missing for the limit and for the period switch; 3) check the keyboard, both themes and three screen widths; 4) keep the tests that were written in the suite of the project; 5) use the real application in a real browser, as a user would; 6) try the edge cases: empty content, a very long title, a slow network, a second tab. Out of scope: fixing the bugs, judging the visual design. Acceptance criteria: every journey has a result, every bug can be reproduced from its steps and the new tests run in the suite. Proof: the test report, the output of the suite and a screenshot per bug."
+   },
+   {
+    "ref": "c20",
+    "phase": 3,
+    "title": "Final security audit: rendering of the prices and the upgrade request",
+    "who": "security",
+    "parents": [
+     "c18"
+    ],
+    "body": "Scope: the whole feature, from the page to the billing client. Steps: 1) try injected markup in a plan name and in an error message, and a forged price in the request; 2) check that the server computes the price again and trusts nothing the page sends; 3) say for each finding what closes it; 4) give each finding a severity and a proof that can be replayed; 5) stay inside the test environment and exploit nothing outside it; 6) check the logs and the error messages for a secret or a personal detail; 7) read the dependencies added by the change. Out of scope: any change of infrastructure, any real payment. Acceptance criteria: nothing leaves the server that the contract does not list and no secret appears anywhere. Proof: the findings, their proofs and the list of what was checked. Keep the report short: findings first, method after."
+   },
+   {
+    "ref": "c21",
+    "phase": 3,
+    "title": "Final cross-review and go / no-go verdict for the acceptance",
+    "who": "reviewer",
+    "parents": [
+     "c19",
+     "c20"
+    ],
+    "body": "Scope: the reports of c19 and c20 and the state of the branch. Steps: 1) check that each bug and each security finding has a fix or a written justification; 2) run the build and every test suite again; 3) measure it yourself instead of trusting the report of the card; 4) run the build and the tests again and quote their real output; 5) look for a regression next to the change, not only in it; 6) number each finding and say how to reproduce it; 7) end with a verdict: validated, changes requested or blocked. Out of scope: rewriting the deliverable, widening the scope of the card reviewed. Acceptance criteria: a global verdict with numbered findings, each one reproducible, and nothing validated that was not checked. Proof: the review report with the real output of the build and of the tests."
+   },
+   {
+    "ref": "c22",
+    "phase": 4,
+    "title": "Functional acceptance on the packaged build",
+    "who": "qa",
+    "parents": [
+     "c21"
+    ],
+    "body": "Scope: the release build of the web app, not the development server. Steps: 1) install the packaged build on a clean profile and run the journeys of c19; 2) check the three languages and both themes on the build itself; 3) try the edge cases: empty content, a very long title, a slow network, a second tab; 4) give each bug its steps, what was expected and what happened; 5) check the keyboard, both themes and three screen widths; 6) keep the tests that were written in the suite of the project; 7) use the real application in a real browser, as a user would. Out of scope: changing the code under test. Acceptance criteria: no journey is left untested and no bug is reported without its steps. Proof: the list of journeys with their result and the tests added."
+   },
+   {
+    "ref": "c23",
+    "phase": 4,
+    "title": "CI, reproducible build and packaging of the release",
+    "who": "devops",
+    "parents": [
+     "c21"
+    ],
+    "body": "Scope: the pipeline of the repository and the release archive. Steps: 1) add the new tests to the pipeline and check that two builds of the same commit are identical; 2) produce the archive with its checksum and its changelog entry; 3) write the commands that were run, in order; 4) check the result from outside, as a visitor would see it; 5) note what stays to be watched; 6) prove each change by a real run, not by reading the configuration; 7) do nothing destructive and keep the way back ready. Out of scope: changing the application code, any action on a service that is not named. Acceptance criteria: the pipeline is green on the commit delivered, the build can be reproduced and the way back was tried. Proof: the output of the pipeline, the checksum of the build and the log of the commands."
+   },
+   {
+    "ref": "c24",
+    "phase": 4,
+    "title": "Final validation of the delivery and reservations",
+    "who": "reviewer",
+    "parents": [
+     "c22",
+     "c23"
+    ],
+    "body": "Scope: the reports of c22 and c23. Steps: 1) check that the acceptance ran on the archive that the pipeline produced; 2) list what is delivered, what is postponed and why; 3) number each finding and say how to reproduce it; 4) end with a verdict: validated, changes requested or blocked; 5) measure it yourself instead of trusting the report of the card; 6) run the build and the tests again and quote their real output; 7) look for a regression next to the change, not only in it. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   }
+  ]
+ },
+ "text": null,
+ "usd": 0.008585952,
+ "cost_status": "estimated",
+ "usage": {
+  "input_tokens": 1832,
+  "output_tokens": 17040,
+  "total_tokens": 18872,
+  "cache_read_tokens": 0
+ },
+ "seconds": 72.1
+}

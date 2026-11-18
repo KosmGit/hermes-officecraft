@@ -1,0 +1,341 @@
+{
+ "case": "C3",
+ "route": "cheap",
+ "sent_chars": 5249,
+ "provider": "acme-cloud",
+ "model": "example/model-fast",
+ "content_type": "json",
+ "parsed": {
+  "phases": [
+   "Scoping, research and editorial plan",
+   "Writing of the guides and template pages",
+   "Interface, structured data and linking",
+   "Spanish version and final acceptance",
+   "Go-live and checks in production"
+  ],
+  "cards": [
+   {
+    "ref": "c1",
+    "phase": 0,
+    "title": "Help center study: products, section structures, dated plan limits",
+    "who": "research",
+    "parents": [],
+    "body": "Scope: frame the new Getting started section of the Acme Notes help center, in English and in Spanish. Steps: 1) describe the help center of 10 to 12 comparable note-taking products and at least 20 of their templates, with the plan each one needs; 2) note the source and the date of every figure, or mark it as not verified, and draw 5 trends; 3) give every figure its source and the date it was read; 4) mark what is not verified as not verified, never guess; 5) write no article and publish nothing; 6) prefer the primary source to a page that quotes it; 7) end with a short list of what remains uncertain. Out of scope: writing the content, choosing the plan, any contact with a third party. Acceptance criteria: every statement can be traced to a dated source and the uncertainties are visible. Proof: the study, its table and the dated list of sources."
+   },
+   {
+    "ref": "c2",
+    "phase": 0,
+    "title": "Keyword clusters, briefs of the guides and of the template pages, no cannibalisation",
+    "who": "seo",
+    "parents": [
+     "c1"
+    ],
+    "body": "Scope: from the study of c1, build the content plan: 4 to 6 clusters, one per guide, two template pages per cluster. Steps: 1) define the search intent of each cluster and choose the keywords with a dated source; 2) write one brief per guide (angle, outline, questions, planned links, title) and a short brief per template page; 3) give each volume its source and its date; 4) write tickets for the others instead of changing their work; 5) check that no two pages answer the same intent; 6) keep one table that links cluster, page and keywords; 7) start from the search intent, not from the keyword. Out of scope: the copy, the server code. Acceptance criteria: the pages validate, each one has its title, its description and its canonical, and no page is an orphan. Proof: the output of the validators and the table page by page. Stop and ask if a criterion cannot be measured."
+   },
+   {
+    "ref": "c3",
+    "phase": 0,
+    "title": "Template data model and read/write API",
+    "who": "backend",
+    "parents": [],
+    "body": "Scope: the model of a template page (name, category, plan needed, limits, licence, date) and its API, in api/help. Steps: 1) write the closed schema of a template and its validation, extra fields refused; 2) implement the routes that read and write a template, with their tests; 3) log nothing that identifies a user or the content of a note; 4) write the short note of the choices made, next to the code; 5) run the whole test suite before handing over; 6) keep the change behind the existing module boundaries and add no dependency; 7) cover the nominal case, each refusal and one malformed input with a test. Out of scope: the interface, the visual design, any change of infrastructure. Acceptance criteria: the tests pass, extra fields are refused, each refusal has its own code and no behaviour outside the scope changes. Proof: the real output of the test run and the list of the files changed."
+   },
+   {
+    "ref": "c4",
+    "phase": 0,
+    "title": "Acceptance of the template data model",
+    "who": "reviewer",
+    "parents": [
+     "c3"
+    ],
+    "body": "Scope: the model and the API of c3. Steps: 1) try a template with a missing field, an extra field and a wrong type; 2) run the tests and read a template back after writing it; 3) number each finding and say how to reproduce it; 4) end with a verdict: validated, changes requested or blocked; 5) measure it yourself instead of trusting the report of the card; 6) run the build and the tests again and quote their real output; 7) look for a regression next to the change, not only in it. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   },
+   {
+    "ref": "c5",
+    "phase": 0,
+    "title": "Sample-based acceptance of the sources of the study",
+    "who": "reviewer",
+    "parents": [
+     "c1"
+    ],
+    "body": "Scope: the study of c1, on a sample of 10 figures. Steps: 1) open the source of each figure of the sample and compare; 2) check that what is not verified is marked as such; 3) end with a verdict: validated, changes requested or blocked; 4) measure it yourself instead of trusting the report of the card; 5) run the build and the tests again and quote their real output. Out of scope: rewriting the deliverable, widening the scope of the card reviewed. Acceptance criteria: a global verdict with numbered findings, each one reproducible, and nothing validated that was not checked. Proof: the review report with the real output of the build and of the tests."
+   },
+   {
+    "ref": "c6",
+    "phase": 0,
+    "title": "Acceptance of the content plan and of the briefs (counts, cannibalisation)",
+    "who": "reviewer",
+    "parents": [
+     "c2"
+    ],
+    "body": "Scope: the plan and the briefs of c2. Steps: 1) count 6 briefs of guides and 12 of template pages; 2) look for two briefs that answer the same intent and for a keyword without a dated source; 3) measure it yourself instead of trusting the report of the card; 4) run the build and the tests again and quote their real output; 5) look for a regression next to the change, not only in it; 6) number each finding and say how to reproduce it; 7) end with a verdict: validated, changes requested or blocked. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   },
+   {
+    "ref": "c7",
+    "phase": 0,
+    "title": "Consolidated editorial plan submitted for human validation",
+    "who": "planner",
+    "parents": [
+     "c6",
+     "c5",
+     "c4"
+    ],
+    "body": "Scope: one document that gathers the study, the content plan and the data model, once the three are accepted. Steps: 1) order the 6 guides and the 12 template pages with their owner and their dependencies; 2) list the open questions the human has to decide; 3) set the dependencies so that a review always follows the card it reviews; 4) produce no code and no deliverable yourself; 5) keep the plan short enough to be read in five minutes; 6) say what a human has to decide, and when; 7) route each piece of work to the bot whose description fits it. Out of scope: writing code, writing the content, judging the design. Acceptance criteria: every piece of work has an owner, a dependency and a way to be checked, and nothing is left implicit. Proof: the plan as one document, with the list of the cards and their dependencies."
+   },
+   {
+    "ref": "c30",
+    "phase": 0,
+    "title": "Acceptance of the editorial plan before the human validation",
+    "who": "reviewer",
+    "parents": [
+     "c7"
+    ],
+    "body": "Scope: the consolidated plan of c7. Steps: 1) check that it says what the three accepted documents say, with no content added; 2) check that each open question can be answered by yes or no; 3) look for a regression next to the change, not only in it; 4) number each finding and say how to reproduce it; 5) end with a verdict: validated, changes requested or blocked; 6) measure it yourself instead of trusting the report of the card; 7) run the build and the tests again and quote their real output. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   },
+   {
+    "ref": "c8",
+    "phase": 1,
+    "title": "Writing of the 6 Getting started guides of the section",
+    "who": "writer",
+    "parents": [
+     "c30"
+    ],
+    "body": "Scope: the 6 guides, each from its brief, once the plan is validated. Steps: 1) follow the outline of the brief and answer each of its questions; 2) redo each step of a guide in the real app and correct what does not match; 3) read the text once more against the real behaviour; 4) list what could not be verified; 5) write from what can be checked in the code, the data or the briefs, and invent nothing; 6) follow the tone and the format of the existing texts of the project. Out of scope: changing the code, adding a feature, deciding the content plan. Acceptance criteria: nothing is stated that the sources do not say, the format of the project is respected and every text has its place. Proof: the files written and the list of the sources used."
+   },
+   {
+    "ref": "c9",
+    "phase": 1,
+    "title": "Writing of the 12 template pages with their plan limits and licence notices",
+    "who": "writer",
+    "parents": [
+     "c30"
+    ],
+    "body": "Scope: the 12 template pages, each from its brief and through the data model. Steps: 1) fill every field of the model, the plan needed and its limits with their date; 2) write the description from what the template really contains; 3) list what could not be verified; 4) write from what can be checked in the code, the data or the briefs, and invent nothing; 5) follow the tone and the format of the existing texts of the project; 6) keep the names of the interface exactly as the app shows them. Out of scope: the layout of the pages, the technical integration. Acceptance criteria: each text answers its brief, no sentence is invented and the lengths fit where they go. Proof: the texts, with for each one the brief or the source it comes from."
+   },
+   {
+    "ref": "c10",
+    "phase": 1,
+    "title": "Acceptance of the 6 guides against their briefs",
+    "who": "reviewer",
+    "parents": [
+     "c8"
+    ],
+    "body": "Scope: the guides of c8. Steps: 1) check guide by guide that each question of the brief is answered; 2) redo the steps of two guides in the real app; 3) measure it yourself instead of trusting the report of the card; 4) run the build and the tests again and quote their real output; 5) look for a regression next to the change, not only in it; 6) number each finding and say how to reproduce it. Out of scope: rewriting the deliverable, widening the scope of the card reviewed. Acceptance criteria: a global verdict with numbered findings, each one reproducible, and nothing validated that was not checked. Proof: the review report with the real output of the build and of the tests."
+   },
+   {
+    "ref": "c11",
+    "phase": 1,
+    "title": "Acceptance of the 12 template pages and of their data (limits, dates)",
+    "who": "reviewer",
+    "parents": [
+     "c9"
+    ],
+    "body": "Scope: the template pages of c9. Steps: 1) check that each mandatory field is filled and typed; 2) check three limits per page against the app, with their date; 3) run the build and the tests again and quote their real output; 4) look for a regression next to the change, not only in it; 5) number each finding and say how to reproduce it; 6) end with a verdict: validated, changes requested or blocked; 7) measure it yourself instead of trusting the report of the card. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   },
+   {
+    "ref": "c12",
+    "phase": 1,
+    "title": "Check of the licence notices, mentions and dated limits of the pages",
+    "who": "compliance",
+    "parents": [
+     "c9"
+    ],
+    "body": "Scope: the 12 template pages of c9. Steps: 1) run the automatic checks of the project on the pages and report their real output, as it is; 2) check that each template carries its licence notice and that each limit quoted has its date; 3) check that the legal page is linked from each page concerned; 4) list the dead links and the notices that contradict each other; 5) date what was checked; 6) rely on the automatic checks of the project and report their real output. Out of scope: writing the content, changing the plans or their limits, any contact with a third party. Acceptance criteria: no notice is missing, each limit quoted has its date and every gap has a ticket. Proof: the real output of the automatic checks, attached as it is, and a table page by page."
+   },
+   {
+    "ref": "c13",
+    "phase": 2,
+    "title": "Templates of the section: index, guide, template page",
+    "who": "frontend",
+    "parents": [
+     "c4",
+     "c7"
+    ],
+    "body": "Scope: the three page templates of the section on the site, from the data model and the validated plan. Steps: 1) build the index with its filters, the guide and the template page; 2) make the three responsive and usable with the keyboard; 3) respect the reduced-motion preference for anything that moves; 4) run the build and the tests before handing over; 5) keep the existing components and class names where they already do the job; 6) check the result at 380 px and 1440 px, with the keyboard and with a pointer. Out of scope: the API, the content, a redesign of the screens that are not named. Acceptance criteria: no regression of the existing screens, keyboard use works end to end and the console stays empty. Proof: the diff, the output of the tests and before and after screenshots."
+   },
+   {
+    "ref": "c14",
+    "phase": 2,
+    "title": "Index API of the section and generation of the sitemap",
+    "who": "backend",
+    "parents": [
+     "c4"
+    ],
+    "body": "Scope: the route that serves the index of the section and the sitemap, in api/help. Steps: 1) serve the list of guides and template pages with a cache; 2) generate the sitemap of the section from the same list; 3) run the whole test suite before handing over; 4) keep the change behind the existing module boundaries and add no dependency; 5) cover the nominal case, each refusal and one malformed input with a test. Out of scope: the interface, the visual design, any change of infrastructure. Acceptance criteria: the tests pass, extra fields are refused, each refusal has its own code and no behaviour outside the scope changes. Proof: the real output of the test run and the list of the files changed."
+   },
+   {
+    "ref": "c15",
+    "phase": 2,
+    "title": "Acceptance of the API, of the cache and of the sitemap",
+    "who": "reviewer",
+    "parents": [
+     "c14"
+    ],
+    "body": "Scope: the routes of c14. Steps: 1) compare the index served with the data, after a write too; 2) validate the sitemap against the list of pages; 3) measure it yourself instead of trusting the report of the card; 4) run the build and the tests again and quote their real output; 5) look for a regression next to the change, not only in it. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   },
+   {
+    "ref": "c16",
+    "phase": 2,
+    "title": "JSON-LD structured data and metadata",
+    "who": "seo",
+    "parents": [
+     "c7",
+     "c13"
+    ],
+    "body": "Scope: the structured data and the metadata of the three templates. Steps: 1) add the JSON-LD of a guide and of a template page from the data model; 2) write the title and the description of each page from its brief; 3) give each volume its source and its date; 4) write tickets for the others instead of changing their work; 5) check that no two pages answer the same intent; 6) keep one table that links cluster, page and keywords; 7) start from the search intent, not from the keyword. Out of scope: writing the texts, changing the templates, the choice of the products named. Acceptance criteria: one page per intent, every keyword has a dated source and the links planned are named page by page. Proof: the table and the briefs, placed with the plan."
+   },
+   {
+    "ref": "c17",
+    "phase": 2,
+    "title": "Internal linking: matrix of guides and template pages, anchors, orphans",
+    "who": "seo",
+    "parents": [
+     "c11",
+     "c13"
+    ],
+    "body": "Scope: the links between the 6 guides and the 12 template pages. Steps: 1) build the matrix of the planned links and apply it; 2) look for an orphan page and for two links with the same anchor to different pages; 3) write tickets for the others instead of changing their work; 4) check that no two pages answer the same intent; 5) keep one table that links cluster, page and keywords; 6) start from the search intent, not from the keyword; 7) give each volume its source and its date. Out of scope: the copy, the server code. Acceptance criteria: the pages validate, each one has its title, its description and its canonical, and no page is an orphan. Proof: the output of the validators and the table page by page."
+   },
+   {
+    "ref": "c18",
+    "phase": 2,
+    "title": "Technical SEO acceptance: JSON-LD, canonicals, hreflang, internal linking",
+    "who": "reviewer",
+    "parents": [
+     "c16",
+     "c17"
+    ],
+    "body": "Scope: the work of c16 and c17. Steps: 1) validate the JSON-LD of three pages and read their canonicals; 2) follow the links of the matrix on a sample; 3) number each finding and say how to reproduce it; 4) end with a verdict: validated, changes requested or blocked; 5) measure it yourself instead of trusting the report of the card. Out of scope: rewriting the deliverable, widening the scope of the card reviewed. Acceptance criteria: a global verdict with numbered findings, each one reproducible, and nothing validated that was not checked. Proof: the review report with the real output of the build and of the tests."
+   },
+   {
+    "ref": "c19",
+    "phase": 2,
+    "title": "Real browser tests: journeys, screen widths, keyboard, accessibility",
+    "who": "qa",
+    "parents": [
+     "c13",
+     "c14",
+     "c16"
+    ],
+    "body": "Scope: the section in a real browser, on the staging site. Steps: 1) run the journeys index, filter, guide and template page at three widths; 2) do them again with the keyboard only and write the missing tests; 3) keep the tests that were written in the suite of the project; 4) use the real application in a real browser, as a user would; 5) try the edge cases: empty content, a very long title, a slow network, a second tab; 6) give each bug its steps, what was expected and what happened. Out of scope: changing the code under test. Acceptance criteria: no journey is left untested and no bug is reported without its steps. Proof: the list of journeys with their result and the tests added."
+   },
+   {
+    "ref": "c20",
+    "phase": 2,
+    "title": "Visual critique of the three templates on real screenshots",
+    "who": "design",
+    "parents": [
+     "c13",
+     "c19"
+    ],
+    "body": "Scope: the screenshots of the index, a guide and a template page. Steps: 1) judge hierarchy, typography and the legibility of the steps; 2) compare with the rest of the help center; 3) judge the real rendering on screenshots, never the code; 4) give each finding a place, a measure and a severity (blocking, important, minor); 5) say for each finding what would fix it, in one precise sentence; 6) compare with the reference of the project and name the gap. Out of scope: changing the code or the mock-up yourself, writing copy. Acceptance criteria: every finding is located, measured and comes with a precise recommendation, and the verdict is unambiguous. Proof: a report with the annotated screenshots."
+   },
+   {
+    "ref": "c21",
+    "phase": 3,
+    "title": "Spanish translation of the 6 guides and of the 12 validated pages",
+    "who": "writer",
+    "parents": [
+     "c10",
+     "c11",
+     "c7"
+    ],
+    "body": "Scope: the validated English texts, into Spanish. Steps: 1) keep the structure, the links and the names of the interface as the app shows them; 2) flag what cannot be translated as is; 3) follow the tone and the format of the existing texts of the project; 4) keep the names of the interface exactly as the app shows them; 5) read the text once more against the real behaviour. Out of scope: the layout of the pages, the technical integration. Acceptance criteria: each text answers its brief, no sentence is invented and the lengths fit where they go. Proof: the texts, with for each one the brief or the source it comes from."
+   },
+   {
+    "ref": "c22",
+    "phase": 3,
+    "title": "JSON-LD, hreflang, canonicals and sitemap for Spanish",
+    "who": "seo",
+    "parents": [
+     "c21",
+     "c16"
+    ],
+    "body": "Scope: the Spanish pages of the section. Steps: 1) add the hreflang pairs and the canonicals; 2) extend the sitemap to both languages; 3) write tickets for the others instead of changing their work; 4) check that no two pages answer the same intent; 5) keep one table that links cluster, page and keywords; 6) start from the search intent, not from the keyword. Out of scope: writing the texts, changing the templates, the choice of the products named. Acceptance criteria: one page per intent, every keyword has a dated source and the links planned are named page by page. Proof: the table and the briefs, placed with the plan."
+   },
+   {
+    "ref": "c23",
+    "phase": 3,
+    "title": "Acceptance of the Spanish pages: fidelity, links, hreflang",
+    "who": "reviewer",
+    "parents": [
+     "c21",
+     "c22"
+    ],
+    "body": "Scope: the pages of c21 and c22. Steps: 1) compare a sample of 6 pages with the English; 2) follow their links and read their hreflang; 3) number each finding and say how to reproduce it; 4) end with a verdict: validated, changes requested or blocked; 5) measure it yourself instead of trusting the report of the card; 6) run the build and the tests again and quote their real output. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   },
+   {
+    "ref": "c24",
+    "phase": 3,
+    "title": "Final acceptance before go-live: journeys in both languages, accessibility",
+    "who": "qa",
+    "parents": [
+     "c19",
+     "c23"
+    ],
+    "body": "Scope: the whole section on the staging site. Steps: 1) run the journeys of c19 in both languages; 2) switch the language in the middle of a journey; 3) keep the tests that were written in the suite of the project; 4) use the real application in a real browser, as a user would; 5) try the edge cases: empty content, a very long title, a slow network, a second tab. Out of scope: fixing the bugs, judging the visual design. Acceptance criteria: every journey has a result, every bug can be reproduced from its steps and the new tests run in the suite. Proof: the test report, the output of the suite and a screenshot per bug."
+   },
+   {
+    "ref": "c25",
+    "phase": 4,
+    "title": "Reproducible build and staging, with a verified backup",
+    "who": "devops",
+    "parents": [
+     "c24",
+     "c20",
+     "c15"
+    ],
+    "body": "Scope: the build of the site and its staging deployment. Steps: 1) build twice from the same commit and compare; 2) take a backup and restore it on a copy; 3) prove each change by a real run, not by reading the configuration; 4) do nothing destructive and keep the way back ready; 5) write the commands that were run, in order; 6) check the result from outside, as a visitor would see it; 7) note what stays to be watched. Out of scope: the content, the design, a change of provider. Acceptance criteria: what is online is the validated commit, the backup restores and the logs show no new error. Proof: the real output of each command and the address of the run."
+   },
+   {
+    "ref": "c26",
+    "phase": 4,
+    "title": "Go-live of the section and monitoring",
+    "who": "devops",
+    "parents": [
+     "c25"
+    ],
+    "body": "Scope: the deployment of the section to production. Steps: 1) deploy the validated build and keep the way back ready; 2) watch the errors and the response times for an hour; 3) do nothing destructive and keep the way back ready; 4) write the commands that were run, in order; 5) check the result from outside, as a visitor would see it; 6) note what stays to be watched. Out of scope: changing the application code, any action on a service that is not named. Acceptance criteria: the pipeline is green on the commit delivered, the build can be reproduced and the way back was tried. Proof: the output of the pipeline, the checksum of the build and the log of the commands."
+   },
+   {
+    "ref": "c27",
+    "phase": 4,
+    "title": "Post-deployment acceptance on a sample of 6 pages",
+    "who": "reviewer",
+    "parents": [
+     "c26"
+    ],
+    "body": "Scope: 6 pages of the section in production. Steps: 1) open them in both languages and compare with staging; 2) read their structured data and their links; 3) look for a regression next to the change, not only in it; 4) number each finding and say how to reproduce it; 5) end with a verdict: validated, changes requested or blocked; 6) measure it yourself instead of trusting the report of the card. Out of scope: fixing what you find yourself. Acceptance criteria: every criterion of the card reviewed is checked one by one and the verdict follows from the findings. Proof: the numbered findings and the commands that were run."
+   },
+   {
+    "ref": "c28",
+    "phase": 4,
+    "title": "Final online check of the licence notices and mentions",
+    "who": "compliance",
+    "parents": [
+     "c26"
+    ],
+    "body": "Scope: the template pages in production. Steps: 1) run the automatic checks on the live pages and report their real output; 2) check the licence notices and the privacy mention; 3) list the dead links and the notices that contradict each other; 4) date what was checked; 5) rely on the automatic checks of the project and report their real output; 6) open a ticket for each gap instead of rewriting the page. Out of scope: writing the content, changing the plans or their limits, any contact with a third party. Acceptance criteria: no notice is missing, each limit quoted has its date and every gap has a ticket. Proof: the real output of the automatic checks, attached as it is, and a table page by page."
+   },
+   {
+    "ref": "c29",
+    "phase": 4,
+    "title": "Smoke test in production: 10 real journeys and the language switch",
+    "who": "qa",
+    "parents": [
+     "c26"
+    ],
+    "body": "Scope: the section in production, in a real browser. Steps: 1) run 10 journeys from the index to a template page; 2) switch the language on three of them; 3) keep the tests that were written in the suite of the project; 4) use the real application in a real browser, as a user would; 5) try the edge cases: empty content, a very long title, a slow network, a second tab; 6) give each bug its steps, what was expected and what happened. Out of scope: changing the code under test. Acceptance criteria: no journey is left untested and no bug is reported without its steps. Proof: the list of journeys with their result and the tests added."
+   }
+  ]
+ },
+ "text": null,
+ "usd": 0.011523316,
+ "cost_status": "estimated",
+ "usage": {
+  "input_tokens": 1606,
+  "output_tokens": 22931,
+  "total_tokens": 24537,
+  "cache_read_tokens": 0
+ },
+ "seconds": 174.3
+}

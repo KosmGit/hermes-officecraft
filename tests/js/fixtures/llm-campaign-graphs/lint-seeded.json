@@ -1,0 +1,72 @@
+{
+ "cards": [
+  {
+   "ref": "k1",
+   "phase": 0,
+   "title": "Dark mode: colour variables and a toggle in the header",
+   "who": "frontend",
+   "model": "",
+   "parents": [],
+   "body": "In web/styles/tokens.css, declare the colour variables of the dark theme under [data-theme=dark]. Add a toggle button to web/components/Header, the choice kept in localStorage, prefers-color-scheme respected. Criteria: AA contrast on the 5 screens, no flash when the page loads. Proof: light and dark screenshots of the 5 screens."
+  },
+  {
+   "ref": "k1r",
+   "phase": 0,
+   "title": "Review of dark mode",
+   "who": "reviewer",
+   "model": "",
+   "parents": [
+    "k1"
+   ],
+   "body": "Read the diff of k1, check the criteria, run the build again and measure the contrast. Send it back if a criterion is missing."
+  },
+  {
+   "ref": "k2",
+   "phase": 0,
+   "title": "Migration of the note lists to the new list component",
+   "who": "backend",
+   "model": "",
+   "parents": [
+    "k1r"
+   ],
+   "body": "Replace the 14 note lists written by hand in web/screens/ by the component NoteList, with the data in web/data. Criteria: identical rendering, green build. Proof: the diff and before and after screenshots of 3 screens."
+  },
+  {
+   "ref": "k3",
+   "phase": 0,
+   "title": "Redo the home screen (hero, cards, animations)",
+   "who": "seo",
+   "model": "",
+   "parents": [
+    "k1r"
+   ],
+   "body": "Redo web/screens/Home: a hero with an illustration, 3 notebook cards, entrance animations (transform and opacity only). Criteria: largest paint under 2.5 s, no layout shift. Proof: screenshots at 380 and 1440 px and a performance report."
+  },
+  {
+   "ref": "k4",
+   "phase": 0,
+   "title": "Improve the home screen",
+   "who": "frontend",
+   "model": "",
+   "parents": [
+    "k1r"
+   ],
+   "body": "Make the home screen prettier."
+  },
+  {
+   "ref": "k5",
+   "phase": 0,
+   "title": "Fix the typo “acme notes” to “Acme Notes” in the footer",
+   "who": "writer",
+   "model": "example/model-large",
+   "parents": [
+    "k1r"
+   ],
+   "body": "In web/components/Footer, replace “acme notes” by “Acme Notes” (2 occurrences). Proof: the diff."
+  }
+ ],
+ "prices": {
+  "example/model-large": "the most capable and most costly model",
+  "default of every bot": "example/model-fast, cheap"
+ }
+}
