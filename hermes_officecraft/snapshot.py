@@ -224,13 +224,12 @@ def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: boo
         for row in con.execute(f"SELECT {', '.join(cols)} FROM tasks WHERE status != 'archived' ORDER BY created_at, id"):
             r = dict(zip(cols, row))
             board["tasks"].append({
-                "id": r["id"], "title": _title(r.get("title")), "status": r["status"], "assignee": r.get("assignee") or None,
+                "id": r["id"], "title": _title(r.get("title")), "status": r["status"], "assignee": _name(r.get("assignee")),
                 "createdAt": task_epoch(r.get("created_at")), "startedAt": task_epoch(r.get("started_at")),
                 "completedAt": task_epoch(r.get("completed_at")),
                 "heartbeatAt": task_epoch(r.get("last_heartbeat_at")) if r["status"] == "running" else None,
                 # model the card pins (None = the bot's own default); older boards lack these columns
-                "modelOverride": r.get("model_override") if isinstance(r.get("model_override"), str) and r.get("model_override") else None,
-                "providerOverride": r.get("provider_override") if isinstance(r.get("provider_override"), str) and r.get("provider_override") else None})
+                "modelOverride": _name(r.get("model_override")), "providerOverride": _name(r.get("provider_override"))})
             if isinstance(r.get("idempotency_key"), str) and r["idempotency_key"].startswith("oc-camp:"):
                 every_key.append(r["idempotency_key"])
             parsed = _campaign_guard(r)
@@ -429,6 +428,13 @@ TITLE_MAX = 300   # a card title Hermes accepts has no bound: what is cleaned an
 
 def _title(value: Any) -> str:
     return printable(value[:TITLE_MAX] if isinstance(value, str) else value)
+
+
+NAME_MAX = 200   # an assignee or a pinned model is a name: drawn as text, cleaned and bounded like a title
+
+
+def _name(value: Any) -> Optional[str]:
+    return printable(value[:NAME_MAX]) or None if isinstance(value, str) else None
 
 
 def printable(value: Any) -> str:
