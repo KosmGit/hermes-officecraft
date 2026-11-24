@@ -201,11 +201,16 @@ export function approvalsReducer(state, action) {
     case 'titles': {
       const titles = {}
       for (const [id, title] of Object.entries(action.titles || {})) if (typeof title === 'string' && title.trim()) titles[id] = oneLine(title).slice(0, 120)
-      return { ...state, titles }
+      return sameTitles(state.titles, titles) ? state : { ...state, titles }   // the same titles again (a poll): the same state, nothing renders
     }
     default:
       return state
   }
+}
+
+const sameTitles = (a, b) => {
+  const ka = Object.keys(a)
+  return ka.length === Object.keys(b).length && ka.every(k => Object.hasOwn(b, k) && a[k] === b[k])
 }
 
 /** The same request seen again without its command keeps the one already known (one request id, one command). */
