@@ -269,7 +269,7 @@ test('« Cancel the campaign » is the discreet secondary button at the right, �
   assert.match(orders, /<RiskDot risk=\{ORDERS\[verb\]\.risk\}/)
   const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
   assert.match(css, /\.ux-dc-o \.ux-b\.cx\{margin-left:auto/)
-  assert.match(css, /@container ux \(max-width: 520px\)\{ \.ux-dc-o \.ux-b\.cx \.full\{position:absolute/)
+  assert.match(css, /@container ux \(max-width: 700px\)\{\s*\.ux-dc-o \.ux-b\.cx \.full\{position:absolute/)
   for (const lang of ['en', 'fr', 'es']) {
     const full = tr(lang)('orders.verb.cancel_campaign'), short = tr(lang)('orders.verbShort.cancel_campaign')
     assert.ok(short.length < full.length && full.startsWith(short.slice(0, 4)), `${lang}: ${short} / ${full}`)

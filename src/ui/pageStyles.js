@@ -217,7 +217,6 @@ export const PAGE_CSS = `
 /* « Cancel the campaign »: the secondary, discreet button, pushed to the right of « Launch »; « Cancel » alone when the card is narrow (the full words stay its name) */
 .ux-dc-o .ux-b.cx{margin-left:auto;color:${T2}}
 .ux-dc-o .ux-b.cx .short{display:none}
-@container ux (max-width: 520px){ .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline} }
 .ux-dc-o .ux-b.sm:not(.ico){padding:0 8px}
 .ux-ch-extra{display:flex;flex-wrap:wrap;gap:8px}
 .ux-slot:empty{display:none}
@@ -388,6 +387,7 @@ export const PAGE_CSS = `
 @container ux (max-width: 980px){ .ux-gs.lvl .ux-g2{display:none} .ux-lvp.working .w{display:none} .ux-lvp.working{padding:0 8px;gap:4px} .ux-top{gap:8px} .ux-acts{gap:4px} .ux-acts .sep{margin:0} }
 /* ---------- a narrow pane (<= 700 px): one view at a time, the bar at the bottom ---------- */
 @container ux (max-width: 700px){
+  .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline}
   .ux-top{gap:8px;min-height:40px}
   .ux-brand h1{font-size:15px}
   .ux-brand .mk{width:28px;height:28px}
