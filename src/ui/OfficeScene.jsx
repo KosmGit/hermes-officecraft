@@ -46,6 +46,16 @@ function readAccent(el) {
 }
 
 /**
+ * The pixel store for a canvas of w x h: a window dragged to another size changes the canvas at each step, and a store is up to 20 MB: one buffer
+ * is kept with a quarter of room to spare and each step is a view on it; a new one only when the size outgrows it or falls under half of it.
+ */
+function storeOf(store, w, h) {
+  const need = w * h * 4
+  if (!store.cap || store.cap.length < need || store.cap.length > need * 2) store.cap = new Uint8ClampedArray(Math.ceil(need * 1.25))
+  return new ImageData(new Uint8ClampedArray(store.cap.buffer, 0, need), w, h)
+}
+
+/**
  * JIT: put a frame (RGBA, W x H art pixels) on a canvas. Same size: as it is. A larger store (src/scene/fit.js backingOf: the scale is not a
  * whole number of device pixels): the page scales the whole picture itself, nearest neighbour, so the browser shows the store 1:1 and
  * no repaint can pick other rows or columns than the frame before.
@@ -54,7 +64,7 @@ function blit(cv, d, W, H, store) {
   const g = cv.getContext('2d')
   if (cv.width === W && cv.height === H) { g.putImageData(new ImageData(d, W, H), 0, 0); return }
   let img = store.current   // kept from one frame to the next: a store can weigh 20 MB
-  if (!img || img.width !== cv.width || img.height !== cv.height) img = store.current = new ImageData(cv.width, cv.height)
+  if (!img || img.width !== cv.width || img.height !== cv.height) img = store.current = storeOf(store, cv.width, cv.height)
   upscale(d, W, H, img.data, cv.width, cv.height)
   g.putImageData(img, 0, 0)
 }
