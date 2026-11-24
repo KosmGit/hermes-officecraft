@@ -46,12 +46,23 @@ export const REPLAY_CSS = `
 .oc-rp-range-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:6px;height:34px;border-radius:2px;background:var(--ui-accent);border:2px solid ${CARD};box-sizing:border-box;box-shadow:0 0 0 1px var(--ui-accent)}
 .oc-rp-range-input::-moz-range-thumb{width:6px;height:34px;border-radius:2px;background:var(--ui-accent);border:2px solid ${CARD};box-sizing:border-box}
 .oc-rp-range-input:focus-visible{outline:2px solid ${RING};outline-offset:2px;border-radius:4px}
-.oc-rp-ends{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:${SOFT};font-variant-numeric:tabular-nums}
+/* the graduations: hours on a day, days on a week; the ends are aligned inward so no label leaves the bar */
+.oc-rp-ticks{position:relative;height:16px;margin:0 3px;font-size:11px;line-height:16px;color:${SOFT};font-variant-numeric:tabular-nums}
+.oc-rp-ticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.oc-rp-ticks span::before{content:"";position:absolute;left:50%;top:-4px;width:1px;height:4px;background:${EDGE}}
+.oc-rp-ticks span[data-edge]:first-child{transform:none}
+.oc-rp-ticks span[data-edge]:last-child{transform:translateX(-100%)}
+.oc-rp-key{display:inline-flex;flex-wrap:wrap;gap:0 12px;margin:0 0 0 auto;padding:0;list-style:none;font-size:11px;color:${SOFT}}
+.oc-rp-key li{display:inline-flex;align-items:center;gap:4px}
+.oc-rp-key i{display:inline-block;width:10px;height:10px;border-radius:2px}
+.oc-rp-key .d-done{background:${GREEN}}
+.oc-rp-key .d-block{background:${ORANGE}}
+.oc-rp-key .d-fail{background:${RED}}
 .oc-rp-steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
 .oc-rp-step{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;height:28px;padding:0 12px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-rp-step:hover{border-color:var(--ui-accent)}
 .oc-rp-step[aria-disabled="true"]{opacity:.5;cursor:default}
-.oc-rp-help{margin-left:auto;display:inline-flex;align-items:center}
+.oc-rp-help{display:inline-flex;align-items:center}
 .oc-rp-msg{margin:0;font-size:12px;color:${SOFT}}
 .oc-rp-warn{margin:0;font-size:11px;color:${ink(ORANGE)}}
 /* facts journal */

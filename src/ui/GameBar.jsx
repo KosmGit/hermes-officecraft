@@ -27,13 +27,13 @@ export function GameBar({ game, view, t, onPostcard }) {
             <span>{lvl.nextName ? t('vit.toLevel', t(`game.levelName.${lvl.nextName}`)) : t('vit.cards')}</span>
           </li>
           <li data-trophy-count title={t('game.trophiesTip')}><b>{view.got}<span className="oc-faint">/{view.total}</span></b><span>{t('vit.trophies')}</span></li>
-          {view.hidden ? <li data-hidden-chip title={t('game.hidden.cond')}><b>{view.hidden}</b><span>{t('vit.hidden', view.hidden)}</span></li> : null}
+          {view.hidden ? <li data-hidden-chip title={t('game.hidden.cond')}><span>{t('vit.hidden', view.hidden)}</span></li> : null}
           {streak > 0 ? <li data-streak={streak} title={t('game.streakTip')}><PixelIcon id="flame" size={16} /><b>{streak}</b><span>{t('vit.streakDays', streak)}</span></li> : null}
         </ul>
         <ul className="oc-vh-chips" aria-label={t('vit.moods')}>
           {view.grades.map(g => (
             <li key={g.id} className="oc-vh-chip" data-grade={g.id} title={t('vit.gradesTip')}>
-              <b>{g.n}</b><span>{t(`game.grade.${g.id}`)}</span>
+              <b>{g.n}</b><span>{t('vit.gradeOf', g.n, t(`game.grade.${g.id}`))}</span>
             </li>
           ))}
           <li className="oc-vh-chip" data-mascot={game.mascotMood} title={t('game.mascotTip')}>

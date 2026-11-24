@@ -466,7 +466,7 @@ test('/replay: a negative run count (calls or tokens) is absent (null)', () => {
 
 test('the replay tag and banner say « not the past » while the facts are not there', () => {
   const page = src('src/ui/OfficePage.jsx')
-  assert.match(page, /replayData \? t\('replay\.banner', replayAt\) : t\('replay\.notLoaded'\)/, 'the tag over the scene')
+  assert.match(page, /replayData \? t\('replay\.banner', replayAt\) : replayStatus === 'loading' \? t\('replay\.loadingPast'\) : t\('replay\.notLoaded'\)/, 'the tag over the scene')
   assert.match(page, /replayData \? t\('replay\.bannerNote'\) : t\('replay\.notLoadedNote'\)/, 'the banner note')
   for (const lang of ['en', 'fr', 'es']) {
     const r = messages[lang].replay

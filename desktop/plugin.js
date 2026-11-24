@@ -4200,6 +4200,28 @@ var STATUS_SET = new Set(STATUSES);
 var SILENCE_MS = 3e5;
 var HOUR_MS = 36e5;
 var DAY_MS2 = 864e5;
+function axisTicks(fromMs, toMs2, lang4 = "en") {
+  const span2 = toMs2 - fromMs;
+  if (!(span2 > 0)) return [];
+  const at = (ms2) => (ms2 - fromMs) / span2;
+  const long = span2 > 36 * HOUR_MS;
+  const hh = new Intl.DateTimeFormat(lang4, { hour: "2-digit", minute: "2-digit", hour12: false });
+  const dd = new Intl.DateTimeFormat(lang4, { weekday: "short" });
+  const edgeLabel = (ms2) => long ? dd.format(ms2) : hh.format(ms2);
+  const out = [{ ms: fromMs, at: 0, label: edgeLabel(fromMs), edge: true }];
+  const step = long ? DAY_MS2 : span2 > 14 * HOUR_MS ? 6 * HOUR_MS : 2 * HOUR_MS;
+  const d = new Date(fromMs);
+  d.setMinutes(0, 0, 0);
+  if (long) d.setHours(0);
+  else d.setHours(Math.ceil(d.getHours() / (step / HOUR_MS)) * (step / HOUR_MS), 0, 0, 0);
+  for (let ms2 = d.getTime(); ms2 < toMs2; ms2 += step) {
+    const t = long ? new Date(ms2).setHours(0, 0, 0, 0) : ms2;
+    if (t <= fromMs || at(t) < 0.08 || at(t) > 0.92) continue;
+    out.push({ ms: t, at: at(t), label: long ? dd.format(t) : hh.format(t) });
+  }
+  out.push({ ms: toMs2, at: 1, label: edgeLabel(toMs2), edge: true });
+  return out;
+}
 var WINDOWS = Object.freeze(["night", "24h", "7d"]);
 var DEFAULT_NIGHT = Object.freeze({ from: 19, to: 7 });
 var ms = (v) => typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.round(v * 1e3) : null;
@@ -5437,7 +5459,7 @@ var en = {
     }
   },
   game: {
-    title: "Showcase",
+    title: "Trophy showcase",
     trophiesTip: "Trophies earned from the real history of your projects, runs and profiles. Select a medal to see what earned it and when.",
     level: (n) => `Level ${n}`,
     levelName: { garage: "Garage", open_space: "Open plan", floor: "Floor", campus: "Campus", skyscraper: "Skyscraper" },
@@ -5705,7 +5727,11 @@ var en = {
     banner: (at) => `Replay: ${at}`,
     bannerNote: "Read-only: you cannot act on the past.",
     notLoaded: "History not loaded",
-    notLoadedNote: "The past is not shown (still loading, or unreadable). The office below is the live one, not the replay.",
+    loadingPast: "Loading the past…",
+    notLoadedNote: "The office below is today’s, not the replay.",
+    noAction: "Replay: read-only. Go back to live to act.",
+    keyLabel: "Colours of the strip",
+    key: { done: "done", block: "blocked", fail: "failures" },
     exit: "Back to live",
     exitTip: "Back to live (Escape)",
     region: "Replay",
@@ -5718,7 +5744,6 @@ var en = {
     prev: "Previous event",
     next: "Next event",
     atEdge: "No more events in that direction.",
-    loading: "Loading events…",
     error: "The replay could not be read. Try again in a minute.",
     unavailable: "Replay needs Officecraft’s agent half (restart the gateway after updating).",
     state: (working, waiting, silent = 0) => `${working} working · ${waiting} waiting for you · ${silent} silent`,
@@ -6369,10 +6394,12 @@ var en = {
   vit: {
     heroLabel: "Office level and game state",
     stats: "Numbers",
-    toLevel: (name) => `cards to ${name}`,
+    toLevel: (name) => `cards done · next level: ${name}`,
     cards: "cards done · top level",
     trophies: "trophies",
-    hidden: () => "hidden",
+    hidden: (n) => `${n} of them hidden`,
+    gradeOf: (n, grade) => `${n === 1 ? "agent" : "agents"} at ${grade} grade`,
+    line: { cond: "Condition", fact: "Done", source: "Source" },
     streakDays: (n) => n === 1 ? "day streak" : "day streak",
     moods: "Grades, cat and season",
     gradesTip: "Agents by grade: successful runs only, never the volume of work.",
@@ -7180,7 +7207,7 @@ var es = {
     }
   },
   game: {
-    title: "Vitrina",
+    title: "Vitrina de trofeos",
     trophiesTip: "Trofeos desbloqueados por el historial real de tus proyectos, ejecuciones y perfiles. Elige una medalla para ver qué la desbloqueó y cuándo.",
     level: (n) => `Nivel ${n}`,
     levelName: { garage: "Garaje", open_space: "Oficina abierta", floor: "Planta", campus: "Campus", skyscraper: "Rascacielos" },
@@ -7448,7 +7475,11 @@ var es = {
     banner: (at) => `Replay: ${at}`,
     bannerNote: "Solo lectura: no se puede enviar ninguna acción sobre el pasado.",
     notLoaded: "Pasado no cargado",
-    notLoadedNote: "El pasado no se muestra (cargando o ilegible): la oficina de abajo es la de hoy, no la del replay.",
+    loadingPast: "Cargando el pasado…",
+    noAction: "Repetición: solo lectura. Vuelva al directo para actuar.",
+    keyLabel: "Colores de la franja",
+    key: { done: "terminadas", block: "bloqueos", fail: "fallos" },
+    notLoadedNote: "La oficina de abajo es la de hoy, no la del replay.",
     exit: "Volver al directo",
     exitTip: "Volver al directo (Esc)",
     region: "Replay",
@@ -7461,7 +7492,6 @@ var es = {
     prev: "Evento anterior",
     next: "Evento siguiente",
     atEdge: "No hay más eventos en esa dirección.",
-    loading: "Cargando los eventos…",
     error: "No se pudo cargar el replay. Inténtalo de nuevo en un minuto.",
     unavailable: "El replay necesita la parte Agente de Officecraft (reinicia el gateway tras actualizar).",
     state: (working, waiting, silent = 0) => `${working} trabajando · ${waiting} ${waiting === 1 ? "te espera" : "te esperan"} · ${silent} en silencio`,
@@ -8112,10 +8142,12 @@ var es = {
   vit: {
     heroLabel: "Nivel de la oficina y estado del juego",
     stats: "Cifras",
-    toLevel: (name) => `tarjetas para ${name}`,
+    toLevel: (name) => `tarjetas terminadas · siguiente nivel: ${name}`,
     cards: "tarjetas terminadas · nivel máximo",
     trophies: "trofeos",
-    hidden: (n) => n === 1 ? "oculto" : "ocultos",
+    hidden: (n) => `${n === 1 ? "de ellos 1 oculto" : `de ellos ${n} ocultos`}`,
+    gradeOf: (n, grade) => `${n === 1 ? "agente" : "agentes"} de grado ${grade}`,
+    line: { cond: "Condición", fact: "Hecho", source: "Fuente" },
     streakDays: (n) => n === 1 ? "día de racha" : "días de racha",
     moods: "Grados, gato y temporada",
     gradesTip: "Agentes por grado: solo ejecuciones correctas, nunca el volumen de trabajo.",
@@ -8924,7 +8956,7 @@ var fr = {
     }
   },
   game: {
-    title: "Vitrine",
+    title: "Vitrine des trophées",
     trophiesTip: "Trophées débloqués par l’historique réel de vos projets, exécutions et profils. Sélectionnez une médaille pour voir ce qui l’a débloquée, et quand.",
     level: (n) => `Niveau ${n}`,
     levelName: { garage: "Garage", open_space: "Open space", floor: "Étage", campus: "Campus", skyscraper: "Gratte-ciel" },
@@ -9192,7 +9224,11 @@ var fr = {
     banner: (at) => `Replay : ${at}`,
     bannerNote: "Lecture seule : aucune action n’est possible sur le passé.",
     notLoaded: "Passé non chargé",
-    notLoadedNote: "Le passé n’est pas affiché (chargement ou lecture impossible) : le bureau ci-dessous est celui d’aujourd’hui, pas le replay.",
+    loadingPast: "Chargement du passé…",
+    notLoadedNote: "Le bureau ci-dessous est celui d’aujourd’hui, pas le replay.",
+    noAction: "Replay : lecture seule. Revenez au direct pour agir.",
+    keyLabel: "Couleurs de la frise",
+    key: { done: "terminées", block: "blocages", fail: "échecs" },
     exit: "Retour au direct",
     exitTip: "Retour au direct (Échap)",
     region: "Replay",
@@ -9205,7 +9241,6 @@ var fr = {
     prev: "Événement précédent",
     next: "Événement suivant",
     atEdge: "Plus aucun événement dans ce sens.",
-    loading: "Chargement des événements…",
     error: "Le replay n’a pas pu être chargé. Réessayez dans une minute.",
     unavailable: "Le replay nécessite la partie agent d’Officecraft (redémarrez le gateway après la mise à jour).",
     state: (working, waiting, silent = 0) => `${working} au travail · ${waiting} ${waiting === 1 ? "vous attend" : "vous attendent"} · ${silent} silencieux`,
@@ -9856,10 +9891,12 @@ var fr = {
   vit: {
     heroLabel: "Niveau du bureau et état du jeu",
     stats: "Chiffres",
-    toLevel: (name) => `cartes vers ${name}`,
+    toLevel: (name) => `cartes terminées · prochain niveau : ${name}`,
     cards: "cartes terminées · niveau maximal",
     trophies: "trophées",
-    hidden: (n) => n === 1 ? "caché" : "cachés",
+    hidden: (n) => `dont ${n} ${n === 1 ? "caché" : "cachés"}`,
+    gradeOf: (n, grade) => `${n === 1 ? "agent" : "agents"} au grade ${grade}`,
+    line: { cond: "Condition", fact: "Fait", source: "Source" },
     streakDays: (n) => n === 1 ? "jour de série" : "jours de série",
     moods: "Grades, chat et saison",
     gradesTip: "Agents par grade : exécutions réussies seulement, jamais le volume de travail.",
@@ -14797,6 +14834,9 @@ ${RINGED(".oc-dg-x:focus-visible")}
 .oc-dg-link.quiet{min-height:20px;font-size:11px;color:${SOFT};text-decoration-style:dotted}
 .oc-dg-link.quiet:hover{color:var(--foreground)}
 .oc-dg .oc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:32px;padding:4px 16px;line-height:1.2;text-align:center}   /* a label on two lines (« Crear el proyecto … y 10 tarjetas » at 380 px) keeps 4 px above and below */
+/* the accent border belongs to the main action (and to the focus ring): a « Close » beside an inactive main button must not be the louder of the two */
+.oc-dg .oc-btn:not(.oc-primary){border-color:${FIELD_EDGE}}
+.oc-dg .oc-btn:not(.oc-primary):hover:not([aria-disabled="true"]):not(:disabled){border-color:color-mix(in oklab, var(--foreground) 45%, ${FIELD_EDGE})}
 .oc-dg .oc-btn.oc-primary{background:var(--ui-accent);color:var(--ui-accent-fg, var(--background));border-color:var(--ui-accent)}
 .oc-dg .oc-btn.oc-primary:hover:not([aria-disabled="true"]):not(:disabled){background:color-mix(in oklab, var(--ui-accent) 88%, var(--foreground))}
 .oc-dg .oc-btn.oc-ghost{border-color:${EDGE};color:var(--ui-text-secondary)}
@@ -19816,6 +19856,7 @@ function SidePanel({
   nowMs,
   onOpen,
   canOpen,
+  frozen = false,
   game = null,
   readMs = null,
   tab,
@@ -19870,7 +19911,7 @@ function SidePanel({
         grade,
         project: project2,
         onPick,
-        onDecide: (slug) => {
+        onDecide: frozen ? null : (slug) => {
           onProject(slug);
           onTab("decisions");
         },
@@ -21849,6 +21890,7 @@ function Density({ entries, fromMs, toMs: toMs2 }) {
 function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, t, children }) {
   const day = replay ? replay.toMs - replay.fromMs > 20 * 36e5 : false;
   const label = (ms2) => clockLabel(ms2, t.lang, { day });
+  const ticks = useMemo12(() => replay ? axisTicks(replay.fromMs, replay.toMs, t.lang) : [], [replay, t.lang]);
   const prev = replay ? stepFact(entries, atMs, -1) : null;
   const next = replay ? stepFact(entries, atMs, 1) : null;
   const key = (e) => {
@@ -21886,10 +21928,7 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
           }
         )
       ] }),
-      /* @__PURE__ */ jsxs30("div", { className: "oc-rp-ends", "aria-hidden": "true", children: [
-        /* @__PURE__ */ jsx34("span", { children: label(replay.fromMs) }),
-        /* @__PURE__ */ jsx34("span", { children: label(replay.toMs) })
-      ] }),
+      /* @__PURE__ */ jsx34("div", { className: "oc-rp-ticks", "aria-hidden": "true", "data-replay-ticks": true, children: ticks.map((k) => /* @__PURE__ */ jsx34("span", { style: { left: `${k.at * 100}%` }, "data-edge": k.edge || void 0, children: k.label }, k.ms)) }),
       /* @__PURE__ */ jsxs30("div", { className: "oc-rp-steps", children: [
         /* @__PURE__ */ jsxs30("button", { type: "button", className: "oc-rp-step", "data-replay-prev": true, "aria-disabled": prev == null, title: prev == null ? t("replay.atEdge") : void 0, onClick: () => {
           if (prev != null) onAt(prev);
@@ -21903,10 +21942,24 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
           t("replay.next"),
           /* @__PURE__ */ jsx34(DlgIcon, { id: "next", size: 14 })
         ] }),
+        /* @__PURE__ */ jsxs30("ul", { className: "oc-rp-key", "aria-label": t("replay.keyLabel"), "data-replay-key": true, children: [
+          /* @__PURE__ */ jsxs30("li", { children: [
+            /* @__PURE__ */ jsx34("i", { className: "d-done", "aria-hidden": "true" }),
+            t("replay.key.done")
+          ] }),
+          /* @__PURE__ */ jsxs30("li", { children: [
+            /* @__PURE__ */ jsx34("i", { className: "d-block", "aria-hidden": "true" }),
+            t("replay.key.block")
+          ] }),
+          /* @__PURE__ */ jsxs30("li", { children: [
+            /* @__PURE__ */ jsx34("i", { className: "d-fail", "aria-hidden": "true" }),
+            t("replay.key.fail")
+          ] })
+        ] }),
         /* @__PURE__ */ jsx34("span", { className: "oc-rp-help", children: /* @__PURE__ */ jsx34(DlgTip, { name: t("replay.cursor"), children: t("replay.cursorHelp") }) })
       ] }),
       children
-    ] }) : status === "loading" ? /* @__PURE__ */ jsx34("p", { className: "oc-rp-msg", role: "status", children: t("replay.loading") }) : /* @__PURE__ */ jsx34("p", { className: "oc-rp-msg", role: "alert", "data-replay-error": true, children: t(status === "unavailable" ? "replay.unavailable" : "replay.error") })
+    ] }) : null
   ] });
 }
 
@@ -22112,12 +22165,23 @@ var REPLAY_CSS = `
 .oc-rp-range-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:6px;height:34px;border-radius:2px;background:var(--ui-accent);border:2px solid ${CARD};box-sizing:border-box;box-shadow:0 0 0 1px var(--ui-accent)}
 .oc-rp-range-input::-moz-range-thumb{width:6px;height:34px;border-radius:2px;background:var(--ui-accent);border:2px solid ${CARD};box-sizing:border-box}
 .oc-rp-range-input:focus-visible{outline:2px solid ${RING};outline-offset:2px;border-radius:4px}
-.oc-rp-ends{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:${SOFT3};font-variant-numeric:tabular-nums}
+/* the graduations: hours on a day, days on a week; the ends are aligned inward so no label leaves the bar */
+.oc-rp-ticks{position:relative;height:16px;margin:0 3px;font-size:11px;line-height:16px;color:${SOFT3};font-variant-numeric:tabular-nums}
+.oc-rp-ticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.oc-rp-ticks span::before{content:"";position:absolute;left:50%;top:-4px;width:1px;height:4px;background:${EDGE}}
+.oc-rp-ticks span[data-edge]:first-child{transform:none}
+.oc-rp-ticks span[data-edge]:last-child{transform:translateX(-100%)}
+.oc-rp-key{display:inline-flex;flex-wrap:wrap;gap:0 12px;margin:0 0 0 auto;padding:0;list-style:none;font-size:11px;color:${SOFT3}}
+.oc-rp-key li{display:inline-flex;align-items:center;gap:4px}
+.oc-rp-key i{display:inline-block;width:10px;height:10px;border-radius:2px}
+.oc-rp-key .d-done{background:${GREEN4}}
+.oc-rp-key .d-block{background:${ORANGE5}}
+.oc-rp-key .d-fail{background:${RED4}}
 .oc-rp-steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
 .oc-rp-step{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;height:28px;padding:0 12px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-rp-step:hover{border-color:var(--ui-accent)}
 .oc-rp-step[aria-disabled="true"]{opacity:.5;cursor:default}
-.oc-rp-help{margin-left:auto;display:inline-flex;align-items:center}
+.oc-rp-help{display:inline-flex;align-items:center}
 .oc-rp-msg{margin:0;font-size:12px;color:${SOFT3}}
 .oc-rp-warn{margin:0;font-size:11px;color:${ink5(ORANGE5)}}
 /* facts journal */
@@ -22252,10 +22316,7 @@ function GameBar({ game, view, t, onPostcard }) {
           ] }),
           /* @__PURE__ */ jsx36("span", { children: t("vit.trophies") })
         ] }),
-        view.hidden ? /* @__PURE__ */ jsxs32("li", { "data-hidden-chip": true, title: t("game.hidden.cond"), children: [
-          /* @__PURE__ */ jsx36("b", { children: view.hidden }),
-          /* @__PURE__ */ jsx36("span", { children: t("vit.hidden", view.hidden) })
-        ] }) : null,
+        view.hidden ? /* @__PURE__ */ jsx36("li", { "data-hidden-chip": true, title: t("game.hidden.cond"), children: /* @__PURE__ */ jsx36("span", { children: t("vit.hidden", view.hidden) }) }) : null,
         streak > 0 ? /* @__PURE__ */ jsxs32("li", { "data-streak": streak, title: t("game.streakTip"), children: [
           /* @__PURE__ */ jsx36(PixelIcon, { id: "flame", size: 16 }),
           /* @__PURE__ */ jsx36("b", { children: streak }),
@@ -22265,7 +22326,7 @@ function GameBar({ game, view, t, onPostcard }) {
       /* @__PURE__ */ jsxs32("ul", { className: "oc-vh-chips", "aria-label": t("vit.moods"), children: [
         view.grades.map((g) => /* @__PURE__ */ jsxs32("li", { className: "oc-vh-chip", "data-grade": g.id, title: t("vit.gradesTip"), children: [
           /* @__PURE__ */ jsx36("b", { children: g.n }),
-          /* @__PURE__ */ jsx36("span", { children: t(`game.grade.${g.id}`) })
+          /* @__PURE__ */ jsx36("span", { children: t("vit.gradeOf", g.n, t(`game.grade.${g.id}`)) })
         ] }, g.id)),
         /* @__PURE__ */ jsxs32("li", { className: "oc-vh-chip", "data-mascot": game.mascotMood, title: t("game.mascotTip"), children: [
           /* @__PURE__ */ jsx36(Cat, { mood: game.mascotMood }),
@@ -22372,15 +22433,25 @@ function Detail({ a, t, lang: lang4, readMs, boards, refEl }) {
     ] }),
     /* @__PURE__ */ jsx37("p", { className: `oc-det-when${a.unlocked ? " ok" : ""}`, children: line(tip.when) }),
     showBar ? /* @__PURE__ */ jsx37("span", { className: "oc-pb oc-pb-l", role: "progressbar", "aria-label": t(`game.ach.${a.id}.name`), "aria-valuemin": 0, "aria-valuemax": a.progress[1], "aria-valuenow": a.progress[0], "aria-valuetext": t("game.collection.progress", a.progress[0], a.progress[1], unit), children: /* @__PURE__ */ jsx37("i", { style: { width: `${pctOf(a)}%` } }) }) : null,
-    /* @__PURE__ */ jsx37("p", { className: "oc-det-cond", children: condText }),
-    a.unlocked && !a.unavailable && line(a.fact) !== condText ? /* @__PURE__ */ jsx37("p", { className: "oc-det-fact", children: line(a.fact) }) : null,
+    /* @__PURE__ */ jsxs33("dl", { className: "oc-det-dl", "data-detail-lines": true, children: [
+      /* @__PURE__ */ jsxs33("div", { "data-line": "cond", children: [
+        /* @__PURE__ */ jsx37("dt", { children: t("vit.line.cond") }),
+        /* @__PURE__ */ jsx37("dd", { children: condText })
+      ] }),
+      a.unlocked && !a.unavailable && line(a.fact) !== condText ? /* @__PURE__ */ jsxs33("div", { "data-line": "fact", children: [
+        /* @__PURE__ */ jsx37("dt", { children: t("vit.line.fact") }),
+        /* @__PURE__ */ jsx37("dd", { children: line(a.fact) })
+      ] }) : null,
+      tip.where && !secret || tip.source ? /* @__PURE__ */ jsxs33("div", { "data-line": "source", children: [
+        /* @__PURE__ */ jsx37("dt", { children: t("vit.line.source") }),
+        /* @__PURE__ */ jsx37("dd", { children: [tip.where && !secret ? t("game.tip.where", line(tip.where)) : null, tip.source ? line(tip.source) : null].filter(Boolean).join(" · ") })
+      ] }) : null
+    ] }),
     a.tiered ? /* @__PURE__ */ jsx37("ul", { className: "oc-tiers", "aria-label": t("vit.tiers"), children: a.tiers.map((x) => /* @__PURE__ */ jsxs33("li", { className: x.unlocked ? "on" : "", "data-tier": x.tier, children: [
       /* @__PURE__ */ jsx37(PixelIcon, { id: `star_${x.tier}`, size: 14 }),
       /* @__PURE__ */ jsx37("span", { children: t(`game.tier.${x.tier}`) }),
       /* @__PURE__ */ jsx37("small", { children: x.unlocked ? x.ms != null ? dateText(x.ms, lang4) : t("vit.wholeHistory") : t("vit.tierAt", x.at, unit) })
-    ] }, x.tier)) }) : null,
-    tip.where && !secret ? /* @__PURE__ */ jsx37("p", { className: "oc-det-src", children: t("game.tip.where", line(tip.where)) }) : null,
-    tip.source ? /* @__PURE__ */ jsx37("p", { className: "oc-det-src", children: line(tip.source) }) : null
+    ] }, x.tier)) }) : null
   ] });
 }
 function Vitrine({ open, onClose, game, office, readMs, nowMs, onPostcard, t }) {
@@ -22471,8 +22542,8 @@ var ORANGE6 = "var(--ui-orange, var(--ui-accent))";
 var GREEN5 = "var(--ui-green, var(--ui-accent))";
 var RED5 = "var(--ui-red, var(--destructive, var(--ui-orange)))";
 var T33 = "color-mix(in oklab, var(--ui-text-secondary) 60%, var(--ui-text-tertiary))";
-var WOOD = `color-mix(in oklab, ${ORANGE6} 72%, var(--background, ${CARD}))`;
-var WOOD_D = `color-mix(in oklab, ${ORANGE6} 100%, var(--background, ${CARD}))`;
+var WOOD = `color-mix(in oklab, ${ORANGE6} 20%, color-mix(in oklab, var(--foreground) 14%, ${CARD}))`;
+var WOOD_D = `color-mix(in oklab, ${ORANGE6} 28%, color-mix(in oklab, var(--foreground) 24%, ${CARD}))`;
 var VITRINE_CSS = `
 .oc-dg.oc-vt{width:min(960px,calc(100vw - 32px))}
 .oc-vt .oc-dg-b{padding:16px}
@@ -22516,8 +22587,8 @@ var VITRINE_CSS = `
 .oc-pb i{display:block;height:100%;background:var(--ui-accent)}
 .oc-pb-l{height:8px;border-radius:4px}
 /* a shelf: wooden board under the medals, lit from the front */
-.oc-shelf{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 4px;border-radius:12px 12px 4px 4px;background:linear-gradient(180deg, color-mix(in oklab, ${SUNKEN} 70%, ${CARD}), color-mix(in oklab, var(--ui-bg-elevated, ${CARD}) 80%, ${CARD}));box-shadow:inset 0 -8px 0 ${WOOD}, inset 0 -12px 0 ${WOOD_D}}
-.oc-md{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;box-sizing:border-box;padding:8px 2px 16px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;cursor:pointer;transition:transform .12s ease,background-color .12s ease}
+.oc-shelf{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 4px;border-radius:12px 12px 4px 4px;background:linear-gradient(180deg, color-mix(in oklab, ${SUNKEN} 70%, ${CARD}), color-mix(in oklab, var(--ui-bg-elevated, ${CARD}) 80%, ${CARD}));box-shadow:inset 0 -3px 0 ${WOOD}, inset 0 -4px 0 ${WOOD_D}}
+.oc-md{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;box-sizing:border-box;padding:8px 2px 12px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;cursor:pointer;transition:transform .12s ease,background-color .12s ease}
 .oc-md:hover{transform:translateY(-2px)}
 .oc-md[aria-pressed="true"]{background:color-mix(in oklab, var(--ui-accent) 12%, transparent);box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--ui-accent) 60%, transparent)}
 .oc-md-n{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-width:76px;min-height:36px;font-size:11px;line-height:12px;text-align:center;overflow-wrap:anywhere}
@@ -22538,9 +22609,11 @@ var VITRINE_CSS = `
 .oc-det-when{font-weight:600;color:${T33}}
 .oc-det-when.ok{color:color-mix(in oklab, ${GREEN5} 60%, var(--foreground))}
 .oc-det .oc-pb-l{align-self:stretch}
-.oc-det-cond{color:var(--foreground)}
-.oc-det-fact{color:var(--ui-text-secondary)}
-.oc-det-src{font-size:11px !important;color:${T33}}
+.oc-det-dl{align-self:stretch;display:flex;flex-direction:column;gap:8px;margin:0;text-align:left}
+.oc-det-dl div{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:baseline}
+.oc-det-dl dt{font-size:11px;font-weight:600;color:${T33}}
+.oc-det-dl dd{margin:0;font-size:12px;line-height:16px;color:var(--foreground)}
+.oc-det-dl [data-line="source"] dd{font-size:11px;color:${T33}}
 .oc-tiers{align-self:stretch;display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;text-align:left}
 .oc-tiers li{display:flex;align-items:center;gap:8px;font-size:12px;color:${T33}}
 .oc-tiers li.on{color:var(--foreground)}
@@ -25704,13 +25777,13 @@ function OfficePage({ ctx }) {
   } else if (model.body === "empty") {
     body = /* @__PURE__ */ jsx47(EmptyOffice, { t, onRecruit: roster.data && !replayOn ? () => setHireOpen(true) : null });
   } else {
-    const canOpen = picked ? canOpenSession(picked) : false;
-    const why = picked ? canOpen ? t("openSession", picked.label) : t("noSession", picked.label) : "";
+    const canOpen = picked && !replayOn ? canOpenSession(picked) : false;
+    const why = picked ? replayOn ? t("replay.noAction") : canOpen ? t("openSession", picked.label) : t("noSession", picked.label) : "";
     body = /* @__PURE__ */ jsxs43("div", { className: `ux-main${panelOpen ? "" : " nopanel"}`, children: [
       narrow && panelOpen ? null : /* @__PURE__ */ jsxs43("div", { className: "ux-stage", "data-replaying": replayOn ? "" : void 0, children: [
         replayOn ? /* @__PURE__ */ jsxs43("span", { className: "oc-rp-tag", "aria-hidden": "true", "data-replay-tag": true, children: [
           /* @__PURE__ */ jsx47("span", { className: "oc-rp-dot" }),
-          replayData ? t("replay.banner", replayAt) : t("replay.notLoaded")
+          replayData ? t("replay.banner", replayAt) : replayStatus === "loading" ? t("replay.loadingPast") : t("replay.notLoaded")
         ] }) : null,
         /* @__PURE__ */ jsx47(
           OfficeScene,
@@ -25799,6 +25872,7 @@ function OfficePage({ ctx }) {
           nowMs,
           onOpen: open,
           canOpen,
+          frozen: replayOn,
           game: sober ? null : game,
           readMs: live.dataUpdatedAt || nowMs,
           tab,
@@ -25855,9 +25929,10 @@ function OfficePage({ ctx }) {
       }
     ),
     replayOn ? /* @__PURE__ */ jsxs43("div", { className: "oc-rp-banner", "data-replay-banner": true, children: [
-      /* @__PURE__ */ jsx47("span", { className: "oc-rp-dot", "aria-hidden": "true" }),
-      /* @__PURE__ */ jsx47("b", { "data-replay-at": true, children: replayData ? t("replay.banner", replayAt) : t("replay.notLoaded") }),
+      !replayData && replayStatus === "loading" ? /* @__PURE__ */ jsx47("span", { className: "oc-dg-spin", "aria-hidden": "true" }) : /* @__PURE__ */ jsx47("span", { className: "oc-rp-dot", "aria-hidden": "true" }),
+      /* @__PURE__ */ jsx47("b", { "data-replay-at": true, role: !replayData ? "status" : void 0, children: replayData ? t("replay.banner", replayAt) : replayStatus === "loading" ? t("replay.loadingPast") : replayStatus === "unavailable" ? t("replay.unavailable") : t("replay.error") }),
       /* @__PURE__ */ jsx47("span", { className: "oc-rp-note", children: replayData ? t("replay.bannerNote") : t("replay.notLoadedNote") }),
+      !replayData && replayStatus === "error" ? /* @__PURE__ */ jsx47("button", { type: "button", className: "oc-rp-exit", "data-replay-retry": true, onClick: () => replayRead.refetch(), children: t("replay.retry") }) : null,
       /* @__PURE__ */ jsx47("button", { type: "button", className: "oc-rp-exit", "data-replay-exit": true, title: t("replay.exitTip"), onClick: exitReplay, children: t("replay.exit") })
     ] }) : null,
     /* @__PURE__ */ jsx47(AlertRail, { alerts, narrow, t, failingNames }),

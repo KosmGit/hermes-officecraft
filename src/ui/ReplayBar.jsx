@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { WINDOWS, clockLabel, cursorKey, density, stepFact } from '../core/replay.js'
+import { WINDOWS, axisTicks, clockLabel, cursorKey, density, stepFact } from '../core/replay.js'
 import { DlgIcon, DlgTip } from './DialogKit.jsx'
 import { TIP_CSS } from './dialogStyles.js'
 
@@ -37,6 +37,7 @@ function Density({ entries, fromMs, toMs }) {
 export function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, t, children }) {
   const day = replay ? replay.toMs - replay.fromMs > 20 * 3_600_000 : false
   const label = ms => clockLabel(ms, t.lang, { day })
+  const ticks = useMemo(() => (replay ? axisTicks(replay.fromMs, replay.toMs, t.lang) : []), [replay, t.lang])
   const prev = replay ? stepFact(entries, atMs, -1) : null
   const next = replay ? stepFact(entries, atMs, 1) : null
   const key = e => {
@@ -78,16 +79,22 @@ export function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, c
               onKeyDown={key}
             />
           </div>
-          <div className="oc-rp-ends" aria-hidden="true"><span>{label(replay.fromMs)}</span><span>{label(replay.toMs)}</span></div>
+          <div className="oc-rp-ticks" aria-hidden="true" data-replay-ticks>
+            {ticks.map(k => <span key={k.ms} style={{ left: `${k.at * 100}%` }} data-edge={k.edge || undefined}>{k.label}</span>)}
+          </div>
           <div className="oc-rp-steps">
             <button type="button" className="oc-rp-step" data-replay-prev aria-disabled={prev == null} title={prev == null ? t('replay.atEdge') : undefined} onClick={() => { if (prev != null) onAt(prev) }}><DlgIcon id="prev" size={14} />{t('replay.prev')}</button>
             <button type="button" className="oc-rp-step" data-replay-next aria-disabled={next == null} title={next == null ? t('replay.atEdge') : undefined} onClick={() => { if (next != null) onAt(next) }}>{t('replay.next')}<DlgIcon id="next" size={14} /></button>
+            <ul className="oc-rp-key" aria-label={t('replay.keyLabel')} data-replay-key>
+              <li><i className="d-done" aria-hidden="true" />{t('replay.key.done')}</li>
+              <li><i className="d-block" aria-hidden="true" />{t('replay.key.block')}</li>
+              <li><i className="d-fail" aria-hidden="true" />{t('replay.key.fail')}</li>
+            </ul>
             <span className="oc-rp-help"><DlgTip name={t('replay.cursor')}>{t('replay.cursorHelp')}</DlgTip></span>
           </div>
           {children}
         </>
-      ) : status === 'loading' ? <p className="oc-rp-msg" role="status">{t('replay.loading')}</p>
-        : <p className="oc-rp-msg" role="alert" data-replay-error>{t(status === 'unavailable' ? 'replay.unavailable' : 'replay.error')}</p>}
+      ) : null /* the banner above says it (loading or failed): said once, not twice 60 px apart */}
     </section>
   )
 }

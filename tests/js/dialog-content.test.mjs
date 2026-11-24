@@ -230,3 +230,89 @@ test('a window that only reads has no « Close » in its foot: the cross, Escape
   assert.match(dlg, /backdrop/)
   assert.doesNotMatch(src('ui/Collection.jsx'), /actions=\{/, 'nor has the showcase')
 })
+
+/* ---------- replay ---------- */
+import { axisTicks } from '../../src/core/replay.js'
+import { REPLAY_CSS } from '../../src/ui/replayStyles.js'
+const VITRINE_CSS = src('ui/Collection.jsx')   // a .jsx cannot be imported by node: the style sits in its source
+
+test('waiting is not failing: one mention while the past is read, the message and a retry when it failed', () => {
+  const page = src('ui/OfficePage.jsx')
+  assert.match(page, /replayStatus === 'loading' \? t\('replay\.loadingPast'\)/)
+  assert.match(page, /data-replay-retry onClick=\{\(\) => replayRead\.refetch\(\)\}/)
+  assert.match(page, /replayStatus === 'error' \? <button/, 'the retry only after a failure, never while waiting')
+  assert.doesNotMatch(src('ui/ReplayBar.jsx'), /replay\.loading'|data-replay-error/, 'the bar does not say it again 60 px under the banner')
+  for (const lang of LANGS) {
+    const r = messages[lang].replay
+    assert.doesNotMatch(r.notLoadedNote, /\(.*\)/, `${lang}: the note no longer mixes the two states`)
+    assert.match(r.loadingPast, /…$/, lang)
+    assert.ok(r.noAction.length > 10, lang)
+  }
+  assert.equal(messages.fr.replay.loadingPast, 'Chargement du passé…')
+})
+
+test('a replay is read-only: « Open the session » and « Decide » are off, loading, failed or loaded', () => {
+  const page = src('ui/OfficePage.jsx')
+  assert.match(page, /const canOpen = picked && !replayOn \? canOpenSession\(picked\) : false/)
+  assert.match(page, /frozen=\{replayOn\}/)
+  assert.match(src('ui/SidePanel.jsx'), /onDecide=\{frozen \? null :/)
+  assert.match(src('ui/AgentTab.jsx'), /\{onDecide \? <button[^>]*data-insp-decide/)
+})
+
+test('the density strip has graduations (hours on a day, days on a week) and a three-word key', () => {
+  const day = new Date(2026, 10, 24, 9, 30).getTime()
+  const h24 = axisTicks(day - 24 * 3_600_000, day, 'fr')
+  assert.ok(h24.length >= 5 && h24.length <= 9, `hours on 24 h (${h24.length})`)
+  assert.ok(h24[0].edge && h24.at(-1).edge && h24[0].at === 0 && h24.at(-1).at === 1)
+  assert.ok(h24.slice(1, -1).every(k => new Date(k.ms).getMinutes() === 0), 'on the local hour')
+  assert.ok(h24.every((k, i, a) => i === 0 || k.at > a[i - 1].at), 'in order, none twice')
+  const d7 = axisTicks(day - 7 * 86_400_000, day, 'fr')
+  assert.ok(d7.slice(1, -1).every(k => new Date(k.ms).getHours() === 0), 'a graduation per local midnight')
+  assert.ok(d7.length >= 7 && d7.length <= 9, `days on 7 days (${d7.length})`)
+  assert.deepEqual(axisTicks(5, 5), [])
+  const night = axisTicks(new Date(2026, 10, 23, 19).getTime(), new Date(2026, 10, 24, 7).getTime(), 'en')
+  assert.ok(night.length >= 4, 'a night of 12 h still has its hours')
+  assert.match(src('ui/ReplayBar.jsx'), /data-replay-ticks/)
+  assert.match(src('ui/ReplayBar.jsx'), /data-replay-key/)
+  for (const lang of LANGS) assert.deepEqual(Object.keys(messages[lang].replay.key), ['done', 'block', 'fail'])
+  assert.match(REPLAY_CSS, /\.oc-rp-key\{/)
+})
+
+/* ---------- showcase ---------- */
+test('the numbers of the showcase say what they count', () => {
+  assert.equal(messages.fr.vit.toLevel('Étage'), 'cartes terminées · prochain niveau : Étage')
+  assert.equal(messages.fr.vit.gradeOf(12, 'Stagiaire'), 'agents au grade Stagiaire')
+  assert.equal(messages.fr.vit.gradeOf(1, 'Senior'), 'agent au grade Senior')
+  assert.equal(messages.fr.vit.hidden(4), 'dont 4 cachés')
+  assert.equal(messages.fr.vit.hidden(1), 'dont 1 caché')
+  assert.equal(messages.fr.game.title, 'Vitrine des trophées')
+  assert.match(messages.en.vit.hidden(4), /4 of them hidden/)
+  assert.match(messages.es.vit.hidden(4), /4 ocultos/)
+  // the hidden ones are IN the total (game.achievements counts them), so « dont », not « + »
+  assert.match(src('core/vitrine.js'), /total: game\.achievements\.length/)
+})
+
+test('the shelf is a thin muted board, not a full progress bar', () => {
+  assert.match(VITRINE_CSS, /box-shadow:inset 0 -3px 0 \$\{WOOD\}, inset 0 -4px 0 \$\{WOOD_D\}/)
+  assert.doesNotMatch(VITRINE_CSS, /inset 0 -12px 0/)
+})
+
+test('the detail of a trophy is three labelled lines, left-aligned', () => {
+  const c = src('ui/Collection.jsx')
+  assert.match(c, /data-detail-lines/)
+  for (const k of ['cond', 'fact', 'source']) assert.match(c, new RegExp(`data-line="${k}"`))
+  assert.match(c, /\.oc-det-dl\{[^}]*text-align:left/)
+  for (const lang of LANGS) assert.deepEqual(Object.keys(messages[lang].vit.line), ['cond', 'fact', 'source'])
+  assert.deepEqual(messages.fr.vit.line, { cond: 'Condition', fact: 'Fait', source: 'Source' })
+})
+
+/* ---------- every window ---------- */
+test('the accent border belongs to the main action: a secondary button in a window has a neutral one', () => {
+  assert.match(DIALOG_CSS, /\.oc-dg \.oc-btn:not\(\.oc-primary\)\{border-color:/)
+  assert.match(DIALOG_CSS, /\.oc-dg \.oc-btn\.oc-primary\{background:var\(--ui-accent\);[^}]*border-color:var\(--ui-accent\)/)
+})
+
+test('« Close » says the same thing in the recruitment and in the campaign', () => {
+  for (const lang of LANGS) assert.equal(messages[lang].recruit.cancel, messages[lang].campaign.close, lang)
+  assert.match(src('ui/CampaignDialog.jsx'), /data-cg-kept/)
+})

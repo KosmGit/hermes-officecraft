@@ -476,13 +476,14 @@ export function OfficePage({ ctx }) {
   } else if (model.body === 'empty') {
     body = <EmptyOffice t={t} onRecruit={roster.data && !replayOn ? () => setHireOpen(true) : null} />
   } else {
-    const canOpen = picked ? canOpenSession(picked) : false
-    const why = picked ? (canOpen ? t('openSession', picked.label) : t('noSession', picked.label)) : ''
+    // a replay is read-only: « open the session » and « decide » act on the present, so they are off while the past is shown (loading, failed or loaded)
+    const canOpen = picked && !replayOn ? canOpenSession(picked) : false
+    const why = picked ? (replayOn ? t('replay.noAction') : canOpen ? t('openSession', picked.label) : t('noSession', picked.label)) : ''
     body = (
       <div className={`ux-main${panelOpen ? '' : ' nopanel'}`}>
         {narrow && panelOpen ? null : <div className="ux-stage" data-replaying={replayOn ? '' : undefined}>
           {/* the past is marked on the scene itself (accent frame + the moment), not only in the banner above it */}
-          {replayOn ? <span className="oc-rp-tag" aria-hidden="true" data-replay-tag><span className="oc-rp-dot" />{replayData ? t('replay.banner', replayAt) : t('replay.notLoaded')}</span> : null}
+          {replayOn ? <span className="oc-rp-tag" aria-hidden="true" data-replay-tag><span className="oc-rp-dot" />{replayData ? t('replay.banner', replayAt) : replayStatus === 'loading' ? t('replay.loadingPast') : t('replay.notLoaded')}</span> : null}
           <OfficeScene
             office={office}
             profiles={profiles}
@@ -562,6 +563,7 @@ export function OfficePage({ ctx }) {
             nowMs={nowMs}
             onOpen={open}
             canOpen={canOpen}
+            frozen={replayOn}
             game={sober ? null : game}
             readMs={live.dataUpdatedAt || nowMs}
             tab={tab}
@@ -617,9 +619,11 @@ export function OfficePage({ ctx }) {
         />
         {replayOn ? (
           <div className="oc-rp-banner" data-replay-banner>
-            <span className="oc-rp-dot" aria-hidden="true" />
-            <b data-replay-at>{replayData ? t('replay.banner', replayAt) : t('replay.notLoaded')}</b>
+            {/* waiting is not failing: while the past is read there is one mention, with its indicator; a failure says so and offers the retry */}
+            {!replayData && replayStatus === 'loading' ? <span className="oc-dg-spin" aria-hidden="true" /> : <span className="oc-rp-dot" aria-hidden="true" />}
+            <b data-replay-at role={!replayData ? 'status' : undefined}>{replayData ? t('replay.banner', replayAt) : replayStatus === 'loading' ? t('replay.loadingPast') : replayStatus === 'unavailable' ? t('replay.unavailable') : t('replay.error')}</b>
             <span className="oc-rp-note">{replayData ? t('replay.bannerNote') : t('replay.notLoadedNote')}</span>
+            {!replayData && replayStatus === 'error' ? <button type="button" className="oc-rp-exit" data-replay-retry onClick={() => replayRead.refetch()}>{t('replay.retry')}</button> : null}
             <button type="button" className="oc-rp-exit" data-replay-exit title={t('replay.exitTip')} onClick={exitReplay}>{t('replay.exit')}</button>
           </div>
         ) : null}

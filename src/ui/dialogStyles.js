@@ -67,6 +67,9 @@ ${RINGED('.oc-dg-x:focus-visible')}
 .oc-dg-link.quiet{min-height:20px;font-size:11px;color:${SOFT};text-decoration-style:dotted}
 .oc-dg-link.quiet:hover{color:var(--foreground)}
 .oc-dg .oc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:32px;padding:4px 16px;line-height:1.2;text-align:center}   /* a label on two lines (« Crear el proyecto … y 10 tarjetas » at 380 px) keeps 4 px above and below */
+/* the accent border belongs to the main action (and to the focus ring): a « Close » beside an inactive main button must not be the louder of the two */
+.oc-dg .oc-btn:not(.oc-primary){border-color:${FIELD_EDGE}}
+.oc-dg .oc-btn:not(.oc-primary):hover:not([aria-disabled="true"]):not(:disabled){border-color:color-mix(in oklab, var(--foreground) 45%, ${FIELD_EDGE})}
 .oc-dg .oc-btn.oc-primary{background:var(--ui-accent);color:var(--ui-accent-fg, var(--background));border-color:var(--ui-accent)}
 .oc-dg .oc-btn.oc-primary:hover:not([aria-disabled="true"]):not(:disabled){background:color-mix(in oklab, var(--ui-accent) 88%, var(--foreground))}
 .oc-dg .oc-btn.oc-ghost{border-color:${EDGE};color:var(--ui-text-secondary)}

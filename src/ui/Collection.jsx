@@ -91,8 +91,12 @@ function Detail({ a, t, lang, readMs, boards, refEl }) {
           <i style={{ width: `${pctOf(a)}%` }} />
         </span>
       ) : null}
-      <p className="oc-det-cond">{condText}</p>
-      {a.unlocked && !a.unavailable && line(a.fact) !== condText ? <p className="oc-det-fact">{line(a.fact)}</p> : null}
+      {/* three labelled lines, left-aligned: what it asks for, what happened, where the number comes from */}
+      <dl className="oc-det-dl" data-detail-lines>
+        <div data-line="cond"><dt>{t('vit.line.cond')}</dt><dd>{condText}</dd></div>
+        {a.unlocked && !a.unavailable && line(a.fact) !== condText ? <div data-line="fact"><dt>{t('vit.line.fact')}</dt><dd>{line(a.fact)}</dd></div> : null}
+        {(tip.where && !secret) || tip.source ? <div data-line="source"><dt>{t('vit.line.source')}</dt><dd>{[tip.where && !secret ? t('game.tip.where', line(tip.where)) : null, tip.source ? line(tip.source) : null].filter(Boolean).join(' · ')}</dd></div> : null}
+      </dl>
       {a.tiered ? (
         <ul className="oc-tiers" aria-label={t('vit.tiers')}>
           {a.tiers.map(x => (
@@ -104,8 +108,6 @@ function Detail({ a, t, lang, readMs, boards, refEl }) {
           ))}
         </ul>
       ) : null}
-      {tip.where && !secret ? <p className="oc-det-src">{t('game.tip.where', line(tip.where))}</p> : null}
-      {tip.source ? <p className="oc-det-src">{line(tip.source)}</p> : null}
     </aside>
   )
 }
@@ -184,8 +186,9 @@ const ORANGE = 'var(--ui-orange, var(--ui-accent))'
 const GREEN = 'var(--ui-green, var(--ui-accent))'
 const RED = 'var(--ui-red, var(--destructive, var(--ui-orange)))'
 const T3 = 'color-mix(in oklab, var(--ui-text-secondary) 60%, var(--ui-text-tertiary))'   // 3.54:1 -> >= 4.5:1 (light theme)
-const WOOD = `color-mix(in oklab, ${ORANGE} 72%, var(--background, ${CARD}))`
-const WOOD_D = `color-mix(in oklab, ${ORANGE} 100%, var(--background, ${CARD}))`
+// a muted board, thin: a saturated 12 px orange line under the medals read as a progress bar at 100 %
+const WOOD = `color-mix(in oklab, ${ORANGE} 20%, color-mix(in oklab, var(--foreground) 14%, ${CARD}))`
+const WOOD_D = `color-mix(in oklab, ${ORANGE} 28%, color-mix(in oklab, var(--foreground) 24%, ${CARD}))`
 
 /** Look of the showcase: theme variables only, sizes on the 4 px grid, medals are canvases (the art palette lives in src/scene/medalart.js). */
 export const VITRINE_CSS = `
@@ -231,8 +234,8 @@ export const VITRINE_CSS = `
 .oc-pb i{display:block;height:100%;background:var(--ui-accent)}
 .oc-pb-l{height:8px;border-radius:4px}
 /* a shelf: wooden board under the medals, lit from the front */
-.oc-shelf{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 4px;border-radius:12px 12px 4px 4px;background:linear-gradient(180deg, color-mix(in oklab, ${SUNKEN} 70%, ${CARD}), color-mix(in oklab, var(--ui-bg-elevated, ${CARD}) 80%, ${CARD}));box-shadow:inset 0 -8px 0 ${WOOD}, inset 0 -12px 0 ${WOOD_D}}
-.oc-md{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;box-sizing:border-box;padding:8px 2px 16px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;cursor:pointer;transition:transform .12s ease,background-color .12s ease}
+.oc-shelf{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 4px;border-radius:12px 12px 4px 4px;background:linear-gradient(180deg, color-mix(in oklab, ${SUNKEN} 70%, ${CARD}), color-mix(in oklab, var(--ui-bg-elevated, ${CARD}) 80%, ${CARD}));box-shadow:inset 0 -3px 0 ${WOOD}, inset 0 -4px 0 ${WOOD_D}}
+.oc-md{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;box-sizing:border-box;padding:8px 2px 12px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;cursor:pointer;transition:transform .12s ease,background-color .12s ease}
 .oc-md:hover{transform:translateY(-2px)}
 .oc-md[aria-pressed="true"]{background:color-mix(in oklab, var(--ui-accent) 12%, transparent);box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--ui-accent) 60%, transparent)}
 .oc-md-n{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-width:76px;min-height:36px;font-size:11px;line-height:12px;text-align:center;overflow-wrap:anywhere}
@@ -253,9 +256,11 @@ export const VITRINE_CSS = `
 .oc-det-when{font-weight:600;color:${T3}}
 .oc-det-when.ok{color:color-mix(in oklab, ${GREEN} 60%, var(--foreground))}
 .oc-det .oc-pb-l{align-self:stretch}
-.oc-det-cond{color:var(--foreground)}
-.oc-det-fact{color:var(--ui-text-secondary)}
-.oc-det-src{font-size:11px !important;color:${T3}}
+.oc-det-dl{align-self:stretch;display:flex;flex-direction:column;gap:8px;margin:0;text-align:left}
+.oc-det-dl div{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:baseline}
+.oc-det-dl dt{font-size:11px;font-weight:600;color:${T3}}
+.oc-det-dl dd{margin:0;font-size:12px;line-height:16px;color:var(--foreground)}
+.oc-det-dl [data-line="source"] dd{font-size:11px;color:${T3}}
 .oc-tiers{align-self:stretch;display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;text-align:left}
 .oc-tiers li{display:flex;align-items:center;gap:8px;font-size:12px;color:${T3}}
 .oc-tiers li.on{color:var(--foreground)}

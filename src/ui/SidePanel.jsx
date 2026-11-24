@@ -18,7 +18,7 @@ const ICON = { decisions: 'inbox', agent: 'office', projects: 'folder', journal:
  * (src/ui/DecisionsTab.jsx).
  */
 export function SidePanel({
-  office, history, profiles, selected, nowMs, onOpen, canOpen, game = null, readMs = null, tab, onTab, narrow, headRef,
+  office, history, profiles, selected, nowMs, onOpen, canOpen, frozen = false, game = null, readMs = null, tab, onTab, narrow, headRef,
   orders = null, writes = [], openCard = null, journal = { served: false }, approvals = [], answer = null, night = null,
   project = null, onProject, sort, onSort, jfilter, onJfilter, decisions = null, onModelFollowUp, onPick, bots = null
 }) {
@@ -42,7 +42,7 @@ export function SidePanel({
     body = (
       <AgentTab
         office={office} agent={agent} sceneAgent={sceneAgent} sceneBy={sceneBy} history={history} nowMs={nowMs} onOpen={onOpen} canOpen={canOpen}
-        grade={grade} project={project} onPick={onPick} onDecide={slug => { onProject(slug); onTab('decisions') }} openKanban={openCard?.kanban ?? null}
+        grade={grade} project={project} onPick={onPick} onDecide={frozen ? null : slug => { onProject(slug); onTab('decisions') }} openKanban={openCard?.kanban ?? null}
         bots={bots} orders={answer} t={t}
       />
     )

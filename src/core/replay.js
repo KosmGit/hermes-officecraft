@@ -22,6 +22,35 @@ const STATUS_SET = new Set(STATUSES)
 export const SILENCE_MS = 300_000
 export const HOUR_MS = 3_600_000
 export const DAY_MS = 86_400_000
+/**
+ * The graduations under the density strip: { ms, at (0..1), label, edge? }. Hours on a window of a day or less (every 2 h up to 14 h long,
+ * every 6 h beyond, on the local hour), days from 7 (each local midnight, named by its weekday); the two ends are always there, as `edge`.
+ * A graduation too close to an end is dropped, so two labels never overlap. `lang` = the page's, for the names of the days.
+ */
+export function axisTicks(fromMs, toMs, lang = 'en') {
+  const span = toMs - fromMs
+  if (!(span > 0)) return []
+  const at = ms => (ms - fromMs) / span
+  const long = span > 36 * HOUR_MS
+  const hh = new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit', hour12: false })
+  const dd = new Intl.DateTimeFormat(lang, { weekday: 'short' })
+  const edgeLabel = ms => (long ? dd.format(ms) : hh.format(ms))
+  const out = [{ ms: fromMs, at: 0, label: edgeLabel(fromMs), edge: true }]
+  const step = long ? DAY_MS : span > 14 * HOUR_MS ? 6 * HOUR_MS : 2 * HOUR_MS
+  const d = new Date(fromMs)
+  d.setMinutes(0, 0, 0)
+  if (long) d.setHours(0)
+  else d.setHours(Math.ceil(d.getHours() / (step / HOUR_MS)) * (step / HOUR_MS), 0, 0, 0)
+  for (let ms = d.getTime(); ms < toMs; ms += step) {
+    // DST: a local day is 23 or 25 h, so the next graduation is re-read from the clock rather than added
+    const t = long ? new Date(ms).setHours(0, 0, 0, 0) : ms
+    if (t <= fromMs || at(t) < 0.08 || at(t) > 0.92) continue
+    out.push({ ms: t, at: at(t), label: long ? dd.format(t) : hh.format(t) })
+  }
+  out.push({ ms: toMs, at: 1, label: edgeLabel(toMs), edge: true })
+  return out
+}
+
 export const WINDOWS = Object.freeze(['night', '24h', '7d'])
 export const DEFAULT_NIGHT = Object.freeze({ from: 19, to: 7 })
 
