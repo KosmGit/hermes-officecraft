@@ -274,6 +274,14 @@ test('the density strip has graduations (hours on a day, days on a week) and a t
   assert.deepEqual(axisTicks(5, 5), [])
   const night = axisTicks(new Date(2026, 10, 23, 19).getTime(), new Date(2026, 10, 24, 7).getTime(), 'en')
   assert.ok(night.length >= 4, 'a night of 12 h still has its hours')
+  // a window that starts or ends a few minutes from a graduation: that graduation is dropped, so its label never sits on the end label
+  for (const offMin of [2, 10, 50, 58]) {
+    const from = new Date(2026, 10, 23, 13, offMin).getTime()
+    for (const span of [12 * 3_600_000, 24 * 3_600_000, 7 * 86_400_000]) {
+      const inner = axisTicks(from, from + span, 'en').slice(1, -1)
+      assert.ok(inner.every(k => k.at >= 0.08 && k.at <= 0.92), `no graduation against an end (offset ${offMin} min, span ${span / 3_600_000} h)`)
+    }
+  }
   assert.match(src('ui/ReplayBar.jsx'), /data-replay-ticks/)
   assert.match(src('ui/ReplayBar.jsx'), /data-replay-key/)
   for (const lang of LANGS) assert.deepEqual(Object.keys(messages[lang].replay.key), ['done', 'block', 'fail'])
