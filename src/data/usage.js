@@ -36,27 +36,47 @@ export function useUsage(ctx, { enabled, kind = '24h', nowMs = Date.now }) {
   })
 }
 
-/** A day that is over is read once for the life of the page (its sessions cannot change); today is read again each minute. */
-const pastDays = new Map()
+/**
+ * `GET /usage` counts the tokens of a session on the day it STARTED, and a session keeps growing until it ends: one started at 23:50 and
+ * finished at 00:40 still adds to « yesterday » after midnight (a bar read at 00:05 said 40 000, the route said 250 000 at 06:45). A day that
+ * is over is therefore kept for good only once it has been read at least DAY_GRACE_MS after its end (a session that long is a long one: past that
+ * the bar is taken as final); until then it is read again, at most once a minute (the poll), like today. The table keeps the last DAYS_KEPT days.
+ */
+export const DAY_GRACE_MS = 24 * 3_600_000
+export const DAYS_KEPT = 45
+const DAY_READ_GAP_MS = USAGE_POLL_MS
+/** fromS -> { usage, readMs (when it was read), final }. Bounded: the oldest days leave first. */
+const dayTable = new Map()
+
+/** What the table knows of the day `d` at `nowMs`: kept as it is while it is final or was read less than a minute ago; else null (to be read). */
+const dayKept = (d, nowMs) => {
+  const hit = dayTable.get(d.fromS)
+  return hit && (hit.final || nowMs - hit.readMs < DAY_READ_GAP_MS) ? hit.usage : null
+}
+const dayKeep = (d, usage, nowMs) => {
+  dayTable.set(d.fromS, { usage, readMs: nowMs, final: d.past && nowMs >= d.toMs + 1000 + DAY_GRACE_MS })
+  if (dayTable.size > DAYS_KEPT) for (const key of [...dayTable.keys()].sort((x, y) => x - y).slice(0, dayTable.size - DAYS_KEPT)) dayTable.delete(key)
+}
+/** The table as it stands (tests). */
+export const usageDayTable = () => dayTable
 
 /**
  * The last days one by one (`GET /usage` per local day: the route gives no per-day split, and the tokens of a session are not dated per
  * call, so each day counts the sessions STARTED that day). Read in sequence, never in parallel; a failed day is `usage: null` (said
- * « no answer », never 0) and is asked again next time.
+ * « no answer », never 0) and is asked again next time; a day over but not final yet keeps its last reading when a new one fails.
  */
 export function useUsageDays(ctx, { enabled, kind = '7d', nowMs = Date.now }) {
   const n = daysFor(kind)
   return useQuery({
     queryKey: [PLUGIN_ID, 'usage-days', n],
     queryFn: async () => {
-      const days = dayRanges(typeof nowMs === 'function' ? nowMs() : nowMs, n)
+      const now = typeof nowMs === 'function' ? nowMs() : nowMs
+      const days = dayRanges(now, n)
       const out = []
       for (const d of days) {
-        const key = `${d.fromS}`
-        let usage = d.past ? pastDays.get(key) ?? null : null
+        let usage = dayKept(d, now)
         if (!usage) {
-          try { usage = await read(ctx, d.fromS, d.toS) } catch { usage = null }
-          if (usage && d.past) pastDays.set(key, usage)
+          try { usage = await read(ctx, d.fromS, d.toS); dayKeep(d, usage, now) } catch { usage = d.past ? dayTable.get(d.fromS)?.usage ?? null : null }
         }
         out.push({ fromMs: d.fromMs, toMs: d.toMs, usage })
       }
