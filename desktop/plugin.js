@@ -166,16 +166,26 @@ function approvalsReducer(state2, action) {
         for (const key of Object.keys(by4)) if (by4[key].sessionId === sid) delete by4[key];
         return { ...state2, byKey: by4, unreadable: dropKey(state2.unreadable, sid) };
       }
-      return { ...state2, unreadable: { ...state2.unreadable, [sid]: true } };
+      return { ...state2, unreadable: capUnreadable({ ...state2.unreadable, [sid]: true }) };
     }
     case "titles": {
       const titles = {};
       for (const [id, title] of Object.entries(action.titles || {})) if (typeof title === "string" && title.trim()) titles[id] = oneLine(title).slice(0, 120);
-      return { ...state2, titles };
+      return sameTitles(state2.titles, titles) ? state2 : { ...state2, titles };
     }
     default:
       return state2;
   }
+}
+var sameTitles = (a, b) => {
+  const ka = Object.keys(a);
+  return ka.length === Object.keys(b).length && ka.every((k) => Object.hasOwn(b, k) && a[k] === b[k]);
+};
+var UNREADABLE_MAX = 50;
+function capUnreadable(flags) {
+  const keys = Object.keys(flags);
+  if (keys.length <= UNREADABLE_MAX) return flags;
+  return Object.fromEntries(keys.slice(keys.length - UNREADABLE_MAX).map((k) => [k, flags[k]]));
 }
 var keepCommand = (r, known2) => r.command || !known2.command ? r : { ...r, command: known2.command, commandCut: known2.commandCut };
 function dropKey(obj, key) {
@@ -605,11 +615,13 @@ import { useQuery as useQuery2, useQueryClient } from "@hermes/plugin-sdk";
 
 // src/scene/color.js
 var memo = /* @__PURE__ */ new Map();
+var MEMO_MAX = 2048;
 function hx(h) {
   let c = memo.get(h);
   if (!c) {
     const n = parseInt(h.slice(1), 16);
     c = Object.freeze([n >> 16 & 255, n >> 8 & 255, n & 255]);
+    if (memo.size >= MEMO_MAX) memo.clear();
     memo.set(h, c);
   }
   return c;
@@ -836,12 +848,13 @@ function lookOf(name) {
 // src/scene/raster.js
 var LIGHT_STEPS = 12;
 var Px = class {
-  constructor(w, h, ox = 0, oy = 0) {
+  /** `buf`: a buffer of exactly w * h * 4 bytes to draw into (its content is the caller's to overwrite), else a new one. */
+  constructor(w, h, ox = 0, oy = 0, buf = null) {
     this.w = w;
     this.h = h;
     this.ox = ox;
     this.oy = oy;
-    this.d = new Uint8ClampedArray(w * h * 4);
+    this.d = buf && buf.length === w * h * 4 ? buf : new Uint8ClampedArray(w * h * 4);
     this.L = null;
   }
   /** Project tile coordinates with this buffer's origin. */
@@ -1309,12 +1322,20 @@ function ownSkills(a) {
   return (sk?.names || []).map((name) => ({ name, category: "", tags: [] }));
 }
 var ROLE_MEMO = /* @__PURE__ */ new Map();
-var MEMO_MAX = 256;
+var MEMO_MAX2 = 256;
 function detectRole(a) {
+  const seen = ROLE_OF.get(a);
+  if (seen && seen.name === a.name && seen.description === a.description && seen.skills === a.skills && seen.copied === a.copiedSkills) return seen.best;
+  const best = detectRoleByKey(a);
+  ROLE_OF.set(a, { name: a.name, description: a.description, skills: a.skills, copied: a.copiedSkills, best });
+  return best;
+}
+var ROLE_OF = /* @__PURE__ */ new WeakMap();
+function detectRoleByKey(a) {
   const key = JSON.stringify([a.name, a.description, ownSkills(a).map((s) => [s.name, s.category, s.tags]), a.copiedSkills || null]);
   if (ROLE_MEMO.has(key)) return ROLE_MEMO.get(key);
   const best = scoreRole(a);
-  if (ROLE_MEMO.size >= MEMO_MAX) ROLE_MEMO.clear();
+  if (ROLE_MEMO.size >= MEMO_MAX2) ROLE_MEMO.clear();
   ROLE_MEMO.set(key, best);
   return best;
 }
@@ -1637,6 +1658,7 @@ var fits = (c, [lo, hi, cmax]) => {
   return l >= lo - 1e-9 && l <= hi + 1e-9 && chromaOf(c) <= cmax + 1e-9;
 };
 var tamed = /* @__PURE__ */ new Map();
+var TAMED_MAX = 1024;
 function tame(hex2, anchor, rule) {
   const key = `${rule}:${hex2}:${anchor}`;
   let c = tamed.get(key);
@@ -1653,6 +1675,7 @@ function tame(hex2, anchor, rule) {
     }
     c = Object.freeze(mixc(from, want, w).map(Math.round));
   }
+  if (tamed.size >= TAMED_MAX) tamed.clear();
   tamed.set(key, c);
   return c;
 }
@@ -3858,10 +3881,21 @@ var UNITS = [
   ["minute", 6e4],
   ["second", 1e3]
 ];
+var FORMATTERS = /* @__PURE__ */ new Map();
+function relativeFormatter(locale) {
+  const key = String(locale);
+  let rtf = FORMATTERS.get(key);
+  if (!rtf) {
+    rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+    if (FORMATTERS.size >= 16) FORMATTERS.clear();
+    FORMATTERS.set(key, rtf);
+  }
+  return rtf;
+}
 function formatRelative(targetMs, nowMs, locale) {
   if (typeof targetMs !== "number") return "";
   const diff = targetMs - nowMs;
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  const rtf = relativeFormatter(locale);
   for (const [unit, size] of UNITS) {
     if (Math.abs(diff) >= size || unit === "second") return rtf.format(Math.round(diff / size), unit);
   }
@@ -4345,14 +4379,14 @@ function clockLabel(atMs, lang4, { day = false, tz } = {}) {
     return new Date(atMs).toISOString().slice(11, 16);
   }
 }
-var FORMATTERS = /* @__PURE__ */ new Map();
+var FORMATTERS2 = /* @__PURE__ */ new Map();
 function formatter(lang4, tz, kind) {
   const key = `${lang4}|${tz ?? ""}|${kind}`;
-  let f = FORMATTERS.get(key);
+  let f = FORMATTERS2.get(key);
   if (!f) {
     const zone = tz ? { timeZone: tz } : {};
     f = new Intl.DateTimeFormat(lang4, kind === "time" ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23", ...zone } : { weekday: "short", day: "numeric", ...zone });
-    FORMATTERS.set(key, f);
+    FORMATTERS2.set(key, f);
   }
   return f;
 }
@@ -5075,6 +5109,7 @@ var en = {
     cancelled: "Nothing was sent.",
     cancelledHidden: "The page was hidden, so nothing was sent.",
     cancelledLeft: (what2) => `Not sent: you left the page (${what2}).`,
+    sentLeft: (what2) => `Sent, but you left the page before the answer, so the outcome was not read (${what2}).`,
     replayed: "This action had already been handled, so nothing was done twice.",
     notAudited: "The audit log could not be written.",
     liveStale: "The project list could not be refreshed yet.",
@@ -6777,6 +6812,7 @@ var es = {
     cancelled: "No se envió nada.",
     cancelledHidden: "La página se ocultó: no se envió nada.",
     cancelledLeft: (what2) => `Acción no enviada: saliste de la página (${what2}).`,
+    sentLeft: (what2) => `Acción enviada, pero saliste de la página antes de la respuesta: el resultado no se leyó (${what2}).`,
     replayed: "Esta acción ya se había procesado: no se hizo nada dos veces.",
     notAudited: "No se pudo escribir el registro de auditoría.",
     liveStale: "La lista de proyectos aún no se ha podido actualizar.",
@@ -8480,6 +8516,7 @@ var fr = {
     cancelled: "Rien n’a été envoyé.",
     cancelledHidden: "La page a été masquée : rien n’a été envoyé.",
     cancelledLeft: (what2) => `Action non envoyée : vous avez quitté la page (${what2}).`,
+    sentLeft: (what2) => `Action partie, mais vous avez quitté la page avant la réponse : le résultat n’a pas été lu (${what2}).`,
     replayed: "Cette action avait déjà été traitée : rien n’a été fait en double.",
     notAudited: "Le journal d’audit n’a pas pu être écrit.",
     liveStale: "La liste des projets n’a pas pu être actualisée pour l’instant.",
@@ -10830,6 +10867,41 @@ function journalEntries(game) {
   return out.sort((x, y) => y.ms - x.ms);
 }
 
+// src/core/gamekey.js
+var DAY_MS5 = 864e5;
+var finite4 = (v) => typeof v === "number" && Number.isFinite(v);
+function gameOffice(office) {
+  const { office: o } = gameFacts(null, office);
+  if (!o) return o;
+  return {
+    boards: (o.boards || []).map((b) => ({
+      slug: b?.slug,
+      createdMs: b?.createdMs,
+      tasks: (Array.isArray(b?.tasks) ? b.tasks : []).map((t) => t ? { id: t.id, status: t.status, createdMs: t.createdMs, completedMs: t.completedMs, assignee: t.assignee, title: t.title, modelOverride: t.modelOverride } : t)
+    })),
+    agents: (o.agents || []).map((a) => ({
+      name: a?.name,
+      state: a?.state === "working" ? "working" : "other",
+      description: a?.description,
+      roleOverride: a?.roleOverride,
+      officeMeta: typeof a?.officeMeta?.role === "string" ? { role: a.officeMeta.role } : void 0
+    }))
+  };
+}
+function gameClock(history, nowMs) {
+  const profiles = history && history.ok ? Object.values(history.profiles || {}) : [];
+  const firsts = profiles.map((p) => p?.stats?.firstSeenMs).filter(finite4);
+  return [
+    dayNo(nowMs),
+    new Date(nowMs).getHours() < RULES_V2.quietUntilHour,
+    firsts.length ? Math.max(0, Math.floor((nowMs - Math.min(...firsts)) / DAY_MS5)) : null,
+    profiles.filter((p) => finite4(p?.stats?.firstSeenMs) && nowMs - p.stats.firstSeenMs >= 0 && nowMs - p.stats.firstSeenMs < RULES.recruitMs).map((p) => p.name)
+  ];
+}
+function gameInputsKey(office, nowMs, history = null) {
+  return JSON.stringify([gameOffice(office), gameClock(history, nowMs)]);
+}
+
 // src/core/models.js
 var str3 = trimmed;
 function runningCard(agent, def) {
@@ -11001,6 +11073,11 @@ function leftBehind(state2) {
   const o = state2.order;
   return { verb: o.verb, board: o.board, task: o.task, code: o.code, choice: o.choice, agent: o.agent, title: o.title };
 }
+function leftSent(state2) {
+  if (!state2 || state2.phase !== "sending" && state2.phase !== "verifying" || !state2.order) return null;
+  const o = state2.order;
+  return { verb: o.verb, board: o.board, task: o.task, code: o.code, choice: o.choice, agent: o.agent, title: o.title, sent: true };
+}
 var left = null;
 var rememberLeft = (info) => {
   left = info || null;
@@ -11009,7 +11086,11 @@ var peekLeft = () => left;
 var clearLeft = () => {
   left = null;
 };
-var leftOutcome = (info) => info ? { cancelled: true, reason: "left", wasCounting: true, ...info } : null;
+var leftOutcome = (info) => {
+  if (!info) return null;
+  const { sent, ...what2 } = info;
+  return sent ? { ok: false, cancelled: false, reason: "unknown_outcome", leftSent: true, ...what2 } : { cancelled: true, reason: "left", wasCounting: true, ...what2 };
+};
 
 // src/scene/fit.js
 var LIST_BELOW = 0.75;
@@ -11032,11 +11113,23 @@ function backingOf({ W, H, S, dpr = 1 }) {
   const h = Math.max(1, Math.round(H * k));
   return { w, h, cssW: w / d, cssH: h / d, k, direct };
 }
+var COLUMNS = /* @__PURE__ */ new Map();
+var COLUMNS_MAX = 8;
+function columnsOf(W, w) {
+  const key = `${W}x${w}`;
+  let xs = COLUMNS.get(key);
+  if (!xs) {
+    xs = new Int32Array(w);
+    for (let x = 0; x < w; x++) xs[x] = Math.min(W - 1, Math.floor((x + 0.5) * W / w));
+    if (COLUMNS.size >= COLUMNS_MAX) COLUMNS.clear();
+    COLUMNS.set(key, xs);
+  }
+  return xs;
+}
 function upscale(src, W, H, out, w, h) {
   const s = new Uint32Array(src.buffer, src.byteOffset, W * H);
   const o = new Uint32Array(out.buffer, out.byteOffset, w * h);
-  const xs = new Int32Array(w);
-  for (let x = 0; x < w; x++) xs[x] = Math.min(W - 1, Math.floor((x + 0.5) * W / w));
+  const xs = columnsOf(W, w);
   let prev = -1;
   for (let y = 0; y < h; y++) {
     const sy = Math.min(H - 1, Math.floor((y + 0.5) * H / h));
@@ -11245,7 +11338,12 @@ function listZones(layout2) {
   return zones;
 }
 function sceneFacts(model) {
-  return JSON.stringify(model, (key, value) => key === "nowMs" ? Math.floor(value / 6e4) : key === "selected" ? void 0 : value);
+  const { boards, ops, ...rest3 } = model;
+  return JSON.stringify({
+    ...rest3,
+    boards: (boards || []).map((b) => [b.slug, b.createdMs ?? null, b.total, b.done, b.counts, b.blocked?.length ?? 0]),
+    ops: ops ? { gateway: ops.gateway ? { state: ops.gateway.state, platforms: (ops.gateway.platforms || []).map((p) => [p.name, p.state, p.attention]) } : null, crons: (ops.crons || []).map((c) => [c.key, c.enabled, c.failing]) } : null
+  }, (key, value) => key === "nowMs" ? Math.floor(value / 6e4) : key === "selected" ? void 0 : value);
 }
 function legendRows(halo2, { workingMs, staleMs, activeMs }) {
   const mins = (ms2) => Math.round(ms2 / 6e4);
@@ -11608,6 +11706,16 @@ async function audit2(ctx, body) {
     return false;
   }
 }
+async function settleLeft(ctx, order2, action, auditOn, request = safeRequest, wait = pause) {
+  if (!order2 || order2.verb !== "recruit" && order2.verb !== "recruitModel" && order2.verb !== "revise") return null;
+  const { answer } = orderReducer({ ...IDLE, phase: "sending", order: order2 }, action);
+  if (!answer) return null;
+  return order2.verb === "revise" ? verifyRevise(ctx, order2, answer, auditOn, request, wait) : verifyRecruit(ctx, order2, answer, auditOn, request, wait);
+}
+async function depart(order2, { mounted, dispatch, ctx, auditOn, request = safeRequest, wait = pause }) {
+  const action = order2.verb === "revise" ? await sendRevise(order2, request) : await sendRecruit(order2, request);
+  return mounted() ? dispatch(action) : settleLeft(ctx, order2, action, auditOn, request, wait);
+}
 
 // src/data/queries.js
 import { useQuery as useQuery4 } from "@hermes/plugin-sdk";
@@ -11728,10 +11836,13 @@ function useOrders(ctx, { audit: auditOn = false, replay = false } = {}) {
   const sent = useRef(/* @__PURE__ */ new Set());
   const latest2 = useRef({});
   latest2.current = { ctx, auditOn, answer: state2.answer, state: state2, replay };
+  const mounted = useRef(true);
   useEffect2(() => {
+    mounted.current = true;
     clearLeft();
     return () => {
-      rememberLeft(leftBehind(latest2.current.state));
+      mounted.current = false;
+      rememberLeft(leftBehind(latest2.current.state) || leftSent(latest2.current.state));
     };
   }, []);
   useEffect2(() => {
@@ -11755,10 +11866,10 @@ function useOrders(ctx, { audit: auditOn = false, replay = false } = {}) {
     const order2 = state2.order;
     (async () => {
       if (routeOf(order2) === "recruit") {
-        return dispatch(await sendRecruit(order2));
+        return depart(order2, { mounted: () => mounted.current, dispatch, ctx, auditOn });
       }
       if (routeOf(order2) === "revise") {
-        return dispatch(await sendRevise(order2));
+        return depart(order2, { mounted: () => mounted.current, dispatch, ctx, auditOn });
       }
       if (routeOf(order2) === "approval") {
         return dispatch(await sendApproval(ctx, order2, auditOn));
@@ -13755,7 +13866,8 @@ function podArea(layout2, p) {
   return { box: box2, inFloor };
 }
 var RING_REST = [226, 230, 238];
-function drawScene(layout2, base, model, frame = 0) {
+var FRAME_BUFFERS = /* @__PURE__ */ new WeakMap();
+function drawScene(layout2, base, model, frame = 0, opts = null) {
   const { pods, lounge, X, Y } = layout2;
   const night = !!model.night;
   const art = !model.classic;
@@ -13766,7 +13878,8 @@ function drawScene(layout2, base, model, frame = 0) {
   const ops = model.ops;
   const selected = model.selected;
   const accent = model.accent;
-  const px = new Px(layout2.W, layout2.H, layout2.origin.ox, layout2.origin.oy);
+  const px = new Px(layout2.W, layout2.H, layout2.origin.ox, layout2.origin.oy, opts?.reuse ? FRAME_BUFFERS.get(layout2) : null);
+  if (opts?.reuse) FRAME_BUFFERS.set(layout2, px.d);
   px.d.set(base.d);
   px.L = base.L;
   const P = (x, y, z) => px.P(x, y, z);
@@ -17151,6 +17264,7 @@ function CardOrders({ item, orders, writes, t, onModelFollowUp }) {
 }
 function outcomeText(o, t) {
   const verb = verbLabel(o, t);
+  if (o.leftSent) return [t("orders.sentLeft", what(o, t)), t(o.verb === "revise" ? "llm.revise.check" : o.verb === "recruit" || o.verb === "recruitModel" ? "recruit.checkList" : "orders.checkJournal")].join(" ");
   if (o.cancelled) return o.reason === "left" ? t("orders.cancelledLeft", what(o, t)) : t(o.reason === "hidden" ? "orders.cancelledHidden" : "orders.cancelled");
   if (o.ok) {
     if (o.verb === "approval") {
@@ -19532,6 +19646,29 @@ var settingsSheet = (width) => width > 0 && width <= SHEET_AT;
 // src/ui/OfficeScene.jsx
 import { useCallback as useCallback7, useEffect as useEffect15, useLayoutEffect as useLayoutEffect6, useMemo as useMemo11, useRef as useRef17, useState as useState14 } from "react";
 
+// src/core/dpr.js
+function watchDpr(win, onChange) {
+  if (typeof win?.matchMedia !== "function") return () => {
+  };
+  let mq = null;
+  let stopped = false;
+  const fire = () => {
+    if (stopped) return;
+    mq.removeEventListener?.("change", fire);
+    onChange(win.devicePixelRatio || 1);
+    arm();
+  };
+  const arm = () => {
+    mq = win.matchMedia(`(resolution: ${win.devicePixelRatio || 1}dppx)`);
+    mq.addEventListener?.("change", fire);
+  };
+  arm();
+  return () => {
+    stopped = true;
+    mq?.removeEventListener?.("change", fire);
+  };
+}
+
 // src/core/ticker.js
 var FRAME_MS = 260;
 var FRAME_COUNT = 840;
@@ -19597,7 +19734,11 @@ function postcardBuffer(layout2, model, frame = 0) {
   const px = drawScene(layout2, base, { ...model, selected: null }, frame);
   return { W: px.W, H: px.H, d: px.d };
 }
-var postcardName = (nowMs) => `officecraft-${new Date(nowMs).toISOString().slice(0, 10)}.png`;
+var postcardName = (nowMs) => {
+  const d = new Date(nowMs);
+  const two = (n) => String(n).padStart(2, "0");
+  return `officecraft-${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}.png`;
+};
 function savePostcard(buffer, name) {
   return new Promise((resolve) => {
     try {
@@ -19798,13 +19939,18 @@ var spotTip = (sp, office, ctx) => tipOf(sp, office, ctx);
 // src/ui/OfficeScene.jsx
 import { jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
 var HUD_SPRITES = Object.freeze({ art: true, marker: false });
-var ACCENT = { at: -Infinity, rgb: null, el: null };
+var ACCENT = { at: -Infinity, rgb: null, el: null, g: null };
+var forgetAccent = () => {
+  ACCENT.el = null;
+  ACCENT.rgb = null;
+  ACCENT.at = -Infinity;
+};
 function readAccent(el) {
   try {
     const now = performance.now();
     if (ACCENT.el === el && now - ACCENT.at < 1e3) return ACCENT.rgb;
     const css = getComputedStyle(el).color;
-    const g = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+    const g = ACCENT.g || (ACCENT.g = document.createElement("canvas").getContext("2d", { willReadFrequently: true }));
     g.canvas.width = g.canvas.height = 1;
     g.fillStyle = css;
     g.fillRect(0, 0, 1, 1);
@@ -19817,6 +19963,11 @@ function readAccent(el) {
     return null;
   }
 }
+function storeOf(store, w, h) {
+  const need = w * h * 4;
+  if (!store.cap || store.cap.length < need || store.cap.length > need * 2) store.cap = new Uint8ClampedArray(Math.ceil(need * 1.25));
+  return new ImageData(new Uint8ClampedArray(store.cap.buffer, 0, need), w, h);
+}
 function blit(cv, d, W, H, store) {
   const g = cv.getContext("2d");
   if (cv.width === W && cv.height === H) {
@@ -19824,11 +19975,19 @@ function blit(cv, d, W, H, store) {
     return;
   }
   let img = store.current;
-  if (!img || img.width !== cv.width || img.height !== cv.height) img = store.current = new ImageData(cv.width, cv.height);
+  if (!img || img.width !== cv.width || img.height !== cv.height) img = store.current = storeOf(store, cv.width, cv.height);
   upscale(d, W, H, img.data, cv.width, cv.height);
   g.putImageData(img, 0, 0);
 }
-var baseKey = (layout2, model) => JSON.stringify([
+var BASE_KEYS = /* @__PURE__ */ new WeakMap();
+var baseKey = (layout2, model) => {
+  const hit = BASE_KEYS.get(model);
+  if (hit && hit.layout === layout2) return hit.key;
+  const key = baseKeyOf(layout2, model);
+  BASE_KEYS.set(model, { layout: layout2, key });
+  return key;
+};
+var baseKeyOf = (layout2, model) => JSON.stringify([
   layout2.W,
   layout2.H,
   model.night,
@@ -19942,6 +20101,8 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+  useEffect15(() => watchDpr(window, setDpr), []);
+  useEffect15(() => forgetAccent, []);
   const fresh = useMemo11(() => toSceneModel(office, { nowMs, night, profiles, decor: decor || void 0, seating }), [office, profiles, nowMs, night, decor, seating]);
   const factsKey = useMemo11(() => sceneFacts(fresh), [fresh]);
   const kept2 = useRef17({ key: null, model: null });
@@ -19999,7 +20160,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     const key = baseKey(cur.layout, cur.model);
     if (baseRef.current.key !== key) baseRef.current = { key, base: buildBase(cur.layout, cur.model) };
     const accent = accentRef.current && readAccent(accentRef.current) || void 0;
-    const px = drawScene(cur.layout, baseRef.current.base, { ...cur.model, markers: false, selected: cur.selected, accent: accent || cur.model.accent, dim: cur.dim }, frame);
+    const px = drawScene(cur.layout, baseRef.current.base, { ...cur.model, markers: false, selected: cur.selected, accent: accent || cur.model.accent, dim: cur.dim }, frame, { reuse: true });
     blit(cv, px.d, cur.layout.W, cur.layout.H, artStore);
     paintedRef.current += 1;
     cv.dataset.frames = String(paintedRef.current);
@@ -22108,24 +22269,35 @@ function useUsage(ctx, { enabled, kind = "24h", nowMs = Date.now }) {
     retryDelay: 5e3
   });
 }
-var pastDays = /* @__PURE__ */ new Map();
+var DAY_GRACE_MS = 24 * 36e5;
+var DAYS_KEPT = 45;
+var DAY_READ_GAP_MS = USAGE_POLL_MS;
+var dayTable = /* @__PURE__ */ new Map();
+var dayKept = (d, nowMs) => {
+  const hit = dayTable.get(d.fromS);
+  return hit && (hit.final || nowMs - hit.readMs < DAY_READ_GAP_MS) ? hit.usage : null;
+};
+var dayKeep = (d, usage, nowMs) => {
+  dayTable.set(d.fromS, { usage, readMs: nowMs, final: d.past && nowMs >= d.toMs + 1e3 + DAY_GRACE_MS });
+  if (dayTable.size > DAYS_KEPT) for (const key of [...dayTable.keys()].sort((x, y) => x - y).slice(0, dayTable.size - DAYS_KEPT)) dayTable.delete(key);
+};
 function useUsageDays(ctx, { enabled, kind = "7d", nowMs = Date.now }) {
   const n = daysFor(kind);
   return useQuery8({
     queryKey: [PLUGIN_ID, "usage-days", n],
     queryFn: async () => {
-      const days = dayRanges(typeof nowMs === "function" ? nowMs() : nowMs, n);
+      const now = typeof nowMs === "function" ? nowMs() : nowMs;
+      const days = dayRanges(now, n);
       const out = [];
       for (const d of days) {
-        const key = `${d.fromS}`;
-        let usage = d.past ? pastDays.get(key) ?? null : null;
+        let usage = dayKept(d, now);
         if (!usage) {
           try {
             usage = await read(ctx, d.fromS, d.toS);
+            dayKeep(d, usage, now);
           } catch {
-            usage = null;
+            usage = d.past ? dayTable.get(d.fromS)?.usage ?? null : null;
           }
-          if (usage && d.past) pastDays.set(key, usage);
         }
         out.push({ fromMs: d.fromMs, toMs: d.toMs, usage });
       }
@@ -24574,7 +24746,8 @@ function OfficePage({ ctx }) {
   }, [narrow, folded, refused2, wideOpen, width, art, forced, held]);
   const command = useMemo17(() => commandDefs(orderJournal.data ?? null, JOURNAL_FETCH), [orderJournal.data]);
   const unreadable = !history.data?.ok || partialSources(live.data ?? null, history.data ?? null).length > 0;
-  const game = useMemo17(() => keepSeenWhilePartial(computeGame(history.data ?? null, liveOffice, liveNow, { sober }, command), readSeen(), unreadable), [history.data, liveOffice, liveNow, sober, command, unreadable]);
+  const gameKey = useMemo17(() => gameInputsKey(liveOffice, liveNow, history.data ?? null), [liveOffice, liveNow, history.data]);
+  const game = useMemo17(() => keepSeenWhilePartial(computeGame(history.data ?? null, liveOffice, liveNow, { sober }, command), readSeen(), unreadable), [history.data, gameKey, sober, command, unreadable]);
   const gameDecor = useMemo17(() => decorOf(game), [game]);
   const llmState = llmQuery.data ?? null;
   const roleView = useMemo17(() => llmView(llmState, sober), [llmState, sober]);
