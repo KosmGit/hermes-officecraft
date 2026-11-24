@@ -797,3 +797,60 @@ def test_the_message_holds_only_whitelisted_fields_for_the_new_types_too():
              {"state": "llm_90", "kind": "usd", "pct": 90, "used": 4.5, "cap": 5, "prompt": secret}, {"state": "trophy", "name": "N", "tier": "gold", "path": "/home/" + secret}]
     for platform in ("telegram", "discord", None):
         assert secret not in msg(facts, "fr", platform) and "/home" not in msg(facts, "fr", platform)
+
+
+# ================================================================ a store that refuses the write
+class Refusing:
+    """Wraps the store of a world: ``set`` of the notification state raises while ``broken`` is true."""
+
+    def __init__(self, inner):
+        self.inner, self.broken, self.refused = inner, False, 0
+
+    def get(self, key, default=None):
+        return self.inner.get(key, default)
+
+    def set(self, key, value):
+        if self.broken and key == N.STATE_KEY:
+            self.refused += 1
+            raise OSError("quota")
+        return self.inner.set(key, value)
+
+
+def test_a_state_that_cannot_be_written_sends_nothing_rather_than_the_same_message_at_every_pass():
+    w = W2({"decision": [T1]})
+    store = w.n.store = Refusing(w.store)
+    w.boards = [board("b")]
+    w.tick()
+    store.broken = True
+    w.boards = [blocked_cards("t_00000001")]
+    for _ in range(30):
+        w.tick(30)
+    assert w.to("telegram:1") == [] and store.refused >= 30, "nothing leaves while what was sent cannot be remembered"
+    store.broken = False
+    w.tick(30)
+    assert len(w.to("telegram:1")) == 1, "the store is back: the fact leaves, once"
+    for _ in range(5):
+        w.tick(30)
+    assert len(w.to("telegram:1")) == 1
+
+
+def test_a_write_refused_after_the_sends_keeps_the_memory_of_the_pass():
+    w = W2({"decision": [T1]})
+    store = w.n.store = Refusing(w.store)
+    w.boards = [board("b")]
+    w.tick()
+    w.boards = [blocked_cards("t_00000001")]
+    real_send = w.n.send
+
+    def send_then_break(target, message):
+        out = real_send(target, message)
+        store.broken = True   # the store fails between the write before the sends and the one after
+        return out
+
+    w.n.send = send_then_break
+    w.tick(30)
+    assert len(w.to("telegram:1")) == 1
+    w.n.send = real_send
+    for _ in range(10):
+        w.tick(30)
+    assert len(w.to("telegram:1")) == 1, "sent once: the pass is remembered in memory while the file is refused"

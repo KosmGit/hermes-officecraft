@@ -591,6 +591,7 @@ class Notifier:
         self._last = float("-inf")
         self._approvals: list[str] = []
         self._exit_hooked = False
+        self._unsaved: Optional[dict] = None   # the state of a pass the store refused: the next pass starts from it, not from the older file
         self.last_result: Optional[dict] = None
 
     # -- hooks (never raise, never block)
@@ -637,7 +638,7 @@ class Notifier:
         known = {t["key"]: t for t in self.targets()} if any(settings["types"].values()) else {}
         routes = {t: [r for r in settings["routes"][t] if r in known] for t in TYPES}
         enabled = {t for t in TYPES if settings["types"][t] and routes[t]}
-        state = migrate_state(store.get(STATE_KEY, None) or {}, routes)
+        state = migrate_state(self._unsaved if self._unsaved is not None else (store.get(STATE_KEY, None) or {}), routes)
         if not enabled:
             if any(v for a in (state.get("armed") or {}).values() for v in a.values()):
                 store.set(STATE_KEY, plan([], routes, set(), state, now)[1])   # disarm: the next switch-on starts from a new baseline
@@ -650,6 +651,8 @@ class Notifier:
         quiet = settings["quiet"]
         dispatches, state = plan(facts, routes, enabled, state, now, quiet_now=in_quiet(quiet, now), urgent=tuple(quiet["urgent"]), quiet=quiet)
         result = None
+        if dispatches and not self._save(store, state):
+            return None   # what was sent could not be remembered: nothing is sent, or the same message would leave at every pass
         for d in dispatches:
             try:
                 res = self.send(known[d["to"]]["target"], render(d, settings, now))
@@ -661,8 +664,20 @@ class Notifier:
             state["last"] = result
             state.setdefault("lastBy", {})[d["to"]] = result
             self.last_result = result
-        store.set(STATE_KEY, state)
+        self._save(store, state)
         return result
+
+    def _save(self, store, state: dict) -> bool:
+        """Write the state. A store that refuses (quota, full disk, unreadable file) leaves the state in memory for the next pass,
+        so that what was sent is not sent again and the hourly cap still counts."""
+        try:
+            store.set(STATE_KEY, state)
+        except Exception as exc:   # noqa: BLE001 - the class only
+            log.warning("hermes-officecraft notify: the state cannot be written (%s)", type(exc).__name__)
+            self._unsaved = state
+            return False
+        self._unsaved = None
+        return True
 
     def _gateway_return(self, state: dict, enabled: set, now: float) -> None:
         """Gateway tracking, only in the process that IS the gateway: the last sign of life, and on a new process the

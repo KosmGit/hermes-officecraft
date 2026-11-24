@@ -444,3 +444,39 @@ def test_the_strong_lane_without_a_model_uses_the_plan_task_when_it_exists(world
     assert world.engine.task_route("strong")["task"] == "officecraft" and world.engine.task_route("light")["task"] == "officecraft"
     world.engine.attach(world.llm, True, None, plan_task=True)
     assert world.engine.task_route("strong")["task"] == "officecraft_plan" and world.engine.task_route("light")["task"] == "officecraft"
+
+
+# ------------------------------------------------------------------ failed calls on a priced model count against the dollar cap
+def test_calls_that_fail_on_a_priced_model_cannot_walk_past_the_dollar_cap(world):
+    grant(world, True)
+    world.engine.price_fn = price(1.0, 100.0)   # worst case of a call: about 0.12 $
+    set_models(world, light=LIGHT, capUsd=0.30)
+    world.llm.error = ValueError("answer did not match schema")   # billed by the provider, usage lost on Hermes' side
+    results = []
+    for _ in range(8):
+        world.clock.t += 120
+        results.append(world.post("decor").json())
+        assert get(world)["spend"]["usd"] <= 0.30
+    failed = [r for r in results if r["result"] == "failed"]
+    refused = [r for r in results if r["result"] == "refused"]
+    assert 1 <= len(failed) <= 2 and len(world.llm.calls) == len(failed), "each failed call took its worst cost from the month"
+    assert refused and all((r["reason"], r["cap"]) == ("cap_reached", "usd") for r in refused)
+    assert get(world)["spend"]["usd"] > 0 and get(world)["spend"]["unpriced"] == 0
+
+
+def test_a_failed_call_on_the_task_route_stays_unpriced_and_a_refusal_by_hermes_costs_nothing(world):
+    set_models(world)   # no model imposed: the price is not known before the call
+    world.llm.error = TimeoutError("slow")
+    world.clock.t += 120
+    assert world.post("decor").json()["reason"] == "timeout"
+    spend = get(world)["spend"]
+    assert (spend["usd"], spend["unpriced"], spend["calls"]) == (0, 1, 1)
+
+
+def test_the_answers_kept_for_replay_stay_bounded_on_the_routes_that_call_no_model(world):
+    for _ in range(L.REMEMBERED + 40):
+        assert world.client.post(f"{BASE}/llm/decor/reset", json={"id": world.uid()}).status_code == 200
+    assert len(world.engine._answers) == L.REMEMBERED
+    for _ in range(40):
+        assert world.client.post(f"{BASE}/llm/decor/resolve", json={"id": world.uid(), "choice": "ignore"}).status_code == 200
+    assert len(world.engine._answers) == L.REMEMBERED

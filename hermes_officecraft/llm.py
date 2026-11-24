@@ -82,6 +82,7 @@ THOUGHT_EVERY_S = 60          # bubbles: one call per minute at most, all agents
 THOUGHT_TTL_S = 300           # a bubble is forgotten after 5 minutes
 WORKING_WITHIN_S = 120        # « at work » = a running card with a sign of life under 2 minutes old
 REMEMBERED = 256              # ids kept for replay
+ART_KEPT = 200                # posters kept at most (the oldest leave)
 TIMEOUT_S = 60
 # two models, « strong » and « light »; a function belongs to ONE lane, fixed here (never chosen per function)
 LANES: tuple[str, ...] = ("strong", "light")
@@ -1265,10 +1266,14 @@ class Engine:
         if status == 200:
             with self._state:
                 # a draft's content is not kept with the replay (a SOUL must not outlive its draft): ``_replay`` puts it back while it is kept
-                self._answers[call_id] = {k: v for k, v in answer.items() if k != "fiche"} if feature in DRAFTS and answer.get("result") == "done" else answer
-                while len(self._answers) > REMEMBERED:
-                    self._answers.popitem(last=False)
+                self._remember(call_id, {k: v for k, v in answer.items() if k != "fiche"} if feature in DRAFTS and answer.get("result") == "done" else answer)
         return status, answer
+
+    def _remember(self, call_id: str, answer: dict) -> None:
+        """Keep the answer of an id for replay, the oldest ones leaving past ``REMEMBERED``. Caller holds ``_state``."""
+        self._answers[call_id] = answer
+        while len(self._answers) > REMEMBERED:
+            self._answers.popitem(last=False)
 
     def _answer(self, call_id: str, feature: str, result: str, *, reason: Optional[str] = None, cap: Optional[str] = None,
                 fiche: Any = None, cost: Optional[float] = None, cost_status: Optional[str] = None, extra: Optional[dict] = None) -> dict:
@@ -1402,7 +1407,12 @@ class Engine:
                 # model, and must be told apart from a provider error in the log. For the Agencement the roster size is enough.
                 log.warning("hermes-officecraft llm %s failed%s: %s reason=%s", feature,
                             f" sent={len(ctx['agents'])}" if feature == "seating" else "", name, reason)
-                self._record(feature, now, usd=None, status="error", model=None, provider=None, priced=False)
+                # a call that failed after it left may still be billed by the provider, and its usage is lost: on a route with a known
+                # price the month is charged the worst cost reserved for it, so that failed calls cannot walk past the dollar cap.
+                # A refusal by Hermes (``Trust``) reached no model and is charged nothing.
+                worst = self._reserved.get(route["lane"]) or 0.0
+                charged = route["via"] == "model" and worst > 0 and reason != "not_allowed"
+                self._record(feature, now, usd=worst if charged else None, status="error", model=None, provider=None, priced=charged)
                 return self._answer(body.id, feature, "failed", reason=reason, cost=round(sum(spent), 6) if spent else None, cost_status="error",
                                     extra={"retried": retried} if feature in DRAFTS else None)
             usd, status = self.cost_fn(result)
@@ -1520,7 +1530,7 @@ class Engine:
             f["decorPending"] = None
             self._save_fiches(f)
             answer = self._answer(body.id, "decor", "done", extra={"reset": True})
-            self._answers[body.id] = answer
+            self._remember(body.id, answer)
         return 200, answer
 
     def resolve_decor(self, body: ResolveIn) -> tuple[int, dict]:
@@ -1536,7 +1546,7 @@ class Engine:
             f["decorPending"] = None
             self._save_fiches(f)
             answer = self._answer(body.id, "decor", "done", extra={"resolved": body.choice if pending else "none"})
-            self._answers[body.id] = answer
+            self._remember(body.id, answer)
         return 200, answer
 
     # -- outfits
@@ -1612,6 +1622,8 @@ class Engine:
                 f = self.fiches()
                 for p in fiche["posters"]:
                     f["art"][ctx["keys"][p["kind"]]] = {"poster": {k: p[k] for k in ("motif", "sky", "accent")}, "at": now}
+                for key in sorted(f["art"], key=lambda k: f["art"][k].get("at") or 0)[:max(0, len(f["art"]) - ART_KEPT)]:
+                    del f["art"][key]   # the oldest posters leave: the milestone kinds come from the page, the store is shared and bounded
                 self._save_fiches(f)
         return fiche
 
