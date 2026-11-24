@@ -83,7 +83,7 @@ export function inboxItems(office, history = null) {
     for (const t of b.blocked) {
       if (heldPhaseGuard(b, t)) continue
       items.push({
-        board: b.slug, id: t.id, code: codeRef(t.title), title: plainTitle(t.title, codeRef(t.title)), createdMs: t.createdMs, blockedMs: since.get(`${b.slug}/${t.id}`) ?? null, assignee: t.assignee, pin: pinOf(t, by.get(t.assignee)),
+        board: b.slug, id: t.id, code: codeRef(t.title), ...(t.blockReason ? { reason: t.blockReason } : {}), title: plainTitle(t.title, codeRef(t.title)), createdMs: t.createdMs, blockedMs: since.get(`${b.slug}/${t.id}`) ?? null, assignee: t.assignee, pin: pinOf(t, by.get(t.assignee)),
         ...(t.guard ? { guard: true, head: t.head === true, campaign: t.campaign ?? null, campaignSize: t.campaignSize ?? null, fullTitle: t.title } : {})
       })
     }

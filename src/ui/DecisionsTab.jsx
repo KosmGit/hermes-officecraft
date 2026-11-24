@@ -82,6 +82,7 @@ export function DecisionsTab({ office, history, orders, writes, openCard, approv
         kind="card"
         code={guard ? t('campaign.kind') : c.code}
         title={guard ? guardName(c.fullTitle ?? c.title) : c.title || c.id}
+        reason={guard ? null : c.reason ?? null}
         whoText={guard ? (c.head ? t('campaign.decision.head', c.campaignSize ?? '?') : t('campaign.decision.phase', guardName(c.fullTitle ?? c.title))) : null}
         sinceMs={row.sinceMs}
         ageTip={age}

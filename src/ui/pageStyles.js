@@ -194,6 +194,9 @@ export const PAGE_CSS = `
 .ux-dc-t{margin:0;font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-t.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-more{align-self:flex-start;font-size:12px}
+/* the reason the bot gave when it blocked the card: two lines, in the secondary text colour, set off by a thin rule; plain text, never a link */
+.ux-dc-r{margin:0;padding:0 0 0 8px;border-left:2px solid color-mix(in oklab, var(--pc) 55%, ${EDGE});font-size:12px;line-height:1.4;color:${T2};display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.ux-dc-r.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-s{margin:0;font-size:12px;line-height:1.4;color:${T2};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-c{margin:0;min-width:0;font-size:11.5px;line-height:1.4;color:${T2};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
 .ux-dc-who{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:${T2}}

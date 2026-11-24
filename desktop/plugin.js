@@ -6407,6 +6407,9 @@ var en = {
       group: (n) => `${n} to decide`,
       more: "Show the whole title",
       less: "Show less",
+      reason: "Why it was blocked:",
+      reasonMore: "Show the whole reason",
+      reasonLess: "Show less of the reason",
       unfilter: (slug) => `Remove the ${slug} filter`,
       noProject: "No project",
       emptyFiltered: "Nothing is waiting in this project.",
@@ -8127,6 +8130,9 @@ var es = {
       group: (n) => `${n} por decidir`,
       more: "Ver el título completo",
       less: "Ver menos",
+      reason: "Motivo del bloqueo:",
+      reasonMore: "Ver el motivo completo",
+      reasonLess: "Ver menos del motivo",
       unfilter: (slug) => `Quitar el filtro ${slug}`,
       noProject: "Sin proyecto",
       emptyFiltered: "Nada espera en este proyecto.",
@@ -9848,6 +9854,9 @@ var fr = {
       group: (n) => `${n} à décider`,
       more: "Afficher le titre en entier",
       less: "Réduire",
+      reason: "Motif du blocage :",
+      reasonMore: "Afficher le motif en entier",
+      reasonLess: "Réduire le motif",
       unfilter: (slug) => `Retirer le filtre ${slug}`,
       noProject: "Sans projet",
       emptyFiltered: "Rien n’attend dans ce projet.",
@@ -11476,6 +11485,7 @@ function inboxItems(office, history = null) {
         board: b.slug,
         id: t.id,
         code: codeRef(t.title),
+        ...t.blockReason ? { reason: t.blockReason } : {},
         title: plainTitle(t.title, codeRef(t.title)),
         createdMs: t.createdMs,
         blockedMs: since.get(`${b.slug}/${t.id}`) ?? null,
@@ -19077,18 +19087,14 @@ import { useCallback as useCallback6, useLayoutEffect as useLayoutEffect7, useRe
 
 // src/ui/DecisionCard.jsx
 import { useId as useId13, useLayoutEffect as useLayoutEffect6, useRef as useRef16, useState as useState14 } from "react";
-import { jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
-function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary: summary2, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
-  const style = useProjectStyle(board);
-  const old = isOld({ sinceMs }, nowMs);
-  const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || "none"}`) : "";
-  const who = agent || t("inbox.unassigned");
-  const titleId = useId13();
-  const titleRef = useRef16(null);
+import { Fragment as Fragment12, jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
+function Clamped({ text: text3, className, tip, more, less, button, children }) {
+  const id = useId13();
+  const ref = useRef16(null);
   const [whole, setWhole] = useState14(false);
   const [cut3, setCut] = useState14(false);
   useLayoutEffect6(() => {
-    const p = titleRef.current;
+    const p = ref.current;
     if (!p || whole) return void 0;
     const measure = () => setCut(p.scrollHeight > p.clientHeight + 1);
     measure();
@@ -19096,7 +19102,20 @@ function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summ
     const ro = new ResizeObserver(measure);
     ro.observe(p);
     return () => ro.disconnect();
-  }, [title, whole]);
+  }, [text3, whole]);
+  return /* @__PURE__ */ jsxs17(Fragment12, { children: [
+    /* @__PURE__ */ jsxs17("p", { ref, id, className: `${className}${whole ? " whole" : ""}`, title: tip, children: [
+      children,
+      text3
+    ] }),
+    cut3 || whole ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-lnk ux-dc-more", ...button, "aria-expanded": whole, "aria-controls": id, onClick: () => setWhole((v) => !v), children: whole ? less : more }) : null
+  ] });
+}
+function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary: summary2, reason = null, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
+  const style = useProjectStyle(board);
+  const old = isOld({ sinceMs }, nowMs);
+  const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || "none"}`) : "";
+  const who = agent || t("inbox.unassigned");
   return /* @__PURE__ */ jsxs17("li", { className: `ux-dc${target2 ? " target" : ""}`, style, "data-decision": id, "data-kind": kind, "data-board": board || void 0, "data-unverified": unverified ? "" : void 0, "data-target": target2 ? "" : void 0, ...attrs, children: [
     /* @__PURE__ */ jsxs17("div", { className: "ux-dc-top", children: [
       grouped ? board ? /* @__PURE__ */ jsx20("span", { className: "ux-vh", children: board }) : null : /* @__PURE__ */ jsx20(ProjectChip, { slug: board, label: t("ux.dec.project") }),
@@ -19107,10 +19126,13 @@ function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summ
       ] }) : null,
       open
     ] }),
-    /* @__PURE__ */ jsx20("p", { ref: titleRef, id: titleId, className: `ux-dc-t${whole ? " whole" : ""}`, title, children: title }),
-    cut3 || whole ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-lnk ux-dc-more", "data-dc-more": true, "aria-expanded": whole, "aria-controls": titleId, onClick: () => setWhole((v) => !v), children: whole ? t("ux.dec.less") : t("ux.dec.more") }) : null,
+    /* @__PURE__ */ jsx20(Clamped, { text: title, className: "ux-dc-t", tip: title, more: t("ux.dec.more"), less: t("ux.dec.less"), button: { "data-dc-more": "" } }),
     summary2 ? /* @__PURE__ */ jsx20("p", { className: "ux-dc-s", "data-approval-summary": true, children: summary2 }) : null,
     detail,
+    reason ? /* @__PURE__ */ jsx20(Clamped, { text: reason, className: "ux-dc-r", more: t("ux.dec.reasonMore"), less: t("ux.dec.reasonLess"), button: { "data-dc-more-reason": "" }, children: /* @__PURE__ */ jsxs17("span", { className: "ux-vh", children: [
+      t("ux.dec.reason"),
+      " "
+    ] }) }) : null,
     /* @__PURE__ */ jsxs17("div", { className: "ux-dc-who", children: [
       sceneAgent ? /* @__PURE__ */ jsx20(Portrait, { agent: sceneAgent }) : null,
       /* @__PURE__ */ jsx20("span", { className: "nm", children: whoText ?? who }),
@@ -19298,6 +19320,7 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
         kind: "card",
         code: guard ? t("campaign.kind") : c.code,
         title: guard ? guardName(c.fullTitle ?? c.title) : c.title || c.id,
+        reason: guard ? null : c.reason ?? null,
         whoText: guard ? c.head ? t("campaign.decision.head", c.campaignSize ?? "?") : t("campaign.decision.phase", guardName(c.fullTitle ?? c.title)) : null,
         sinceMs: row.sinceMs,
         ageTip: age2,
@@ -19352,7 +19375,7 @@ function FilterChip({ slug, onClear, t }) {
 import { useMemo as useMemo7 } from "react";
 
 // src/ui/NightCard.jsx
-import { Fragment as Fragment12, jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
+import { Fragment as Fragment13, jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
 var TILES = [
   ["runs", "start", ""],
   ["done", "done", "done"],
@@ -19402,7 +19425,7 @@ function NightCard({ summary: summary2, kind = "night", t, onShow = null, onRepl
       /* @__PURE__ */ jsx23("span", { className: "oc-faint", "data-night-range": true, children: t("replay.night.range", label(summary2.from), label(summary2.to)) }),
       summary2.ongoing ? /* @__PURE__ */ jsx23("span", { className: "oc-tag", "data-night-ongoing": true, children: t("replay.night.ongoing") }) : null
     ] }),
-    summary2.empty ? /* @__PURE__ */ jsx23("p", { className: "oc-hint oc-dashed", "data-night-none": true, children: t("replay.night.none") }) : /* @__PURE__ */ jsxs20(Fragment12, { children: [
+    summary2.empty ? /* @__PURE__ */ jsx23("p", { className: "oc-hint oc-dashed", "data-night-none": true, children: t("replay.night.none") }) : /* @__PURE__ */ jsxs20(Fragment13, { children: [
       /* @__PURE__ */ jsx23("div", { className: "oc-nt-grid", role: "group", "aria-label": t("replay.night.title"), children: tiles.map(([key, group, tone, n, text3, detail]) => {
         const can = onShow && n > 0;
         return /* @__PURE__ */ jsxs20(
@@ -19426,7 +19449,7 @@ function NightCard({ summary: summary2, kind = "night", t, onShow = null, onRepl
           key
         );
       }) }),
-      summary2.buckets.some((b) => b.done || b.blocked || b.failures) ? /* @__PURE__ */ jsxs20(Fragment12, { children: [
+      summary2.buckets.some((b) => b.done || b.blocked || b.failures) ? /* @__PURE__ */ jsxs20(Fragment13, { children: [
         /* @__PURE__ */ jsx23(Chart, { buckets: summary2.buckets, label: t("replay.night.chart") }),
         /* @__PURE__ */ jsxs20("div", { className: "oc-nt-ends", "aria-hidden": "true", children: [
           /* @__PURE__ */ jsx23("span", { children: label(summary2.from) }),
@@ -19720,7 +19743,7 @@ function SidePanel({
 }
 
 // src/ui/HireDialog.jsx
-import { Fragment as Fragment13, jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
+import { Fragment as Fragment14, jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
 var RECRUIT2 = /* @__PURE__ */ new Set(["recruit", "recruitModel"]);
 var WORKING = /* @__PURE__ */ new Set(["counting", "sending", "verifying"]);
 function hireProfiles(desks, sceneProfiles2) {
@@ -19805,7 +19828,7 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
         }
       },
       alert: confirming ? null : /* @__PURE__ */ jsx27("div", { id: `${id}-err`, role: "alert", "data-hire-errors": true, className: "oc-dg-al", children: shown.map((e) => /* @__PURE__ */ jsx27(Notice, { tone: "bad", icon: "alert", children: t(`recruit.err.${e}`) }, e)) }),
-      start: confirming ? null : /* @__PURE__ */ jsxs24(Fragment13, { children: [
+      start: confirming ? null : /* @__PURE__ */ jsxs24(Fragment14, { children: [
         /* @__PURE__ */ jsxs24("button", { type: "button", className: "oc-dg-link", "aria-expanded": reqOpen, onClick: () => setReqOpen((v) => !v), children: [
           /* @__PURE__ */ jsx27(DlgIcon, { id: "chev", size: 12 }),
           t("recruit.requests")
@@ -19813,11 +19836,11 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
         /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.submit"), children: t("recruit.riskNote") }),
         /* @__PURE__ */ jsx27(LeftCount, { assist })
       ] }),
-      actions: confirming ? null : /* @__PURE__ */ jsxs24(Fragment13, { children: [
+      actions: confirming ? null : /* @__PURE__ */ jsxs24(Fragment14, { children: [
         /* @__PURE__ */ jsx27("button", { type: "button", className: "oc-btn", "data-hire-cancel": true, onClick: close, children: t("recruit.cancel") }),
         /* @__PURE__ */ jsx27("button", { type: "submit", className: "oc-btn oc-primary", "data-hire-ok": true, "aria-disabled": errors.length || busy ? true : void 0, children: nameOk ? t("recruit.submitNamed", draft.name) : t("recruit.submit") })
       ] }),
-      children: confirming ? /* @__PURE__ */ jsx27(OrderConfirm, { orders }) : /* @__PURE__ */ jsxs24(Fragment13, { children: [
+      children: confirming ? /* @__PURE__ */ jsx27(OrderConfirm, { orders }) : /* @__PURE__ */ jsxs24(Fragment14, { children: [
         /* @__PURE__ */ jsx27(AssistPanel, { assist, onSee: onSeeBot }),
         /* @__PURE__ */ jsxs24("div", { className: "oc-dg-rc", children: [
           /* @__PURE__ */ jsxs24("div", { className: "oc-dg-prev", "data-hire-preview": true, children: [
@@ -19873,7 +19896,7 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
               ] }),
               /* @__PURE__ */ jsx27(RolePicker, { value: draft.role, onPick: (r) => set({ role: r }), guessed, mark: /* @__PURE__ */ jsx27(Mark, { assist, field: "role", label: t("recruit.roleField") }) })
             ] }),
-            /* @__PURE__ */ jsxs24(Step, { n: 2, title: /* @__PURE__ */ jsxs24(Fragment13, { children: [
+            /* @__PURE__ */ jsxs24(Step, { n: 2, title: /* @__PURE__ */ jsxs24(Fragment14, { children: [
               t("recruit.step2"),
               " ",
               /* @__PURE__ */ jsx27(Mark, { assist, field: "start", label: t("recruit.step2") })
@@ -21247,6 +21270,9 @@ var PAGE_CSS = `
 .ux-dc-t{margin:0;font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-t.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-more{align-self:flex-start;font-size:12px}
+/* the reason the bot gave when it blocked the card: two lines, in the secondary text colour, set off by a thin rule; plain text, never a link */
+.ux-dc-r{margin:0;padding:0 0 0 8px;border-left:2px solid color-mix(in oklab, var(--pc) 55%, ${EDGE});font-size:12px;line-height:1.4;color:${T22};display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.ux-dc-r.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-s{margin:0;font-size:12px;line-height:1.4;color:${T22};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-c{margin:0;min-width:0;font-size:11.5px;line-height:1.4;color:${T22};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
 .ux-dc-who{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:${T22}}
@@ -21543,7 +21569,7 @@ function Legend() {
 }
 
 // src/ui/ProjectDock.jsx
-import { Fragment as Fragment14, jsx as jsx32, jsxs as jsxs28 } from "react/jsx-runtime";
+import { Fragment as Fragment15, jsx as jsx32, jsxs as jsxs28 } from "react/jsx-runtime";
 function ProjectButton({ b, pressed, onPick, t }) {
   const style = useProjectStyle(b.slug);
   const blocked = b.blocked.length;
@@ -21572,7 +21598,7 @@ function ProjectDock({ boards, project: project2, onProject, picked, sceneAgent,
       boards.map((b) => /* @__PURE__ */ jsx32(ProjectButton, { b, pressed: project2 === b.slug, onPick: onProject, t }, b.slug))
     ] }) : /* @__PURE__ */ jsx32("span", { className: "ux-sp" }),
     /* @__PURE__ */ jsxs28("div", { className: "ux-sel", children: [
-      picked ? /* @__PURE__ */ jsxs28(Fragment14, { children: [
+      picked ? /* @__PURE__ */ jsxs28(Fragment15, { children: [
         sceneAgent ? /* @__PURE__ */ jsx32(Portrait, { agent: sceneAgent }) : null,
         /* @__PURE__ */ jsx32("b", { title: picked.label, children: picked.label }),
         /* @__PURE__ */ jsxs28("span", { className: `ux-st ux-st-${picked.state}`, children: [
@@ -21609,7 +21635,7 @@ function TabBar({ view, onView, decisions, t }) {
 
 // src/ui/ReplayBar.jsx
 import { useMemo as useMemo12 } from "react";
-import { Fragment as Fragment15, jsx as jsx34, jsxs as jsxs30 } from "react/jsx-runtime";
+import { Fragment as Fragment16, jsx as jsx34, jsxs as jsxs30 } from "react/jsx-runtime";
 var BINS = 96;
 function Density({ entries, fromMs, toMs: toMs2 }) {
   const bins = useMemo12(() => density(entries, fromMs, toMs2, BINS), [entries, fromMs, toMs2]);
@@ -21653,7 +21679,7 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
       replay ? /* @__PURE__ */ jsx34("span", { className: "oc-rp-range", "data-replay-range": true, children: t("replay.range", label(replay.fromMs), label(replay.toMs)) }) : null,
       replay && counts ? /* @__PURE__ */ jsx34("span", { className: "oc-rp-state", "aria-live": "polite", "data-replay-state": true, children: counts.working + counts.waiting + counts.silent ? t("replay.state", counts.working, counts.waiting, counts.silent) : t("replay.stateNone") }) : null
     ] }),
-    replay ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+    replay ? /* @__PURE__ */ jsxs30(Fragment16, { children: [
       /* @__PURE__ */ jsxs30("div", { className: "oc-rp-track", children: [
         /* @__PURE__ */ jsx34(Density, { entries, fromMs: replay.fromMs, toMs: replay.toMs }),
         /* @__PURE__ */ jsx34(
@@ -21699,7 +21725,7 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
 
 // src/ui/ReplayPanel.jsx
 import { useMemo as useMemo13 } from "react";
-import { Fragment as Fragment16, jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
+import { Fragment as Fragment17, jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
 var STATUS3 = new Set(CARD_STATUSES);
 var MAX_ROWS = 120;
 function factText(e, t) {
@@ -21721,7 +21747,7 @@ function Moment({ office, nowMs, t }) {
   const cardOf = (a) => (a.state === "waiting" ? a.blocked[0] ?? runningCards(a, nowMs)[0] : runningCards(a, nowMs)[0] ?? a.blocked[0]) ?? null;
   return /* @__PURE__ */ jsxs31("section", { className: "oc-psec", "aria-labelledby": "oc-h-moment", "data-moment": true, children: [
     /* @__PURE__ */ jsx35("h3", { id: "oc-h-moment", children: t("replay.moment.title") }),
-    agents.length || blocked.length ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+    agents.length || blocked.length ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
       /* @__PURE__ */ jsx35("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.agents"), children: agents.map((a) => {
         const c = cardOf(a);
         const tag = taskTag(a, nowMs);
@@ -21731,7 +21757,7 @@ function Moment({ office, nowMs, t }) {
           /* @__PURE__ */ jsx35("span", { className: `oc-tag oc-t-${a.state}`, children: t(`state.${a.state}`) }),
           /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
             /* @__PURE__ */ jsx35("b", { children: a.label }),
-            c ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+            c ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
               " ",
@@ -21741,11 +21767,11 @@ function Moment({ office, nowMs, t }) {
                 ")"
               ] })
             ] }) : null,
-            many ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+            many ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-faint oc-mono", "data-moment-more": true, title: cardsTip(tag, t), children: c.title ? plusOf(tag.more) : codeText("", tag.more, t) })
             ] }) : null,
-            quiet2 ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+            quiet2 ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
               " ",
               /* @__PURE__ */ jsxs31("span", { className: "oc-faint", "data-moment-quiet": true, style: { display: "inline-flex", alignItems: "center", gap: 4 }, children: [
                 /* @__PURE__ */ jsx35(StateIcon, { state: "stale" }),
@@ -21755,7 +21781,7 @@ function Moment({ office, nowMs, t }) {
           ] })
         ] }) }, a.name);
       }) }),
-      blocked.length ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+      blocked.length ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
         /* @__PURE__ */ jsx35("h4", { className: "oc-faint", style: { margin: "8px 0 4px" }, children: t("replay.moment.blocked", blocked.length) }),
         /* @__PURE__ */ jsx35("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.blocked", blocked.length), children: blocked.slice(0, 12).map((c) => /* @__PURE__ */ jsx35("li", { "data-moment-blocked": c.id, children: /* @__PURE__ */ jsx35("span", { className: "oc-fact oc-fact-static", children: /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
           /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
@@ -21825,7 +21851,7 @@ function ReplayPanel({ replay, office, summary: summary2, entries, atMs, nowMs, 
           /* @__PURE__ */ jsx35("time", { dateTime: new Date(e.ms).toISOString(), children: clockLabel(e.ms, t.lang, { day }) }),
           /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
             /* @__PURE__ */ jsx35("span", { className: "oc-fk", children: factText(e, t) }),
-            e.group === "order" && e.result ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+            e.group === "order" && e.result ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-tag", children: t(`orders.result.${e.result}`) })
             ] }) : null,
@@ -21833,11 +21859,11 @@ function ReplayPanel({ replay, office, summary: summary2, entries, atMs, nowMs, 
               " ",
               t("replay.fact.to", STATUS3.has(e.to) ? t(`status.${e.to}`) : e.to)
             ] }) : null,
-            e.group === "cron" && e.title ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+            e.group === "cron" && e.title ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-mono", children: e.title })
             ] }) : null,
-            e.task && e.source !== "cron" ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+            e.task && e.source !== "cron" ? /* @__PURE__ */ jsxs31(Fragment17, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: e.title ? void 0 : t("replay.journal.noTitle"), children: e.title || e.task })
             ] }) : null,
@@ -22757,7 +22783,7 @@ function useQuotaRetry(query, hasWindows) {
 }
 
 // src/ui/UsageDialog.jsx
-import { Fragment as Fragment17, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
+import { Fragment as Fragment18, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
 var WIN_KEY = { "24h": "24h", "7d": "7d", "30d": "30d" };
 function Bar({ parts: parts2, peak, label }) {
   if (!parts2) return /* @__PURE__ */ jsx38("span", { className: "oc-us-bar oc-us-bar-none", "aria-hidden": "true" });
@@ -22942,7 +22968,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
           /* @__PURE__ */ jsx38("span", { className: "oc-dg-spin", "aria-hidden": "true" }),
           t("usage.loading")
         ] }) : null,
-        data ? /* @__PURE__ */ jsxs34(Fragment17, { children: [
+        data ? /* @__PURE__ */ jsxs34(Fragment18, { children: [
           partial.length ? /* @__PURE__ */ jsx38(Notice, { tone: "warn", icon: "alert", role: "status", "data-usage-partial": true, children: t("usage.partial", partial.map((p) => p.source).join(", ")) }) : null,
           !tot ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", icon: "info", "data-usage-none": true, children: agents.absent ? t("usage.noneAbsent", agents.absent) : t("usage.none") }) : /* @__PURE__ */ jsxs34("div", { className: "oc-us-top", children: [
             /* @__PURE__ */ jsxs34("div", { className: "oc-us-tiles", role: "group", "aria-label": t("usage.title"), children: [
@@ -22974,7 +23000,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
               /* @__PURE__ */ jsx38("b", { className: "oc-us-name", title: r.profile, children: r.profile }),
               /* @__PURE__ */ jsx38(Bar, { parts: r.parts, peak: agentPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
               /* @__PURE__ */ jsx38("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: r.state === "ok" ? tokenLabel(r.parts?.total ?? null, t.lang) ?? t("usage.absent") : r.state === "none" ? t("usage.noSession") : t(`usage.reason.${r.reason ?? "missing"}`) }),
-              /* @__PURE__ */ jsx38("span", { className: "oc-faint oc-us-sub", children: r.state === "ok" ? /* @__PURE__ */ jsxs34(Fragment17, { children: [
+              /* @__PURE__ */ jsx38("span", { className: "oc-faint oc-us-sub", children: r.state === "ok" ? /* @__PURE__ */ jsxs34(Fragment18, { children: [
                 t("usage.agents.calls", nf(r.calls) ?? t("usage.absent"), nf(r.sessions) ?? t("usage.absent")),
                 " · ",
                 /* @__PURE__ */ jsx38(Cost, { cost: r.cost, t })
@@ -23164,7 +23190,7 @@ var USAGE_CSS = `
 
 // src/ui/SeatingDialog.jsx
 import { useEffect as useEffect22, useId as useId20, useRef as useRef24, useState as useState22 } from "react";
-import { Fragment as Fragment18, jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
+import { Fragment as Fragment19, jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
 function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   const t = useT();
   const areaRef = useRef24(null);
@@ -23223,7 +23249,7 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
         setAnswer(null);
         onChoice("default");
       }), children: t("llm.seating.revert") }),
-      actions: /* @__PURE__ */ jsxs35(Fragment18, { children: [
+      actions: /* @__PURE__ */ jsxs35(Fragment19, { children: [
         /* @__PURE__ */ jsx39("button", { type: "button", className: "oc-btn", "data-seating-close": true, onClick: onClose, children: t("llm.decor.close") }),
         /* @__PURE__ */ jsxs35("button", { type: "submit", className: "oc-btn oc-primary", "data-seating-run": true, "aria-disabled": blocked ? true : void 0, children: [
           /* @__PURE__ */ jsx39(DlgIcon, { id: "spark", size: 14 }),
@@ -23537,7 +23563,7 @@ function Segmented({ label, value, options, onChange, describedBy }) {
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { Fragment as Fragment19, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
+import { Fragment as Fragment20, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
 var STATE_TONE = { off: "off", ready: "ok", unavailable: "warn", outdated: "warn", cap: "warn", error: "warn" };
 var GAUGE_R = 34;
 function lastLine(state2, feature, t) {
@@ -23643,7 +23669,7 @@ function SettingsFormLlm({ actions = null }) {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
   const title = /* @__PURE__ */ jsx41(SectionTitle, { label: t("llm.title"), where: "server", tip: t("llm.hint") });
-  if (query.isError) return /* @__PURE__ */ jsxs37(Fragment19, { children: [
+  if (query.isError) return /* @__PURE__ */ jsxs37(Fragment20, { children: [
     title,
     /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", "data-llm-unavailable": true, children: t("llm.unavailable") })
   ] });
@@ -23833,7 +23859,7 @@ function SettingsFormLlm({ actions = null }) {
           ] })
         ] })
       ] }),
-      view.lists ? /* @__PURE__ */ jsxs37(Fragment19, { children: [
+      view.lists ? /* @__PURE__ */ jsxs37(Fragment20, { children: [
         /* @__PURE__ */ jsx41(ModelSelect, { lane: "strong", sel: view.selects.strong, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }), tipped: true }),
         /* @__PURE__ */ jsx41(ModelSelect, { lane: "light", sel: view.selects.light, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }) })
       ] }) : /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn oc-lm-wide", role: "status", "data-llm-too-old": true, children: t("llm.grant.tooOld") }),
@@ -23868,7 +23894,7 @@ function SettingsFormLlm({ actions = null }) {
 // src/ui/SettingsFormNotify.jsx
 import { host as host3 } from "@hermes/plugin-sdk";
 import { useEffect as useEffect25, useRef as useRef27, useState as useState25 } from "react";
-import { Fragment as Fragment20, jsx as jsx42, jsxs as jsxs38 } from "react/jsx-runtime";
+import { Fragment as Fragment21, jsx as jsx42, jsxs as jsxs38 } from "react/jsx-runtime";
 var MESSAGING_PATH = "/messaging";
 var selectStyle = {
   font: "inherit",
@@ -23927,7 +23953,7 @@ function SettingsFormNotify() {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
   const title = /* @__PURE__ */ jsx42(SectionTitle, { label: t("notify.title"), where: "server" });
-  if (query.isError) return /* @__PURE__ */ jsxs38(Fragment20, { children: [
+  if (query.isError) return /* @__PURE__ */ jsxs38(Fragment21, { children: [
     title,
     /* @__PURE__ */ jsx42("p", { className: "oc-sx-warn", "data-notify-unavailable": true, children: t("notify.unavailable") })
   ] });
@@ -24080,7 +24106,7 @@ function SettingsFormNotify() {
         control: ({ id, describedBy }) => /* @__PURE__ */ jsx42(Switch, { id, describedBy, checked: quiet2.enabled, ...held(saving), onChange: hold(saving, (checked) => apply({ quiet: { enabled: checked } })) })
       }
     ),
-    quiet2.enabled ? /* @__PURE__ */ jsxs38(Fragment20, { children: [
+    quiet2.enabled ? /* @__PURE__ */ jsxs38(Fragment21, { children: [
       /* @__PURE__ */ jsx42(
         SettingsRow,
         {
@@ -24088,7 +24114,7 @@ function SettingsFormNotify() {
           group: true,
           label: t("notify.quiet.range"),
           help: zone ? t("notify.quiet.clock", zone) : null,
-          control: ({ describedBy }) => /* @__PURE__ */ jsxs38(Fragment20, { children: [
+          control: ({ describedBy }) => /* @__PURE__ */ jsxs38(Fragment21, { children: [
             /* @__PURE__ */ jsx42(
               "select",
               {
@@ -24148,7 +24174,7 @@ function SettingsFormNotify() {
     /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
     preview ? /* @__PURE__ */ jsxs38("div", { "data-notify-preview-box": true, children: [
       /* @__PURE__ */ jsx42(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
-      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment20, { children: [
+      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment21, { children: [
         /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
         /* @__PURE__ */ jsx42(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
       ] }) : null,
@@ -24385,7 +24411,7 @@ ${ringed(".oc-sd-x:focus-visible")}
 `;
 
 // src/ui/SettingsForm.jsx
-import { Fragment as Fragment21, jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
+import { Fragment as Fragment22, jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
 var selectStyle2 = {
   font: "inherit",
   height: "32px",
@@ -24450,7 +24476,7 @@ function SettingsForm({ llm = null }) {
         code
       )) }),
       /* @__PURE__ */ jsxs39("div", { id: `${base}-panel`, className: "oc-sf-panel", role: "tabpanel", tabIndex: 0, "aria-labelledby": `${base}-tab-${tab}`, "data-settings-tab": tab, children: [
-        tab === "general" ? /* @__PURE__ */ jsxs39(Fragment21, { children: [
+        tab === "general" ? /* @__PURE__ */ jsxs39(Fragment22, { children: [
           /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.general"), where: "local" }),
           /* @__PURE__ */ jsx43(
             SettingsRow,
@@ -24505,7 +24531,7 @@ function SettingsForm({ llm = null }) {
             }
           )
         ] }) : null,
-        tab === "game" ? /* @__PURE__ */ jsxs39(Fragment21, { children: [
+        tab === "game" ? /* @__PURE__ */ jsxs39(Fragment22, { children: [
           /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.game"), where: "local" }),
           /* @__PURE__ */ jsx43(
             SettingsRow,
@@ -24518,7 +24544,7 @@ function SettingsForm({ llm = null }) {
             }
           )
         ] }) : null,
-        tab === "replay" ? /* @__PURE__ */ jsxs39(Fragment21, { children: [
+        tab === "replay" ? /* @__PURE__ */ jsxs39(Fragment22, { children: [
           /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.replay"), where: "local" }),
           /* @__PURE__ */ jsx43(
             SettingsRow,
@@ -24528,7 +24554,7 @@ function SettingsForm({ llm = null }) {
               label: t("settings.night"),
               help: t("settings.nightHint"),
               tip: t("settings.nightTip"),
-              control: ({ describedBy }) => /* @__PURE__ */ jsxs39(Fragment21, { children: [
+              control: ({ describedBy }) => /* @__PURE__ */ jsxs39(Fragment22, { children: [
                 /* @__PURE__ */ jsx43(
                   "select",
                   {

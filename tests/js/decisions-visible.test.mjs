@@ -174,3 +174,59 @@ test('agent sheet: « waits for you » comes first under the header, « Decide �
     assert.ok(tr(lang)('ux.agent.decideCard', 'Pick one').startsWith(tr(lang)('ux.agent.decide')), `${lang}: the name of the button starts with its visible label`)
   }
 })
+
+// ===== the reason the bot gave =====
+
+import { toBoard, BLOCK_REASON_MAX } from '../../src/core/office.js'
+import { inboxItems } from '../../src/core/panel.js'
+import { cutWords, oneLine } from '../../src/core/util.js'
+
+const rawBoard = tasks => ({ slug: 'website', tasks })
+const rawCard = (id, status, extra = {}) => ({ id, title: `${id} title`, status, assignee: 'alpha', createdAt: s(NOW - 3_600_000), ...extra })
+
+test('reason: a blocked card carries it to the decision list; no reason → no key (nothing to draw, not even an empty line)', () => {
+  const board = toBoard(rawBoard([
+    rawCard('a', 'blocked', { blockReason: 'Which provider should we pick?' }),
+    rawCard('b', 'blocked'),                                   // an older agent half, or none given
+    rawCard('c', 'blocked', { blockReason: null }),
+    rawCard('d', 'blocked', { blockReason: '   \n\u202e  ' }), // nothing left once cleaned
+    rawCard('e', 'running', { blockReason: 'not blocked: ignored' })
+  ]))
+  const by_ = id => board.tasks.find(t => t.id === id)
+  assert.equal(by_('a').blockReason, 'Which provider should we pick?')
+  for (const id of ['b', 'c', 'd', 'e']) assert.equal('blockReason' in by_(id), false, id)
+  const items = inboxItems({ boards: [board], agents: [] })
+  assert.equal(items.find(i => i.id === 'a').reason, 'Which provider should we pick?')
+  for (const id of ['b', 'c', 'd']) assert.equal('reason' in items.find(i => i.id === id), false, id)
+})
+
+test('reason: hostile text is one clean line, bounded to 280 characters, cut on a word; markup and links stay inert text', () => {
+  const hostile = '<script>alert(1)</script> [open](javascript:alert(1)) **bold** https://example.com/x\u202eevil\u200b\nline two\u2028line three\u0007'
+  const t = toBoard(rawBoard([rawCard('a', 'blocked', { blockReason: hostile })])).tasks[0]
+  assert.equal(t.blockReason, '<script>alert(1)</script> [open](javascript:alert(1)) **bold** https://example.com/xevil line two line three')
+  const long = toBoard(rawBoard([rawCard('a', 'blocked', { blockReason: 'word '.repeat(1000) })])).tasks[0].blockReason
+  assert.ok([...long].length <= BLOCK_REASON_MAX && long.endsWith('word…'), long.slice(-12))
+  assert.equal(BLOCK_REASON_MAX, 280)
+  const solid = toBoard(rawBoard([rawCard('a', 'blocked', { blockReason: 'x'.repeat(5000) })])).tasks[0].blockReason
+  assert.equal([...solid].length, 280)
+  assert.equal(cutWords('short', 280), 'short')
+  assert.equal(cutWords('alpha, beta, gamma', 12), 'alpha…', 'a word is cut whole, and no dangling comma stays before the ellipsis')
+  assert.equal(oneLine(null), '')
+  assert.equal(oneLine(42), '')
+})
+
+test('reason: drawn as text only, with its own unfolding; never a title, a link or a button name', () => {
+  const card = src('src/ui/DecisionCard.jsx')
+  const tab = src('src/ui/DecisionsTab.jsx')
+  assert.match(card, /<Clamped text=\{reason\} className="ux-dc-r"/, 'two lines, unfolded like the title')
+  assert.match(card, /<p ref=\{ref\} id=\{id\} className=\{`\$\{className\}\$\{whole \? ' whole' : ''\}`\} title=\{tip\}>\{children\}\{text\}<\/p>/, 'the text is a child of a paragraph')
+  assert.doesNotMatch(card.slice(card.indexOf('{reason ? (')), /tip=|title=/, 'no tooltip on the reason')
+  assert.doesNotMatch(card, /dangerouslySetInnerHTML|innerHTML|<a\s|href=/)
+  assert.match(tab, /reason=\{guard \? null : c\.reason \?\? null\}/)
+  // the names of the buttons that open it never contain it
+  for (const lang of ['en', 'fr', 'es']) for (const k of ['reason', 'reasonMore', 'reasonLess']) assert.equal(tr(lang)(`ux.dec.${k}`, 'LEAK'), tr(lang)(`ux.dec.${k}`), `${lang} ${k} takes no argument`)
+  for (const f of ['src/ui/Orders.jsx', 'src/ui/DecisionsTab.jsx', 'src/ui/DecisionCard.jsx']) assert.doesNotMatch(src(f), /aria-label=\{[^}]*(reason|blockReason)/, f)
+  // the reason stays on the decision card: no other screen of the page reads it
+  const readers = ['src/ui/AgentTab.jsx', 'src/ui/JournalTab.jsx', 'src/ui/OfficeScene.jsx', 'src/ui/ProjectDock.jsx', 'src/ui/ProjectsTab.jsx', 'src/core/notify.js', 'src/core/notifyFormat.js', 'src/core/hud.js', 'src/core/llm.js', 'src/core/llmAssist.js']
+  for (const f of readers) assert.doesNotMatch(src(f), /blockReason/, `${f} does not read the reason of a blocked card`)
+})
