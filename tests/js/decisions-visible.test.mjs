@@ -292,7 +292,10 @@ test('under a project filter the chip is on the sort line (one « ? ») and the 
   assert.match(tab, /\{project \? <FilterChip slug=\{project\}/)
   assert.match(tab, /className=\{project \? 'lbl ux-vh' : 'lbl'\} id="ux-sort-l"/, 'the word stays for the screen reader')
   const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
-  assert.match(css, /\.ux-pbar\.flt\{flex-wrap:nowrap\}/)
+  // the chip says which project is filtered: it shares the sort line when there is room and moves under it otherwise, never squeezed
+  // below its own name (in a 300 px side pane a squeezed chip read « d… »)
+  assert.doesNotMatch(css, /\.ux-pbar\.flt\{[^}]*flex-wrap:nowrap/, 'the sort line may wrap under a filter')
+  assert.match(css, /\.ux-pbar\.flt \.ux-prjx\{flex:0 0 auto;max-width:100%\}/, 'the chip keeps its name and never overflows the pane')
   const frame = src('src/ui/DecisionCard.jsx')
   assert.match(frame, /const chip = !grouped && !filtered/)
 })
