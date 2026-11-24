@@ -13,8 +13,12 @@ export function postcardBuffer(layout, model, frame = 0) {
   return { W: px.W, H: px.H, d: px.d }
 }
 
-/** `officecraft-2026-11-09.png`: the date is in the file name only, never in the picture. */
-export const postcardName = nowMs => `officecraft-${new Date(nowMs).toISOString().slice(0, 10)}.png`
+/** `officecraft-2026-11-09.png`: the date is in the file name only, never in the picture. It is the user's calendar day, not the UTC one. */
+export const postcardName = nowMs => {
+  const d = new Date(nowMs)
+  const two = n => String(n).padStart(2, '0')
+  return `officecraft-${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}.png`
+}
 
 /** Encode the buffer as a PNG and hand it to the user through a download link. Resolves the link's file name, or null. */
 export function savePostcard(buffer, name) {
