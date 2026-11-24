@@ -45,6 +45,8 @@ GUARD_KEY_RE = re.compile(r"^oc-camp:([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab
 GUARD_COLUMNS = ("idempotency_key", "created_by")   # read to recognise the guards of a campaign; never served
 INTERNAL_LISTING_FALLBACK = ("kanban", "tool", "oneshot")   # hermes_state_sessions.INTERNAL_LISTING_SOURCES on the verified base
 DESCRIPTION_MAX = 280
+BLOCK_REASON_MAX = 280    # the reason a bot gave when it blocked a card: bounded like a description, cut on a word
+BLOCK_REASON_READ = 2000  # characters of it ever looked at (Hermes accepts any length)
 OWN_SKILLS_MAX = 40
 MODEL_NAME_MAX = 120   # a model/provider name, never a config block (same bound as workerModel)
 SMALL_SKILL_SET = 12   # a profile that kept this few skills hand-picked them: all of them describe it
@@ -204,9 +206,48 @@ def _campaign_sizes(guards: list, keys: list[str]) -> None:
             card["campaignSize"] = sum(1 for key in keys if key.startswith(prefix))
 
 
-def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: bool = True) -> dict:
+def _block_reason(payload: Any) -> Optional[str]:
+    """The reason a bot gave when it blocked a card (``reason`` of the payload of a ``blocked`` event), as text the page may draw:
+    line breaks and runs of blanks become one space, unprintable characters go (``printable``), at most ``BLOCK_REASON_MAX``
+    characters, cut on a word and closed with « … ». None when there is none. The text is written by a bot: it is served to the
+    page only (``/live``), never to a notification, the journal or a prompt."""
+    try:
+        reason = json.loads(payload).get("reason") if isinstance(payload, str) and payload.lstrip().startswith("{") else None
+    except (ValueError, AttributeError):
+        return None
+    if not isinstance(reason, str):
+        return None
+    text = printable(re.sub(r"\s+", " ", reason[:BLOCK_REASON_READ]))
+    if len(text) > BLOCK_REASON_MAX:
+        head = text[:BLOCK_REASON_MAX - 1]
+        if text[BLOCK_REASON_MAX - 1] != " " and head.rfind(" ") >= BLOCK_REASON_MAX // 2:
+            head = head[:head.rfind(" ")]
+        text = head.rstrip(" ,;:.—–-·(") + "…"
+    return text or None
+
+
+def read_block_reasons(con: sqlite3.Connection, ids: list[str]) -> dict[str, Optional[str]]:
+    """Card id -> the reason of its LAST ``blocked`` event, for the given cards (None for one without). A Hermes whose events
+    carry no such table or columns answers None for every card: no error, no flag (the reason is a nicety, never a requirement)."""
+    out: dict[str, Optional[str]] = {i: None for i in ids}
+    try:
+        if not {"task_id", "kind", "payload"} <= _columns(con, "task_events"):
+            return out
+        for start in range(0, len(ids), 400):
+            chunk = ids[start:start + 400]
+            for task, payload in con.execute(
+                    "SELECT e.task_id, e.payload FROM task_events e WHERE e.kind = 'blocked' AND e.task_id IN (%s) "
+                    "AND e.id = (SELECT MAX(l.id) FROM task_events l WHERE l.task_id = e.task_id AND l.kind = 'blocked')" % ",".join("?" * len(chunk)), chunk):
+                out[task] = _block_reason(payload)
+    except sqlite3.Error:
+        return {i: None for i in ids}
+    return out
+
+
+def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: bool = True, reasons: bool = False) -> dict:
     """One board: its non-archived cards (whitelisted columns) and, with ``history``, finished
-    runs and whitelisted events. An empty board is returned too (an empty pod is a fact)."""
+    runs and whitelisted events. An empty board is returned too (an empty pod is a fact).
+    ``reasons`` (the page's ``/live`` only): each ``blocked`` card also carries ``blockReason`` (``_block_reason``, None when it has none)."""
     board: dict = {"slug": slug, "createdAt": iso_to_epoch(created_at), "tasks": [], "runs": [], "events": []}
     source = f"kanban:{_safe(slug)}"
     if not Path(db_path).is_file():
@@ -237,6 +278,11 @@ def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: boo
                 board["tasks"][-1].update(parsed[0])
                 guards.append((board["tasks"][-1], parsed[1]))
         _campaign_sizes(guards, every_key)
+        if reasons:
+            blocked = [t for t in board["tasks"] if t["status"] == "blocked"]
+            found = read_block_reasons(con, [t["id"] for t in blocked])
+            for t in blocked:
+                t["blockReason"] = found.get(t["id"])
         if history:
             run_cols = _columns(con, "task_runs")
             if not {"profile", "started_at", "ended_at", "outcome"} <= run_cols:
@@ -265,13 +311,13 @@ def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: boo
     return board
 
 
-def hermes_boards(*, history: bool = True) -> list[dict]:
+def hermes_boards(*, history: bool = True, reasons: bool = False) -> list[dict]:
     """Every live (non-archived) board of this Hermes home, ``default`` first."""
     from hermes_cli.kanban_db_boards import list_boards
     out = []
     for meta in list_boards(include_archived=False):
         try:
-            out.append(read_board(Path(meta["db_path"]), meta["slug"], created_at=meta.get("created_at"), history=history))
+            out.append(read_board(Path(meta["db_path"]), meta["slug"], created_at=meta.get("created_at"), history=history, reasons=reasons))
         except sqlite3.Error as exc:
             # a board being migrated, locked or damaged: skipped this round (never fails the whole read), and said
             flag(f"kanban:{_safe(meta['slug'])}", classify(exc))
