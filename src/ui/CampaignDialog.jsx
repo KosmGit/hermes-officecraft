@@ -6,6 +6,7 @@ import {
   renamePhase, clearSession, slugState, slugify, summary, templateCards, toggleParent, windowReducer, workCards
 } from '../core/campaign.js'
 import { depthOf } from '../core/campaignLayout.js'
+import { numberText } from '../core/format.js'
 import { workReady } from '../core/llm.js'
 import { pricesOf } from '../core/llmCampaignUi.js'
 import { UNDO_SECONDS, isBusy } from '../core/orders.js'
@@ -162,7 +163,7 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
               </select></label>
           </div>
           {A?.ready.cardbody && A.body.card === c.id && A.body.phase === 'review' ? <BodyProposal A={A} card={c} code={code} /> : (
-            <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${id}-body`}>{t('campaign.f.body')}</label><small className={`oc-mono${blen > MAX_BODY * 0.9 ? ' near' : ''}`} id={`${id}-body-n`}>{blen} / {MAX_BODY.toLocaleString('en').replace(',', ' ')}</small><CardMark A={A} card={c} field="body" label={t('campaign.f.body')} id={`${id}-body-mk`} /></span>
+            <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${id}-body`}>{t('campaign.f.body')}</label><small className={`oc-mono${blen > MAX_BODY * 0.9 ? ' near' : ''}`} id={`${id}-body-n`}>{blen} / {numberText(MAX_BODY, t.lang)}</small><CardMark A={A} card={c} field="body" label={t('campaign.f.body')} id={`${id}-body-mk`} /></span>
               <textarea id={`${id}-body`} data-f="body" rows={3} maxLength={MAX_BODY} value={c.body} placeholder={t('campaign.f.bodyPh')} aria-describedby={`${id}-body-n ${id}-body-mk`} className={A?.isMarked(c, 'body') ? 'oc-lm-f' : undefined} onChange={e => onPatch(c.id, { body: e.target.value })} /></div>
           )}
           {A?.ready.cardbody ? <BodyAsk A={A} card={c} code={code} /> : null}

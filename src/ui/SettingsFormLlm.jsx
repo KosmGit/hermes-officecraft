@@ -214,7 +214,7 @@ export function SettingsFormLlm({ actions = null }) {
         <span className="oc-lm-ctl">
           <HelpTip name={name}>
             <p>{t(`llm.f.${f}.what`)}</p>
-            <p>{`${t('llm.sends', t(`llm.f.${f}.detail`))}.`}</p>
+            <p>{t('llm.sendsLine', t(`llm.f.${f}.detail`))}</p>
             <p data-llm-cost>{t('llm.cost', t(`llm.f.${f}.cost`))}{last ? ` ${last}` : ''}</p>
             {f === 'thoughts' ? <p>{t('llm.thoughts.note')}</p> : null}
           </HelpTip>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { MAX_BODY } from '../core/campaign.js'
+import { numberText } from '../core/format.js'
 import { formatUsd, workReady } from '../core/llm.js'
 import { formatWait, pendingOffer } from '../core/llmAssist.js'
 import { NOTES_MAX, emptyMarks, markedFields, pruneMarks, validateMarks } from '../core/llmCampaign.js'
@@ -365,7 +366,7 @@ export function GraphPanel({ A, draft, colors, onClose }) {
         </div>
       ) : null}
       {/* the <label> holds the name alone: the counter sits beside it and reaches the field by aria-describedby */}
-      <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${fid}-notes`}>{t('llm.cg.notes')}</label><small className="oc-mono" id={`${fid}-notes-n`} data-lm-notes-count>{c.notes.length}/{NOTES_MAX.toLocaleString('en').replace(',', ' ')}</small></span>
+      <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${fid}-notes`}>{t('llm.cg.notes')}</label><small className="oc-mono" id={`${fid}-notes-n`} data-lm-notes-count>{c.notes.length}/{numberText(NOTES_MAX, t.lang)}</small></span>
         <textarea id={`${fid}-notes`} aria-describedby={`${fid}-notes-n`} data-lm-notes rows={3} maxLength={NOTES_MAX} value={c.notes} placeholder={t('llm.cg.notesPh')} onChange={e => c.setNotes(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.stopPropagation(); if (goal) c.ask() } }} /></div>
       <div className="oc-lm-foot">
@@ -418,7 +419,7 @@ export function BodyProposal({ A, card, code }) {
         <summary><DlgIcon id="chev" size={12} />{t('llm.body.current', b.before.length)}</summary>
         <p data-lm-before>{b.before.trim() ? b.before : '—'}</p>
       </details>
-      <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${fid}-after`}>{t('llm.body.after')}</label><small className="oc-mono" id={`${fid}-after-n`} data-lm-after-count>{b.text.length} / {MAX_BODY.toLocaleString('en').replace(',', ' ')}</small>
+      <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${fid}-after`}>{t('llm.body.after')}</label><small className="oc-mono" id={`${fid}-after-n`} data-lm-after-count>{b.text.length} / {numberText(MAX_BODY, t.lang)}</small>
         {mine ? <span className="oc-lm-mk-static" id={`${fid}-after-mk`}><DlgIcon id="spark" size={12} />{t('llm.mark.text')}</span> : null}</span>
         <textarea id={`${fid}-after`} aria-describedby={`${fid}-after-n${mine ? ` ${fid}-after-mk` : ''}`} data-lm-after rows={9} maxLength={MAX_BODY} value={b.text} className={mine ? 'oc-lm-f' : undefined} onChange={e => b.setText(e.target.value)} /></div>
       <div className="oc-lm-act">

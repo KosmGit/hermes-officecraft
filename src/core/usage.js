@@ -10,6 +10,7 @@
  *     are never added together), always « Hermes' estimate, not an invoice »;
  *   - the breakdown by model includes auxiliary tasks and can exceed the sessions' total: it is shown as a breakdown, never added to it.
  */
+import { numberText } from './format.js'
 import { toPartial } from './history.js'
 import { clockLabel, toReplay } from './replay.js'
 import { count, num, str } from './util.js'
@@ -330,7 +331,7 @@ export function tokenLabel(n, lang = 'en') {
 export function exactLabel(n, lang = 'en') {
   if (n == null || !Number.isFinite(n)) return null
   try {
-    return new Intl.NumberFormat(lang).format(n)
+    return numberText(n, lang)
   } catch {
     return String(n)
   }

@@ -5,6 +5,7 @@ import {
   NOTIFY_TYPES, changeBody, cooldownUntil, hourChoices, previewOf, previewPieces, previewPlatform, quietSentence, sameForAll, sharedRoute,
   testState, testView, toggleRoute, typesWithoutRoute
 } from '../core/notify.js'
+import { timeText } from '../core/format.js'
 import { sendTest, useNotify, useSaveNotify } from '../data/notify.js'
 import { held, hold } from './hold.js'
 import { SectionTitle, SettingsIcon, SettingsRow, Switch } from './SettingsKit.jsx'
@@ -136,7 +137,7 @@ export function SettingsFormNotify() {
   const testLine = view => {
     if (!view.line) return null
     const { key } = view.line
-    if (key === 'sent') return t('notify.tested.sent', new Date(view.line.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    if (key === 'sent') return t('notify.tested.sent', timeText(view.line.at, t.lang))
     if (key === 'wait') return t('notify.tested.wait', view.line.seconds)
     return t(`notify.tested.${key}`)
   }

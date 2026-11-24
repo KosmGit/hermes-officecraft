@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useState } from 'react'
 
+import { percentText } from '../core/format.js'
 import { clockLabel, DEFAULT_NIGHT } from '../core/replay.js'
 import {
   USAGE_METRICS, USAGE_WINDOWS, agentRows, daysFor, boardRows, boardsAvailable, dailySeries, exactLabel, modelRows, peakOf, percentLabel, quotaOf, rangeLabel, share, splitShares, tokenLabel, usageWindow, usdLabel
@@ -67,7 +68,7 @@ function Donut({ parts, total, t }) {
       </svg>
       <ul className="oc-us-legend" aria-label={t('usage.split')}>
         {items.map(({ key, pct }) => (
-          <li key={key}><i className={`s-${key}`} aria-hidden="true" />{t(`usage.part.${key === 'in' ? 'input' : key === 'out' ? 'output' : 'cache'}`)} <b>{pct} %</b></li>
+          <li key={key}><i className={`s-${key}`} aria-hidden="true" />{t(`usage.part.${key === 'in' ? 'input' : key === 'out' ? 'output' : 'cache'}`)} <b>{percentText(pct, t.lang)}</b></li>
         ))}
       </ul>
     </div>
