@@ -413,7 +413,7 @@ def test_the_answer_is_the_reread_state_not_the_assumed_one(world, monkeypatch):
 
 def test_journal_whitelist_drops_everything_else_and_cuts_strings(world):
     audit = _m("audit")
-    audit.append({"id": "x" * 400, "verb": "comment", "board": "b", "task": "t_00000001", "result": "done", "risk": "final",
+    audit.append({"id": "x" * 100, "reason": "r" * 400, "verb": "comment", "board": "b", "task": "t_00000001", "result": "done", "risk": "final",
                   "text": "SECRET COMMENT", "body": "SECRET", "command": "rm -rf /", "path": "/home/x", "token": "abc",
                   "before": {"status": "blocked", "title": "SECRET TITLE"}, "after": {"status": "ready", "path": "/p"},
                   "len": 14, "headers": {"authorization": "Bearer abc"}, "error": "Traceback ...", "source": "agent"})
@@ -422,7 +422,7 @@ def test_journal_whitelist_drops_everything_else_and_cuts_strings(world):
     assert set(line) <= set(audit.FIELDS)
     for forbidden in ("SECRET", "rm -rf", "/home", "abc", "Traceback", "authorization"):
         assert forbidden not in raw
-    assert len(line["id"]) == 256 and line["before"] == {"status": "blocked"} and line["after"] == {"status": "ready"}
+    assert len(line["id"]) == 100 and "reason" not in line and line["before"] == {"status": "blocked"} and line["after"] == {"status": "ready"}
 
 
 def test_journal_rejects_bad_types_and_values(world):
@@ -570,3 +570,54 @@ def test_audit_write_failure_is_said_not_hidden(world, monkeypatch):
     assert r.status_code == 503 and "secret" not in r.text
     done = order(world, "unblock", "t_00000001")   # the order itself is done and says the journal missed it
     assert done.json()["result"] == "done" and done.json()["audited"] is False
+
+
+# ---------------------------------------------------------------- the journal keeps names and codes, and one line per id
+def test_the_same_page_line_sent_twice_at_once_is_written_once(world, monkeypatch):
+    import threading
+    audit, orders = _m("audit"), _m("orders")
+    real, inside = audit.append, threading.Barrier(2, timeout=1)
+
+    def slow_append(entry, directory=None):
+        try:
+            inside.wait()   # both twins are in the write at once only when nothing holds the second one back
+        except threading.BrokenBarrierError:
+            pass
+        return real(entry, directory)
+
+    monkeypatch.setattr(audit, "append", slow_append)
+    body, out = audit_body(), []
+    twins = [threading.Thread(target=lambda: out.append(orders.run_audit(orders.AuditIn(**body)))) for _ in range(2)]
+    for t in twins:
+        t.start()
+    for t in twins:
+        t.join()
+    assert sorted(o["replayed"] for o in out) == [False, True] and len(journal(world)) == 1
+
+
+def test_an_order_older_than_the_fifty_lines_served_is_still_known_after_a_restart(world):
+    orders = _m("orders")
+    first = order(world, "comment", "t_00000002", text="one").json()
+    for _ in range(120):
+        assert world.post(f"{BASE}/audit", json=audit_body()).status_code == 200
+    orders.reset()   # a restart: the table is fed from the journal
+    again = order(world, "comment", "t_00000002", text="one", oid=first["id"]).json()
+    assert again["replayed"] is True and again["at"] == first["at"], "known from the journal: nothing runs a second time"
+    assert len(world.get(f"{BASE}/orders?limit=50").json()["entries"]) == 50, "the route still serves fifty lines at most"
+
+
+@pytest.mark.parametrize("field,value", [("board", "Not A Slug <b>free text</b>"), ("board", "x" * 65), ("task", "t_1; DROP TABLE"), ("reason", "Typed by hand"),
+                                         ("profile", "../etc"), ("id", "an id with spaces")])
+def test_a_text_that_is_not_a_name_or_a_code_never_enters_the_journal(tmp_path, field, value):
+    audit = _m("audit")
+    line = audit.append({"id": str(uuid.uuid4()), "verb": "campaign", "risk": "final", "result": "refused", "source": "agent", field: value}, tmp_path)
+    assert field not in line, line
+    assert value not in (tmp_path / audit.FILE_NAME).read_text()
+
+
+def test_names_and_codes_of_the_right_shape_are_kept(tmp_path):
+    audit = _m("audit")
+    entry = {"id": str(uuid.uuid4()), "verb": "campaign", "risk": "final", "result": "refused", "source": "agent", "board": "demo-store_2",
+             "task": "t_0000000a", "reason": "bad_slug", "profile": "alpha"}
+    line = audit.append(entry, tmp_path)
+    assert {k: line[k] for k in entry} == entry

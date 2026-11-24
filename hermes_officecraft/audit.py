@@ -38,6 +38,11 @@ _STATUS_RE = re.compile(r"^[a-z_]{1,32}$")
 # the id Hermes gave an approval request (`request_id`, a 32-hex uuid), as the page read it in `approval.pending`
 # before answering. An opaque id, never a command or a description; anything else is dropped, not cut (a cut id names nothing).
 REQUEST_RE = re.compile(r"^[A-Za-z0-9_-]{8,128}$")
+# the other texts of a line are names and codes, each with its shape: a value of another shape is dropped, not cut, so that no free
+# text (a board slug refused for its shape, a reason typed by hand) ever reaches the journal or is served back from it
+_SHAPES = {"id": re.compile(r"^[A-Za-z0-9_#:.-]{1,128}$"),   # a uuid, or the short handle of a recipient (« platform#hash »)
+           "board": re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$"), "profile": re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$"),
+           "task": re.compile(r"^[A-Za-z0-9_-]{1,64}$"), "reason": re.compile(r"^[a-z][a-z0-9_]{0,63}$")}
 
 _write_lock = threading.Lock()
 
@@ -104,7 +109,7 @@ def clean(entry: dict) -> dict:
                 out[key] = value
         else:   # id, board, task, reason, profile
             text = _text(value)
-            if text is not None:
+            if text is not None and _SHAPES[key].fullmatch(text):
                 out[key] = text
     return out
 
@@ -160,9 +165,9 @@ def _tail_lines(path: Path) -> list[str]:
     return lines
 
 
-def read_tail(limit: int = 20, directory: Path | None = None) -> list[dict]:
-    """The last ``limit`` (at most 50) entries, newest first, each passed through the whitelist again."""
-    limit = max(1, min(int(limit), MAX_LIMIT))
+def read_tail(limit: int = 20, directory: Path | None = None, *, cap: int = MAX_LIMIT) -> list[dict]:
+    """The last ``limit`` (at most ``cap``: 50 for the route) entries, newest first, each passed through the whitelist again."""
+    limit = max(1, min(int(limit), cap))
     folder = Path(directory) if directory is not None else data_dir()
     entries: list[dict] = []
     for name in (FILE_NAME, FILE_NAME + ".1"):

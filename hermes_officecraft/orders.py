@@ -93,6 +93,7 @@ class AuditIn(BaseModel):
 
 _run_lock = threading.Lock()          # one order at a time on the server
 _state_lock = threading.Lock()
+_audit_lock = threading.Lock()        # one journal line of the page at a time
 _seen: "OrderedDict[str, dict]" = OrderedDict()   # id -> the answer given (without `replayed`)
 _journal_loaded = False
 
@@ -138,7 +139,7 @@ def _load_journal() -> None:
             return
         _journal_loaded = True
     try:
-        entries = audit.read_tail(audit.MAX_LIMIT)
+        entries = audit.read_tail(REMEMBERED, cap=REMEMBERED)   # as many ids as the table keeps, not the 50 lines the route serves
     except Exception as exc:   # noqa: BLE001 - the replay guard degrades to memory only
         log.warning("hermes-officecraft journal not read at start: %s", type(exc).__name__)
         return
@@ -284,13 +285,14 @@ def run_order(order: OrderIn) -> tuple[int, dict]:
 def run_audit(entry: AuditIn) -> dict:
     """Journal an order the page did. Executes nothing; the same id twice writes one line."""
     _load_journal()
-    again = _replayed(entry.id, entry.verb, entry.board, entry.task)
-    if again is not None:
-        return {"ok": again.get("reason") != "id_conflict", "id": entry.id, "replayed": again.get("reason") != "id_conflict",
-                **({"reason": "id_conflict"} if again.get("reason") == "id_conflict" else {})}
-    line = {**entry.model_dump(exclude_none=True), "source": "page"}
-    written = audit.append(line)
-    _remember({"ok": entry.result == "done", "id": entry.id, "verb": entry.verb, "board": entry.board, "task": entry.task,
-               "risk": entry.risk, "result": entry.result, "before": written.get("before"), "after": written.get("after"),
-               "at": written.get("ts"), "audited": True, **({"reason": entry.reason} if entry.reason else {})})
+    with _audit_lock:   # the check and the write are one step: the same id sent twice at once writes one line
+        again = _replayed(entry.id, entry.verb, entry.board, entry.task)
+        if again is not None:
+            return {"ok": again.get("reason") != "id_conflict", "id": entry.id, "replayed": again.get("reason") != "id_conflict",
+                    **({"reason": "id_conflict"} if again.get("reason") == "id_conflict" else {})}
+        line = {**entry.model_dump(exclude_none=True), "source": "page"}
+        written = audit.append(line)
+        _remember({"ok": entry.result == "done", "id": entry.id, "verb": entry.verb, "board": entry.board, "task": entry.task,
+                   "risk": entry.risk, "result": entry.result, "before": written.get("before"), "after": written.get("after"),
+                   "at": written.get("ts"), "audited": True, **({"reason": entry.reason} if entry.reason else {})})
     return {"ok": True, "id": entry.id, "replayed": False}
