@@ -68,7 +68,15 @@ export function podArea(layout, p) {
 /** Selection square of an agent at rest (no halo): a light neutral, readable on the floor by day and by night. */
 const RING_REST = [226, 230, 238]
 
-export function drawScene(layout, base, model, frame = 0) {
+/** The frame buffer of each layout, for the callers that paint frame after frame (`opts.reuse`). */
+const FRAME_BUFFERS = new WeakMap()
+
+/**
+ * One frame of the room: { W, H, d } (RGBA). `d` is a new buffer, owned by the caller. A caller that paints the same layout again and again and
+ * uses each frame before the next one (the page's animation) passes `{ reuse: true }`: the frame is then drawn into the buffer of that layout,
+ * the same one every time (a 756 KB buffer per frame at 12 bots is ~10 GB an hour for the collector). Such a caller must copy `d` to keep it.
+ */
+export function drawScene(layout, base, model, frame = 0, opts = null) {
   const { pods, lounge, X, Y } = layout
   const night = !!model.night
   const art = !model.classic   // the second art pass (base.js); false = the first art direction, kept pixel for pixel
@@ -79,7 +87,8 @@ export function drawScene(layout, base, model, frame = 0) {
   const ops = model.ops
   const selected = model.selected
   const accent = model.accent
-  const px = new Px(layout.W, layout.H, layout.origin.ox, layout.origin.oy)
+  const px = new Px(layout.W, layout.H, layout.origin.ox, layout.origin.oy, opts?.reuse ? FRAME_BUFFERS.get(layout) : null)
+  if (opts?.reuse) FRAME_BUFFERS.set(layout, px.d)
   px.d.set(base.d)
   px.L = base.L
   const P = (x, y, z) => px.P(x, y, z)

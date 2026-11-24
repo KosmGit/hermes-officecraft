@@ -126,6 +126,15 @@ const MEMO_MAX = 256
 
 /** Best role from name / skills / description. why = { kind: 'name'|'skill'|'description', hit } (the UI words it). Memoised by (name, description, skills): pure, and called for every agent on every repaint. */
 export function detectRole(a) {
+  // the same agent object, drawn frame after frame: no key to build while what it was judged on is the very same
+  const seen = ROLE_OF.get(a)
+  if (seen && seen.name === a.name && seen.description === a.description && seen.skills === a.skills && seen.copied === a.copiedSkills) return seen.best
+  const best = detectRoleByKey(a)
+  ROLE_OF.set(a, { name: a.name, description: a.description, skills: a.skills, copied: a.copiedSkills, best })
+  return best
+}
+const ROLE_OF = new WeakMap()
+function detectRoleByKey(a) {
   const key = JSON.stringify([a.name, a.description, ownSkills(a).map(s => [s.name, s.category, s.tags]), a.copiedSkills || null])
   if (ROLE_MEMO.has(key)) return ROLE_MEMO.get(key)
   const best = scoreRole(a)

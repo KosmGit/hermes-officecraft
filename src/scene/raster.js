@@ -7,12 +7,13 @@ import { TH2, TW2, projectAt } from './constants.js'
 export const LIGHT_STEPS = 12
 
 export class Px {
-  constructor(w, h, ox = 0, oy = 0) {
+  /** `buf`: a buffer of exactly w * h * 4 bytes to draw into (its content is the caller's to overwrite), else a new one. */
+  constructor(w, h, ox = 0, oy = 0, buf = null) {
     this.w = w
     this.h = h
     this.ox = ox
     this.oy = oy
-    this.d = new Uint8ClampedArray(w * h * 4)
+    this.d = buf && buf.length === w * h * 4 ? buf : new Uint8ClampedArray(w * h * 4)
     this.L = null
   }
 

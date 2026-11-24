@@ -60,7 +60,15 @@ function blit(cv, d, W, H, store) {
 }
 
 /** What the baked base depends on: structure and light, not the per-poll noise (heartbeats, titles) and not the minute (the clock hands are drawn per frame). */
-const baseKey = (layout, model) =>
+const BASE_KEYS = new WeakMap()   // model -> { layout, key }: the key of a model and its layout is built once (a frame asks for it 12 times a second)
+const baseKey = (layout, model) => {
+  const hit = BASE_KEYS.get(model)
+  if (hit && hit.layout === layout) return hit.key
+  const key = baseKeyOf(layout, model)
+  BASE_KEYS.set(model, { layout, key })
+  return key
+}
+const baseKeyOf = (layout, model) =>
   JSON.stringify([
     layout.W, layout.H, model.night, model.decor, model.seating,
     layout.pods.map(p => p.seats.map(s => s.agent?.name ?? null)),   // who sits where (the Seating function moves the neighbours, hence the lights and shadows)
@@ -258,7 +266,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
     const key = baseKey(cur.layout, cur.model)
     if (baseRef.current.key !== key) baseRef.current = { key, base: buildBase(cur.layout, cur.model) }
     const accent = (accentRef.current && readAccent(accentRef.current)) || undefined
-    const px = drawScene(cur.layout, baseRef.current.base, { ...cur.model, markers: false, selected: cur.selected, accent: accent || cur.model.accent, dim: cur.dim }, frame)
+    const px = drawScene(cur.layout, baseRef.current.base, { ...cur.model, markers: false, selected: cur.selected, accent: accent || cur.model.accent, dim: cur.dim }, frame, { reuse: true })   // blit copies it before the next frame
     blit(cv, px.d, cur.layout.W, cur.layout.H, artStore)
     paintedRef.current += 1
     cv.dataset.frames = String(paintedRef.current)
