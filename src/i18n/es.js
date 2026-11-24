@@ -311,7 +311,7 @@ export const es = {
     },
     created: {
       title: 'Campaña creada: está lista y aún no se ejecuta nada.',
-      body: (n, links = 0, blocked = 0, running = 0, board = '') => `Estado verificado: ${n}/${n} tarjetas y ${links} enlaces idénticos a la vista previa, ${blocked} barrera(s) bloqueada(s), ${running} en curso.${board ? ` Proyecto ${board} creado.` : ''}`,
+      body: (n, links = 0, blocked = 0, running = 0, board = '') => `Estado verificado: ${n}/${n} tarjetas y ${links} ${links === 1 ? 'enlace' : 'enlaces'} idénticos a la vista previa, ${blocked} barrera(s) bloqueada(s), ${running} en curso.${board ? ` Proyecto ${board} creado.` : ''}`,
       where: 'Cerrar esta ventana no cancela nada: la barrera espera en Decisiones, como tarjeta «Campaña» con el botón «Lanzar».'
     },
     launched: {

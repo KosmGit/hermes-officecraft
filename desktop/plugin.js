@@ -5037,7 +5037,7 @@ var en = {
     },
     created: {
       title: "Campaign created. It is ready; nothing is running.",
-      body: (n, links = 0, blocked = 0, running = 0, board = "") => `Verified: ${n}/${n} cards and ${links} links match the preview, ${blocked} guard(s) blocked, ${running} running.${board ? ` Project ${board} created.` : ""}`,
+      body: (n, links = 0, blocked = 0, running = 0, board = "") => `Verified: ${n}/${n} cards and ${links} ${links === 1 ? "link" : "links"} match the preview, ${blocked} guard(s) blocked, ${running} running.${board ? ` Project ${board} created.` : ""}`,
       where: "Closing this window cancels nothing. The guard waits in Decisions as a “Campaign” card with a “Launch” button."
     },
     launched: {
@@ -6753,7 +6753,7 @@ var es = {
     },
     created: {
       title: "Campaña creada: está lista y aún no se ejecuta nada.",
-      body: (n, links = 0, blocked = 0, running = 0, board = "") => `Estado verificado: ${n}/${n} tarjetas y ${links} enlaces idénticos a la vista previa, ${blocked} barrera(s) bloqueada(s), ${running} en curso.${board ? ` Proyecto ${board} creado.` : ""}`,
+      body: (n, links = 0, blocked = 0, running = 0, board = "") => `Estado verificado: ${n}/${n} tarjetas y ${links} ${links === 1 ? "enlace" : "enlaces"} idénticos a la vista previa, ${blocked} barrera(s) bloqueada(s), ${running} en curso.${board ? ` Proyecto ${board} creado.` : ""}`,
       where: "Cerrar esta ventana no cancela nada: la barrera espera en Decisiones, como tarjeta «Campaña» con el botón «Lanzar»."
     },
     launched: {
@@ -8470,7 +8470,7 @@ var fr = {
     },
     created: {
       title: "Campagne créée : elle est prête, rien n’a démarré.",
-      body: (n, links = 0, blocked = 0, running = 0, board = "") => `État vérifié : ${n}/${n} cartes et ${links} liens identiques à l’aperçu, ${blocked} verrou(s) en place, ${running} en cours.${board ? ` Projet ${board} créé.` : ""}`,
+      body: (n, links = 0, blocked = 0, running = 0, board = "") => `État vérifié : ${n}/${n} cartes et ${links} ${links === 1 ? "lien" : "liens"} identiques à l’aperçu, ${blocked} verrou(s) en place, ${running} en cours.${board ? ` Projet ${board} créé.` : ""}`,
       where: "Fermer cette fenêtre n’annule rien : la campagne vous attend dans Décisions, sur une carte « Campagne » avec le bouton « Lancer »."
     },
     launched: {

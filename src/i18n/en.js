@@ -312,7 +312,7 @@ export const en = {
     },
     created: {
       title: 'Campaign created. It is ready; nothing is running.',
-      body: (n, links = 0, blocked = 0, running = 0, board = '') => `Verified: ${n}/${n} cards and ${links} links match the preview, ${blocked} guard(s) blocked, ${running} running.${board ? ` Project ${board} created.` : ''}`,
+      body: (n, links = 0, blocked = 0, running = 0, board = '') => `Verified: ${n}/${n} cards and ${links} ${links === 1 ? 'link' : 'links'} match the preview, ${blocked} guard(s) blocked, ${running} running.${board ? ` Project ${board} created.` : ''}`,
       where: 'Closing this window cancels nothing. The guard waits in Decisions as a “Campaign” card with a “Launch” button.'
     },
     launched: {

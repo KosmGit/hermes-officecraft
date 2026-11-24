@@ -314,7 +314,7 @@ export const fr = {
     },
     created: {
       title: 'Campagne créée : elle est prête, rien n’a démarré.',
-      body: (n, links = 0, blocked = 0, running = 0, board = '') => `État vérifié : ${n}/${n} cartes et ${links} liens identiques à l’aperçu, ${blocked} verrou(s) en place, ${running} en cours.${board ? ` Projet ${board} créé.` : ''}`,
+      body: (n, links = 0, blocked = 0, running = 0, board = '') => `État vérifié : ${n}/${n} cartes et ${links} ${links === 1 ? 'lien' : 'liens'} identiques à l’aperçu, ${blocked} verrou(s) en place, ${running} en cours.${board ? ` Projet ${board} créé.` : ''}`,
       where: 'Fermer cette fenêtre n’annule rien : la campagne vous attend dans Décisions, sur une carte « Campagne » avec le bouton « Lancer ».'
     },
     launched: {

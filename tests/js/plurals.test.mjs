@@ -24,6 +24,7 @@ const KEYS = {
   'orders.effect.comment': n(),
   'orders.effect.cancel': n(),
   'orders.done.campaign': second('website'),
+  'campaign.created.body': second(5),
   'game.levelTop': n(),
   'game.toast.many': n(),
   'game.collection.summary': n(9),
@@ -77,9 +78,9 @@ const KEYS = {
 
 // what a plural noun after « 1 » looks like, per language (the words these keys count)
 const PLURAL = {
-  en: /\b1 (?:[a-z]+ )?(?:cards|calls|characters|chars|tokens|models|recipients|projects|days|profiles|messages|bots|roles|runs|trophies)\b/i,
-  fr: /\b1 (?:[a-zé]+ )?(?:cartes|appels|caractères|jetons|modèles|destinataires|projets|jours|profils|messages|bots|rôles|exécutions|trophées|autres|propres)\b/i,
-  es: /\b1 (?:[a-zé]+ )?(?:tarjetas|llamadas|caracteres|tokens|modelos|destinatarios|proyectos|días|perfiles|mensajes|bots|roles|ejecuciones|trofeos|propios)\b/i
+  en: /\b1 (?:[a-z]+ )?(?:cards|calls|characters|chars|tokens|models|recipients|projects|days|profiles|messages|bots|roles|runs|trophies|links)\b/i,
+  fr: /\b1 (?:[a-zé]+ )?(?:cartes|liens|appels|caractères|jetons|modèles|destinataires|projets|jours|profils|messages|bots|rôles|exécutions|trophées|autres|propres)\b/i,
+  es: /\b1 (?:[a-zé]+ )?(?:tarjetas|enlaces|llamadas|caracteres|tokens|modelos|destinatarios|proyectos|días|perfiles|mensajes|bots|roles|ejecuciones|trofeos|propios)\b/i
 }
 
 // the keys whose number reaches them already formatted (text)
