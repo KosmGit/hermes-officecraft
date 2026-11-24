@@ -25,13 +25,13 @@ import { useT } from './useT.js'
 // replay cursor is dragged, one repaint per step). A theme changes rarely: the colour is read again at most once a second, not per paint.
 // the page hangs its own state dot and label above every head, so the canvas draws no state crystal there (the postcard, which has no HUD, keeps it)
 const HUD_SPRITES = Object.freeze({ art: true, marker: false })
-const ACCENT = { at: -Infinity, rgb: null, el: null }
+const ACCENT = { at: -Infinity, rgb: null, el: null, g: null }
 function readAccent(el) {
   try {
     const now = performance.now()
     if (ACCENT.el === el && now - ACCENT.at < 1000) return ACCENT.rgb
     const css = getComputedStyle(el).color
-    const g = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
+    const g = ACCENT.g || (ACCENT.g = document.createElement('canvas').getContext('2d', { willReadFrequently: true }))   // one 1-pixel canvas, not one a second
     g.canvas.width = g.canvas.height = 1
     g.fillStyle = css
     g.fillRect(0, 0, 1, 1)
