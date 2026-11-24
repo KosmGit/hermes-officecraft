@@ -107,6 +107,7 @@ ${TIP_CSS}
 .oc-dg-fl > .oc-dg-seg{align-self:flex-start}
 /* the title and its identifier side by side on a wide window (the second step of the recruitment must be on the first screen); one under the other on a sheet */
 .oc-dg-pair{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:start}
+.oc-dg-pair > .oc-dg-fl > .oc-dg-lab{min-height:24px}
 @media (max-width:700px){.oc-dg-pair{grid-template-columns:minmax(0,1fr)}}
 .oc-dg-seg{display:inline-flex;flex-wrap:wrap;max-width:100%;box-sizing:border-box;padding:4px;gap:2px;border:0;box-shadow:inset 0 0 0 1px ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .oc-dg-seg button,.oc-dg-seg label{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;font-weight:500;color:var(--ui-text-secondary);cursor:pointer;white-space:nowrap}

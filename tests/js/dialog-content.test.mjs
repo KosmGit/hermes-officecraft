@@ -28,6 +28,8 @@ test('the title comes before the identifier, which the title fills in', () => {
   assert.ok(dlg.indexOf("htmlFor={`${id}-title`}") < dlg.indexOf("htmlFor={`${id}-name`}"), 'the readable name first')
   assert.match(dlg, /set\(\{ title: e\.target\.value, \.\.\.followTitle\(draft, e\.target\.value\) \}\)/)
   assert.match(dlg, /titleRef\.current\?\.focus\(\)/, 'the window opens on the first field')
+  // side by side, the two label rows have one height (the identifier's carries a 24 px « ? »), so the two inputs line up
+  assert.match(DIALOG_CSS, /\.oc-dg-pair > \.oc-dg-fl > \.oc-dg-lab\{min-height:24px\}/)
 })
 
 test('the type of bot is one folded line that unfolds in place and folds back after a choice', () => {
