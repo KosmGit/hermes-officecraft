@@ -251,6 +251,16 @@ export const PAGE_CSS = `
 .ux-chip2{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:12px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};font-size:11.5px;max-width:100%}
 .ux-chip2 > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-ag-act{display:flex;flex-wrap:wrap;gap:8px}
+.ux-ag-nos{flex:1 0 100%;color:${T3};font-size:12px}
+/* what waits for the user, first under the header: the card's title on one line (the id is its tooltip) and the filled « Decide » */
+.ux-ag-wait{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${ORANGE} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${ORANGE} 8%, transparent)}
+.ux-ag-wait h4{margin:0 0 4px;font-size:12px;font-weight:600;color:${ink(ORANGE)}}
+.ux-ag-wait small{display:block;color:${T3};font-size:11.5px}
+.ux-ag-wr{display:flex;align-items:center;gap:8px;padding:4px 0}
+.ux-ag-wr .tx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ux-ag-wr .hd{display:flex;align-items:center;gap:8px;min-width:0}
+.ux-ag-wr .hd b{font-size:12px}
+.ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .ux-rosterb{display:flex;align-items:center;gap:8px;width:100%;min-width:0;height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
@@ -309,12 +319,15 @@ export const PAGE_CSS = `
 /* journal tab */
 .ux-nightc{margin:0 0 12px}
 .ux-jl{display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
-.ux-jl li{display:grid;grid-template-columns:52px 20px minmax(0,1fr);gap:8px;align-items:center;min-height:36px;padding:4px 0;border-bottom:1px solid color-mix(in oklab, ${EDGE} 70%, transparent);font-size:12.5px}
+.ux-jl li{display:grid;grid-template-columns:52px 20px minmax(0,112px) minmax(0,1fr);gap:8px;align-items:center;min-height:36px;padding:4px 0;border-bottom:1px solid color-mix(in oklab, ${EDGE} 70%, transparent);font-size:12.5px}
 .ux-jl time{font-size:11.5px;color:${T3};white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ux-jl .ic{display:inline-flex;color:${T3}}
 .ux-jl .ic.ok{color:${ink(GREEN)}}.ux-jl .ic.w{color:${ink(ORANGE)}}.ux-jl .ic.ko{color:${ink(RED)}}
-.ux-jl .tx{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0}
-.ux-jl .tx > span{min-width:0;overflow-wrap:anywhere}
+/* fixed columns (age, icon, project, text): the text is one line cut with an ellipsis (its whole is the tooltip), so a long project name never pushes it down */
+.ux-jl .pj{display:flex;min-width:0}
+.ux-jl .tx{display:flex;align-items:center;gap:8px;min-width:0}
+.ux-jl .tx .t{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ux-jl .tx .res{flex:0 0 auto;white-space:nowrap}
 .ux-jl .ux-prj{max-width:100%} /* the chip has its own line in a journal row, so a long name (« customer-support… ») is not cut at 140 px beside free space */
 .ux-jl .res{font-size:11px;font-weight:600}
 /* popover (the « ? » texts, alert details) */

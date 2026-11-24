@@ -88,6 +88,22 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
         </div>
         <button type="button" className="ux-b sm ico ghost" data-pick="" aria-label={t('ux.agent.close')} onClick={() => onPick(null)}><Icon name="x" size={14} /></button>
       </div>
+      {i.waiting.length ? (
+        // what waits for the user comes first under the header: the action, then the facts
+        <div className="ux-ag-wait" data-insp-waiting role="group" aria-label={t('insp.waiting')}>
+          <h4>{t('insp.waiting')}</h4>
+          {i.waiting.map(w => (
+            <div key={`${w.board}/${w.id}`} className="ux-ag-wr" data-insp-wait-row>
+              <span className="tx">
+                <span className="hd"><ProjectChip slug={w.board} />{w.named ? <b className="ux-mono">{w.code}</b> : null}</span>
+                <span className="one ux-ag-wt" title={w.id}>{w.title}</span>
+              </span>
+              <button type="button" className="ux-b sm pri" data-decide aria-label={t('ux.agent.decideCard', w.title)} onClick={() => onDecide(w.board)}>{t('ux.agent.decide')}</button>
+            </div>
+          ))}
+          {i.waitingMore ? <small>{t('insp.more', i.waitingMore)}</small> : null}
+        </div>
+      ) : null}
       <dl className="ux-kv">
         <dt>{t('ux.agent.project')}</dt>
         <dd>{agent.home ? <ProjectChip slug={agent.home} /> : <span>{t('ux.agent.common')}</span>}</dd>
@@ -105,20 +121,6 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
             </span>
           ) : <span>{boardsKnown(office) ? t('insp.noCard') : t('panel.needsAgentHalf')}</span>}
         </dd>
-        {i.waiting.length ? (
-          <>
-            <dt>{t('insp.waiting')}</dt>
-            <dd data-insp-waiting>
-              {i.waiting.map(w => (
-                <span key={`${w.board}/${w.code}`} className="one" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px', alignItems: 'center' }}>
-                  <ProjectChip slug={w.board} /><b className="ux-mono">{w.code}</b>
-                  <button type="button" className="ux-lnk" onClick={() => onDecide(w.board)}>{t('ux.agent.decide')}</button>
-                </span>
-              ))}
-              {i.waitingMore ? <small>{t('insp.more', i.waitingMore)}</small> : null}
-            </dd>
-          </>
-        ) : null}
         <dt>{t('insp.session')}</dt>
         <dd>
           {i.session ? <span><span className="one">{i.session.title || t(untitledKey(i.session))}</span>{i.session.ms ? <small>{t.ago(i.session.ms)}</small> : null}</span> : <span>{t('insp.noSession')}</span>}
@@ -156,8 +158,10 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
       </dl>
       <style>{LM_CSS}</style>
       <div className="ux-ag-act">
-        <WhyButton className="ux-b pri" reason={canOpen ? '' : why} title={why} onGo={() => onOpen(i.name)} data-insp-open>{t('insp.open')}</WhyButton>
+        {/* « Open the session » is the secondary action; with a decision waiting, « Decide » above is the one that is filled */}
+        <WhyButton className={`ux-b${i.waiting.length ? '' : ' pri'}`} reason={canOpen ? '' : why} title={why} onGo={() => onOpen(i.name)} data-insp-open>{t('insp.open')}</WhyButton>
         {openKanban ? <button type="button" className="ux-b" onClick={() => openKanban()}><Icon name="ext" size={14} />{t('ux.prj.kanban')}</button> : null}
+        {canOpen ? null : <small className="ux-ag-nos" data-insp-nosession>{why}</small>}
       </div>
     </section>
   )

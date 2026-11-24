@@ -19,7 +19,7 @@ const KIND_ICON = { completed: ['check', 'ok'], blocked: ['warn', 'w'], unblocke
  */
 export function JournalTab({ history, office, game, journal, night, project, filter, onFilter, nowMs, readMs, t }) {
   const rows = useMemo(() => {
-    const cards = eventsView(history, office).map((e, n) => ({ key: `card/${e.board}/${e.code}/${e.kind}/${e.ms}/${n}`, kind: 'card', ms: e.ms, board: e.board, icon: KIND_ICON[e.kind] ?? ['check', ''], text: `${t(`journal.${e.kind}`)} · ${e.code}` }))
+    const cards = eventsView(history, office).map((e, n) => ({ key: `card/${e.board}/${e.code}/${e.kind}/${e.ms}/${n}`, kind: 'card', ms: e.ms, board: e.board, icon: KIND_ICON[e.kind] ?? ['check', ''], text: `${t(`journal.${e.kind}`)} · ${e.title || e.code}` }))   // the card's title; its id once the board no longer has it (archived)
     const play = journalEntries(game).map((e, n) => ({
       key: `game/${e.kind}/${e.id ?? e.board}/${e.ms}/${n}`,
       kind: 'game',
@@ -52,9 +52,9 @@ export function JournalTab({ history, office, game, journal, night, project, fil
             <li key={r.key} data-kind={r.kind} data-game={r.kind === 'game' ? '' : undefined} data-result={r.result}>
               <time dateTime={new Date(r.ms).toISOString()} title={t.ago(r.ms)}>{shortAge(nowMs - r.ms, t('ux.dec.day'))}</time>
               <span className={`ic ${r.icon[1]}`}><Icon name={r.icon[0]} size={14} /></span>
+              <span className="pj">{r.board ? <ProjectChip slug={r.board} /> : null}</span>
               <span className="tx">
-                <ProjectChip slug={r.board} />
-                <span>{r.text}</span>
+                <span className="t" title={r.text}>{r.text}</span>
                 {r.resultText ? <span className="res">{r.resultText}</span> : null}
                 {r.extra ? <span className="ux-vh">{r.extra}</span> : null}
               </span>

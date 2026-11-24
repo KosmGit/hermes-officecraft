@@ -3908,6 +3908,14 @@ var count = (v) => typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : n
 var str2 = (v) => typeof v === "string" ? v : "";
 var trimmed = (v) => typeof v === "string" ? v.trim() : "";
 var lastTouch = (t) => Math.max(t.completedMs || 0, t.startedMs || 0, t.createdMs || 0);
+var oneLine2 = (v) => str2(v).replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, " ").replace(/\p{Cf}/gu, "").replace(/\s+/g, " ").trim();
+function cutWords(text3, max) {
+  const chars2 = [...str2(text3)];
+  if (chars2.length <= max) return chars2.join("");
+  let head = chars2.slice(0, max - 1);
+  if (chars2[max - 1] !== " " && head.lastIndexOf(" ") >= Math.floor(max / 2)) head = head.slice(0, head.lastIndexOf(" "));
+  return `${head.join("").replace(/[\s,;:.—–·(-]+$/u, "")}…`;
+}
 
 // src/core/history.js
 var RECENT_SKILL_MS = 7 * 864e5;
@@ -4055,13 +4063,17 @@ var isGatewayDegraded = (state2) => state2 === "degraded";
 var isGatewayUp = (state2) => state2 === "running";
 
 // src/core/office.js
+var BLOCK_REASON_MAX = 280;
 var DONE = /* @__PURE__ */ new Set(["done", "archived"]);
 var OK_RUN = /* @__PURE__ */ new Set(["ok", "success", "completed", "succeeded"]);
 function toBoard(raw) {
   const tasks = (Array.isArray(raw?.tasks) ? raw.tasks : []).filter((t) => t && typeof t === "object" && str2(t.id) && str2(t.status)).map((t) => ({
     id: t.id,
-    title: str2(t.title),
+    title: oneLine2(t.title),
     status: t.status,
+    // the reason the bot gave when it blocked the card (`/live`, already cleaned and cut by the agent half): drawn as text, cleaned again here
+    // since the page never trusts a text it did not write; absent when there is none. Read for a blocked card only.
+    ...t.status === "blocked" && oneLine2(t.blockReason) ? { blockReason: cutWords(oneLine2(t.blockReason), BLOCK_REASON_MAX) } : {},
     assignee: str2(t.assignee) || null,
     createdMs: toMs(t.createdAt),
     startedMs: toMs(t.startedAt),
@@ -6417,7 +6429,8 @@ var en = {
       project: "Project",
       common: "Common room",
       description: "Description",
-      decide: "decide"
+      decide: "Decide",
+      decideCard: (title) => `Decide: ${title}`
     },
     prj: {
       running: "running",
@@ -8136,7 +8149,8 @@ var es = {
       project: "Proyecto",
       common: "Sala común",
       description: "Descripción",
-      decide: "decidir"
+      decide: "Decidir",
+      decideCard: (title) => `Decidir: ${title}`
     },
     prj: {
       running: "en curso",
@@ -9856,7 +9870,8 @@ var fr = {
       project: "Projet",
       common: "Salle commune",
       description: "Description",
-      decide: "décider"
+      decide: "Décider",
+      decideCard: (title) => `Décider : ${title}`
     },
     prj: {
       running: "en cours",
@@ -11491,7 +11506,7 @@ function eventsView(history, office, limit = EVENTS_SHOWN) {
     for (const e of b.events || []) {
       if (!kinds.has(e.kind) || e.ms == null) continue;
       const t = known2.get(`${b.slug}/${e.task}`);
-      out.push({ board: b.slug, kind: e.kind, code: t ? cardRef(t) : String(e.task || ""), ms: e.ms });
+      out.push({ board: b.slug, kind: e.kind, code: t ? cardRef(t) : String(e.task || ""), title: t ? oneLine2(t.title) : "", ms: e.ms });
     }
   }
   return out.sort((x, y) => y.ms - x.ms).slice(0, limit);
@@ -11530,7 +11545,8 @@ function inspectorOf(agent, { nowMs, history = null, models = null, roleId = nul
     roleId,
     since: agent.state === "waiting" && oldest2 ? { kind: oldestBlocked ? "waitingBlocked" : "waiting", ms: oldest2 } : sinceOf(agent, nowMs),
     current: running ? { board: running.board, code: cardRef(running), title: plainTitle(running.title, cardRef(running)), startedMs: running.startedMs || null } : null,
-    waiting: blocked.slice(0, INSPECTOR_WAITING_MAX).map((t) => ({ board: t.board, code: cardRef(t), title: plainTitle(t.title, cardRef(t)), createdMs: t.createdMs, blockedMs: since.get(`${t.board}/${t.id}`) ?? null })),
+    // `title`: what the card is about (the id when it has no title), `named`: the code in front of it is a real one (S3.2), not the id; the id is for a `title` tooltip
+    waiting: blocked.slice(0, INSPECTOR_WAITING_MAX).map((t) => ({ board: t.board, id: t.id, code: cardRef(t), named: Boolean(codeRef(t.title)), title: oneLine2(plainTitle(t.title, cardRef(t))) || String(t.id || ""), createdMs: t.createdMs, blockedMs: since.get(`${t.board}/${t.id}`) ?? null })),
     waitingMore: Math.max(0, blocked.length - INSPECTOR_WAITING_MAX),
     session: session ? { title: session.title || "", ms: session.lastActiveMs ?? null } : null,
     skills: own.slice(0, INSPECTOR_SKILLS_MAX).map((s) => ({ name: s.name, category: s.category })),
@@ -18972,6 +18988,23 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
       ] }),
       /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm ico ghost", "data-pick": "", "aria-label": t("ux.agent.close"), onClick: () => onPick(null), children: /* @__PURE__ */ jsx19(Icon, { name: "x", size: 14 }) })
     ] }),
+    i.waiting.length ? (
+      // what waits for the user comes first under the header: the action, then the facts
+      /* @__PURE__ */ jsxs16("div", { className: "ux-ag-wait", "data-insp-waiting": true, role: "group", "aria-label": t("insp.waiting"), children: [
+        /* @__PURE__ */ jsx19("h4", { children: t("insp.waiting") }),
+        i.waiting.map((w) => /* @__PURE__ */ jsxs16("div", { className: "ux-ag-wr", "data-insp-wait-row": true, children: [
+          /* @__PURE__ */ jsxs16("span", { className: "tx", children: [
+            /* @__PURE__ */ jsxs16("span", { className: "hd", children: [
+              /* @__PURE__ */ jsx19(ProjectChip, { slug: w.board }),
+              w.named ? /* @__PURE__ */ jsx19("b", { className: "ux-mono", children: w.code }) : null
+            ] }),
+            /* @__PURE__ */ jsx19("span", { className: "one ux-ag-wt", title: w.id, children: w.title })
+          ] }),
+          /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm pri", "data-decide": true, "aria-label": t("ux.agent.decideCard", w.title), onClick: () => onDecide(w.board), children: t("ux.agent.decide") })
+        ] }, `${w.board}/${w.id}`)),
+        i.waitingMore ? /* @__PURE__ */ jsx19("small", { children: t("insp.more", i.waitingMore) }) : null
+      ] })
+    ) : null,
     /* @__PURE__ */ jsxs16("dl", { className: "ux-kv", children: [
       /* @__PURE__ */ jsx19("dt", { children: t("ux.agent.project") }),
       /* @__PURE__ */ jsx19("dd", { children: agent.home ? /* @__PURE__ */ jsx19(ProjectChip, { slug: agent.home }) : /* @__PURE__ */ jsx19("span", { children: t("ux.agent.common") }) }),
@@ -18986,17 +19019,6 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
         ] }),
         i.current.startedMs ? /* @__PURE__ */ jsx19("small", { children: formatSpan(nowMs - i.current.startedMs) }) : null
       ] }) : /* @__PURE__ */ jsx19("span", { children: boardsKnown(office) ? t("insp.noCard") : t("panel.needsAgentHalf") }) }),
-      i.waiting.length ? /* @__PURE__ */ jsxs16(Fragment11, { children: [
-        /* @__PURE__ */ jsx19("dt", { children: t("insp.waiting") }),
-        /* @__PURE__ */ jsxs16("dd", { "data-insp-waiting": true, children: [
-          i.waiting.map((w) => /* @__PURE__ */ jsxs16("span", { className: "one", style: { display: "flex", flexWrap: "wrap", gap: "4px 8px", alignItems: "center" }, children: [
-            /* @__PURE__ */ jsx19(ProjectChip, { slug: w.board }),
-            /* @__PURE__ */ jsx19("b", { className: "ux-mono", children: w.code }),
-            /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-lnk", onClick: () => onDecide(w.board), children: t("ux.agent.decide") })
-          ] }, `${w.board}/${w.code}`)),
-          i.waitingMore ? /* @__PURE__ */ jsx19("small", { children: t("insp.more", i.waitingMore) }) : null
-        ] })
-      ] }) : null,
       /* @__PURE__ */ jsx19("dt", { children: t("insp.session") }),
       /* @__PURE__ */ jsx19("dd", { children: i.session ? /* @__PURE__ */ jsxs16("span", { children: [
         /* @__PURE__ */ jsx19("span", { className: "one", children: i.session.title || t(untitledKey(i.session)) }),
@@ -19037,11 +19059,12 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
     ] }),
     /* @__PURE__ */ jsx19("style", { children: LM_CSS }),
     /* @__PURE__ */ jsxs16("div", { className: "ux-ag-act", children: [
-      /* @__PURE__ */ jsx19(WhyButton, { className: "ux-b pri", reason: canOpen ? "" : why, title: why, onGo: () => onOpen(i.name), "data-insp-open": true, children: t("insp.open") }),
+      /* @__PURE__ */ jsx19(WhyButton, { className: `ux-b${i.waiting.length ? "" : " pri"}`, reason: canOpen ? "" : why, title: why, onGo: () => onOpen(i.name), "data-insp-open": true, children: t("insp.open") }),
       openKanban2 ? /* @__PURE__ */ jsxs16("button", { type: "button", className: "ux-b", onClick: () => openKanban2(), children: [
         /* @__PURE__ */ jsx19(Icon, { name: "ext", size: 14 }),
         t("ux.prj.kanban")
-      ] }) : null
+      ] }) : null,
+      canOpen ? null : /* @__PURE__ */ jsx19("small", { className: "ux-ag-nos", "data-insp-nosession": true, children: why })
     ] })
   ] });
 }
@@ -19438,7 +19461,7 @@ var FILTERS = ["all", "card", "order", "game"];
 var KIND_ICON = { completed: ["check", "ok"], blocked: ["warn", "w"], unblocked: ["unlock", ""], review_requested: ["msg", ""], changes_requested: ["msg", "w"], crashed: ["crit", "ko"], timed_out: ["crit", "ko"] };
 function JournalTab({ history, office, game, journal, night, project: project2, filter, onFilter, nowMs, readMs, t }) {
   const rows = useMemo7(() => {
-    const cards = eventsView(history, office).map((e, n) => ({ key: `card/${e.board}/${e.code}/${e.kind}/${e.ms}/${n}`, kind: "card", ms: e.ms, board: e.board, icon: KIND_ICON[e.kind] ?? ["check", ""], text: `${t(`journal.${e.kind}`)} · ${e.code}` }));
+    const cards = eventsView(history, office).map((e, n) => ({ key: `card/${e.board}/${e.code}/${e.kind}/${e.ms}/${n}`, kind: "card", ms: e.ms, board: e.board, icon: KIND_ICON[e.kind] ?? ["check", ""], text: `${t(`journal.${e.kind}`)} · ${e.title || e.code}` }));
     const play = journalEntries(game).map((e, n) => ({
       key: `game/${e.kind}/${e.id ?? e.board}/${e.ms}/${n}`,
       kind: "game",
@@ -19464,9 +19487,9 @@ function JournalTab({ history, office, game, journal, night, project: project2, 
     rows.length ? /* @__PURE__ */ jsx24("ul", { className: "ux-jl", "data-events": true, children: rows.map((r) => /* @__PURE__ */ jsxs21("li", { "data-kind": r.kind, "data-game": r.kind === "game" ? "" : void 0, "data-result": r.result, children: [
       /* @__PURE__ */ jsx24("time", { dateTime: new Date(r.ms).toISOString(), title: t.ago(r.ms), children: shortAge(nowMs - r.ms, t("ux.dec.day")) }),
       /* @__PURE__ */ jsx24("span", { className: `ic ${r.icon[1]}`, children: /* @__PURE__ */ jsx24(Icon, { name: r.icon[0], size: 14 }) }),
+      /* @__PURE__ */ jsx24("span", { className: "pj", children: r.board ? /* @__PURE__ */ jsx24(ProjectChip, { slug: r.board }) : null }),
       /* @__PURE__ */ jsxs21("span", { className: "tx", children: [
-        /* @__PURE__ */ jsx24(ProjectChip, { slug: r.board }),
-        /* @__PURE__ */ jsx24("span", { children: r.text }),
+        /* @__PURE__ */ jsx24("span", { className: "t", title: r.text, children: r.text }),
         r.resultText ? /* @__PURE__ */ jsx24("span", { className: "res", children: r.resultText }) : null,
         r.extra ? /* @__PURE__ */ jsx24("span", { className: "ux-vh", children: r.extra }) : null
       ] })
@@ -21281,6 +21304,16 @@ var PAGE_CSS = `
 .ux-chip2{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:12px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};font-size:11.5px;max-width:100%}
 .ux-chip2 > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-ag-act{display:flex;flex-wrap:wrap;gap:8px}
+.ux-ag-nos{flex:1 0 100%;color:${T32};font-size:12px}
+/* what waits for the user, first under the header: the card's title on one line (the id is its tooltip) and the filled « Decide » */
+.ux-ag-wait{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${ORANGE4} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${ORANGE4} 8%, transparent)}
+.ux-ag-wait h4{margin:0 0 4px;font-size:12px;font-weight:600;color:${ink4(ORANGE4)}}
+.ux-ag-wait small{display:block;color:${T32};font-size:11.5px}
+.ux-ag-wr{display:flex;align-items:center;gap:8px;padding:4px 0}
+.ux-ag-wr .tx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ux-ag-wr .hd{display:flex;align-items:center;gap:8px;min-width:0}
+.ux-ag-wr .hd b{font-size:12px}
+.ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .ux-rosterb{display:flex;align-items:center;gap:8px;width:100%;min-width:0;height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
@@ -21339,12 +21372,15 @@ var PAGE_CSS = `
 /* journal tab */
 .ux-nightc{margin:0 0 12px}
 .ux-jl{display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
-.ux-jl li{display:grid;grid-template-columns:52px 20px minmax(0,1fr);gap:8px;align-items:center;min-height:36px;padding:4px 0;border-bottom:1px solid color-mix(in oklab, ${EDGE} 70%, transparent);font-size:12.5px}
+.ux-jl li{display:grid;grid-template-columns:52px 20px minmax(0,112px) minmax(0,1fr);gap:8px;align-items:center;min-height:36px;padding:4px 0;border-bottom:1px solid color-mix(in oklab, ${EDGE} 70%, transparent);font-size:12.5px}
 .ux-jl time{font-size:11.5px;color:${T32};white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ux-jl .ic{display:inline-flex;color:${T32}}
 .ux-jl .ic.ok{color:${ink4(GREEN3)}}.ux-jl .ic.w{color:${ink4(ORANGE4)}}.ux-jl .ic.ko{color:${ink4(RED3)}}
-.ux-jl .tx{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0}
-.ux-jl .tx > span{min-width:0;overflow-wrap:anywhere}
+/* fixed columns (age, icon, project, text): the text is one line cut with an ellipsis (its whole is the tooltip), so a long project name never pushes it down */
+.ux-jl .pj{display:flex;min-width:0}
+.ux-jl .tx{display:flex;align-items:center;gap:8px;min-width:0}
+.ux-jl .tx .t{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ux-jl .tx .res{flex:0 0 auto;white-space:nowrap}
 .ux-jl .ux-prj{max-width:100%} /* the chip has its own line in a journal row, so a long name (« customer-support… ») is not cut at 140 px beside free space */
 .ux-jl .res{font-size:11px;font-weight:600}
 /* popover (the « ? » texts, alert details) */

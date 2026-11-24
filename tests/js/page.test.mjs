@@ -425,11 +425,14 @@ test('the dock wraps on its own: the selected-agent bar goes to its own line bef
 
 //    (2)  Agent tab, 380 px, a board with a long name (names are never short): the row « [project] [card code] [Decide] » did not wrap and
 //         its box clips (`overflow:hidden`): measured 235 px of content in 222, the « Decide » link, the ACTION of the row, was cut off.
-test('the waiting-decisions row of the Agent tab wraps instead of clipping its « Decide » link', () => {
+test('the waiting-decisions row of the Agent tab never clips its « Decide » button: the text beside it gives way (project chip and title are cut with an ellipsis)', () => {
   const tab = readFileSync(new URL('../../src/ui/AgentTab.jsx', import.meta.url), 'utf8')
-  const row = tab.split('\n').find(l => l.includes('key={`${w.board}/${w.code}`}'))
-  assert.ok(row, 'the row of a waiting decision')
-  assert.match(row, /flexWrap:\s*'wrap'/, 'a long project name pushes the link to a second line, not out of the box')
+  assert.ok(tab.split('\n').some(l => l.includes('key={`${w.board}/${w.id}`}') && l.includes('ux-ag-wr')), 'the row of a waiting decision')
+  const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.match(css, /\.ux-ag-wr\{display:flex;[^}]*\}/)
+  assert.match(css, /\.ux-ag-wr \.tx\{[^}]*flex:1 1 auto;min-width:0/, 'the text column shrinks')
+  assert.match(css, /\.ux-ag-wt\{[^}]*overflow:hidden;text-overflow:ellipsis;white-space:nowrap/, 'the title is one line with an ellipsis')
+  assert.match(css, /\.ux-b\{[^}]*flex:0 0 auto/, 'a button keeps its size')
 })
 
 //    (3)  Settings → General → Motion « Reduced »: the scene and the dialogs stop moving, but the page of the redesign only answered to the

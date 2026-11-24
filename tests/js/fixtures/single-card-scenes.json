@@ -274,14 +274,18 @@
    "waiting": [
     {
      "board": "alpha",
+     "id": "t6",
      "code": "Q9",
+     "named": true,
      "title": "Needs you",
      "createdMs": 1799995000000,
      "blockedMs": null
     },
     {
      "board": "alpha",
+     "id": "t7",
      "code": "Q10",
+     "named": true,
      "title": "Needs you too",
      "createdMs": 1799995000000,
      "blockedMs": null
@@ -589,7 +593,9 @@
    "waiting": [
     {
      "board": "beta",
+     "id": "t4",
      "code": "B7",
+     "named": true,
      "title": "decision",
      "createdMs": 1799995000000,
      "blockedMs": null

@@ -105,3 +105,72 @@ test('the accessible name says it, in the three languages; the legend has the en
   }
   assert.equal(`${tr('fr')('state.working')}, ${tr('fr')('waitTip', 1)}`, 'Au travail, une décision vous attend')
 })
+
+// ===== the title instead of the id =====
+
+import { eventsView, inspectorOf } from '../../src/core/panel.js'
+import { toHistory } from '../../src/core/history.js'
+
+const hist = events => toHistory({ ok: true, profiles: [], boards: [{ slug: 'website', runs: [], events }] })
+
+test('journal: a known card is named by its title, an unknown (archived) one by its id; a hostile title is cleaned and never HTML', () => {
+  const hostile = '<img src=x onerror=alert(1)>\u202e Fix\u200b the\nlogin\u2066 [x](javascript:alert(1))'
+  const o = office([desk('alpha', 'idle')], [{ slug: 'website', tasks: [
+    card('t_known', 'blocked', 'alpha', { title: 'Choose the hero photo' }),
+    card('t_code', 'blocked', 'alpha', { title: 'WEB4 — Redesign the footer' }),
+    card('t_evil', 'blocked', 'alpha', { title: hostile }),
+    card('t_empty', 'blocked', 'alpha', { title: '' })
+  ] }])
+  const ev = eventsView(hist([
+    { task: 't_known', kind: 'blocked', ts: s(NOW - 1000) }, { task: 't_code', kind: 'blocked', ts: s(NOW - 2000) },
+    { task: 't_evil', kind: 'blocked', ts: s(NOW - 3000) }, { task: 't_gone', kind: 'blocked', ts: s(NOW - 4000) }, { task: 't_empty', kind: 'blocked', ts: s(NOW - 5000) }
+  ]), o)
+  const row = id => ev.find(e => e.code === id || e.title.includes(id))
+  assert.equal(ev.length, 5)
+  assert.equal(ev[0].title, 'Choose the hero photo')
+  assert.equal(ev[1].title, 'WEB4 — Redesign the footer', 'the title as the board has it, code included')
+  assert.equal(ev[1].code, 'WEB4')
+  assert.equal(ev[2].title, '<img src=x onerror=alert(1)> Fix the login [x](javascript:alert(1))', 'bidi and zero-width gone, one line; the markup is kept as the plain text it is')
+  assert.equal(ev[3].title, '', 'a card the board no longer has: no title…')
+  assert.equal(ev[3].code, 't_gone', '…its id stays')
+  assert.equal(ev[4].title, '', 'a known card without a title falls back on the id too')
+  assert.equal(ev[4].code, 't_empty')
+  assert.equal(row('t_gone').title || row('t_gone').code, 't_gone')
+  // the page draws it as text: no HTML anywhere on this path
+  for (const f of ['src/ui/JournalTab.jsx', 'src/ui/AgentTab.jsx', 'src/ui/DecisionCard.jsx']) assert.doesNotMatch(src(f), /dangerouslySetInnerHTML|innerHTML/, f)
+  assert.match(src('src/ui/JournalTab.jsx'), /\$\{e\.title \|\| e\.code\}/)
+})
+
+test('inspector: the « waits for you » block names a card by its title, keeps the id for the tooltip, falls back on the id when there is no title', () => {
+  const o = office([desk('alpha', 'idle')], [{ slug: 'website', tasks: [
+    card('t_plain', 'blocked', 'alpha', { title: 'Pick the push provider', createdAt: s(NOW - 9_000_000) }),
+    card('t_coded', 'blocked', 'alpha', { title: 'S3.2 — Inspector', createdAt: s(NOW - 8_000_000) }),
+    card('t_bare', 'blocked', 'alpha', { title: '', createdAt: s(NOW - 7_000_000) }),
+    card('t_evil', 'blocked', 'alpha', { title: 'Ship it\u202e\u200b\nnow <b>x</b>', createdAt: s(NOW - 6_000_000) })
+  ] }])
+  const w = inspectorOf(by(o, 'alpha'), { nowMs: NOW }).waiting
+  assert.deepEqual(w.map(x => x.title), ['Pick the push provider', 'Inspector', 't_bare', 'Ship it now <b>x</b>'])
+  assert.deepEqual(w.map(x => x.id), ['t_plain', 't_coded', 't_bare', 't_evil'])
+  assert.deepEqual(w.map(x => x.named), [false, true, false, false], 'only a real code (S3.2) is shown in front of the title')
+  assert.equal(w[1].code, 'S3.2')
+  assert.equal(w[0].code, 't_plain', 'the code field keeps meaning « code, else id » (the tests of the panel and the notifier read it)')
+  const tab = src('src/ui/AgentTab.jsx')
+  assert.match(tab, /className="one ux-ag-wt" title=\{w\.id\}>\{w\.title\}</, 'one line, the id in the tooltip')
+  assert.match(src('src/ui/pageStyles.js'), /\.ux-ag-wt\{[^}]*text-overflow:ellipsis;white-space:nowrap/)
+})
+
+// ===== the sheet of a bot that waits: the action first =====
+
+test('agent sheet: « waits for you » comes first under the header, « Decide » is the filled button, « Open the session » the secondary one, and no session is said in clear', () => {
+  const tab = src('src/ui/AgentTab.jsx')
+  const at = s => tab.indexOf(s)
+  assert.ok(at('data-insp-waiting') > at('ux-ag-h') && at('data-insp-waiting') < at('<dl className="ux-kv">'), 'the block sits between the header and the facts')
+  assert.match(tab, /className="ux-b sm pri" data-decide/)
+  assert.match(tab, /className=\{`ux-b\$\{i\.waiting\.length \? '' : ' pri'\}`\}/, 'secondary when a decision waits (primary when there is nothing else to do)')
+  assert.match(tab, /\{canOpen \? null : <small className="ux-ag-nos" data-insp-nosession>\{why\}<\/small>\}/, 'no session: said in words, not only dimmed')
+  for (const lang of ['en', 'fr', 'es']) {
+    assert.match(tr(lang)('ux.agent.decide'), /^[A-ZÀ-Ý]/, `${lang}: a button label starts with a capital`)
+    assert.ok(tr(lang)('ux.agent.decideCard', 'Pick one').includes('Pick one'))
+    assert.ok(tr(lang)('ux.agent.decideCard', 'Pick one').startsWith(tr(lang)('ux.agent.decide')), `${lang}: the name of the button starts with its visible label`)
+  }
+})

@@ -8,7 +8,7 @@
 import { quietCards, runningCards } from './cards.js'
 import { codeRef } from './hud.js'
 import { modelText, pinOf } from './models.js'
-import { lastTouch } from './util.js'
+import { lastTouch, oneLine } from './util.js'
 
 export const CHAIN_LEN = 16
 export const EVENTS_SHOWN = 14
@@ -116,7 +116,8 @@ export function eventsView(history, office, limit = EVENTS_SHOWN) {
     for (const e of b.events || []) {
       if (!kinds.has(e.kind) || e.ms == null) continue
       const t = known.get(`${b.slug}/${e.task}`)
-      out.push({ board: b.slug, kind: e.kind, code: t ? cardRef(t) : String(e.task || ''), ms: e.ms })
+      // `title`: the card's own title (one clean line) while the board still has it; '' once the card is gone (archived): the journal then names it by its id
+      out.push({ board: b.slug, kind: e.kind, code: t ? cardRef(t) : String(e.task || ''), title: t ? oneLine(t.title) : '', ms: e.ms })
     }
   }
   return out.sort((x, y) => y.ms - x.ms).slice(0, limit)
@@ -171,7 +172,8 @@ export function inspectorOf(agent, { nowMs, history = null, models = null, roleI
     roleId,
     since: agent.state === 'waiting' && oldest ? { kind: oldestBlocked ? 'waitingBlocked' : 'waiting', ms: oldest } : sinceOf(agent, nowMs),
     current: running ? { board: running.board, code: cardRef(running), title: plainTitle(running.title, cardRef(running)), startedMs: running.startedMs || null } : null,
-    waiting: blocked.slice(0, INSPECTOR_WAITING_MAX).map(t => ({ board: t.board, code: cardRef(t), title: plainTitle(t.title, cardRef(t)), createdMs: t.createdMs, blockedMs: since.get(`${t.board}/${t.id}`) ?? null })),
+    // `title`: what the card is about (the id when it has no title), `named`: the code in front of it is a real one (S3.2), not the id; the id is for a `title` tooltip
+    waiting: blocked.slice(0, INSPECTOR_WAITING_MAX).map(t => ({ board: t.board, id: t.id, code: cardRef(t), named: Boolean(codeRef(t.title)), title: oneLine(plainTitle(t.title, cardRef(t))) || String(t.id || ''), createdMs: t.createdMs, blockedMs: since.get(`${t.board}/${t.id}`) ?? null })),
     waitingMore: Math.max(0, blocked.length - INSPECTOR_WAITING_MAX),
     session: session ? { title: session.title || '', ms: session.lastActiveMs ?? null } : null,
     skills: own.slice(0, INSPECTOR_SKILLS_MAX).map(s => ({ name: s.name, category: s.category })),

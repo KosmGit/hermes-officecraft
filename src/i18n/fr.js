@@ -1659,7 +1659,8 @@ export const fr = {
       project: 'Projet',
       common: 'Salle commune',
       description: 'Description',
-      decide: 'décider'
+      decide: 'Décider',
+      decideCard: title => `Décider : ${title}`
     },
     prj: {
       running: 'en cours',

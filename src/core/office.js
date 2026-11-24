@@ -19,9 +19,11 @@
 import { STALE_AFTER_MS, quietCards, runningCards } from './cards.js'
 import { isGatewayDegraded, isGatewayDown, isGatewayUp } from './gateway.js'
 import { toMs } from './time.js'
-import { lastTouch, num, str } from './util.js'
+import { cutWords, lastTouch, num, oneLine, str } from './util.js'
 
 export { STALE_AFTER_MS }
+/** Characters of a blocking reason the page keeps (the agent half serves at most as many). */
+export const BLOCK_REASON_MAX = 280
 const DONE = new Set(['done', 'archived'])
 const OK_RUN = new Set(['ok', 'success', 'completed', 'succeeded'])
 
@@ -31,8 +33,11 @@ export function toBoard(raw) {
     .filter(t => t && typeof t === 'object' && str(t.id) && str(t.status))
     .map(t => ({
       id: t.id,
-      title: str(t.title),
+      title: oneLine(t.title),
       status: t.status,
+      // the reason the bot gave when it blocked the card (`/live`, already cleaned and cut by the agent half): drawn as text, cleaned again here
+      // since the page never trusts a text it did not write; absent when there is none. Read for a blocked card only.
+      ...(t.status === 'blocked' && oneLine(t.blockReason) ? { blockReason: cutWords(oneLine(t.blockReason), BLOCK_REASON_MAX) } : {}),
       assignee: str(t.assignee) || null,
       createdMs: toMs(t.createdAt),
       startedMs: toMs(t.startedAt),

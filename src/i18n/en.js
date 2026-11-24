@@ -1657,7 +1657,8 @@ export const en = {
       project: 'Project',
       common: 'Common room',
       description: 'Description',
-      decide: 'decide'
+      decide: 'Decide',
+      decideCard: title => `Decide: ${title}`
     },
     prj: {
       running: 'running',
