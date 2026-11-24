@@ -61,10 +61,14 @@ test('small targets and the floating bar', () => {
   const mk = rule(LM_CSS, '.oc-lm-mk')
   assert.match(mk, /min-height:\s*24px/)
   assert.match(mk, /min-width:\s*24px/)
-  const body = rule(PANEL_CSS, '.oc-main:has(.oc-ordbar) .oc-pbody')
+  const body = rule(PANEL_CSS, '.ux-main:has(.oc-ordbar) .ux-pbody')
   assert.match(body, /padding-bottom:\s*\d+px/)
   assert.match(body, /scroll-padding-bottom:\s*\d+px/, 'a focused row scrolls above the floating bar')
   assert.equal(body.match(/padding-bottom:\s*(\d+)px/)[1], body.match(/scroll-padding-bottom:\s*(\d+)px/)[1])
+  // the rule must name classes the page really draws (a selector nobody renders reserves nothing)
+  assert.match(src('OfficePage.jsx'), /className=\{`ux-main/)
+  assert.match(src('SidePanel.jsx'), /className="ux-pbody"/)
+  assert.match(src('Orders.jsx'), /className="oc-ordbar"/)
 })
 
 test('help popover: capped, scrolls inside itself, and a scroll of the card does not close it', () => {

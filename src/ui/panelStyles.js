@@ -158,7 +158,7 @@ export const PANEL_CSS = `
 /* under the floating bar the refusal (« another order is waiting ») has its own background, so it never runs over the page's hint line */
 .oc-ordbar .oc-ordnote{padding:5px 12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 /* while the bar floats over the foot of the panel (drawer at 1024 / 380 px), the panel can scroll its last rows above it */
-.oc-main:has(.oc-ordbar) .oc-pbody{padding-bottom:140px;scroll-padding-bottom:140px}
+.ux-main:has(.oc-ordbar) .ux-pbody{padding-bottom:140px;scroll-padding-bottom:140px}
 .oc-ordbar{position:absolute;left:50%;bottom:12px;z-index:45;transform:translateX(-50%);box-sizing:border-box;width:min(560px,calc(100% - 24px));display:flex;flex-direction:column;gap:4px}
 .oc-undo{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;box-sizing:border-box;padding:9px 12px 12px 14px;border:1px solid var(--ui-accent);border-radius:12px;background:${CARD};color:var(--foreground);font-size:12.5px;box-shadow:0 8px 28px color-mix(in oklab, var(--foreground) 28%, transparent);overflow:hidden}
 .oc-undotx,.oc-outtx{flex:1 1 12rem;min-width:0;overflow-wrap:anywhere}
