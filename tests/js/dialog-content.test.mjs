@@ -239,6 +239,8 @@ const VITRINE_CSS = src('ui/Collection.jsx')   // a .jsx cannot be imported by n
 test('waiting is not failing: one mention while the past is read, the message and a retry when it failed', () => {
   const page = src('ui/OfficePage.jsx')
   assert.match(page, /replayStatus === 'loading' \? t\('replay\.loadingPast'\)/)
+  assert.match(page, /\{replayOn && replayData \? <span className="oc-rp-tag"/, 'the tag over the scene exists only with the past loaded: the mention is not said twice')
+  for (const lang of LANGS) assert.ok(messages[lang].replay.retry.length > 3, `${lang} replay.retry`)
   assert.match(page, /data-replay-retry onClick=\{\(\) => replayRead\.refetch\(\)\}/)
   assert.match(page, /replayStatus === 'error' \? <button/, 'the retry only after a failure, never while waiting')
   assert.doesNotMatch(src('ui/ReplayBar.jsx'), /replay\.loading'|data-replay-error/, 'the bar does not say it again 60 px under the banner')

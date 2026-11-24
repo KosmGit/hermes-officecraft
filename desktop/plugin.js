@@ -5726,8 +5726,8 @@ var en = {
     openBusy: "An action is in progress. Finish or cancel it before opening Replay.",
     banner: (at) => `Replay: ${at}`,
     bannerNote: "Read-only: you cannot act on the past.",
-    notLoaded: "History not loaded",
     loadingPast: "Loading the past…",
+    retry: "Try again",
     notLoadedNote: "The office below is today’s, not the replay.",
     noAction: "Replay: read-only. Go back to live to act.",
     keyLabel: "Colours of the strip",
@@ -7474,8 +7474,8 @@ var es = {
     openBusy: "Hay una acción en curso: termínala o cancélala antes de abrir el replay.",
     banner: (at) => `Replay: ${at}`,
     bannerNote: "Solo lectura: no se puede enviar ninguna acción sobre el pasado.",
-    notLoaded: "Pasado no cargado",
     loadingPast: "Cargando el pasado…",
+    retry: "Reintentar",
     noAction: "Repetición: solo lectura. Vuelva al directo para actuar.",
     keyLabel: "Colores de la franja",
     key: { done: "terminadas", block: "bloqueos", fail: "fallos" },
@@ -9223,8 +9223,8 @@ var fr = {
     openBusy: "Une action est en cours : terminez-la ou annulez-la avant d’ouvrir le replay.",
     banner: (at) => `Replay : ${at}`,
     bannerNote: "Lecture seule : aucune action n’est possible sur le passé.",
-    notLoaded: "Passé non chargé",
     loadingPast: "Chargement du passé…",
+    retry: "Réessayer",
     notLoadedNote: "Le bureau ci-dessous est celui d’aujourd’hui, pas le replay.",
     noAction: "Replay : lecture seule. Revenez au direct pour agir.",
     keyLabel: "Couleurs de la frise",
@@ -14872,7 +14872,10 @@ ${TIP_CSS}
 .oc-dg .oc-dg-faint{margin:0;font-size:11px;color:${SOFT}}
 /* segmented choice and chips */
 .oc-dg-fl > .oc-dg-seg{align-self:flex-start}
-.oc-dg-seg{display:inline-flex;flex-wrap:nowrap;box-sizing:border-box;padding:4px;gap:2px;border:0;box-shadow:inset 0 0 0 1px ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
+/* the title and its identifier side by side on a wide window (the second step of the recruitment must be on the first screen); one under the other on a sheet */
+.oc-dg-pair{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:700px){.oc-dg-pair{grid-template-columns:minmax(0,1fr)}}
+.oc-dg-seg{display:inline-flex;flex-wrap:wrap;max-width:100%;box-sizing:border-box;padding:4px;gap:2px;border:0;box-shadow:inset 0 0 0 1px ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .oc-dg-seg button,.oc-dg-seg label{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;font-weight:500;color:var(--ui-text-secondary);cursor:pointer;white-space:nowrap}
 .oc-dg-seg button[aria-pressed="true"],.oc-dg-seg label:has(input:checked){background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 0 0 1px ${EDGE}}
 .oc-dg-seg button:disabled,.oc-dg-seg button[aria-disabled="true"]{opacity:.5;cursor:default}
@@ -20073,36 +20076,38 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
           ] }),
           /* @__PURE__ */ jsxs24("div", { className: "oc-dg-steps", children: [
             /* @__PURE__ */ jsxs24(Step, { n: 1, title: t("recruit.step1"), children: [
-              /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
-                /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
-                  /* @__PURE__ */ jsx27("label", { htmlFor: `${id}-title`, children: t("recruit.titleField") }),
-                  /* @__PURE__ */ jsx27(Mark, { assist, field: "title", label: t("recruit.titleField"), id: `${id}-title-mk` })
+              /* @__PURE__ */ jsxs24("div", { className: "oc-dg-pair", children: [
+                /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
+                  /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
+                    /* @__PURE__ */ jsx27("label", { htmlFor: `${id}-title`, children: t("recruit.titleField") }),
+                    /* @__PURE__ */ jsx27(Mark, { assist, field: "title", label: t("recruit.titleField"), id: `${id}-title-mk` })
+                  ] }),
+                  /* @__PURE__ */ jsx27("input", { ref: titleRef, id: `${id}-title`, "data-h": "title", className: marked("title").trim() || void 0, value: draft.title, maxLength: TITLE_MAX, placeholder: t("recruit.titlePh"), "aria-describedby": `${id}-title-mk`, onChange: (e) => set({ title: e.target.value, ...followTitle(draft, e.target.value) }) })
                 ] }),
-                /* @__PURE__ */ jsx27("input", { ref: titleRef, id: `${id}-title`, "data-h": "title", className: marked("title").trim() || void 0, value: draft.title, maxLength: TITLE_MAX, placeholder: t("recruit.titlePh"), "aria-describedby": `${id}-title-mk`, onChange: (e) => set({ title: e.target.value, ...followTitle(draft, e.target.value) }) })
-              ] }),
-              /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
-                /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
-                  /* @__PURE__ */ jsx27("label", { htmlFor: `${id}-name`, children: t("recruit.name") }),
-                  /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.name"), children: t("recruit.nameHint", draft.name || "…") }),
-                  nameOk ? /* @__PURE__ */ jsx27("span", { className: "oc-dg-ok", id: `${id}-free`, "data-hire-free": true, children: t("recruit.free") }) : null,
-                  /* @__PURE__ */ jsx27(Mark, { assist, field: "name", label: t("recruit.name"), id: `${id}-name-mk` })
-                ] }),
-                /* @__PURE__ */ jsx27(
-                  "input",
-                  {
-                    id: `${id}-name`,
-                    "data-h": "name",
-                    className: marked("name").trim() || void 0,
-                    value: draft.name,
-                    maxLength: 64,
-                    autoComplete: "off",
-                    spellCheck: false,
-                    placeholder: t("recruit.namePh"),
-                    "aria-invalid": shown.some((e) => e.startsWith("name_")) || void 0,
-                    "aria-describedby": `${id}-err ${id}-free ${id}-name-mk`,
-                    onChange: (e) => set({ name: e.target.value })
-                  }
-                )
+                /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
+                  /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
+                    /* @__PURE__ */ jsx27("label", { htmlFor: `${id}-name`, children: t("recruit.name") }),
+                    /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.name"), children: t("recruit.nameHint", draft.name || "…") }),
+                    nameOk ? /* @__PURE__ */ jsx27("span", { className: "oc-dg-ok", id: `${id}-free`, "data-hire-free": true, children: t("recruit.free") }) : null,
+                    /* @__PURE__ */ jsx27(Mark, { assist, field: "name", label: t("recruit.name"), id: `${id}-name-mk` })
+                  ] }),
+                  /* @__PURE__ */ jsx27(
+                    "input",
+                    {
+                      id: `${id}-name`,
+                      "data-h": "name",
+                      className: marked("name").trim() || void 0,
+                      value: draft.name,
+                      maxLength: 64,
+                      autoComplete: "off",
+                      spellCheck: false,
+                      placeholder: t("recruit.namePh"),
+                      "aria-invalid": shown.some((e) => e.startsWith("name_")) || void 0,
+                      "aria-describedby": `${id}-err ${id}-free ${id}-name-mk`,
+                      onChange: (e) => set({ name: e.target.value })
+                    }
+                  )
+                ] })
               ] }),
               /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
                 /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
@@ -23419,9 +23424,11 @@ var USAGE_CSS = `
 .oc-us-range{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT4}}
 .oc-us-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch}
 .oc-us-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.oc-us-tile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i v" "l l" "n n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
+.oc-us-tile{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"v" "l" "n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
 .oc-us-tico{grid-area:i;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 14%, transparent)}
-.oc-us-tile b{grid-area:v;font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+/* four tiles beside the donut: no icon column (it left 50 px for « 6,61 $ », which broke in two), the figure on one line */
+.oc-us-tico{display:none}
+.oc-us-tile b{grid-area:v;font-size:22px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .oc-us-tile > span:not(.oc-us-tico){grid-area:l;font-size:12px;color:${SOFT4}}
 .oc-us-tile small{grid-area:n;font-size:11px}
 .oc-us-tile.cost{border-color:color-mix(in oklab, var(--ui-accent) 40%, ${EDGE});background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD})}
@@ -25781,9 +25788,9 @@ function OfficePage({ ctx }) {
     const why = picked ? replayOn ? t("replay.noAction") : canOpen ? t("openSession", picked.label) : t("noSession", picked.label) : "";
     body = /* @__PURE__ */ jsxs43("div", { className: `ux-main${panelOpen ? "" : " nopanel"}`, children: [
       narrow && panelOpen ? null : /* @__PURE__ */ jsxs43("div", { className: "ux-stage", "data-replaying": replayOn ? "" : void 0, children: [
-        replayOn ? /* @__PURE__ */ jsxs43("span", { className: "oc-rp-tag", "aria-hidden": "true", "data-replay-tag": true, children: [
+        replayOn && replayData ? /* @__PURE__ */ jsxs43("span", { className: "oc-rp-tag", "aria-hidden": "true", "data-replay-tag": true, children: [
           /* @__PURE__ */ jsx47("span", { className: "oc-rp-dot" }),
-          replayData ? t("replay.banner", replayAt) : replayStatus === "loading" ? t("replay.loadingPast") : t("replay.notLoaded")
+          t("replay.banner", replayAt)
         ] }) : null,
         /* @__PURE__ */ jsx47(
           OfficeScene,

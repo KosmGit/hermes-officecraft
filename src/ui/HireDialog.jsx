@@ -125,6 +125,7 @@ export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null })
             <div className="oc-dg-steps">
               <Step n={1} title={t('recruit.step1')}>
                 {/* the <label> holds the name alone; the « ? », its note, the « free » mark and the model's mark sit beside it and reach the field by aria-describedby */}
+                <div className="oc-dg-pair">
                 <div className="oc-dg-fl">
                   <span className="oc-dg-lab"><label htmlFor={`${id}-title`}>{t('recruit.titleField')}</label><Mark assist={assist} field="title" label={t('recruit.titleField')} id={`${id}-title-mk`} /></span>
                   <input ref={titleRef} id={`${id}-title`} data-h="title" className={marked('title').trim() || undefined} value={draft.title} maxLength={TITLE_MAX} placeholder={t('recruit.titlePh')} aria-describedby={`${id}-title-mk`} onChange={e => set({ title: e.target.value, ...followTitle(draft, e.target.value) })} />
@@ -139,6 +140,7 @@ export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null })
                   <input id={`${id}-name`} data-h="name" className={marked('name').trim() || undefined} value={draft.name} maxLength={64} autoComplete="off" spellCheck={false} placeholder={t('recruit.namePh')}
                     aria-invalid={shown.some(e => e.startsWith('name_')) || undefined} aria-describedby={`${id}-err ${id}-free ${id}-name-mk`}
                     onChange={e => set({ name: e.target.value })} />
+                </div>
                 </div>
                 <div className="oc-dg-fl">
                   <span className="oc-dg-lab"><label htmlFor={`${id}-desc`}>{t('recruit.description')}</label><Mark assist={assist} field="description" label={t('recruit.description')} id={`${id}-desc-mk`} /></span>

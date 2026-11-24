@@ -483,7 +483,7 @@ export function OfficePage({ ctx }) {
       <div className={`ux-main${panelOpen ? '' : ' nopanel'}`}>
         {narrow && panelOpen ? null : <div className="ux-stage" data-replaying={replayOn ? '' : undefined}>
           {/* the past is marked on the scene itself (accent frame + the moment), not only in the banner above it */}
-          {replayOn ? <span className="oc-rp-tag" aria-hidden="true" data-replay-tag><span className="oc-rp-dot" />{replayData ? t('replay.banner', replayAt) : replayStatus === 'loading' ? t('replay.loadingPast') : t('replay.notLoaded')}</span> : null}
+          {replayOn && replayData ? <span className="oc-rp-tag" aria-hidden="true" data-replay-tag><span className="oc-rp-dot" />{t('replay.banner', replayAt)}</span> : null}
           <OfficeScene
             office={office}
             profiles={profiles}

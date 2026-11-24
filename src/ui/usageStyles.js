@@ -25,9 +25,11 @@ export const USAGE_CSS = `
 .oc-us-range{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT}}
 .oc-us-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch}
 .oc-us-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.oc-us-tile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i v" "l l" "n n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
+.oc-us-tile{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"v" "l" "n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
 .oc-us-tico{grid-area:i;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 14%, transparent)}
-.oc-us-tile b{grid-area:v;font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+/* four tiles beside the donut: no icon column (it left 50 px for « 6,61 $ », which broke in two), the figure on one line */
+.oc-us-tico{display:none}
+.oc-us-tile b{grid-area:v;font-size:22px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .oc-us-tile > span:not(.oc-us-tico){grid-area:l;font-size:12px;color:${SOFT}}
 .oc-us-tile small{grid-area:n;font-size:11px}
 .oc-us-tile.cost{border-color:color-mix(in oklab, var(--ui-accent) 40%, ${EDGE});background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD})}
