@@ -49,7 +49,7 @@ function CommandBlock({ req, choice, read, onRead, t }) {
   )
 }
 
-export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFollowUp, t }) {
+export function ApprovalRow({ row, orders, nowMs, grouped, filtered = false, sceneAgent, open, onModelFollowUp, t }) {
   const req = row.req
   const o = orders.state.order
   const phase = orders.state.phase
@@ -86,6 +86,7 @@ export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onM
       attrs={{ 'data-approval': req.requestId, 'data-session': req.sessionId }}
       board={row.board}
       grouped={grouped}
+      filtered={filtered}
       kind="approval"
       title={where}
       summary={req.summary || t('approvals.noSummary')}

@@ -354,6 +354,7 @@ export const en = {
     risk: { safe: 'No risk', rev: 'Reversible', final: 'Final' },
     riskTip: { safe: 'Changes nothing', rev: 'Can be undone afterwards', final: 'Cannot be undone once sent' },
     verb: { unblock: 'Unblock', comment: 'Comment', approval: 'Approval', openSession: 'Open session', openKanban: 'Open kanban', recruit: 'Recruit', recruitModel: 'Apply model', launch: 'Launch', cancel_campaign: 'Cancel campaign', campaign: 'Create campaign', revise: 'Apply description' },
+    verbShort: { cancel_campaign: 'Cancel' },
     journalVerb: { approval: 'Approval', recruit: 'Recruit', launch: 'Launch', cancel_campaign: 'Cancel campaign', campaign: 'Campaign' },
     group: code => `Actions for card ${code}`,
     draftLabel: target => `Comment on ${target}`,

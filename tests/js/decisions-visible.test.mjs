@@ -258,3 +258,31 @@ test('decision card: « open in the kanban » is named by the card (code and tit
     assert.doesNotMatch(name, /\(t_|t_[0-9a-f]{6}/)
   }
 })
+
+// ===== « Cancel the campaign » and the filter line =====
+
+test('« Cancel the campaign » is the discreet secondary button at the right, « Cancel » when room is short, the full words as its name; the risk and the confirmation are untouched', () => {
+  const orders = src('src/ui/Orders.jsx')
+  assert.match(orders, /verb === 'cancel_campaign' \? ' ghost cx' : ''/)
+  assert.match(orders, /<span className="full">\{t\(`orders\.verb\.\$\{verb\}`\)\}<\/span><span className="short" aria-hidden="true">/)
+  assert.match(orders, /primary=\{v === 'unblock' \|\| v === 'launch'\}/, '« Launch » stays the only filled one')
+  assert.match(orders, /<RiskDot risk=\{ORDERS\[verb\]\.risk\}/)
+  const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.match(css, /\.ux-dc-o \.ux-b\.cx\{margin-left:auto/)
+  assert.match(css, /@container ux \(max-width: 520px\)\{ \.ux-dc-o \.ux-b\.cx \.full\{position:absolute/)
+  for (const lang of ['en', 'fr', 'es']) {
+    const full = tr(lang)('orders.verb.cancel_campaign'), short = tr(lang)('orders.verbShort.cancel_campaign')
+    assert.ok(short.length < full.length && full.startsWith(short.slice(0, 4)), `${lang}: ${short} / ${full}`)
+  }
+})
+
+test('under a project filter the chip is on the sort line (one « ? ») and the cards do not repeat it', () => {
+  const tab = src('src/ui/DecisionsTab.jsx')
+  assert.equal((tab.match(/<ListHelp t=\{t\} \/>/g) || []).length, 1, 'one « ? »')
+  assert.match(tab, /\{project \? <FilterChip slug=\{project\}/)
+  assert.match(tab, /className=\{project \? 'lbl ux-vh' : 'lbl'\} id="ux-sort-l"/, 'the word stays for the screen reader')
+  const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.match(css, /\.ux-pbar\.flt\{flex-wrap:nowrap\}/)
+  const frame = src('src/ui/DecisionCard.jsx')
+  assert.match(frame, /const chip = !grouped && !filtered/)
+})

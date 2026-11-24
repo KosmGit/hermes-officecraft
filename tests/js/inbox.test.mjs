@@ -166,7 +166,9 @@ test('every card of the decision list names its project: a stripe + a chip (a gr
   assert.match(frame, /\(grouped \|\| filtered\) && board \? <span className="ux-vh">\{board\}<\/span> : null/, 'a grouped card keeps the name for the screen reader')
   const tab = src('src/ui/DecisionsTab.jsx')
   assert.match(tab, /<GroupHead slug=\{g\.slug\}/)
-  assert.match(tab, /const grouped = sort === 'project' && !project/, 'a filtered list brings the chip back on each card')
+  assert.match(tab, /const grouped = sort === 'project' && !project/)
+  assert.equal((tab.match(/filtered=\{Boolean\(project\)\}/g) || []).length, 2, 'under a filter the cards (and the approvals) do not repeat the project chip: the filter chip says it once')
+  assert.match(tab, /ux-pbar\$\{project \? ' flt' : ''\}/, 'the filter chip lives on the sort line')
 })
 
 test('orders: the risk class is on every order button as a pip with a word for assistive tech, never a triangle or a tick', () => {

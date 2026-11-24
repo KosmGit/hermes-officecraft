@@ -47,7 +47,7 @@ function OrderButton({ verb, item, orders, t, primary, onClick }) {
   return (
     <button
       type="button"
-      className={`ux-b sm${primary ? ' pri' : ''}`}
+      className={`ux-b sm${primary ? ' pri' : ''}${verb === 'cancel_campaign' ? ' ghost cx' : ''}`}
       data-order={verb}
       data-card={item.id}
       data-board={item.board}
@@ -55,7 +55,10 @@ function OrderButton({ verb, item, orders, t, primary, onClick }) {
       onClick={onClick}
     >
       {ICON[verb] ? <Icon name={ICON[verb]} size={14} /> : null}
-      {t(`orders.verb.${verb}`)}
+      {verb === 'cancel_campaign' ? (
+        // « Cancel the campaign » is not « Launch »: discreet, at the right, and just « Cancel » where the room is short (the full words stay the button's name)
+        <><span className="full">{t(`orders.verb.${verb}`)}</span><span className="short" aria-hidden="true">{t(`orders.verbShort.${verb}`)}</span></>
+      ) : t(`orders.verb.${verb}`)}
       <RiskDot risk={ORDERS[verb].risk} t={t} />
     </button>
   )

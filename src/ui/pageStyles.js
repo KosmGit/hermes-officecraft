@@ -152,6 +152,10 @@ export const PAGE_CSS = `
 .ux-pbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
 .ux-pbar .lbl{font-size:12px;color:${T3}}
 .ux-pbar .grow{margin-left:auto}
+/* under a project filter the chip and the single « ? » stay on the sort line (the word « Sort » is kept for the screen reader only): the chip gives way, not the line */
+.ux-pbar.flt{flex-wrap:nowrap}
+.ux-pbar.flt .ux-prjx{flex:0 1 auto;min-width:0;max-width:none}
+.ux-pbar.flt .ux-seg{flex:0 0 auto}
 .ux-seg{display:inline-flex;padding:4px;border:0;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});box-shadow:inset 0 0 0 1px ${EDGE}}
 .ux-seg button{height:24px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:${T2};font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 .ux-seg button[aria-pressed="true"]{background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 1px 2px color-mix(in oklab, var(--foreground) 14%, transparent)}
@@ -210,6 +214,10 @@ export const PAGE_CSS = `
 .ux-dc-o{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px}
 .ux-dc-o .ux-b{flex:0 0 auto}
 .ux-dc-o .more{margin-left:auto}
+/* « Cancel the campaign »: the secondary, discreet button, pushed to the right of « Launch »; « Cancel » alone when the card is narrow (the full words stay its name) */
+.ux-dc-o .ux-b.cx{margin-left:auto;color:${T2}}
+.ux-dc-o .ux-b.cx .short{display:none}
+@container ux (max-width: 520px){ .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline} }
 .ux-dc-o .ux-b.sm:not(.ico){padding:0 8px}
 .ux-ch-extra{display:flex;flex-wrap:wrap;gap:8px}
 .ux-slot:empty{display:none}

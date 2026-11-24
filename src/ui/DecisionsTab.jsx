@@ -79,6 +79,7 @@ export function DecisionsTab({ office, history, orders, writes, openCard, approv
         attrs={{ 'data-card': c.id, 'data-board': c.board, ...(guard ? { 'data-guard': c.head ? 'head' : 'phase' } : {}) }}
         board={c.board}
         grouped={grouped}
+        filtered={Boolean(project)}
         kind="card"
         code={guard ? t('campaign.kind') : c.code}
         title={guard ? guardName(c.fullTitle ?? c.title) : c.title || c.id}
@@ -99,15 +100,15 @@ export function DecisionsTab({ office, history, orders, writes, openCard, approv
     )
   }
   const one = row => (row.kind === 'approval'
-    ? <ApprovalRow key={row.key} row={row} orders={answer} nowMs={nowMs} grouped={grouped} sceneAgent={sceneBy.get(row.req.profile)} onModelFollowUp={onModelFollowUp} t={t} />
+    ? <ApprovalRow key={row.key} row={row} orders={answer} nowMs={nowMs} grouped={grouped} filtered={Boolean(project)} sceneAgent={sceneBy.get(row.req.profile)} onModelFollowUp={onModelFollowUp} t={t} />
     : card(row))
   const list = rs => <ul className="ux-dcl">{rs.map(one)}</ul>
   const groups = grouped ? groupRows(shown) : null
   const empty = !shown.length
   return (
     <section data-inbox data-count={view.total} aria-label={t('ux.tab.decisions')}>
-      <div className="ux-pbar">
-        <span className="lbl" id="ux-sort-l">{t('ux.dec.sort')}</span>
+      <div className={`ux-pbar${project ? ' flt' : ''}`}>
+        <span className={project ? 'lbl ux-vh' : 'lbl'} id="ux-sort-l">{t('ux.dec.sort')}</span>
         <span className="ux-seg" role="group" aria-labelledby="ux-sort-l">
           <button type="button" aria-pressed={sort === 'project'} data-sort="project" onClick={() => onSort('project')}>{t('ux.dec.byProject')}</button>
           <button type="button" aria-pressed={sort === 'age'} data-sort="age" onClick={() => onSort('age')}>{t('ux.dec.byAge')}</button>

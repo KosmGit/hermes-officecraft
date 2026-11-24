@@ -5091,6 +5091,7 @@ var en = {
     risk: { safe: "No risk", rev: "Reversible", final: "Final" },
     riskTip: { safe: "Changes nothing", rev: "Can be undone afterwards", final: "Cannot be undone once sent" },
     verb: { unblock: "Unblock", comment: "Comment", approval: "Approval", openSession: "Open session", openKanban: "Open kanban", recruit: "Recruit", recruitModel: "Apply model", launch: "Launch", cancel_campaign: "Cancel campaign", campaign: "Create campaign", revise: "Apply description" },
+    verbShort: { cancel_campaign: "Cancel" },
     journalVerb: { approval: "Approval", recruit: "Recruit", launch: "Launch", cancel_campaign: "Cancel campaign", campaign: "Campaign" },
     group: (code) => `Actions for card ${code}`,
     draftLabel: (target2) => `Comment on ${target2}`,
@@ -6814,6 +6815,7 @@ var es = {
     risk: { safe: "Sin riesgo", rev: "Reversible", final: "Definitivo" },
     riskTip: { safe: "No cambia nada", rev: "Se puede deshacer después", final: "No se puede deshacer una vez enviado" },
     verb: { unblock: "Desbloquear", comment: "Comentar", approval: "Aprobación", openSession: "Abrir la sesión", openKanban: "Abrir el kanban", recruit: "Reclutar", recruitModel: "Aplicar el modelo", launch: "Lanzar", cancel_campaign: "Cancelar la campaña", campaign: "Crear la campaña", revise: "Aplicar la descripción" },
+    verbShort: { cancel_campaign: "Cancelar" },
     journalVerb: { approval: "Aprobación", recruit: "Reclutar", launch: "Lanzar", cancel_campaign: "Cancelar campaña", campaign: "Campaña" },
     group: (code) => `Acciones para la tarjeta ${code}`,
     draftLabel: (target2) => `Comentario sobre ${target2}`,
@@ -8538,6 +8540,7 @@ var fr = {
     risk: { safe: "Sans risque", rev: "Réversible", final: "Définitif" },
     riskTip: { safe: "Ne change rien", rev: "Peut être défait ensuite", final: "Ne peut pas être annulé une fois envoyé" },
     verb: { unblock: "Débloquer", comment: "Commenter", approval: "Approbation", openSession: "Ouvrir la session", openKanban: "Ouvrir le kanban", recruit: "Recruter", recruitModel: "Appliquer le modèle", launch: "Lancer", cancel_campaign: "Annuler la campagne", campaign: "Créer la campagne", revise: "Appliquer la description" },
+    verbShort: { cancel_campaign: "Annuler" },
     journalVerb: { approval: "Approbation", recruit: "Recruter", launch: "Lancer", cancel_campaign: "Annuler campagne", campaign: "Campagne" },
     group: (code) => `Actions pour la carte ${code}`,
     draftLabel: (target2) => `Commentaire sur ${target2}`,
@@ -17344,7 +17347,7 @@ function OrderButton({ verb, item, orders, t, primary, onClick }) {
     "button",
     {
       type: "button",
-      className: `ux-b sm${primary ? " pri" : ""}`,
+      className: `ux-b sm${primary ? " pri" : ""}${verb === "cancel_campaign" ? " ghost cx" : ""}`,
       "data-order": verb,
       "data-card": item.id,
       "data-board": item.board,
@@ -17352,7 +17355,13 @@ function OrderButton({ verb, item, orders, t, primary, onClick }) {
       onClick,
       children: [
         ICON2[verb] ? /* @__PURE__ */ jsx10(Icon, { name: ICON2[verb], size: 14 }) : null,
-        t(`orders.verb.${verb}`),
+        verb === "cancel_campaign" ? (
+          // « Cancel the campaign » is not « Launch »: discreet, at the right, and just « Cancel » where the room is short (the full words stay the button's name)
+          /* @__PURE__ */ jsxs9(Fragment5, { children: [
+            /* @__PURE__ */ jsx10("span", { className: "full", children: t(`orders.verb.${verb}`) }),
+            /* @__PURE__ */ jsx10("span", { className: "short", "aria-hidden": "true", children: t(`orders.verbShort.${verb}`) })
+          ] })
+        ) : t(`orders.verb.${verb}`),
         /* @__PURE__ */ jsx10(RiskDot, { risk: ORDERS[verb].risk, t })
       ]
     }
@@ -19322,6 +19331,7 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
         attrs: { "data-card": c.id, "data-board": c.board, ...guard ? { "data-guard": c.head ? "head" : "phase" } : {} },
         board: c.board,
         grouped,
+        filtered: Boolean(project2),
         kind: "card",
         code: guard ? t("campaign.kind") : c.code,
         title: guard ? guardName(c.fullTitle ?? c.title) : c.title || c.id,
@@ -19343,13 +19353,13 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
       row.key
     );
   };
-  const one = (row) => row.kind === "approval" ? /* @__PURE__ */ jsx22(ApprovalRow, { row, orders: answer, nowMs, grouped, sceneAgent: sceneBy.get(row.req.profile), onModelFollowUp, t }, row.key) : card(row);
+  const one = (row) => row.kind === "approval" ? /* @__PURE__ */ jsx22(ApprovalRow, { row, orders: answer, nowMs, grouped, filtered: Boolean(project2), sceneAgent: sceneBy.get(row.req.profile), onModelFollowUp, t }, row.key) : card(row);
   const list = (rs) => /* @__PURE__ */ jsx22("ul", { className: "ux-dcl", children: rs.map(one) });
   const groups = grouped ? groupRows(shown) : null;
   const empty = !shown.length;
   return /* @__PURE__ */ jsxs19("section", { "data-inbox": true, "data-count": view.total, "aria-label": t("ux.tab.decisions"), children: [
-    /* @__PURE__ */ jsxs19("div", { className: "ux-pbar", children: [
-      /* @__PURE__ */ jsx22("span", { className: "lbl", id: "ux-sort-l", children: t("ux.dec.sort") }),
+    /* @__PURE__ */ jsxs19("div", { className: `ux-pbar${project2 ? " flt" : ""}`, children: [
+      /* @__PURE__ */ jsx22("span", { className: project2 ? "lbl ux-vh" : "lbl", id: "ux-sort-l", children: t("ux.dec.sort") }),
       /* @__PURE__ */ jsxs19("span", { className: "ux-seg", role: "group", "aria-labelledby": "ux-sort-l", children: [
         /* @__PURE__ */ jsx22("button", { type: "button", "aria-pressed": sort === "project", "data-sort": "project", onClick: () => onSort("project"), children: t("ux.dec.byProject") }),
         /* @__PURE__ */ jsx22("button", { type: "button", "aria-pressed": sort === "age", "data-sort": "age", onClick: () => onSort("age"), children: t("ux.dec.byAge") })
@@ -21233,6 +21243,10 @@ var PAGE_CSS = `
 .ux-pbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
 .ux-pbar .lbl{font-size:12px;color:${T32}}
 .ux-pbar .grow{margin-left:auto}
+/* under a project filter the chip and the single « ? » stay on the sort line (the word « Sort » is kept for the screen reader only): the chip gives way, not the line */
+.ux-pbar.flt{flex-wrap:nowrap}
+.ux-pbar.flt .ux-prjx{flex:0 1 auto;min-width:0;max-width:none}
+.ux-pbar.flt .ux-seg{flex:0 0 auto}
 .ux-seg{display:inline-flex;padding:4px;border:0;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});box-shadow:inset 0 0 0 1px ${EDGE}}
 .ux-seg button{height:24px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:${T22};font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 .ux-seg button[aria-pressed="true"]{background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 1px 2px color-mix(in oklab, var(--foreground) 14%, transparent)}
@@ -21291,6 +21305,10 @@ var PAGE_CSS = `
 .ux-dc-o{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px}
 .ux-dc-o .ux-b{flex:0 0 auto}
 .ux-dc-o .more{margin-left:auto}
+/* « Cancel the campaign »: the secondary, discreet button, pushed to the right of « Launch »; « Cancel » alone when the card is narrow (the full words stay its name) */
+.ux-dc-o .ux-b.cx{margin-left:auto;color:${T22}}
+.ux-dc-o .ux-b.cx .short{display:none}
+@container ux (max-width: 520px){ .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline} }
 .ux-dc-o .ux-b.sm:not(.ico){padding:0 8px}
 .ux-ch-extra{display:flex;flex-wrap:wrap;gap:8px}
 .ux-slot:empty{display:none}

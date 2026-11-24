@@ -356,6 +356,7 @@ export const fr = {
     risk: { safe: 'Sans risque', rev: 'Réversible', final: 'Définitif' },
     riskTip: { safe: 'Ne change rien', rev: 'Peut être défait ensuite', final: 'Ne peut pas être annulé une fois envoyé' },
     verb: { unblock: 'Débloquer', comment: 'Commenter', approval: 'Approbation', openSession: 'Ouvrir la session', openKanban: 'Ouvrir le kanban', recruit: 'Recruter', recruitModel: 'Appliquer le modèle', launch: 'Lancer', cancel_campaign: 'Annuler la campagne', campaign: 'Créer la campagne', revise: 'Appliquer la description' },
+    verbShort: { cancel_campaign: 'Annuler' },
     journalVerb: { approval: 'Approbation', recruit: 'Recruter', launch: 'Lancer', cancel_campaign: 'Annuler campagne', campaign: 'Campagne' },
     group: code => `Actions pour la carte ${code}`,
     draftLabel: target => `Commentaire sur ${target}`,
