@@ -15,6 +15,7 @@
  */
 
 import { ROLES } from '../scene/wardrobe.js'
+import { slugify } from './campaign.js'
 
 export const NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
 export const RESERVED = Object.freeze(['default', 'hermes', 'test', 'tmp', 'root', 'sudo'])
@@ -108,6 +109,12 @@ export function hireErrors(h, profiles = []) {
   if (h.start === 'clone' && !profiles.some(x => x.name === h.from)) e.push('from_missing')
   return e
 }
+
+/**
+ * The identifier follows the display title until it has been written by hand: the patch `{ name }` that typing `title` makes, or `{}`
+ * when the identifier is its own (typed, or filled in by the model: it is then no longer the slug of the title that preceded).
+ */
+export const followTitle = (draft, title) => (!draft.name || draft.name === slugify(draft.title) ? { name: slugify(title) } : {})
 
 /** What a typed identifier becomes: lowercase, no surrounding blanks (the page shows the result, never a silent change). */
 export const normalizeName = s => String(s ?? '').trim().toLowerCase()

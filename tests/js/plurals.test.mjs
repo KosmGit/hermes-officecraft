@@ -52,7 +52,7 @@ const KEYS = {
   'notify.maxRoutes': n(),
   'notify.hint': n(),
   'recruit.model.count': c => [c, c],
-  'recruit.skillsSum': n(8),
+  'recruit.skillsSum': c => [c, 'alpha', c],
   'replay.night.usageLine': c => [c, c, c],
   'replay.night.agentRuns': c => [2, c],
   'replay.night.ordersDetail': c => [c, c, c],
@@ -87,7 +87,7 @@ const PLURAL = {
 const TEXT_COUNT = new Set(['usage.exact', 'usage.days.bar', 'usage.days.detail', 'usage.models.calls', 'replay.night.usageLine', 'replay.night.agentRuns'])
 // wordings that do not change with the count in that language (the unit is invariable or not written)
 const SAME = {
-  en: new Set(['game.collection.summary', 'insp.more', 'inbox.more', 'campaign.issue.more', 'recruit.model.more', 'usage.models.aux', 'recruit.skillsSum', 'replay.state', 'replay.night.ordersDetail']),
+  en: new Set(['game.collection.summary', 'insp.more', 'inbox.more', 'campaign.issue.more', 'recruit.model.more', 'usage.models.aux', 'replay.state', 'replay.night.ordersDetail']),
   fr: new Set(['llm.soul.written', 'llm.body.current']),
   es: new Set(['llm.soul.written', 'llm.body.current', 'insp.more', 'inbox.more', 'campaign.issue.more', 'recruit.model.more', 'usage.boards.without'])
 }

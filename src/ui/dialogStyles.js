@@ -59,6 +59,12 @@ ${RINGED('.oc-dg-x:focus-visible')}
 .oc-dg-f{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;box-sizing:border-box;padding:12px 16px;border-top:1px solid ${EDGE};background:${CARD}}
 .oc-dg-fs,.oc-dg-fa{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
 .oc-dg-fa{margin-left:auto}
+/* a foot with a risk note: the note in clear next to the actions, the discreet diagnostic line under it */
+.oc-dg-fs:has(> .oc-dg-fn){flex:1 1 280px;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:4px}
+.oc-dg-fn{margin:0;font-size:12px;line-height:1.4;color:var(--ui-text-secondary)}
+.oc-dg-fm{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:11px;color:${SOFT}}
+.oc-dg-link.quiet{min-height:20px;font-size:11px;color:${SOFT};text-decoration-style:dotted}
+.oc-dg-link.quiet:hover{color:var(--foreground)}
 .oc-dg .oc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:32px;padding:4px 16px;line-height:1.2;text-align:center}   /* a label on two lines (« Crear el proyecto … y 10 tarjetas » at 380 px) keeps 4 px above and below */
 .oc-dg .oc-btn.oc-primary{background:var(--ui-accent);color:var(--ui-accent-fg, var(--background));border-color:var(--ui-accent)}
 .oc-dg .oc-btn.oc-primary:hover:not([aria-disabled="true"]):not(:disabled){background:color-mix(in oklab, var(--ui-accent) 88%, var(--foreground))}
@@ -72,6 +78,7 @@ ${TIP_CSS}
 .oc-dg-fl > .oc-dg-lab{display:flex;align-items:center;gap:8px;min-height:20px;font-size:12px;font-weight:600}
 .oc-dg-lab .grow{flex:1 1 auto}
 .oc-dg-lab small,.oc-dg-fl small{font-size:11px;font-weight:400;color:${SOFT}}
+.oc-dg-fl > small.oc-dg-help-line{font-size:11.5px;line-height:1.4}
 .oc-dg-ok{font-size:11px;font-weight:600;color:${ink(GREEN)}}
 .oc-dg input[type=text],.oc-dg input[type=search],.oc-dg input:not([type]),.oc-dg textarea,.oc-dg select{box-sizing:border-box;width:100%;max-width:100%;min-height:32px;padding:4px 8px;font-family:inherit;font-size:12.5px;color:var(--foreground);background:${CARD};border:1px solid ${FIELD_EDGE};border-radius:${FIELD_RADIUS}}
 .oc-dg textarea{resize:vertical;min-height:64px}
@@ -121,7 +128,7 @@ label.oc-dg-pill:has(input:focus-visible){${RING_FOCUS}}
 .oc-dg-sec{display:flex;flex-direction:column;gap:8px;min-width:0}
 /* stepped form (recruitment) */
 .oc-dg-rc{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
-.oc-dg-prev{display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:12px;text-align:center;background:linear-gradient(180deg,color-mix(in oklab, var(--ui-accent) 10%, ${CARD}),${CARD})}
+.oc-dg-prev{position:sticky;top:0;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:12px;text-align:center;background:linear-gradient(180deg,color-mix(in oklab, var(--ui-accent) 10%, ${CARD}),${CARD})}
 .oc-dg-prev .oc-portrait{width:112px;height:120px;border-radius:12px;image-rendering:pixelated;background:color-mix(in oklab, var(--foreground) 6%, transparent)}
 .oc-dg-prev b{font-size:14px;max-width:100%;overflow-wrap:anywhere}
 .oc-dg-prev .oc-faint{max-width:100%;overflow-wrap:anywhere}
@@ -166,6 +173,12 @@ details.oc-dg-req[open] > summary{margin-bottom:8px}
 .oc-dg .oc-rp,.oc-dg .oc-mp-pvs{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px;box-sizing:border-box;margin:0;padding:0;border:0;background:none}
 .oc-dg-pill.sel{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD});font-weight:600}
 .oc-rp-chip{gap:8px;min-height:28px;padding:0 12px 0 8px}
+/* the folded line of the type: label, current choice, « Change » */
+.oc-rp-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.oc-rp-line > .oc-dg-lab{display:flex;align-items:center;gap:8px;min-height:20px;font-size:12px;font-weight:600}
+.oc-rp-cur{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;min-width:0;flex:1 1 auto;font-size:12.5px}
+.oc-rp-cur b{font-weight:600}
+.oc-dg-link[aria-expanded="true"] svg{transform:rotate(180deg)}
 .oc-rp-sw{flex:0 0 auto;display:inline-block;width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--foreground) 45%, transparent)}
 .oc-rp-sw.auto{background:linear-gradient(135deg,var(--ui-accent) 50%,color-mix(in oklab, var(--foreground) 14%, transparent) 50%)}
 .oc-rp-sw.none{background:color-mix(in oklab, var(--foreground) 18%, transparent)}
@@ -263,7 +276,7 @@ const DIALOG_TAIL = `
   .oc-dg-h,.oc-dg-f{padding-left:12px;padding-right:12px}
   .oc-dg-b{padding:12px}
   .oc-dg-rc{grid-template-columns:minmax(0,1fr)}
-  .oc-dg-prev{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left}
+  .oc-dg-prev{position:static;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left}
   .oc-dg-prev .oc-portrait{width:56px;height:60px}
   .oc-dg-fa{margin-left:0;width:100%;justify-content:flex-end}
   .oc-dg-f{align-items:stretch}

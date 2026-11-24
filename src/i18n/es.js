@@ -456,6 +456,7 @@ export const es = {
   // el marco común de las ventanas del plugin
   dlg: {
     close: 'Cerrar',
+    draftKept: 'Cerrar conserva el borrador.',
     helpFor: name => `Ayuda: ${name}`
   },
   recruit: {
@@ -466,22 +467,22 @@ export const es = {
     step1: 'Identidad',
     step2: 'Punto de partida',
     step3: 'Modelo y proveedor',
-    skillsSum: (own, base) => `${own} ${own === 1 ? 'propio' : 'propios'} + ${base} de base`,
-    modelInherited: 'heredado',
+    skillsSum: (total, from, own) => `${total} ${total === 1 ? 'skill copiado' : 'skills copiados'} de ${from}${own ? `, ${own === 1 ? '1 propio' : `${own} propios`}` : ''}`,
+    modelInherited: 'heredado del bot principal',
     submitNamed: name => `Reclutar ${name}`,
     newBot: 'Bot nuevo',
     previewNote: 'La ropa y los objetos de escritorio siguen su nombre, su descripción y sus skills, como en todos los bots.',
     name: 'Identificador',
-    namePh: 'p. ej. designer',
+    namePh: 'p. ej. disenador-ui',
     nameHint: name => `Nombre del perfil de Hermes: su carpeta y su comando (${name}). Minúsculas, cifras, - y _.`,
     titleField: 'Título visible',
     titlePh: 'p. ej. Diseñador UI',
     description: 'Descripción del rol',
-    descriptionPh: 'Lo que hace',
-    descriptionTip: 'Lo que sabe hacer. El kanban la usa para asignarle tarjetas, la oficina para vestirlo.',
+    descriptionPh: 'P. ej.: toma pantallas y CSS; entrega HTML revisado; no toma el servidor.',
+    descriptionHelp: 'El kanban la usa para asignarle tarjetas: di qué toma, qué entrega y qué no toma.',
     start: 'Punto de partida',
     copyOf: 'Bot de origen',
-    starts: { clone: 'Copiar un bot', fresh: 'Nuevo', empty: 'Vacío' },
+    starts: { clone: 'Copiar un bot', fresh: 'Nuevo (skills de Hermes)', empty: 'Vacío (sin skills)' },
     startHint: {
       clone: 'Toma su configuración, su personalidad y sus skills, pero no sus conexiones de mensajería (dos bots nunca comparten un token).',
       fresh: 'Un perfil nuevo con los skills que trae Hermes y una breve nota de identidad escrita a partir del título y la descripción.',
@@ -500,6 +501,9 @@ export const es = {
     roleGuess: role => `Deducido del nombre y la descripción: ${role}.`,
     roleGuessNone: 'Nada que deducir por ahora: ropa polivalente hasta que el nombre o la descripción digan más.',
     roleGuessedTag: 'deducido',
+    roleGuessLine: role => `deducido: ${role}`,
+    roleChange: 'Cambiar',
+    roleFold: 'Plegar',
     model: {
       inherited: 'Heredado del bot principal',
       inheritedNote: 'el modelo y el proveedor del bot principal',
@@ -528,8 +532,8 @@ export const es = {
     },
     requests: 'Solicitudes enviadas a Hermes',
     requestsEmpty: 'Elige un identificador para ver las solicitudes.',
-    riskNote: 'Definitivo: escribe una carpeta en este dispositivo. La pestaña Bots puede borrar el bot después.',
-    cancel: 'Cancelar',
+    riskNote: 'Definitivo: crea una carpeta de perfil en este dispositivo. Para deshacerlo, borra el bot en la pestaña Bots.',
+    cancel: 'Cerrar',
     submit: 'Reclutar',
     err: {
       name_empty: 'Elige un identificador.',

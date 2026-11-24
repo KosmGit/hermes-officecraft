@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { isBusy } from '../core/orders.js'
-import { AUTO_ROLE, DESCRIPTION_MAX, STARTS, TITLE_MAX, hireAgent, hireDraft, hireErrors, requestsPreview } from '../core/recruit.js'
+import { AUTO_ROLE, DESCRIPTION_MAX, STARTS, TITLE_MAX, hireAgent, followTitle, hireDraft, hireErrors, requestsPreview } from '../core/recruit.js'
 import { roleOf } from '../scene/index.js'
 import { Dlg, DlgChip, DlgIcon, DlgTip, Notice, Step } from './DialogKit.jsx'
 import { ModelPicker, useModelOptions } from './ModelPicker.jsx'
@@ -29,7 +29,7 @@ export function hireProfiles(desks, sceneProfiles) {
  */
 export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
   const t = useT()
-  const nameRef = useRef(null)
+  const titleRef = useRef(null)
   const id = useId()
   const [reqOpen, setReqOpen] = useState(false)
   const [draft, setDraft] = useState(() => hireDraft(profiles))
@@ -47,7 +47,7 @@ export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null })
 
   // the order in flight closes the window (the bar of the page must stay reachable)
   useEffect(() => { if (open && WORKING.has(phase) && o && RECRUIT.has(o.verb)) onClose() }, [open, phase, o, onClose])
-  useEffect(() => { if (open && !confirming) setTimeout(() => nameRef.current?.focus(), 0) }, [open, confirming])
+  useEffect(() => { if (open && !confirming) setTimeout(() => titleRef.current?.focus(), 0) }, [open, confirming])
   // the draft goes with the bot once it exists (a cancelled or failed order keeps it for another try)
   const outcome = orders.state.outcome
   useEffect(() => {
@@ -96,11 +96,14 @@ export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null })
       )}
       start={confirming ? null : (
         <>
-          <button type="button" className="oc-dg-link" aria-expanded={reqOpen} onClick={() => setReqOpen(v => !v)}>
-            <DlgIcon id="chev" size={12} />{t('recruit.requests')}
-          </button>
-          <DlgTip name={t('recruit.submit')}>{t('recruit.riskNote')}</DlgTip>
-          <LeftCount assist={assist} />
+          <p className="oc-dg-fn" data-hire-risk>{t('recruit.riskNote')}</p>
+          <span className="oc-dg-fm">
+            <button type="button" className="oc-dg-link quiet" aria-expanded={reqOpen} onClick={() => setReqOpen(v => !v)}>
+              <DlgIcon id="chev" size={12} />{t('recruit.requests')}
+            </button>
+            <span className="oc-dg-kept" data-hire-kept>{t('dlg.draftKept')}</span>
+            <LeftCount assist={assist} />
+          </span>
         </>
       )}
       actions={confirming ? null : (
@@ -123,27 +126,28 @@ export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null })
               <Step n={1} title={t('recruit.step1')}>
                 {/* the <label> holds the name alone; the « ? », its note, the « free » mark and the model's mark sit beside it and reach the field by aria-describedby */}
                 <div className="oc-dg-fl">
+                  <span className="oc-dg-lab"><label htmlFor={`${id}-title`}>{t('recruit.titleField')}</label><Mark assist={assist} field="title" label={t('recruit.titleField')} id={`${id}-title-mk`} /></span>
+                  <input ref={titleRef} id={`${id}-title`} data-h="title" className={marked('title').trim() || undefined} value={draft.title} maxLength={TITLE_MAX} placeholder={t('recruit.titlePh')} aria-describedby={`${id}-title-mk`} onChange={e => set({ title: e.target.value, ...followTitle(draft, e.target.value) })} />
+                </div>
+                <div className="oc-dg-fl">
                   <span className="oc-dg-lab">
                     <label htmlFor={`${id}-name`}>{t('recruit.name')}</label>
                     <DlgTip name={t('recruit.name')}>{t('recruit.nameHint', draft.name || '…')}</DlgTip>
                     {nameOk ? <span className="oc-dg-ok" id={`${id}-free`} data-hire-free>{t('recruit.free')}</span> : null}
                     <Mark assist={assist} field="name" label={t('recruit.name')} id={`${id}-name-mk`} />
                   </span>
-                  <input ref={nameRef} id={`${id}-name`} data-h="name" className={marked('name').trim() || undefined} value={draft.name} maxLength={64} autoComplete="off" spellCheck={false} placeholder={t('recruit.namePh')}
+                  <input id={`${id}-name`} data-h="name" className={marked('name').trim() || undefined} value={draft.name} maxLength={64} autoComplete="off" spellCheck={false} placeholder={t('recruit.namePh')}
                     aria-invalid={shown.some(e => e.startsWith('name_')) || undefined} aria-describedby={`${id}-err ${id}-free ${id}-name-mk`}
                     onChange={e => set({ name: e.target.value })} />
                 </div>
                 <div className="oc-dg-fl">
-                  <span className="oc-dg-lab"><label htmlFor={`${id}-title`}>{t('recruit.titleField')}</label><Mark assist={assist} field="title" label={t('recruit.titleField')} id={`${id}-title-mk`} /></span>
-                  <input id={`${id}-title`} data-h="title" className={marked('title').trim() || undefined} value={draft.title} maxLength={TITLE_MAX} placeholder={t('recruit.titlePh')} aria-describedby={`${id}-title-mk`} onChange={e => set({ title: e.target.value })} />
-                </div>
-                <div className="oc-dg-fl">
-                  <span className="oc-dg-lab"><label htmlFor={`${id}-desc`}>{t('recruit.description')}</label><DlgTip name={t('recruit.description')}>{t('recruit.descriptionTip')}</DlgTip><Mark assist={assist} field="description" label={t('recruit.description')} id={`${id}-desc-mk`} /></span>
-                  <textarea id={`${id}-desc`} data-h="description" className={marked('description').trim() || undefined} rows={assist.phase === 'done' ? 4 : 2} value={draft.description} maxLength={DESCRIPTION_MAX} placeholder={t('recruit.descriptionPh')} aria-describedby={`${id}-desc-mk`} onChange={e => set({ description: e.target.value })} />
+                  <span className="oc-dg-lab"><label htmlFor={`${id}-desc`}>{t('recruit.description')}</label><Mark assist={assist} field="description" label={t('recruit.description')} id={`${id}-desc-mk`} /></span>
+                  <small className="oc-dg-faint oc-dg-help-line" id={`${id}-desc-h`}>{t('recruit.descriptionHelp')}</small>
+                  <textarea id={`${id}-desc`} data-h="description" className={marked('description').trim() || undefined} rows={assist.phase === 'done' ? 4 : 3} value={draft.description} maxLength={DESCRIPTION_MAX} placeholder={t('recruit.descriptionPh')} aria-describedby={`${id}-desc-h ${id}-desc-mk`} onChange={e => set({ description: e.target.value })} />
                 </div>
                 <RolePicker value={draft.role} onPick={r => set({ role: r })} guessed={guessed} mark={<Mark assist={assist} field="role" label={t('recruit.roleField')} />} />
               </Step>
-              <Step n={2} title={<>{t('recruit.step2')} <Mark assist={assist} field="start" label={t('recruit.step2')} /></>} summary={draft.start === 'clone' && src ? t('recruit.skillsSum', own.length, baseSkills) : null}>
+              <Step n={2} title={<>{t('recruit.step2')} <Mark assist={assist} field="start" label={t('recruit.step2')} /></>} summary={draft.start === 'clone' && src ? t('recruit.skillsSum', src.skills?.enabled ?? 0, draft.from, own.length) : null}>
                 <div className="oc-dg-start">
                   <span className="oc-dg-seg" role="radiogroup" aria-label={t('recruit.start')}>
                     {STARTS.map(s => (

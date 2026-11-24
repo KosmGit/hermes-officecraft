@@ -456,6 +456,7 @@ export const en = {
   // the shared frame of the plugin's windows
   dlg: {
     close: 'Close',
+    draftKept: 'Closing keeps the draft.',
     helpFor: name => `Help: ${name}`
   },
   recruit: {
@@ -466,22 +467,22 @@ export const en = {
     step1: 'Identity',
     step2: 'Starting point',
     step3: 'Model and provider',
-    skillsSum: (own, base) => `${own} own + ${base} base`,
-    modelInherited: 'inherited',
+    skillsSum: (total, from, own) => `${total} ${total === 1 ? 'skill' : 'skills'} copied from ${from}${own ? `, ${own} of them custom` : ''}`,
+    modelInherited: 'inherited from the main bot',
     submitNamed: name => `Recruit ${name}`,
     newBot: 'New bot',
     previewNote: 'Like every bot, its outfit and desk items follow its name, description and skills.',
     name: 'Identifier',
-    namePh: 'e.g. designer',
+    namePh: 'e.g. ui-designer',
     nameHint: name => `The Hermes profile name, also used for its folder and its command (${name}). Lowercase letters, digits, - and _.`,
     titleField: 'Display title',
     titlePh: 'e.g. UI designer',
     description: 'Role description',
-    descriptionPh: 'What it does',
-    descriptionTip: 'What it can do. The kanban uses it to assign cards; the office uses it to pick an outfit.',
+    descriptionPh: 'E.g. takes screens and CSS; delivers reviewed HTML; does not take the server.',
+    descriptionHelp: 'The kanban uses it to hand it cards: say what it takes, what it delivers, what it does not take.',
     start: 'Starting point',
     copyOf: 'Bot to copy',
-    starts: { clone: 'Copy a bot', fresh: 'New', empty: 'Empty' },
+    starts: { clone: 'Copy a bot', fresh: 'New (Hermes’ skills)', empty: 'Empty (no skills)' },
     startHint: {
       clone: 'Copies its configuration, personality and skills, but not its messaging accounts (two bots never share a token).',
       fresh: 'A fresh profile with the skills Hermes provides and a short identity note written from the title and the description.',
@@ -500,6 +501,9 @@ export const en = {
     roleGuess: role => `Guessed from the name and description: ${role}.`,
     roleGuessNone: 'Nothing to go on yet. It gets a generalist outfit until the name or description says more.',
     roleGuessedTag: 'guessed',
+    roleGuessLine: role => `guessed: ${role}`,
+    roleChange: 'Change',
+    roleFold: 'Fold',
     model: {
       inherited: 'Inherited from the main bot',
       inheritedNote: 'the main bot’s model and provider',
@@ -528,8 +532,8 @@ export const en = {
     },
     requests: 'Requests sent to Hermes',
     requestsEmpty: 'Choose an identifier to see the requests.',
-    riskNote: 'Final: this creates a folder on this computer. You can delete the bot afterwards in the Bots tab.',
-    cancel: 'Cancel',
+    riskNote: 'Final: creates a profile folder on this computer. To undo it, delete the bot in the Bots tab.',
+    cancel: 'Close',
     submit: 'Recruit',
     err: {
       name_empty: 'Choose an identifier.',

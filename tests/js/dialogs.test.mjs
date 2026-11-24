@@ -61,13 +61,15 @@ test('the 4 px grid: paddings, gaps, margins and control heights of the frame ar
   assert.deepEqual([...new Set(bad)], [])
 })
 
-test('a few words: no paragraph of help in the windows, the explanation sits behind a « ? » (<= 60 characters for what stays visible)', () => {
+test('a few words: the explanation of a field sits behind a « ? », except the description, whose purpose is said in clear (the kanban routes cards on it)', () => {
   for (const lang of LANGS) {
     const r = messages[lang].recruit
-    for (const k of ['descriptionPh', 'titlePh', 'namePh']) assert.ok(r[k].length <= 40, `${lang} recruit.${k}`)
+    for (const k of ['titlePh', 'namePh']) assert.ok(r[k].length <= 40, `${lang} recruit.${k}`)
+    assert.ok(r.descriptionPh.length <= 100, `${lang} an example, not a paragraph`)
+    assert.ok(r.descriptionHelp.length > r.descriptionPh.length / 2 && r.descriptionHelp.length <= 140, `${lang} the visible help of the description`)
     assert.ok(r.free.length <= 10, lang)
     for (const k of ['step1', 'step2', 'step3']) assert.ok(r[k].length <= 40, `${lang} recruit.${k}`)
-    assert.equal(typeof r.descriptionTip, 'string', 'the long sentence moved behind its « ? »')
+    assert.equal(r.descriptionTip, undefined, 'the description says what it is for in clear, no « ? » to open')
     assert.ok(messages[lang].dlg.close.length > 2)
     assert.match(messages[lang].dlg.helpFor('X'), /X/)
   }
@@ -76,6 +78,8 @@ test('a few words: no paragraph of help in the windows, the explanation sits beh
   assert.equal((hire.match(/<Step n=\{/g) || []).length, 2)
   assert.match(hire, /recruit\.step3/)
   assert.match(hire, /<DlgTip name=\{t\('recruit\.name'\)\}>/)
+  assert.doesNotMatch(hire, /<DlgTip name=\{t\('recruit\.description'\)\}>/, 'the purpose of the description is written under its label')
+  assert.doesNotMatch(hire, /<DlgTip name=\{t\('recruit\.submit'\)\}>/, 'the risk of « Recruit » is written next to the button, not behind a « ? »')
   assert.doesNotMatch(hire, /<fieldset|<legend/, 'no box of boxes')
 })
 
