@@ -98,7 +98,7 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
                 <span className="hd"><ProjectChip slug={w.board} />{w.named ? <b className="ux-mono">{w.code}</b> : null}</span>
                 <span className="one ux-ag-wt" title={w.id}>{w.title}</span>
               </span>
-              <button type="button" className="ux-b sm pri" data-decide aria-label={t('ux.agent.decideCard', w.title)} onClick={() => onDecide(w.board)}>{t('ux.agent.decide')}</button>
+              {onDecide ? <button type="button" className="ux-b sm pri" data-decide aria-label={t('ux.agent.decideCard', w.title)} onClick={() => onDecide(w.board)}>{t('ux.agent.decide')}</button> : null}
             </div>
           ))}
           {i.waitingMore ? <small>{t('insp.more', i.waitingMore)}</small> : null}

@@ -19222,7 +19222,7 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
             ] }),
             /* @__PURE__ */ jsx19("span", { className: "one ux-ag-wt", title: w.id, children: w.title })
           ] }),
-          /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm pri", "data-decide": true, "aria-label": t("ux.agent.decideCard", w.title), onClick: () => onDecide(w.board), children: t("ux.agent.decide") })
+          onDecide ? /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm pri", "data-decide": true, "aria-label": t("ux.agent.decideCard", w.title), onClick: () => onDecide(w.board), children: t("ux.agent.decide") }) : null
         ] }, `${w.board}/${w.id}`)),
         i.waitingMore ? /* @__PURE__ */ jsx19("small", { children: t("insp.more", i.waitingMore) }) : null
       ] })
