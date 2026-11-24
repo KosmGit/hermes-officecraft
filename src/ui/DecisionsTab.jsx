@@ -113,8 +113,8 @@ export function DecisionsTab({ office, history, orders, writes, openCard, approv
           <button type="button" aria-pressed={sort === 'project'} data-sort="project" onClick={() => onSort('project')}>{t('ux.dec.byProject')}</button>
           <button type="button" aria-pressed={sort === 'age'} data-sort="age" onClick={() => onSort('age')}>{t('ux.dec.byAge')}</button>
         </span>
-        {project ? <FilterChip slug={project} onClear={() => onProject(null)} t={t} /> : null}
-        <span className={project ? '' : 'grow'}><ListHelp t={t} /></span>
+        {/* the filter's chip and the « ? » wrap together, so the « ? » is never alone on a line */}
+        <span className={project ? 'ux-fltg' : 'grow'}>{project ? <FilterChip slug={project} onClear={() => onProject(null)} t={t} /> : null}<ListHelp t={t} /></span>
       </div>
       {empty ? (
         <p className="ux-empty" data-empty>

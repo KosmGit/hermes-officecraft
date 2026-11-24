@@ -154,7 +154,8 @@ export const PAGE_CSS = `
 .ux-pbar .grow{margin-left:auto}
 /* under a project filter the chip and the single « ? » sit on the sort line when there is room (the word « Sort » is kept for the screen reader only);
    in a narrow side pane they move under it rather than squeeze the chip below the project's name */
-.ux-pbar.flt .ux-prjx{flex:0 0 auto;max-width:100%}
+.ux-pbar .ux-fltg{display:inline-flex;align-items:center;gap:8px;margin-left:auto;min-width:0;max-width:100%}
+.ux-pbar.flt .ux-prjx{flex:0 1 auto;min-width:0;max-width:100%}
 .ux-pbar.flt .ux-seg{flex:0 0 auto}
 .ux-seg{display:inline-flex;padding:4px;border:0;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});box-shadow:inset 0 0 0 1px ${EDGE}}
 .ux-seg button{height:24px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:${T2};font:inherit;font-size:12px;font-weight:500;cursor:pointer}
