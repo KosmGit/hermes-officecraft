@@ -4782,6 +4782,7 @@ var en = {
   tagCards: (n) => n === 1 ? "1 card" : `${n} cards`,
   tipCards: (n, list, more = "") => `${n} ${n === 1 ? "card" : "cards"} running: ${list}${more ? ` ${more}` : ""}`,
   quietOne: (ref, span2) => `${ref} silent for ${span2}`,
+  waitTip: (n) => n === 1 ? "a decision is waiting for you" : `${n} decisions are waiting for you`,
   narrowNote: "The window is too narrow for the office, so it is shown as a list. Widen the window to bring it back.",
   sceneLabel: "The office",
   openBtn: "Open",
@@ -4794,7 +4795,9 @@ var en = {
     waiting: "one of their cards is blocked and needs your decision",
     stale: (mins) => `a card is running, but no signal for ${mins} min`,
     active: (mins) => `one of your sessions in the last ${mins} min`,
-    rest: "no halo: nothing recent"
+    rest: "no halo: nothing recent",
+    waitName: "Orange “!” sign",
+    waitSign: "the agent is working, but one of its cards is blocked: a decision is yours"
   },
   panel: {
     title: "Details",
@@ -6498,6 +6501,7 @@ var es = {
   tagCards: (n) => n === 1 ? "1 tarjeta" : `${n} tarjetas`,
   tipCards: (n, list, more = "") => `${n} ${n === 1 ? "tarjeta" : "tarjetas"} en curso: ${list}${more ? ` ${more}` : ""}`,
   quietOne: (ref, span2) => `${ref} en silencio desde hace ${span2}`,
+  waitTip: (n) => n === 1 ? "una decisión te espera" : `${n} decisiones te esperan`,
   narrowNote: "Ventana estrecha: la oficina se muestra como lista. El dibujo vuelve si ensanchas la ventana.",
   sceneLabel: "La oficina",
   openBtn: "Abrir",
@@ -6510,7 +6514,9 @@ var es = {
     waiting: "una de sus tarjetas está bloqueada: te toca decidir",
     stale: (mins) => `una tarjeta en curso, sin señales desde hace ${mins} min`,
     active: (mins) => `una de tus sesiones en los últimos ${mins} min`,
-    rest: "sin halo: nada reciente"
+    rest: "sin halo: nada reciente",
+    waitName: "Señal « ! » naranja",
+    waitSign: "el agente trabaja, pero una de sus tarjetas está bloqueada: te toca decidir"
   },
   panel: {
     title: "Detalles",
@@ -8215,6 +8221,7 @@ var fr = {
   tagCards: (n) => n === 1 ? "1 carte" : `${n} cartes`,
   tipCards: (n, list, more = "") => `${n} ${n === 1 ? "carte" : "cartes"} en cours : ${list}${more ? ` ${more}` : ""}`,
   quietOne: (ref, span2) => `${ref} silencieuse depuis ${span2}`,
+  waitTip: (n) => n === 1 ? "une décision vous attend" : `${n} décisions vous attendent`,
   narrowNote: "Fenêtre étroite : le bureau s’affiche en liste. Élargissez-la pour retrouver la vue du bureau.",
   sceneLabel: "Le bureau",
   openBtn: "Ouvrir",
@@ -8227,7 +8234,9 @@ var fr = {
     waiting: "une de ses cartes est bloquée : une décision vous revient",
     stale: (mins) => `une carte est en cours, sans signe de vie depuis ${mins} min`,
     active: (mins) => `une de vos sessions il y a moins de ${mins} min`,
-    rest: "pas de halo : rien de récent"
+    rest: "pas de halo : rien de récent",
+    waitName: "Signe « ! » orange",
+    waitSign: "l’agent travaille, mais une de ses cartes est bloquée : une décision vous revient"
   },
   panel: {
     title: "Détails",
@@ -11340,6 +11349,7 @@ function quietFacts(cards, state2) {
   const quiet2 = quietCards(cards, state2);
   return quiet2.length ? { quiet: quiet2.slice(0, NAMED_MAX).map((c) => ({ ref: refOf(c), span: formatSpan(c.silentMs) })), quietMore: Math.max(0, quiet2.length - NAMED_MAX) } : {};
 }
+var waitSign = (agent) => Boolean(agent) && agent.state !== "waiting" && Array.isArray(agent.blocked) && agent.blocked.length > 0;
 function taskTag(agent, nowMs) {
   if (!agent) return null;
   const cards = runningCards(agent, nowMs);
@@ -11347,7 +11357,7 @@ function taskTag(agent, nowMs) {
     const main = cards[0];
     const ref = labelRef(cards) || (cards.length < 2 ? codeRef(agent.workerSession?.title) : "");
     const since = main?.startedMs;
-    return { kind: "working", ref, span: since && nowMs > since ? formatSpan(nowMs - since) : "", ...manyFacts(cards, nowMs), ...quietFacts(cards, "working") };
+    return { kind: "working", ref, span: since && nowMs > since ? formatSpan(nowMs - since) : "", ...manyFacts(cards, nowMs), ...quietFacts(cards, "working"), ...waitSign(agent) ? { wait: agent.blocked.length } : {} };
   }
   if (agent.state === "stale") {
     const ref = labelRef(cards);
@@ -13246,6 +13256,7 @@ function labelOf(agent, tag) {
   const out = { name: String(agent?.label || agent?.name || ""), code: tag && (tag.kind === "working" || tag.kind === "waiting" || tag.kind === "stale") ? tag.ref || "" : "" };
   if (tag?.more) out.more = tag.more;
   if (tag?.quiet?.length) out.quiet = true;
+  if (tag?.wait) out.wait = true;
   return out;
 }
 var RANK2 = { waiting: 0, stale: 1, working: 2, active: 3 };
@@ -18928,7 +18939,11 @@ function Roster({ office, sceneBy, project: project2, selected, onPick, t }) {
       sceneBy.get(a.name) ? /* @__PURE__ */ jsx19(Portrait, { agent: sceneBy.get(a.name) }) : null,
       /* @__PURE__ */ jsx19("span", { className: "nm", title: a.label || a.name, children: a.label || a.name }),
       /* @__PURE__ */ jsx19(ProjectChip, { slug: a.home }),
-      /* @__PURE__ */ jsx19(StateTag, { state: a.state, t })
+      /* @__PURE__ */ jsx19(StateTag, { state: a.state, t }),
+      waitSign(a) ? /* @__PURE__ */ jsxs16("span", { className: "ux-wait", "data-wait": true, title: t("waitTip", a.blocked.length), children: [
+        /* @__PURE__ */ jsx19(StateIcon, { state: "waiting" }),
+        /* @__PURE__ */ jsx19("span", { className: "ux-vh", children: t("waitTip", a.blocked.length) })
+      ] }) : null
     ] }) }, a.name)) })
   ] });
 }
@@ -20132,6 +20147,11 @@ var SCENE_CSS = `
 .oc-quiet{display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;flex:0 0 auto;color:${ink3(ORANGE3)}}
 .oc-dense .oc-station:not(.oc-s-working):not(.oc-s-waiting):not(.oc-s-stale):not([aria-pressed="true"]):not(:hover):not(:focus-visible) .oc-chip > .oc-quiet,
 .oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-quiet{display:inline-flex!important;position:absolute;top:-7px;right:-7px;border-radius:50%;background:${CARD2};box-shadow:0 0 0 1px ${EDGE}}
+/* the sign « a decision waits for you » on a bot whose state is another one (it works): the waiting state's « ! », in the family of the code pill
+   (a tinted rounded square), after the code. Folded, it is a pip on the corner of the dot like the silent sign (the second pip when both are there). */
+.oc-wait{display:inline-flex;align-items:center;justify-content:center;width:15px;height:14px;flex:0 0 auto;border-radius:5px;color:${ink3(ORANGE3)};background:color-mix(in oklab, ${ORANGE3} 18%, transparent)}
+.oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-wait{display:inline-flex!important;position:absolute;top:-7px;right:-7px;width:14px;border-radius:50%;background:${CARD2};box-shadow:0 0 0 1px ${EDGE}}
+.oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-quiet ~ .oc-wait{right:8px}
 .oc-list{display:flex;flex-direction:column;gap:10px;padding:4px 2px;width:100%;box-sizing:border-box;min-width:0}
 .oc-list p{margin:0;font-size:11px;color:${SOFT2}}
 .oc-lzone{min-width:0}
@@ -20292,7 +20312,9 @@ function agentFacts(a, t, nowMs, badge) {
   const cards = cardsTip(tag, t) || pileTip(a, nowMs, t);
   const quiet2 = quietTip(tag, t);
   const more = [cards, quiet2].filter(Boolean).map((x) => `. ${x}`).join("");
-  return { state: state2, code: codeText(lab.code, lab.more, t), quiet: lab.quiet === true, tag: full, cardsText: cards, quietText: quiet2, label: `${a.label || a.name} — ${state2}. ${when}${pin}${more}`, tip: [state2, full, cards, quiet2].filter(Boolean).join(" · ") };
+  const wait = tag?.wait ? t("waitTip", tag.wait) : "";
+  const said = wait ? `${state2}, ${wait}` : state2;
+  return { state: state2, code: codeText(lab.code, lab.more, t), quiet: lab.quiet === true, wait: lab.wait === true, tag: full, cardsText: cards, quietText: quiet2, label: `${a.label || a.name} — ${said}. ${when}${pin}${more}`, tip: [said, full, cards, quiet2].filter(Boolean).join(" · ") };
 }
 function Island({ board, hall, count: count2, dim, active, onPick, t }) {
   const style = useProjectStyle(hall ? null : board.slug);
@@ -20658,6 +20680,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
               badge ? /* @__PURE__ */ jsx28("span", { className: "oc-pinwrap", "data-pin": a.name, onMouseEnter: (e) => show(`badge:${a.name}`, e.currentTarget), onMouseLeave: () => hide(`badge:${a.name}`), children: /* @__PURE__ */ jsx28(PixelBadge, {}) }) : null,
               f.code ? /* @__PURE__ */ jsx28("span", { className: "oc-task", children: f.code }) : null,
               f.quiet ? /* @__PURE__ */ jsx28("span", { className: "oc-quiet", "data-quiet": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: "stale" }) }) : null,
+              f.wait ? /* @__PURE__ */ jsx28("span", { className: "oc-wait", "data-wait": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: "waiting" }) }) : null,
               bar ? /* @__PURE__ */ jsx28("span", { className: "oc-bar", "data-late": bar.late ? "" : void 0, "aria-hidden": "true", children: /* @__PURE__ */ jsx28("i", { style: { width: `${Math.round(bar.f * 100)}%` } }) }) : null
             ] }),
             thought ? /* @__PURE__ */ jsxs25("span", { className: "oc-thought", "data-thought": a.name, "aria-hidden": "true", children: [
@@ -20803,7 +20826,8 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
                   badge ? /* @__PURE__ */ jsx28("span", { className: "oc-pinwrap", "data-pin": a.name, children: /* @__PURE__ */ jsx28(PixelBadge, {}) }) : null,
                   f.state ? /* @__PURE__ */ jsx28("span", { className: "oc-sl", children: f.state }) : null,
                   f.code ? /* @__PURE__ */ jsx28("span", { className: "oc-task", children: f.code }) : null,
-                  f.quiet ? /* @__PURE__ */ jsx28("span", { className: "oc-quiet", "data-quiet": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: "stale" }) }) : null
+                  f.quiet ? /* @__PURE__ */ jsx28("span", { className: "oc-quiet", "data-quiet": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: "stale" }) }) : null,
+                  f.wait ? /* @__PURE__ */ jsx28("span", { className: "oc-wait", "data-wait": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: "waiting" }) }) : null
                 ] }),
                 thoughts?.[a.name] ? /* @__PURE__ */ jsxs25("span", { className: "oc-lthought", "data-thought": a.name, children: [
                   /* @__PURE__ */ jsx28("i", { children: t("llm.thoughts.badge") }),
@@ -21268,6 +21292,8 @@ var PAGE_CSS = `
 .ux-rosterb .ux-prj{flex:0 100 auto;min-width:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-rosterb .ux-st{flex:0 0 auto;white-space:nowrap}
 .ux-rosterb .ux-st{margin-left:auto;font-size:11.5px}
+/* the « a decision waits for you » sign beside the state of a bot at work: same tinted square as the scene's label */
+.ux-wait{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:20px;height:20px;border-radius:5px;color:${ink4(ORANGE4)};background:color-mix(in oklab, ${ORANGE4} 18%, transparent)}
 /* projects tab */
 .ux-pjc{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr);gap:4px 12px;margin:0 0 12px;padding:16px 12px 12px;border:1px solid ${EDGE};border-radius:10px;overflow:hidden}
 .ux-pjc::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--pc)}
@@ -21462,12 +21488,20 @@ function Legend() {
     /* @__PURE__ */ jsx31("button", { type: "button", className: "oc-legend-btn", "aria-expanded": open, "aria-controls": id, "aria-label": t("legend.button"), onClick: () => setOpen((v) => !v), children: "?" }),
     open ? /* @__PURE__ */ jsxs27("div", { id, className: "oc-legend-pop", role: "group", "aria-label": t("legend.title"), children: [
       /* @__PURE__ */ jsx31("b", { children: t("legend.title") }),
-      /* @__PURE__ */ jsx31("ul", { children: rows.map((r) => /* @__PURE__ */ jsxs27("li", { "data-legend-state": r.state, children: [
-        /* @__PURE__ */ jsx31(Swatch, { rgb: r.rgb }),
-        /* @__PURE__ */ jsx31("span", { className: "oc-lg-sti", children: /* @__PURE__ */ jsx31(StateIcon, { state: r.state }) }),
-        /* @__PURE__ */ jsx31("span", { className: "oc-lg-name", children: t(`state.${r.state}`) }),
-        /* @__PURE__ */ jsx31("span", { className: "oc-lg-hint", children: r.arg == null ? t(r.hint) : t(r.hint, r.arg) })
-      ] }, r.state)) })
+      /* @__PURE__ */ jsxs27("ul", { children: [
+        rows.map((r) => /* @__PURE__ */ jsxs27("li", { "data-legend-state": r.state, children: [
+          /* @__PURE__ */ jsx31(Swatch, { rgb: r.rgb }),
+          /* @__PURE__ */ jsx31("span", { className: "oc-lg-sti", children: /* @__PURE__ */ jsx31(StateIcon, { state: r.state }) }),
+          /* @__PURE__ */ jsx31("span", { className: "oc-lg-name", children: t(`state.${r.state}`) }),
+          /* @__PURE__ */ jsx31("span", { className: "oc-lg-hint", children: r.arg == null ? t(r.hint) : t(r.hint, r.arg) })
+        ] }, r.state)),
+        /* @__PURE__ */ jsxs27("li", { "data-legend-sign": "wait", children: [
+          /* @__PURE__ */ jsx31("span", { "aria-hidden": "true" }),
+          /* @__PURE__ */ jsx31("span", { className: "oc-lg-sti oc-lg-wait", children: /* @__PURE__ */ jsx31(StateIcon, { state: "waiting" }) }),
+          /* @__PURE__ */ jsx31("span", { className: "oc-lg-name", children: t("legend.waitName") }),
+          /* @__PURE__ */ jsx31("span", { className: "oc-lg-hint", children: t("legend.waitSign") })
+        ] })
+      ] })
     ] }) : null
   ] });
 }
@@ -24762,6 +24796,7 @@ var PANEL_CSS = `
 .oc-lg-sti{align-self:center;display:flex;color:var(--foreground)}
 .oc-sw{align-self:center;width:10px;height:10px;display:block;box-sizing:border-box}
 .oc-sw-none{border:1.5px solid var(--ui-text-tertiary);border-radius:50%}
+.oc-lg-sti.oc-lg-wait{color:${ink6(ORANGE9)}}
 .oc-lg-name{font-weight:600}
 .oc-lg-hint{color:${SOFT5}}
 .oc-icon{flex:0 0 auto;image-rendering:pixelated;image-rendering:crisp-edges}

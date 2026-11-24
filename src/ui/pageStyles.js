@@ -262,6 +262,8 @@ export const PAGE_CSS = `
 .ux-rosterb .ux-prj{flex:0 100 auto;min-width:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-rosterb .ux-st{flex:0 0 auto;white-space:nowrap}
 .ux-rosterb .ux-st{margin-left:auto;font-size:11.5px}
+/* the « a decision waits for you » sign beside the state of a bot at work: same tinted square as the scene's label */
+.ux-wait{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:20px;height:20px;border-radius:5px;color:${ink(ORANGE)};background:color-mix(in oklab, ${ORANGE} 18%, transparent)}
 /* projects tab */
 .ux-pjc{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr);gap:4px 12px;margin:0 0 12px;padding:16px 12px 12px;border:1px solid ${EDGE};border-radius:10px;overflow:hidden}
 .ux-pjc::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--pc)}

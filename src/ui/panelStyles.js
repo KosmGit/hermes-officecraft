@@ -116,6 +116,7 @@ export const PANEL_CSS = `
 .oc-lg-sti{align-self:center;display:flex;color:var(--foreground)}
 .oc-sw{align-self:center;width:10px;height:10px;display:block;box-sizing:border-box}
 .oc-sw-none{border:1.5px solid var(--ui-text-tertiary);border-radius:50%}
+.oc-lg-sti.oc-lg-wait{color:${ink(ORANGE)}}
 .oc-lg-name{font-weight:600}
 .oc-lg-hint{color:${SOFT}}
 .oc-icon{flex:0 0 auto;image-rendering:pixelated;image-rendering:crisp-edges}

@@ -128,6 +128,11 @@ export const SCENE_CSS = `
 .oc-quiet{display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;flex:0 0 auto;color:${ink(ORANGE)}}
 .oc-dense .oc-station:not(.oc-s-working):not(.oc-s-waiting):not(.oc-s-stale):not([aria-pressed="true"]):not(:hover):not(:focus-visible) .oc-chip > .oc-quiet,
 .oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-quiet{display:inline-flex!important;position:absolute;top:-7px;right:-7px;border-radius:50%;background:${CARD};box-shadow:0 0 0 1px ${EDGE}}
+/* the sign « a decision waits for you » on a bot whose state is another one (it works): the waiting state's « ! », in the family of the code pill
+   (a tinted rounded square), after the code. Folded, it is a pip on the corner of the dot like the silent sign (the second pip when both are there). */
+.oc-wait{display:inline-flex;align-items:center;justify-content:center;width:15px;height:14px;flex:0 0 auto;border-radius:5px;color:${ink(ORANGE)};background:color-mix(in oklab, ${ORANGE} 18%, transparent)}
+.oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-wait{display:inline-flex!important;position:absolute;top:-7px;right:-7px;width:14px;border-radius:50%;background:${CARD};box-shadow:0 0 0 1px ${EDGE}}
+.oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-quiet ~ .oc-wait{right:8px}
 .oc-list{display:flex;flex-direction:column;gap:10px;padding:4px 2px;width:100%;box-sizing:border-box;min-width:0}
 .oc-list p{margin:0;font-size:11px;color:${SOFT}}
 .oc-lzone{min-width:0}

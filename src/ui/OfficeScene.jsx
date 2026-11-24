@@ -131,7 +131,10 @@ function agentFacts(a, t, nowMs, badge) {
   const cards = cardsTip(tag, t) || pileTip(a, nowMs, t)
   const quiet = quietTip(tag, t)
   const more = [cards, quiet].filter(Boolean).map(x => `. ${x}`).join('')
-  return { state, code: codeText(lab.code, lab.more, t), quiet: lab.quiet === true, tag: full, cardsText: cards, quietText: quiet, label: `${a.label || a.name} — ${state}. ${when}${pin}${more}`, tip: [state, full, cards, quiet].filter(Boolean).join(' · ') }
+  // a bot at work with a blocked card: « Au travail, une décision vous attend » (the sign beside its state, and the words for the screen reader)
+  const wait = tag?.wait ? t('waitTip', tag.wait) : ''
+  const said = wait ? `${state}, ${wait}` : state
+  return { state, code: codeText(lab.code, lab.more, t), quiet: lab.quiet === true, wait: lab.wait === true, tag: full, cardsText: cards, quietText: quiet, label: `${a.label || a.name} — ${said}. ${when}${pin}${more}`, tip: [said, full, cards, quiet].filter(Boolean).join(' · ') }
 }
 
 /** The label of an island (a project of the office), a button that filters on it: dot + name, ring and `done/total`, blocked cards. `data-isl` = its size (full / short / dot). */
@@ -505,6 +508,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
             ) : null}
             {f.code ? <span className="oc-task">{f.code}</span> : null}
             {f.quiet ? <span className="oc-quiet" data-quiet aria-hidden="true"><StateIcon state="stale" /></span> : null}
+            {f.wait ? <span className="oc-wait" data-wait aria-hidden="true"><StateIcon state="waiting" /></span> : null}
             {bar ? <span className="oc-bar" data-late={bar.late ? '' : undefined} aria-hidden="true"><i style={{ width: `${Math.round(bar.f * 100)}%` }} /></span> : null}
           </span>
           {thought ? <span className="oc-thought" data-thought={a.name} aria-hidden="true"><i>{t('llm.thoughts.badge')}</i>{thought}</span> : null}
@@ -642,6 +646,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
                     {f.state ? <span className="oc-sl">{f.state}</span> : null}
                     {f.code ? <span className="oc-task">{f.code}</span> : null}
                     {f.quiet ? <span className="oc-quiet" data-quiet aria-hidden="true"><StateIcon state="stale" /></span> : null}
+                    {f.wait ? <span className="oc-wait" data-wait aria-hidden="true"><StateIcon state="waiting" /></span> : null}
                   </span>
                   {thoughts?.[a.name] ? <span className="oc-lthought" data-thought={a.name}><i>{t('llm.thoughts.badge')}</i>{thoughts[a.name]}</span> : null}
                 </button>

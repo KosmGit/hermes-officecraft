@@ -58,6 +58,7 @@ export const en = {
   tagCards: n => (n === 1 ? '1 card' : `${n} cards`),
   tipCards: (n, list, more = '') => `${n} ${n === 1 ? 'card' : 'cards'} running: ${list}${more ? ` ${more}` : ''}`,
   quietOne: (ref, span) => `${ref} silent for ${span}`,
+  waitTip: n => (n === 1 ? 'a decision is waiting for you' : `${n} decisions are waiting for you`),
   narrowNote: 'The window is too narrow for the office, so it is shown as a list. Widen the window to bring it back.',
   sceneLabel: 'The office',
   openBtn: 'Open',
@@ -70,7 +71,9 @@ export const en = {
     waiting: 'one of their cards is blocked and needs your decision',
     stale: mins => `a card is running, but no signal for ${mins} min`,
     active: mins => `one of your sessions in the last ${mins} min`,
-    rest: 'no halo: nothing recent'
+    rest: 'no halo: nothing recent',
+    waitName: 'Orange “!” sign',
+    waitSign: 'the agent is working, but one of its cards is blocked: a decision is yours'
   },
   panel: {
     title: 'Details',

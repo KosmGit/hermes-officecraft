@@ -60,6 +60,12 @@ export function Legend() {
                 <span className="oc-lg-hint">{r.arg == null ? t(r.hint) : t(r.hint, r.arg)}</span>
               </li>
             ))}
+            <li data-legend-sign="wait">
+              <span aria-hidden="true" />
+              <span className="oc-lg-sti oc-lg-wait"><StateIcon state="waiting" /></span>
+              <span className="oc-lg-name">{t('legend.waitName')}</span>
+              <span className="oc-lg-hint">{t('legend.waitSign')}</span>
+            </li>
           </ul>
         </div>
       ) : null}

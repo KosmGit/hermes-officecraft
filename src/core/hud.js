@@ -46,10 +46,20 @@ function quietFacts(cards, state) {
 }
 
 /**
+ * The sign « a decision waits for you » on a bot whose main state is not « waits for you ». The state of a bot says one thing (working wins
+ * over a blocked card, src/core/office.js): a bot at work with a blocked card keeps its state, its outline and its ring, and carries this
+ * sign besides, so the scene shows every bot a decision is waiting on. A bot already in the waiting state says it by its state.
+ */
+export const waitSign = agent => Boolean(agent) && agent.state !== 'waiting' && Array.isArray(agent.blocked) && agent.blocked.length > 0
+
+/** The bots that say « a decision waits for you » on screen: the waiting state, or the sign beside another state. A bot with no card, or none blocked, is not one. */
+export const waitBearers = agents => (agents || []).filter(a => a?.state === 'waiting' || waitSign(a))
+
+/**
  * The agent's short factual tag, as data (the page translates it). The card it names is the MAIN one (the running card started first,
  * src/core/cards.js); `more` / `cards` appear only with several running cards, `quiet` only with a silent card on a bot that is not
  * itself silent:
- *   working -> { kind: 'working', ref, span, more?, cards?, cardsMore?, quiet?, quietMore? }   card code + time on it (either may be empty)
+ *   working -> { kind: 'working', ref, span, more?, cards?, cardsMore?, quiet?, quietMore?, wait? }   card code + time on it (either may be empty); `wait` = its cards that wait for a decision
  *   stale   -> { kind: 'stale', span, ref?, more?, cards?, cardsMore? }    silent for <span> (ref: the code of the card that went silent, when it has one)
  *   waiting -> { kind: 'waiting', ref, n, quiet?, quietMore? }             the card waiting on you
  *   other   -> { kind: 'quiet', quiet, quietMore } when a running card is silent, else null
@@ -61,7 +71,7 @@ export function taskTag(agent, nowMs) {
     const main = cards[0]
     const ref = labelRef(cards) || (cards.length < 2 ? codeRef(agent.workerSession?.title) : '')
     const since = main?.startedMs
-    return { kind: 'working', ref, span: since && nowMs > since ? formatSpan(nowMs - since) : '', ...manyFacts(cards, nowMs), ...quietFacts(cards, 'working') }
+    return { kind: 'working', ref, span: since && nowMs > since ? formatSpan(nowMs - since) : '', ...manyFacts(cards, nowMs), ...quietFacts(cards, 'working'), ...(waitSign(agent) ? { wait: agent.blocked.length } : {}) }
   }
   if (agent.state === 'stale') {
     // the card that went silent, by its code (the label of the scene is « name + code »); nothing when it has none

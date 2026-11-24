@@ -57,6 +57,7 @@ export const es = {
   tagCards: n => (n === 1 ? '1 tarjeta' : `${n} tarjetas`),
   tipCards: (n, list, more = '') => `${n} ${n === 1 ? 'tarjeta' : 'tarjetas'} en curso: ${list}${more ? ` ${more}` : ''}`,
   quietOne: (ref, span) => `${ref} en silencio desde hace ${span}`,
+  waitTip: n => (n === 1 ? 'una decisión te espera' : `${n} decisiones te esperan`),
   narrowNote: 'Ventana estrecha: la oficina se muestra como lista. El dibujo vuelve si ensanchas la ventana.',
   sceneLabel: 'La oficina',
   openBtn: 'Abrir',
@@ -69,7 +70,9 @@ export const es = {
     waiting: 'una de sus tarjetas está bloqueada: te toca decidir',
     stale: mins => `una tarjeta en curso, sin señales desde hace ${mins} min`,
     active: mins => `una de tus sesiones en los últimos ${mins} min`,
-    rest: 'sin halo: nada reciente'
+    rest: 'sin halo: nada reciente',
+    waitName: 'Señal « ! » naranja',
+    waitSign: 'el agente trabaja, pero una de sus tarjetas está bloqueada: te toca decidir'
   },
   panel: {
     title: 'Detalles',

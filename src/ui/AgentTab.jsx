@@ -1,4 +1,4 @@
-import { formatSpan } from '../core/hud.js'
+import { formatSpan, waitSign } from '../core/hud.js'
 import { outfitSource } from '../core/llm.js'
 import { boardsKnown, inspectorOf, untitledKey } from '../core/panel.js'
 import { modelOf } from '../core/models.js'
@@ -53,6 +53,7 @@ function Roster({ office, sceneBy, project, selected, onPick, t }) {
               <span className="nm" title={a.label || a.name}>{a.label || a.name}</span>
               <ProjectChip slug={a.home} />
               <StateTag state={a.state} t={t} />
+              {waitSign(a) ? <span className="ux-wait" data-wait title={t('waitTip', a.blocked.length)}><StateIcon state="waiting" /><span className="ux-vh">{t('waitTip', a.blocked.length)}</span></span> : null}
             </button>
           </li>
         ))}

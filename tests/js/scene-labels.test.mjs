@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { foldRank, taskTag } from '../../src/core/hud.js'
+import { foldRank, taskTag, waitBearers, waitSign } from '../../src/core/hud.js'
 import { buildOffice } from '../../src/core/office.js'
 import { buildRoster } from '../../src/core/roster.js'
 import {
@@ -59,7 +59,7 @@ export const SETUPS = {
 }
 
 /** The page measures a label's width in the DOM; here an estimate of the same label (11 px font, 6.5 px a letter, the padding and the dot). */
-const chipSize = ({ name, code }) => ({ w: Math.ceil(7 + 5 + 5 + name.length * 6.5 + (code ? 5 + 10 + code.length * 6.6 : 0) + 4), h: 20 })
+const chipSize = ({ name, code, wait }) => ({ w: Math.ceil(7 + 5 + 5 + name.length * 6.5 + (code ? 5 + 10 + code.length * 6.6 : 0) + (wait ? 5 + 15 : 0) + 4), h: 20 })
 const islandSizes = (slug, done, total) => [
   { w: Math.ceil(9 + 8 + 7 + slug.length * 6.6 + 7 + 14 + 7 + `${done}/${total}`.length * 6.6 + 9), h: 24, mode: 'full' },
   { w: Math.ceil(9 + 8 + 7 + slug.length * 6.6 + 7 + `${done}/${total}`.length * 6.6 + 9), h: 24, mode: 'short' },
@@ -248,4 +248,16 @@ test('the wash stays inside the 60 ms budget of drawScene on 30 agents (median o
   for (let i = 0; i < 5; i++) { const t0 = performance.now(); drawScene(layout, base, { ...model, dim }, i); times.push(performance.now() - t0) }
   times.sort((a, b) => a - b)
   assert.ok(times[0] < 60, `best of the runs ${times[0].toFixed(1)} ms`)
+})
+
+test('the 7 setups exercise the « a decision waits » sign: bots at work with a blocked card carry it, and the full labels still do not overlap', () => {
+  let carriers = 0
+  for (const [name, make] of Object.entries(SETUPS)) {
+    const office = make()
+    const withBlocked = office.agents.filter(a => a.blocked.length > 0)
+    assert.deepEqual(waitBearers(office.agents).map(a => a.name).sort(), withBlocked.map(a => a.name).sort(), `${name}: sign + waiting state = every bot with a blocked card`)
+    carriers += office.agents.filter(waitSign).length
+    for (const a of office.agents.filter(waitSign)) assert.equal(labelOf(a, taskTag(a, NOW)).wait, true, `${name}/${a.name}`)
+  }
+  assert.ok(carriers > 0, 'at least one setup puts the sign on a label')
 })

@@ -60,6 +60,7 @@ export const fr = {
   tagCards: n => (n === 1 ? '1 carte' : `${n} cartes`),
   tipCards: (n, list, more = '') => `${n} ${n === 1 ? 'carte' : 'cartes'} en cours\u00a0: ${list}${more ? ` ${more}` : ''}`,
   quietOne: (ref, span) => `${ref} silencieuse depuis ${span}`,
+  waitTip: n => (n === 1 ? 'une décision vous attend' : `${n} décisions vous attendent`),
   narrowNote: 'Fenêtre étroite : le bureau s’affiche en liste. Élargissez-la pour retrouver la vue du bureau.',
   sceneLabel: 'Le bureau',
   openBtn: 'Ouvrir',
@@ -72,7 +73,9 @@ export const fr = {
     waiting: 'une de ses cartes est bloquée : une décision vous revient',
     stale: mins => `une carte est en cours, sans signe de vie depuis ${mins} min`,
     active: mins => `une de vos sessions il y a moins de ${mins} min`,
-    rest: 'pas de halo : rien de récent'
+    rest: 'pas de halo : rien de récent',
+    waitName: 'Signe « ! » orange',
+    waitSign: 'l’agent travaille, mais une de ses cartes est bloquée : une décision vous revient'
   },
   panel: {
     title: 'Détails',

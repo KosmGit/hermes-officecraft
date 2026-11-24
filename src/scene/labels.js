@@ -20,6 +20,8 @@ export function labelOf(agent, tag) {
   // `more` = running cards besides the main one (the page writes « +N »), `quiet` = the label carries the sign of a silent card
   if (tag?.more) out.more = tag.more
   if (tag?.quiet?.length) out.quiet = true
+  // a bot at work that also has a card blocked for the user: the label carries the « waits for you » sign beside its state
+  if (tag?.wait) out.wait = true
   return out
 }
 
