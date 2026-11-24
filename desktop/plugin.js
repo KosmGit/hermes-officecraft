@@ -4720,6 +4720,9 @@ function setMotionPref(value) {
   storage?.set?.("motion", next);
 }
 
+// src/i18n/plural.js
+var isOne = (n) => n === 1 || n === "1";
+
 // src/i18n/en.js
 var en = {
   nav: "Officecraft",
@@ -4777,7 +4780,7 @@ var en = {
   tagWaitsN: (n) => n === 1 ? "waiting · 1 card" : `waiting · ${n} cards`,
   tagWaits: "waiting",
   tagCards: (n) => n === 1 ? "1 card" : `${n} cards`,
-  tipCards: (n, list, more = "") => `${n} cards running: ${list}${more ? ` ${more}` : ""}`,
+  tipCards: (n, list, more = "") => `${n} ${n === 1 ? "card" : "cards"} running: ${list}${more ? ` ${more}` : ""}`,
   quietOne: (ref, span2) => `${ref} silent for ${span2}`,
   narrowNote: "The window is too narrow for the office, so it is shown as a list. Widen the window to bring it back.",
   sceneLabel: "The office",
@@ -4896,7 +4899,7 @@ var en = {
     addPhase: "Phase, with its guard",
     removePhase: "Remove last phase",
     after: (list) => `after ${list}`,
-    afterN: (n) => `after ${n} cards`,
+    afterN: (n) => `after ${n} ${n === 1 ? "card" : "cards"}`,
     dup: (code) => `Duplicate ${code}`,
     del: (code) => `Delete ${code}`,
     edit: (code) => `Edit ${code}`,
@@ -4960,7 +4963,7 @@ var en = {
       replace: "Replace",
       appendNote: "The new cards start with the first ones, right after the start guard.",
       replaceNote: "The cards and phases currently in the draft are replaced. The objective and the project stay.",
-      room: (n) => `Room for ${n} more cards.`,
+      room: (n) => `${n === 1 ? "Room for 1 more card." : `Room for ${n} more cards.`}`,
       go: "Use this template",
       step: (n) => `Step ${n}`,
       review: (n) => `Review of step ${n}`,
@@ -4975,10 +4978,10 @@ var en = {
       not_eligible: "A card can only wait for a card in its own phase or an earlier one.",
       too_many: "That would exceed 40 work cards or 8 phases. The draft is unchanged."
     },
-    graph: { title: "Preview", final: "Final preview", created: "What was created", label: (n) => `Graph preview: ${n} cards`, tip: "Top to bottom, in the order the cards will start. Each color is a bot. A dashed orange line is a guard. Beyond 24 cards, parallel cards are stacked: click a stack to expand it." },
-    groupAria: (codes2, n, list = "") => `${codes2}, ${n} cards in parallel (${list}), press to expand`,
-    groupTip: (n, codes2) => `${n} cards in parallel (${codes2}): click to expand`,
-    groupFold: (codes2, n) => `Fold ${codes2} (${n} cards)`,
+    graph: { title: "Preview", final: "Final preview", created: "What was created", label: (n) => `Graph preview: ${n} ${n === 1 ? "card" : "cards"}`, tip: "Top to bottom, in the order the cards will start. Each color is a bot. A dashed orange line is a guard. Beyond 24 cards, parallel cards are stacked: click a stack to expand it." },
+    groupAria: (codes2, n, list = "") => `${codes2}, ${n} ${n === 1 ? "card" : "cards"} in parallel (${list}), press to expand`,
+    groupTip: (n, codes2) => `${n} ${n === 1 ? "card" : "cards"} in parallel (${codes2}): click to expand`,
+    groupFold: (codes2, n) => `Fold ${codes2} (${n} ${n === 1 ? "card" : "cards"})`,
     state: { blocked: "blocked", done: "launched", todo: "waiting", ready: "ready", archived: "archived" },
     ck: { noLoop: "No loops", guarded: "Every card is behind a guard", count: (n, max) => `${n}/${max} cards` },
     clear: { button: "Clear draft", label: "Clear draft", ask: "Discard this draft?", keep: "Keep it", go: "Discard" },
@@ -5008,8 +5011,8 @@ var en = {
       more: (n) => `…and ${n} more.`
     },
     toReview: "Check",
-    create: (n, board) => `Create ${n} cards on ${board}`,
-    createNew: (n, slug) => `Create the project ${slug} and ${n} cards`,
+    create: (n, board) => `Create ${n} ${n === 1 ? "card" : "cards"} on ${board}`,
+    createNew: (n, slug) => `Create the project ${slug} and ${n} ${n === 1 ? "card" : "cards"}`,
     review: { note: (n) => `This is final. After you confirm, you have ${n} s to cancel. One action at a time.` },
     sum: {
       title: "What will be created",
@@ -5086,10 +5089,10 @@ var en = {
     target: "Target:",
     effect: {
       unblock: "The card moves from “blocked” to “ready” (or “to do” while a parent is still open) and can be picked up again. There is no clean way to block it again.",
-      comment: (n) => `Your comment (${n} characters) is added to the card and read by its worker. Kanban comments cannot be deleted.`,
+      comment: (n) => `Your comment (${n} ${n === 1 ? "character" : "characters"}) is added to the card and read by its worker. Kanban comments cannot be deleted.`,
       launch: "The start guard is completed (never unblocked). The cards waiting for it become ready and start on the dispatcher’s next pass.",
       launchNamed: (names) => `The start guard is completed. Ready to start: ${names}. They start on the dispatcher’s next pass.`,
-      cancel: (n) => `The campaign’s ${n} cards are archived, last cards first and the guard last. Nothing has started, and they cannot be unarchived from here.`
+      cancel: (n) => `The campaign’s ${n} ${n === 1 ? "card is" : "cards are"} archived, last cards first and the guard last. Nothing has started, and they cannot be unarchived from here.`
     },
     undoNote: (n) => `After you confirm, you have ${n} s to cancel; once sent, it is final.`,
     confirm: "Confirm",
@@ -5105,7 +5108,7 @@ var en = {
       comment: (target2, n) => `Comment added to ${target2}; the card now has ${n} comment(s) (verified).`,
       launch: (target2, n) => `${target2} launched (verified): ${n} card(s) ready.`,
       cancel: (target2, n) => `${target2} canceled (verified): ${n} card(s) archived.`,
-      campaign: (board, n) => `Campaign created on ${board} (verified): ${n} cards.`
+      campaign: (board, n) => `Campaign created on ${board} (verified): ${n} ${n === 1 ? "card" : "cards"}.`
     },
     failed: (what2, why) => `${what2} did not go through. ${why}`,
     unknown: (what2, why) => `${what2}: ${why}`,
@@ -5228,7 +5231,7 @@ var en = {
       unconfiguredList: "Providers with no key or connection",
       configureIn: "To add one, set it up in Hermes settings. Officecraft never asks for or stores a key.",
       openSettings: "Open Hermes settings",
-      count: (n, total) => n === total ? `${total} models` : `${n} of ${total} models`,
+      count: (n, total) => n === total ? `${total} ${total === 1 ? "model" : "models"}` : `${n} of ${total} ${total === 1 ? "model" : "models"}`,
       search: "Search by name or ID",
       noMatch: "No matching models.",
       noModels: "Hermes lists no models for this provider.",
@@ -5401,7 +5404,7 @@ var en = {
     level: (n) => `Level ${n}`,
     levelName: { garage: "Garage", open_space: "Open plan", floor: "Floor", campus: "Campus", skyscraper: "Skyscraper" },
     levelNext: (done2, next) => `${done2}/${next} cards done`,
-    levelTop: (done2) => `${done2} cards done`,
+    levelTop: (done2) => `${done2} ${done2 === 1 ? "card" : "cards"} done`,
     levelTip: "Office level: cards done across all projects. Cards created, sessions and time spent never count.",
     grade: { stagiaire: "Intern", confirme: "Regular", senior: "Senior", legende: "Legend" },
     gradeLine: (grade, runs) => `${grade} · ${runs} successful ${runs === 1 ? "run" : "runs"}`,
@@ -5420,7 +5423,7 @@ var en = {
     toast: {
       first: (n) => `History analyzed: ${n} ${n === 1 ? "trophy" : "trophies"}`,
       new: (names) => `Trophy unlocked: ${names}`,
-      many: (n) => `${n} new trophies unlocked from your history`
+      many: (n) => `${n} ${n === 1 ? "new trophy" : "new trophies"} unlocked from your history`
     },
     journalTier: (name, tier) => `${tier} tier: ${name}`,
     near: (cur, goal) => `Progress ${cur}/${goal}`,
@@ -5499,37 +5502,37 @@ var en = {
       guardian: { name: "Guardian", cond: "A first approval request denied from the office." }
     },
     fact: {
-      chain: (board, n) => `Project ${board}: ${n} cards, all done.`,
-      centurion: (board, n) => `${n} cards done on ${board}.`,
-      zero: (n) => `${n} finished runs in a row, none crashed or timed out.`,
+      chain: (board, n) => `Project ${board}: ${n} ${n === 1 ? "card" : "cards"}, all done.`,
+      centurion: (board, n) => `${n} ${n === 1 ? "card" : "cards"} done on ${board}.`,
+      zero: (n) => `${n} ${n === 1 ? "finished run" : "finished runs"} in a row, none crashed or timed out.`,
       quick: (board, min) => `A card on ${board} was unblocked ${min} min after it was blocked.`,
       review: (board) => `A card on ${board} was sent back for changes, then completed.`,
-      owl: (board, n) => `${n} cards completed in one night on ${board}.`,
+      owl: (board, n) => `${n} ${n === 1 ? "card" : "cards"} completed in one night on ${board}.`,
       thrifty: (pct) => `${pct}% of the input tokens were read from the cache.`,
-      hire: (n) => `${n} profiles exist.`,
-      builder: (n) => `${n} projects have cards.`,
+      hire: (n) => `${n} ${n === 1 ? "profile exists" : "profiles exist"}.`,
+      builder: (n) => `${n} ${n === 1 ? "project has" : "projects have"} cards.`,
       fire: (board, min, fails = 1) => `On ${board}: ${fails} failed ${fails === 1 ? "run" : "runs"}, then a success ${min} min after the first.`,
-      smooth: (board, n) => `On ${board}: ${n} linked cards in a row, all done, none ever blocked.`,
-      architect: (board, n) => `On ${board}: a chain of ${n} linked cards, all done.`,
-      teamwork: (board, n) => `On ${board}: a linked chain finished by at least ${n} different bots.`,
+      smooth: (board, n) => `On ${board}: ${n} ${n === 1 ? "linked card" : "linked cards"} in a row, all done, none ever blocked.`,
+      architect: (board, n) => `On ${board}: a chain of ${n} ${n === 1 ? "linked card" : "linked cards"}, all done.`,
+      teamwork: (board, n) => `On ${board}: a linked chain finished by at least ${n} ${n === 1 ? "different bot" : "different bots"}.`,
       quickstart: (board, min) => `On ${board}: the first card was done ${min} min after the project was created.`,
-      wide: (n) => `${n} projects each finished a card on the same day.`,
-      versatile: (who, n) => `${who} finished cards on ${n} projects.`,
-      multimodel: (board, n) => `On ${board}: cards done with ${n} different pinned models.`,
+      wide: (n) => `${n} ${n === 1 ? "project" : "projects"} each finished a card on the same day.`,
+      versatile: (who, n) => `${who} finished cards on ${n} ${n === 1 ? "project" : "projects"}.`,
+      multimodel: (board, n) => `On ${board}: cards done with ${n} ${n === 1 ? "different pinned model" : "different pinned models"}.`,
       rescue: (board, hours) => `On ${board}: a card stayed blocked for ${hours} h, then was done.`,
-      iron: (board, n) => `${n} days in a row on ${board}: finished runs, no crash, no timeout.`,
-      ontime: (n) => `${n} finished runs in a row: no timeout, no second attempt at a card.`,
-      firstpass: (n) => `${n} review cards in a row done without changes requested.`,
-      swiss: (name, n) => `Scheduled job ${name}: ${n} successful runs in a row.`,
-      present: (n) => `${n} days in a row with at least one blocked card unblocked.`,
-      noqueue: (n) => `${n} days in a row where no card stayed blocked for more than 24 hours.`,
-      fullteam: (n) => `${n} different roles each finished a card.`,
+      iron: (board, n) => `${n} ${n === 1 ? "day" : "days"} in a row on ${board}: finished runs, no crash, no timeout.`,
+      ontime: (n) => `${n} ${n === 1 ? "finished run" : "finished runs"} in a row: no timeout, no second attempt at a card.`,
+      firstpass: (n) => `${n} ${n === 1 ? "review card" : "review cards"} in a row done without changes requested.`,
+      swiss: (name, n) => `Scheduled job ${name}: ${n} ${n === 1 ? "successful run" : "successful runs"} in a row.`,
+      present: (n) => `${n} ${n === 1 ? "day" : "days"} in a row with at least one blocked card unblocked.`,
+      noqueue: (n) => `${n} ${n === 1 ? "day" : "days"} in a row where no card stayed blocked for more than 24 hours.`,
+      fullteam: (n) => `${n} ${n === 1 ? "different role" : "different roles"} each finished a card.`,
       training: (who, skill) => `${who} changed its skill ${skill}, then finished a card within 7 days.`,
       firstmission: (who) => `${who} finished its first card in its first week.`,
-      veteran: (days) => `${days} days since the oldest profile was first seen.`,
+      veteran: (days) => `${days} ${days === 1 ? "day" : "days"} since the oldest profile was first seen.`,
       twin: (board, from, to = "another bot") => `On ${board}: a run by ${from} failed, then ${to} finished the card.`,
       fastlane: (board, min) => `On ${board}: a card was done ${min} min after it was created, with no block and no failed run.`,
-      quiet: (n) => `A night with ${n} finished runs, all completed, and no card blocked.`,
+      quiet: (n) => `A night with ${n} ${n === 1 ? "finished run" : "finished runs"}, all completed, and no card blocked.`,
       comeback: (board, hours, n = 5) => `On ${board}: down for ${hours} h, then ${n} finished runs in a row, all completed.`,
       pilot: (verb, board) => `${verb === "unblock" ? "Unblock" : "Comment"} on ${board || "a project"}: carried out and verified.`,
       recruiter: (who) => `${who || "A bot"} was created from the office and confirmed in Hermes’ list.`,
@@ -5574,7 +5577,7 @@ var en = {
   },
   notify: {
     title: "Notifications",
-    hint: (cap) => `Get notified on a messaging app Hermes already serves, without keeping the page open. Messages carry only the basics (project, card code and title, agent, state, duration), never any content. Everything is off by default. At most ${cap} messages an hour per recipient, one per event, grouped when several arrive together. Nothing can be sent during an outage. Test projects (sandbox-*) are never reported.`,
+    hint: (cap) => `Get notified on a messaging app Hermes already serves, without keeping the page open. Messages carry only the basics (project, card code and title, agent, state, duration), never any content. Everything is off by default. At most ${cap} ${cap === 1 ? "message" : "messages"} an hour per recipient, one per event, grouped when several arrive together. Nothing can be sent during an outage. Test projects (sandbox-*) are never reported.`,
     type: {
       decision: "Decisions",
       silent: "Silences",
@@ -5604,7 +5607,7 @@ var en = {
     targetLabel: (platform, label) => `${platform} ${label}`,
     noTarget: "Hermes has no recipients yet.",
     noRoute: "No recipient, so nothing is sent.",
-    maxRoutes: (n) => `Up to ${n} recipients per type.`,
+    maxRoutes: (n) => `Up to ${n} ${n === 1 ? "recipient" : "recipients"} per type.`,
     oneRecipient: "Only one messaging app is connected in Hermes.",
     addApp: "Add a messaging app",
     addAppNote: "You connect it in Hermes.",
@@ -5781,12 +5784,12 @@ var en = {
       show: "Show these events",
       chart: "Events per hour: completed, blocked, failures",
       usage: "Usage",
-      usageLine: (calls, input, output = 0) => `${calls} model calls · ${input} tokens in · ${output} tokens out`,
+      usageLine: (calls, input, output = 0) => `${calls} model ${isOne(calls) ? "call" : "calls"} · ${input} ${isOne(input) ? "token" : "tokens"} in · ${output} ${isOne(output) ? "token" : "tokens"} out`,
       usageNone: "No usage recorded for the runs of this window.",
       usageMissing: (n) => `${n} ${n === 1 ? "run has" : "runs have"} no recorded usage (not counted as zero).`,
       usageNote: "Sessions are counted by start time; tokens are not timestamped per call.",
       byAgent: "Runs by agent",
-      agentRuns: (runs, calls) => `${runs} ${runs === 1 ? "run" : "runs"}${calls == null ? " · usage unknown" : ` · ${calls} calls`}`,
+      agentRuns: (runs, calls) => `${runs} ${runs === 1 ? "run" : "runs"}${calls == null ? " · usage unknown" : ` · ${calls} ${isOne(calls) ? "call" : "calls"}`}`,
       since: (slug, at) => `Project ${slug}: events go back only to ${at}, so the count may be low.`,
       truncated: (at) => `Too many events: counted only up to ${at}.`
     }
@@ -5811,7 +5814,7 @@ var en = {
     incomplete: "a lower bound: some counts were not recorded",
     split: "Token breakdown",
     part: { input: "input", output: "output", cache: "cache" },
-    exact: (n) => `${n} tokens`,
+    exact: (n) => `${n} ${isOne(n) ? "token" : "tokens"}`,
     absent: "not recorded",
     noSession: "no sessions",
     noRun: "no runs",
@@ -5826,11 +5829,11 @@ var en = {
     days: {
       title: "Day by day",
       span: (n) => n <= 2 ? "yesterday and today" : `last ${n} days`,
-      bar: (day, n) => `${day}: ${n} tokens`,
+      bar: (day, n) => `${day}: ${n} ${isOne(n) ? "token" : "tokens"}`,
       none: (day) => `${day}: no session started`,
       failed: (day) => `${day}: no answer`,
       hint: "Select a day to see its figures. Each day counts the sessions started that day.",
-      detail: (day, tokens) => `${day}: ${tokens} tokens`,
+      detail: (day, tokens) => `${day}: ${tokens} ${isOne(tokens) ? "token" : "tokens"}`,
       error: "The days could not be read.",
       note: "Hermes does not timestamp tokens per call, so a session counts toward the day it started."
     },
@@ -5846,7 +5849,7 @@ var en = {
     },
     models: {
       title: "By model",
-      calls: (n) => `${n} calls`,
+      calls: (n) => `${n} ${isOne(n) ? "call" : "calls"}`,
       aux: (n) => `${n} auxiliary`,
       absent: "No breakdown by model was recorded.",
       none: "No model recorded.",
@@ -5897,10 +5900,10 @@ var en = {
     unavailable: "LLM functions need an up-to-date Officecraft agent half. Update the plugin, then restart the gateway.",
     month: "This month",
     spendUsd: (usd, cap) => `$${usd} of $${cap} · estimate`,
-    spendCalls: (n, cap) => `${n} of ${cap} calls with no known price`,
+    spendCalls: (n, cap) => `${n} of ${cap} ${cap === 1 ? "call" : "calls"} with no known price`,
     unknownPrice: (n, cap) => `Price unknown for this model, so the cap is counted in calls (${n}/${cap} this month). To count in dollars, choose a priced model in Settings → Model → Auxiliary models → Officecraft.`,
     priceUnknown: "Price unknown: cap counted in calls.",
-    gaugeCalls: (n, cap) => `${n} of ${cap} calls this month`,
+    gaugeCalls: (n, cap) => `${n} of ${cap} ${cap === 1 ? "call" : "calls"} this month`,
     gaugeUsd: (usd, cap) => `$${usd} of $${cap} this month`,
     gaugeOf: (cap) => `/ ${cap}`,
     capSummary: "Monthly cap",
@@ -5910,6 +5913,7 @@ var en = {
     capInvalid: "That is not a valid amount. The cap is unchanged.",
     saveFailed: "The change was not saved. Nothing changed on the server.",
     sends: (s) => `Sends: ${s}`,
+    sendsLine: (s) => `Sends: ${s}.`,
     cost: (c) => `Cost: ${c}.`,
     lastKnown: (usd) => `Last call: about $${usd} (Hermes’ estimate).`,
     lastUnknown: "Last call: price unknown (counted in calls).",
@@ -5986,7 +5990,7 @@ var en = {
     },
     soul: {
       title: "Personality (SOUL)",
-      written: (n) => `written · ${n} chars`,
+      written: (n) => `written · ${n} ${n === 1 ? "char" : "chars"}`,
       of: (from) => `${from}’s`,
       group: "Personality sent",
       take: "Use this one",
@@ -6031,7 +6035,7 @@ var en = {
       counted: (n) => `${n} ${n === 1 ? "call" : "calls"} counted`,
       intact: "form unchanged",
       capUsd: (usd, cap) => `$${usd} of $${cap} · raise it in Settings → LLM functions.`,
-      capCalls: (n, cap) => `${n} of ${cap} calls · raise it in Settings → LLM functions.`,
+      capCalls: (n, cap) => `${n} of ${cap} ${cap === 1 ? "call" : "calls"} · raise it in Settings → LLM functions.`,
       stopAfter: (s) => `stopped after ${s} s`,
       again: "Ask again",
       retry: "Try again",
@@ -6150,7 +6154,7 @@ var en = {
       reading: (code) => `The strong model is rewriting ${code}…`,
       title: "Proposed instructions",
       region: (code) => `Proposed instructions for ${code}`,
-      current: (n) => `Current · ${n} chars`,
+      current: (n) => `Current · ${n} ${n === 1 ? "char" : "chars"}`,
       after: "After",
       note: "Check paths and figures before applying.",
       apply: (code) => `Apply to ${code}`,
@@ -6169,7 +6173,7 @@ var en = {
       sub: "Advice only: none of it blocks “Create”.",
       ask: "Review the draft",
       again: "Review again",
-      reading: (n) => `The light model is reading ${n} cards…`,
+      reading: (n) => `The light model is reading ${n} ${n === 1 ? "card" : "cards"}…`,
       tipReturns: "Up to 8 remarks. Advice only: none blocks “Create”. They are cleared if the draft changes.",
       sev: { high: "High", medium: "Medium", low: "Low" },
       kind: { no_review: "No review", wrong_bot: "Wrong bot", vague: "Too vague", conflict: "Conflict", model: "Model", order: "Order", other: "To check" },
@@ -6341,6 +6345,7 @@ var en = {
     pill: {
       label: "Office state, live",
       working: () => "working",
+      workingLabel: (n) => `${n} working`,
       workingTip: "Agents whose worker sent a signal in the last 2 minutes",
       decisions: (n) => n === 1 ? "decision" : "decisions",
       decisionsTip: "Blocked cards and approvals waiting for you",
@@ -6350,10 +6355,11 @@ var en = {
       level: (n) => `lvl ${n}`,
       trophies: "trophies",
       streak: "streak",
+      streakLabel: (n) => `${n}-day streak`,
       days: (n) => `${n} d`,
       tip: "Open the showcase",
       open: (summary2) => `Open the showcase: ${summary2}`,
-      levelTip: (done2, next) => next ? `Office level: ${done2} cards done out of ${next} for the next level` : `Office level: ${done2} cards done, top level`,
+      levelTip: (done2, next) => next ? `Office level: ${done2} ${done2 === 1 ? "card" : "cards"} done out of ${next} for the next level` : `Office level: ${done2} ${done2 === 1 ? "card" : "cards"} done, top level`,
       trophiesTip: (got, total) => `Trophies unlocked: ${got} of ${total}`
     },
     more: "More actions",
@@ -6366,7 +6372,8 @@ var en = {
       partial: (n) => `Partial data · ${n} ${n === 1 ? "source" : "sources"}`,
       roster: "Agents only",
       cronsNames: (names) => `Failing: ${names}`,
-      folded: (short, n) => `${short} + ${n} ${n === 1 ? "alert" : "alerts"}`
+      folded: (short, n) => `${short} + ${n} ${n === 1 ? "alert" : "alerts"}`,
+      rest: (n) => `${n} more ${n === 1 ? "alert" : "alerts"}`
     },
     dock: {
       label: "Projects: filter the office and lists",
@@ -6383,6 +6390,8 @@ var en = {
       byProject: "By project",
       byAge: "Oldest first",
       group: (n) => `${n} to decide`,
+      more: "Show the whole title",
+      less: "Show less",
       unfilter: (slug) => `Remove the ${slug} filter`,
       noProject: "No project",
       emptyFiltered: "Nothing is waiting in this project.",
@@ -6411,7 +6420,9 @@ var en = {
       running: "running",
       todo: "to do",
       blocked: "blocked",
-      queue: (n) => `Last ${n} cards`,
+      queue: (n) => `${n === 1 ? "Last card" : `Last ${n} cards`}`,
+      showCards: "Show the cards",
+      hideCards: "Hide the cards",
       filter: "Filter the office",
       filtered: "Filtered",
       kanban: "Kanban"
@@ -6485,7 +6496,7 @@ var es = {
   tagWaitsN: (n) => n === 1 ? "espera · 1 tarjeta" : `espera · ${n} tarjetas`,
   tagWaits: "espera",
   tagCards: (n) => n === 1 ? "1 tarjeta" : `${n} tarjetas`,
-  tipCards: (n, list, more = "") => `${n} tarjetas en curso: ${list}${more ? ` ${more}` : ""}`,
+  tipCards: (n, list, more = "") => `${n} ${n === 1 ? "tarjeta" : "tarjetas"} en curso: ${list}${more ? ` ${more}` : ""}`,
   quietOne: (ref, span2) => `${ref} en silencio desde hace ${span2}`,
   narrowNote: "Ventana estrecha: la oficina se muestra como lista. El dibujo vuelve si ensanchas la ventana.",
   sceneLabel: "La oficina",
@@ -6604,7 +6615,7 @@ var es = {
     addPhase: "Fase, con su barrera",
     removePhase: "Quitar la última fase",
     after: (list) => `después de ${list}`,
-    afterN: (n) => `después de ${n} tarjetas`,
+    afterN: (n) => `después de ${n} ${n === 1 ? "tarjeta" : "tarjetas"}`,
     dup: (code) => `Duplicar ${code}`,
     del: (code) => `Eliminar ${code}`,
     edit: (code) => `Editar ${code}`,
@@ -6668,7 +6679,7 @@ var es = {
       replace: "Reemplazar",
       appendNote: "Las tarjetas nuevas empiezan con las primeras, justo después de la barrera inicial.",
       replaceNote: "Se reemplazan las tarjetas y fases del borrador; el objetivo y el proyecto se quedan.",
-      room: (n) => `Caben ${n} tarjetas más.`,
+      room: (n) => `${n === 1 ? "Cabe 1 tarjeta más." : `Caben ${n} tarjetas más.`}`,
       go: "Usar esta plantilla",
       step: (n) => `Etapa ${n}`,
       review: (n) => `Revisión de la etapa ${n}`,
@@ -6683,10 +6694,10 @@ var es = {
       not_eligible: "Una tarjeta solo puede esperar a una tarjeta de su fase o de una anterior.",
       too_many: "Superaría 40 tarjetas de trabajo u 8 fases: el borrador no cambia."
     },
-    graph: { title: "Vista previa", final: "Vista previa final", created: "Lo que se creó", label: (n) => `Vista previa del grafo: ${n} tarjetas`, tip: "De arriba abajo, en el orden en que empezarán las tarjetas. El color es el del bot. Una línea naranja discontinua es una barrera. Pasadas 24 tarjetas, las paralelas se pliegan en una pila: haz clic para desplegarla." },
-    groupAria: (codes2, n, list = "") => `${codes2}, ${n} tarjetas en paralelo (${list}), pulsa para desplegar`,
-    groupTip: (n, codes2) => `${n} tarjetas en paralelo (${codes2}): clic para desplegar`,
-    groupFold: (codes2, n) => `Plegar ${codes2} (${n} tarjetas)`,
+    graph: { title: "Vista previa", final: "Vista previa final", created: "Lo que se creó", label: (n) => `Vista previa del grafo: ${n} ${n === 1 ? "tarjeta" : "tarjetas"}`, tip: "De arriba abajo, en el orden en que empezarán las tarjetas. El color es el del bot. Una línea naranja discontinua es una barrera. Pasadas 24 tarjetas, las paralelas se pliegan en una pila: haz clic para desplegarla." },
+    groupAria: (codes2, n, list = "") => `${codes2}, ${n} ${n === 1 ? "tarjeta" : "tarjetas"} en paralelo (${list}), pulsa para desplegar`,
+    groupTip: (n, codes2) => `${n} ${n === 1 ? "tarjeta" : "tarjetas"} en paralelo (${codes2}): clic para desplegar`,
+    groupFold: (codes2, n) => `Plegar ${codes2} (${n} ${n === 1 ? "tarjeta" : "tarjetas"})`,
     state: { blocked: "bloqueada", done: "lanzada", todo: "en espera", ready: "lista", archived: "archivada" },
     ck: { noLoop: "Sin bucle", guarded: "Todo tras una barrera", count: (n, max) => `${n}/${max} tarjetas` },
     clear: { button: "Descartar el borrador", label: "Descartar el borrador", ask: "¿Descartar este borrador?", keep: "Conservarlo", go: "Descartarlo" },
@@ -6716,8 +6727,8 @@ var es = {
       more: (n) => `…y ${n} más.`
     },
     toReview: "Revisar",
-    create: (n, board) => `Crear ${n} tarjetas en ${board}`,
-    createNew: (n, slug) => `Crear el proyecto ${slug} y ${n} tarjetas`,
+    create: (n, board) => `Crear ${n} ${n === 1 ? "tarjeta" : "tarjetas"} en ${board}`,
+    createNew: (n, slug) => `Crear el proyecto ${slug} y ${n} ${n === 1 ? "tarjeta" : "tarjetas"}`,
     review: { note: (n) => `Acción definitiva: tras confirmar tienes ${n} s para cancelar. Solo una acción a la vez.` },
     sum: {
       title: "Lo que se creará",
@@ -6794,10 +6805,10 @@ var es = {
     target: "Destino:",
     effect: {
       unblock: "La tarjeta deja de estar «bloqueada» y pasa a «lista» (o a «por hacer» mientras siga abierta una tarjeta de la que depende); ya se puede retomar. No hay una forma limpia de volver a bloquearla.",
-      comment: (n) => `Tu comentario (${n} caracteres) se añade a la tarjeta y lo lee el bot que trabaja en ella. Un comentario del kanban no se puede borrar.`,
+      comment: (n) => `Tu comentario (${n} ${n === 1 ? "carácter" : "caracteres"}) se añade a la tarjeta y lo lee el bot que trabaja en ella. Un comentario del kanban no se puede borrar.`,
       launch: "La barrera inicial se termina (nunca se desbloquea): las tarjetas que la esperaban pasan a «lista» y empiezan en la próxima pasada del kanban.",
       launchNamed: (names) => `La barrera inicial se termina; listas para empezar: ${names}. Empiezan en la próxima pasada del kanban.`,
-      cancel: (n) => `Las ${n} tarjetas de la campaña se archivan, las últimas primero, la barrera al final. No ha empezado nada; desde aquí no se pueden desarchivar.`
+      cancel: (n) => `${n === 1 ? "La tarjeta de la campaña se archiva" : `Las ${n} tarjetas de la campaña se archivan`}, las últimas primero, la barrera al final. No ha empezado nada; desde aquí no se pueden desarchivar.`
     },
     undoNote: (n) => `Tras confirmar tienes ${n} s para cancelar; una vez enviada, es definitiva.`,
     confirm: "Confirmar",
@@ -6813,7 +6824,7 @@ var es = {
       comment: (target2, n) => `Comentario añadido a ${target2}; la tarjeta tiene ahora ${n} comentario(s) (verificado).`,
       launch: (target2, n) => `${target2} lanzada (verificado): ${n} tarjeta(s) lista(s).`,
       cancel: (target2, n) => `${target2} cancelada (verificado): ${n} tarjeta(s) archivada(s).`,
-      campaign: (board, n) => `Campaña creada en ${board} (verificado): ${n} tarjetas.`
+      campaign: (board, n) => `Campaña creada en ${board} (verificado): ${n} ${n === 1 ? "tarjeta" : "tarjetas"}.`
     },
     failed: (what2, why) => `${what2} no se completó. ${why}`,
     unknown: (what2, why) => `${what2}: ${why}`,
@@ -6893,7 +6904,7 @@ var es = {
     step1: "Identidad",
     step2: "Punto de partida",
     step3: "Modelo y proveedor",
-    skillsSum: (own, base) => `${own} propios + ${base} de base`,
+    skillsSum: (own, base) => `${own} ${own === 1 ? "propio" : "propios"} + ${base} de base`,
     modelInherited: "heredado",
     submitNamed: (name) => `Reclutar ${name}`,
     newBot: "Bot nuevo",
@@ -6937,7 +6948,7 @@ var es = {
       unconfiguredList: "Proveedores sin clave ni conexión",
       configureIn: "Para añadir uno, configúralo en Hermes: Configuración → Modelo. La oficina nunca pide ni guarda una clave.",
       openSettings: "Abrir la configuración de Hermes",
-      count: (n, total) => n === total ? `${total} modelos` : `${n} de ${total} modelos`,
+      count: (n, total) => n === total ? `${total} ${total === 1 ? "modelo" : "modelos"}` : `${n} de ${total} ${total === 1 ? "modelo" : "modelos"}`,
       search: "Buscar por nombre o identificador",
       noMatch: "Ningún modelo coincide.",
       noModels: "Hermes no lista ningún modelo para este proveedor.",
@@ -7109,7 +7120,7 @@ var es = {
     level: (n) => `Nivel ${n}`,
     levelName: { garage: "Garaje", open_space: "Oficina abierta", floor: "Planta", campus: "Campus", skyscraper: "Rascacielos" },
     levelNext: (done2, next) => `${done2}/${next} tarjetas terminadas`,
-    levelTop: (done2) => `${done2} tarjetas terminadas`,
+    levelTop: (done2) => `${done2} ${done2 === 1 ? "tarjeta terminada" : "tarjetas terminadas"}`,
     levelTip: "Nivel de la oficina: tarjetas terminadas en todos los proyectos. Las tarjetas creadas, las sesiones o el tiempo empleado nunca cuentan.",
     grade: { stagiaire: "Aprendiz", confirme: "Júnior", senior: "Sénior", legende: "Leyenda" },
     gradeLine: (grade, runs) => `${grade} · ${runs} ${runs === 1 ? "ejecución correcta" : "ejecuciones correctas"}`,
@@ -7128,7 +7139,7 @@ var es = {
     toast: {
       first: (n) => `Historial analizado: ${n} ${n === 1 ? "trofeo" : "trofeos"}`,
       new: (names) => `Trofeo desbloqueado: ${names}`,
-      many: (n) => `${n} trofeos nuevos desbloqueados por el historial`
+      many: (n) => `${n} ${n === 1 ? "trofeo nuevo" : "trofeos nuevos"} desbloqueados por el historial`
     },
     journalTier: (name, tier) => `categoría ${tier}: ${name}`,
     near: (cur, goal) => `Progreso ${cur}/${goal}`,
@@ -7144,7 +7155,7 @@ var es = {
     unavailable: "Bloqueado · la parte Agente de Officecraft aún no ofrece este dato (lo hará tras reiniciar el gateway con la nueva versión)",
     where: { medal: "una medalla en la vitrina" },
     collection: {
-      summary: (got, total) => `${got} de ${total} desbloqueados`,
+      summary: (got, total) => `${got} de ${total} ${got === 1 ? "desbloqueado" : "desbloqueados"}`,
       familyHead: (name, summary2) => `${name}: ${summary2}`,
       // summary = « 3 de 5 desbloqueados »
       progress: (cur, goal, unit) => `${cur}${unit ? ` ${unit}` : ""} de ${goal}${unit ? ` ${unit}` : ""}`,
@@ -7207,37 +7218,37 @@ var es = {
       guardian: { name: "Guardián", cond: "Una primera solicitud de aprobación rechazada desde la oficina." }
     },
     fact: {
-      chain: (board, n) => `Proyecto ${board}: ${n} tarjetas, todas terminadas.`,
-      centurion: (board, n) => `${n} tarjetas terminadas en ${board}.`,
-      zero: (n) => `${n} ejecuciones terminadas seguidas, ninguna con fallo ni plazo superado.`,
+      chain: (board, n) => `Proyecto ${board}: ${n} ${n === 1 ? "tarjeta" : "tarjetas"}, todas terminadas.`,
+      centurion: (board, n) => `${n} ${n === 1 ? "tarjeta" : "tarjetas"} terminadas en ${board}.`,
+      zero: (n) => `${n} ${n === 1 ? "ejecución" : "ejecuciones"} terminadas seguidas, ninguna con fallo ni plazo superado.`,
       quick: (board, min) => `Una tarjeta de ${board} se desbloqueó ${min} min después de bloquearse.`,
       review: (board) => `Una tarjeta de ${board} volvió con cambios y después se terminó.`,
-      owl: (board, n) => `${n} tarjetas terminadas en una noche en ${board}.`,
+      owl: (board, n) => `${n} ${n === 1 ? "tarjeta" : "tarjetas"} terminadas en una noche en ${board}.`,
       thrifty: (pct) => `El ${pct} % de los tokens de entrada se leyó de la caché.`,
-      hire: (n) => `Existen ${n} perfiles.`,
-      builder: (n) => `${n} proyectos tienen tarjetas.`,
+      hire: (n) => `${n === 1 ? "Existe 1 perfil" : `Existen ${n} perfiles`}.`,
+      builder: (n) => `${n} ${n === 1 ? "proyecto tiene" : "proyectos tienen"} tarjetas.`,
       fire: (board, min, fails = 1) => `En ${board}: ${fails} ${fails === 1 ? "ejecución fallida" : "ejecuciones fallidas"} y después un éxito ${min} min después de la primera.`,
-      smooth: (board, n) => `En ${board}: ${n} tarjetas enlazadas seguidas, todas terminadas, ninguna bloqueada jamás.`,
-      architect: (board, n) => `En ${board}: una cadena de ${n} tarjetas enlazadas, todas terminadas.`,
-      teamwork: (board, n) => `En ${board}: una cadena enlazada terminada por al menos ${n} bots distintos.`,
+      smooth: (board, n) => `En ${board}: ${n} ${n === 1 ? "tarjeta" : "tarjetas"} enlazadas seguidas, todas terminadas, ninguna bloqueada jamás.`,
+      architect: (board, n) => `En ${board}: una cadena de ${n} ${n === 1 ? "tarjeta" : "tarjetas"} enlazadas, todas terminadas.`,
+      teamwork: (board, n) => `En ${board}: una cadena enlazada terminada por al menos ${n} ${n === 1 ? "bot" : "bots"} distintos.`,
       quickstart: (board, min) => `En ${board}: la primera tarjeta se terminó ${min} min después de crear el proyecto.`,
-      wide: (n) => `${n} proyectos terminaron cada uno una tarjeta el mismo día.`,
-      versatile: (who, n) => `${who} terminó tarjetas en ${n} proyectos.`,
-      multimodel: (board, n) => `En ${board}: tarjetas terminadas con ${n} modelos fijados distintos.`,
+      wide: (n) => `${n} ${n === 1 ? "proyecto" : "proyectos"} terminaron cada uno una tarjeta el mismo día.`,
+      versatile: (who, n) => `${who} terminó tarjetas en ${n} ${n === 1 ? "proyecto" : "proyectos"}.`,
+      multimodel: (board, n) => `En ${board}: tarjetas terminadas con ${n} ${n === 1 ? "modelo" : "modelos"} fijados distintos.`,
       rescue: (board, hours) => `En ${board}: una tarjeta estuvo bloqueada ${hours} h y luego se terminó.`,
-      iron: (board, n) => `${n} días seguidos en ${board}: ejecuciones terminadas, sin fallos ni plazos superados.`,
-      ontime: (n) => `${n} ejecuciones terminadas seguidas: sin plazo superado ni segundo intento de una tarjeta.`,
-      firstpass: (n) => `${n} tarjetas de revisión seguidas terminadas sin cambios solicitados.`,
-      swiss: (name, n) => `Tarea programada ${name}: ${n} ejecuciones correctas seguidas.`,
-      present: (n) => `${n} días seguidos con al menos una tarjeta bloqueada desbloqueada.`,
-      noqueue: (n) => `${n} días seguidos en los que ninguna tarjeta quedó bloqueada más de 24 horas.`,
-      fullteam: (n) => `${n} roles distintos terminaron una tarjeta cada uno.`,
+      iron: (board, n) => `${n} ${n === 1 ? "día" : "días"} seguidos en ${board}: ejecuciones terminadas, sin fallos ni plazos superados.`,
+      ontime: (n) => `${n} ${n === 1 ? "ejecución" : "ejecuciones"} terminadas seguidas: sin plazo superado ni segundo intento de una tarjeta.`,
+      firstpass: (n) => `${n} ${n === 1 ? "tarjeta" : "tarjetas"} de revisión seguidas terminadas sin cambios solicitados.`,
+      swiss: (name, n) => `Tarea programada ${name}: ${n} ${n === 1 ? "ejecución" : "ejecuciones"} correctas seguidas.`,
+      present: (n) => `${n} ${n === 1 ? "día" : "días"} seguidos con al menos una tarjeta bloqueada desbloqueada.`,
+      noqueue: (n) => `${n} ${n === 1 ? "día" : "días"} seguidos en los que ninguna tarjeta quedó bloqueada más de 24 horas.`,
+      fullteam: (n) => `${n} ${n === 1 ? "rol" : "roles"} distintos terminaron una tarjeta cada uno.`,
       training: (who, skill) => `${who} modificó su skill ${skill} y terminó una tarjeta en los 7 días siguientes.`,
       firstmission: (who) => `${who} terminó su primera tarjeta en su primera semana.`,
-      veteran: (days) => `${days} días desde la primera aparición del perfil más antiguo.`,
+      veteran: (days) => `${days} ${days === 1 ? "día" : "días"} desde la primera aparición del perfil más antiguo.`,
       twin: (board, from, to = "otro bot") => `En ${board}: una ejecución de ${from} falló y luego ${to} terminó la tarjeta.`,
       fastlane: (board, min) => `En ${board}: una tarjeta terminada ${min} min después de crearse, sin bloqueo ni ejecución fallida.`,
-      quiet: (n) => `Una noche con ${n} ejecuciones terminadas, todas correctas, y ninguna tarjeta bloqueada.`,
+      quiet: (n) => `Una noche con ${n} ${n === 1 ? "ejecución" : "ejecuciones"} terminadas, todas correctas, y ninguna tarjeta bloqueada.`,
       comeback: (board, hours, n = 5) => `En ${board}: caído ${hours} h y luego ${n} ejecuciones terminadas seguidas, todas correctas.`,
       pilot: (verb, board) => `${verb === "unblock" ? "Desbloqueo" : "Comentario"} en ${board || "un proyecto"}: ejecutado, estado verificado.`,
       recruiter: (who) => `${who || "Un bot"} se creó desde la oficina y aparece en la lista de Hermes.`,
@@ -7282,7 +7293,7 @@ var es = {
   },
   notify: {
     title: "Notificaciones",
-    hint: (cap) => `Recibe los avisos en una app de mensajería que Hermes ya tenga conectada, sin tener la página abierta. Solo datos (proyecto, código y título de la tarjeta, agente, estado, duración), nunca contenido. Todo desactivado por defecto; como máximo ${cap} mensajes por hora y destinatario, uno por evento, agrupados cuando llegan varios a la vez. Durante una caída no se puede enviar nada. Los proyectos de prueba (sandbox-*) nunca generan avisos.`,
+    hint: (cap) => `Recibe los avisos en una app de mensajería que Hermes ya tenga conectada, sin tener la página abierta. Solo datos (proyecto, código y título de la tarjeta, agente, estado, duración), nunca contenido. Todo desactivado por defecto; como máximo ${cap} ${cap === 1 ? "mensaje" : "mensajes"} por hora y destinatario, uno por evento, agrupados cuando llegan varios a la vez. Durante una caída no se puede enviar nada. Los proyectos de prueba (sandbox-*) nunca generan avisos.`,
     type: {
       decision: "Decisiones",
       silent: "Silencios",
@@ -7312,7 +7323,7 @@ var es = {
     targetLabel: (platform, label) => `${platform} ${label}`,
     noTarget: "Hermes no conoce ningún destinatario.",
     noRoute: "Sin destinatario: no se envía nada.",
-    maxRoutes: (n) => `Hasta ${n} destinatarios por tipo.`,
+    maxRoutes: (n) => `Hasta ${n} ${n === 1 ? "destinatario" : "destinatarios"} por tipo.`,
     oneRecipient: "Solo hay una app de mensajería conectada en Hermes.",
     addApp: "Añadir app de mensajería",
     addAppNote: "La conexión se hace en Hermes.",
@@ -7388,7 +7399,7 @@ var es = {
     loading: "Cargando los eventos…",
     error: "No se pudo cargar el replay. Inténtalo de nuevo en un minuto.",
     unavailable: "El replay necesita la parte Agente de Officecraft (reinicia el gateway tras actualizar).",
-    state: (working, waiting, silent = 0) => `${working} trabajando · ${waiting} te esperan · ${silent} en silencio`,
+    state: (working, waiting, silent = 0) => `${working} trabajando · ${waiting} ${waiting === 1 ? "te espera" : "te esperan"} · ${silent} en silencio`,
     stateNone: "Nadie estaba trabajando en este momento.",
     titlesNote: "Los títulos de las tarjetas son los de hoy: Hermes no guarda el historial de títulos. Una tarjeta, un proyecto o un agente eliminado no aparece en el replay.",
     since: (slug, at) => `Proyecto ${slug}: solo hay eventos desde ${at}.`,
@@ -7482,19 +7493,19 @@ var es = {
       loops: "bucles de bloqueo",
       silences: "silencios",
       orders: "acciones",
-      ordersDetail: (done2, refused2, failed = 0) => `${done2} hechas · ${refused2} rechazadas · ${failed} fallidas`,
+      ordersDetail: (done2, refused2, failed = 0) => `${done2} ${done2 === 1 ? "hecha" : "hechas"} · ${refused2} ${refused2 === 1 ? "rechazada" : "rechazadas"} · ${failed} ${failed === 1 ? "fallida" : "fallidas"}`,
       cronsOk: "tareas programadas ejecutadas",
       cronsFailed: "tareas programadas fallidas",
       cronsOf: (n) => `de ${n}`,
       show: "Ver estos eventos",
       chart: "Eventos por hora: terminadas, bloqueos, fallos",
       usage: "Uso",
-      usageLine: (calls, input, output = 0) => `${calls} llamadas al modelo · ${input} tokens de entrada · ${output} de salida`,
+      usageLine: (calls, input, output = 0) => `${calls} ${isOne(calls) ? "llamada" : "llamadas"} al modelo · ${input} ${isOne(input) ? "token" : "tokens"} de entrada · ${output} de salida`,
       usageNone: "Ningún uso registrado para las ejecuciones de este periodo.",
       usageMissing: (n) => `${n} ${n === 1 ? "ejecución no tiene" : "ejecuciones no tienen"} uso registrado (no se cuenta como cero).`,
       usageNote: "Las sesiones se cuentan por su inicio; los tokens no están fechados llamada a llamada.",
       byAgent: "Ejecuciones por agente",
-      agentRuns: (runs, calls) => `${runs} ${runs === 1 ? "ejecución" : "ejecuciones"}${calls == null ? " · uso desconocido" : ` · ${calls} llamadas`}`,
+      agentRuns: (runs, calls) => `${runs} ${runs === 1 ? "ejecución" : "ejecuciones"}${calls == null ? " · uso desconocido" : ` · ${calls} ${isOne(calls) ? "llamada" : "llamadas"}`}`,
       since: (slug, at) => `Proyecto ${slug}: solo hay eventos desde ${at}; el recuento puede quedarse corto.`,
       truncated: (at) => `Demasiados eventos: solo se cuentan hasta ${at}.`
     }
@@ -7519,7 +7530,7 @@ var es = {
     incomplete: "un mínimo: algunos recuentos no se registraron",
     split: "Desglose de tokens",
     part: { input: "entrada", output: "salida", cache: "caché" },
-    exact: (n) => `${n} tokens`,
+    exact: (n) => `${n} ${isOne(n) ? "token" : "tokens"}`,
     absent: "no registrado",
     noSession: "sin sesión",
     noRun: "sin ejecución",
@@ -7534,11 +7545,11 @@ var es = {
     days: {
       title: "Día a día",
       span: (n) => n <= 2 ? "ayer y hoy" : `últimos ${n} días`,
-      bar: (day, n) => `${day}: ${n} tokens`,
+      bar: (day, n) => `${day}: ${n} ${isOne(n) ? "token" : "tokens"}`,
       none: (day) => `${day}: ninguna sesión iniciada`,
       failed: (day) => `${day}: sin respuesta`,
       hint: "Elige un día para ver sus cifras. Cada día cuenta las sesiones iniciadas ese día.",
-      detail: (day, tokens) => `${day}: ${tokens} tokens`,
+      detail: (day, tokens) => `${day}: ${tokens} ${isOne(tokens) ? "token" : "tokens"}`,
       error: "No se pudieron leer los días.",
       note: "Hermes no fecha los tokens llamada a llamada: una sesión cuenta el día en que empezó."
     },
@@ -7554,8 +7565,8 @@ var es = {
     },
     models: {
       title: "Por modelo",
-      calls: (n) => `${n} llamadas`,
-      aux: (n) => `${n} auxiliares`,
+      calls: (n) => `${n} ${isOne(n) ? "llamada" : "llamadas"}`,
+      aux: (n) => `${n} ${n === 1 ? "auxiliar" : "auxiliares"}`,
       absent: "No se registró ningún desglose por modelo.",
       none: "Ningún modelo registrado.",
       note: "Un desglose: incluye las tareas auxiliares (títulos, compresión…), así que puede superar el total de las sesiones. Dólares solo donde Hermes conoce el precio; nunca sumados entre rutas."
@@ -7605,10 +7616,10 @@ var es = {
     unavailable: "Las funciones LLM necesitan la parte Agente de Officecraft, actualizada y reiniciada con el gateway.",
     month: "Este mes",
     spendUsd: (usd, cap) => `${usd} $ de ${cap} $ · estimación`,
-    spendCalls: (n, cap) => `${n} de ${cap} llamadas sin precio conocido`,
+    spendCalls: (n, cap) => `${n} de ${cap} ${cap === 1 ? "llamada" : "llamadas"} sin precio conocido`,
     unknownPrice: (n, cap) => `Precio desconocido para este modelo: el límite se cuenta en llamadas (${n}/${cap} este mes). Para contar en dólares, elige un modelo con precio conocido en Configuración → Modelo → Modelos auxiliares → Officecraft.`,
     priceUnknown: "Precio desconocido: límite contado en llamadas.",
-    gaugeCalls: (n, cap) => `${n} de ${cap} llamadas este mes`,
+    gaugeCalls: (n, cap) => `${n} de ${cap} ${cap === 1 ? "llamada" : "llamadas"} este mes`,
     gaugeUsd: (usd, cap) => `${usd} $ de ${cap} $ este mes`,
     gaugeOf: (cap) => `/ ${cap}`,
     capSummary: "Límite mensual",
@@ -7618,6 +7629,7 @@ var es = {
     capInvalid: "No es un importe válido. El límite no cambia.",
     saveFailed: "El cambio no se guardó. Nada cambió en el servidor.",
     sends: (s) => `Envía: ${s}`,
+    sendsLine: (s) => `Envía: ${s}.`,
     cost: (c) => `Coste: ${c}.`,
     lastKnown: (usd) => `Última llamada: unos ${usd} $ (estimación de Hermes).`,
     lastUnknown: "Última llamada: precio desconocido (contada en llamadas).",
@@ -7739,7 +7751,7 @@ var es = {
       counted: (n) => `${n} ${n === 1 ? "llamada contada" : "llamadas contadas"}`,
       intact: "formulario intacto",
       capUsd: (usd, cap) => `${usd} $ de ${cap} $ · súbelo en Ajustes → Funciones LLM.`,
-      capCalls: (n, cap) => `${n} llamadas de ${cap} · súbelo en Ajustes → Funciones LLM.`,
+      capCalls: (n, cap) => `${n} ${n === 1 ? "llamada" : "llamadas"} de ${cap} · súbelo en Ajustes → Funciones LLM.`,
       stopAfter: (s) => `parada tras ${s} s`,
       again: "Volver a pedir",
       retry: "Reintentar",
@@ -7877,7 +7889,7 @@ var es = {
       sub: "Solo consejos: ninguno bloquea «Crear».",
       ask: "Revisar el borrador",
       again: "Revisar de nuevo",
-      reading: (n) => `El modelo ligero está leyendo ${n} tarjetas…`,
+      reading: (n) => `El modelo ligero está leyendo ${n} ${n === 1 ? "tarjeta" : "tarjetas"}…`,
       tipReturns: "como máximo 8 observaciones. Consejos: ninguna bloquea «Crear». Se borran si el borrador cambia.",
       sev: { high: "Alta", medium: "Media", low: "Baja" },
       kind: { no_review: "Sin revisión", wrong_bot: "Bot mal elegido", vague: "Demasiado vago", conflict: "Conflicto", model: "Modelo", order: "Orden", other: "Por comprobar" },
@@ -8049,6 +8061,7 @@ var es = {
     pill: {
       label: "Estado de la oficina, en directo",
       working: () => "trabajando",
+      workingLabel: (n) => `${n} trabajando`,
       workingTip: "Agentes con señales de actividad en los últimos 2 minutos",
       decisions: (n) => n === 1 ? "decisión" : "decisiones",
       decisionsTip: "Tarjetas bloqueadas y aprobaciones que esperan tu decisión",
@@ -8058,10 +8071,11 @@ var es = {
       level: (n) => `niv. ${n}`,
       trophies: "trofeos",
       streak: "racha",
+      streakLabel: (n) => `racha de ${n} ${n === 1 ? "día" : "días"}`,
       days: (n) => `${n} d`,
       tip: "Abrir la vitrina",
       open: (summary2) => `Abrir la vitrina: ${summary2}`,
-      levelTip: (done2, next) => next ? `Nivel de la oficina: ${done2} tarjetas terminadas de ${next} para el siguiente nivel` : `Nivel de la oficina: ${done2} tarjetas terminadas, nivel máximo`,
+      levelTip: (done2, next) => next ? `Nivel de la oficina: ${done2} ${done2 === 1 ? "tarjeta terminada" : "tarjetas terminadas"} de ${next} para el siguiente nivel` : `Nivel de la oficina: ${done2} ${done2 === 1 ? "tarjeta terminada" : "tarjetas terminadas"}, nivel máximo`,
       trophiesTip: (got, total) => `Trofeos desbloqueados: ${got} de ${total}`
     },
     more: "Más acciones",
@@ -8074,7 +8088,8 @@ var es = {
       partial: (n) => `Datos parciales · ${n} ${n === 1 ? "fuente" : "fuentes"}`,
       roster: "Solo agentes",
       cronsNames: (names) => `Con fallos: ${names}`,
-      folded: (short, n) => `${short} + ${n} ${n === 1 ? "alerta" : "alertas"}`
+      folded: (short, n) => `${short} + ${n} ${n === 1 ? "alerta" : "alertas"}`,
+      rest: (n) => `${n} ${n === 1 ? "alerta más" : "alertas más"}`
     },
     dock: {
       label: "Proyectos: filtrar la oficina y las listas",
@@ -8091,6 +8106,8 @@ var es = {
       byProject: "Por proyecto",
       byAge: "Más antiguas",
       group: (n) => `${n} por decidir`,
+      more: "Ver el título completo",
+      less: "Ver menos",
       unfilter: (slug) => `Quitar el filtro ${slug}`,
       noProject: "Sin proyecto",
       emptyFiltered: "Nada espera en este proyecto.",
@@ -8119,7 +8136,9 @@ var es = {
       running: "en curso",
       todo: "por hacer",
       blocked: "bloqueadas",
-      queue: (n) => `Últimas ${n} tarjetas`,
+      queue: (n) => `${n === 1 ? "Última tarjeta" : `Últimas ${n} tarjetas`}`,
+      showCards: "Ver las tarjetas",
+      hideCards: "Ocultar las tarjetas",
       filter: "Filtrar la oficina",
       filtered: "Filtrado",
       kanban: "Kanban"
@@ -8194,7 +8213,7 @@ var fr = {
   tagWaitsN: (n) => n === 1 ? "attend · 1 carte" : `attend · ${n} cartes`,
   tagWaits: "attend",
   tagCards: (n) => n === 1 ? "1 carte" : `${n} cartes`,
-  tipCards: (n, list, more = "") => `${n} cartes en cours : ${list}${more ? ` ${more}` : ""}`,
+  tipCards: (n, list, more = "") => `${n} ${n === 1 ? "carte" : "cartes"} en cours : ${list}${more ? ` ${more}` : ""}`,
   quietOne: (ref, span2) => `${ref} silencieuse depuis ${span2}`,
   narrowNote: "Fenêtre étroite : le bureau s’affiche en liste. Élargissez-la pour retrouver la vue du bureau.",
   sceneLabel: "Le bureau",
@@ -8232,7 +8251,7 @@ var fr = {
     noSession: "Aucune session de chat",
     untitled: "Session sans titre",
     noCard: "Aucune carte en cours",
-    more: (n) => `+${n} autres`,
+    more: (n) => `+${n} ${n === 1 ? "autre" : "autres"}`,
     cards: "Cartes",
     quietFor: (span2) => `silencieuse depuis ${span2}`,
     modelOn: (code) => `sur ${code}`,
@@ -8313,7 +8332,7 @@ var fr = {
     addPhase: "Phase, avec son verrou",
     removePhase: "Retirer la dernière phase",
     after: (list) => `après ${list}`,
-    afterN: (n) => `après ${n} cartes`,
+    afterN: (n) => `après ${n} ${n === 1 ? "carte" : "cartes"}`,
     dup: (code) => `Dupliquer ${code}`,
     del: (code) => `Supprimer ${code}`,
     edit: (code) => `Modifier ${code}`,
@@ -8377,7 +8396,7 @@ var fr = {
       replace: "Remplacer",
       appendNote: "Les nouvelles cartes démarrent avec les premières, dès que le verrou de départ est levé.",
       replaceNote: "Les cartes et les phases du brouillon sont remplacées ; l’objectif et le projet sont conservés.",
-      room: (n) => `Encore ${n} cartes possibles.`,
+      room: (n) => `${n === 1 ? "Encore 1 carte possible." : `Encore ${n} cartes possibles.`}`,
       go: "Utiliser ce modèle",
       step: (n) => `Étape ${n}`,
       review: (n) => `Revue de l’étape ${n}`,
@@ -8392,10 +8411,10 @@ var fr = {
       not_eligible: "Une carte ne peut dépendre que d’une carte de sa phase ou d’une phase précédente.",
       too_many: "La limite de 40 cartes de travail ou de 8 phases serait dépassée : le brouillon reste inchangé."
     },
-    graph: { title: "Aperçu", final: "Aperçu final", created: "Ce qui a été créé", label: (n) => `Aperçu du graphe : ${n} cartes`, tip: "De haut en bas, dans l’ordre où les cartes démarreront. La couleur est celle du bot. Une ligne orange en tirets est un verrou. Au-delà de 24 cartes, les cartes en parallèle sont regroupées en pile : cliquez dessus pour la déplier." },
-    groupAria: (codes2, n, list = "") => `${codes2}, ${n} cartes en parallèle (${list}), appuyer pour déplier`,
-    groupTip: (n, codes2) => `${n} cartes en parallèle (${codes2}) : cliquer pour déplier`,
-    groupFold: (codes2, n) => `Replier ${codes2} (${n} cartes)`,
+    graph: { title: "Aperçu", final: "Aperçu final", created: "Ce qui a été créé", label: (n) => `Aperçu du graphe : ${n} ${n === 1 ? "carte" : "cartes"}`, tip: "De haut en bas, dans l’ordre où les cartes démarreront. La couleur est celle du bot. Une ligne orange en tirets est un verrou. Au-delà de 24 cartes, les cartes en parallèle sont regroupées en pile : cliquez dessus pour la déplier." },
+    groupAria: (codes2, n, list = "") => `${codes2}, ${n} ${n === 1 ? "carte" : "cartes"} en parallèle (${list}), appuyer pour déplier`,
+    groupTip: (n, codes2) => `${n} ${n === 1 ? "carte" : "cartes"} en parallèle (${codes2}) : cliquer pour déplier`,
+    groupFold: (codes2, n) => `Replier ${codes2} (${n} ${n === 1 ? "carte" : "cartes"})`,
     state: { blocked: "fermé", done: "levé", todo: "en attente", ready: "prête", archived: "archivée" },
     ck: { noLoop: "Sans boucle", guarded: "Tout est sous verrou", count: (n, max) => `${n}/${max} cartes` },
     clear: { button: "Effacer le brouillon", label: "Effacer le brouillon", ask: "Effacer ce brouillon ?", keep: "Le garder", go: "L’effacer" },
@@ -8422,11 +8441,11 @@ var fr = {
       runtime: (code) => `Carte ${code} : la durée maximale doit être comprise entre 15 minutes et 24 heures.`,
       loop: "Les dépendances entre cartes forment une boucle.",
       graph: (why) => `Le graphe est refusé : ${why}`,
-      more: (n) => `…et ${n} autres.`
+      more: (n) => `…et ${n} ${n === 1 ? "autre" : "autres"}.`
     },
     toReview: "Vérifier",
-    create: (n, board) => `Créer ${n} cartes sur ${board}`,
-    createNew: (n, slug) => `Créer le projet ${slug} et ${n} cartes`,
+    create: (n, board) => `Créer ${n} ${n === 1 ? "carte" : "cartes"} sur ${board}`,
+    createNew: (n, slug) => `Créer le projet ${slug} et ${n} ${n === 1 ? "carte" : "cartes"}`,
     review: { note: (n) => `Action définitive : après confirmation, vous avez ${n} s pour annuler. Une seule action à la fois.` },
     sum: {
       title: "Ce qui sera créé",
@@ -8483,7 +8502,7 @@ var fr = {
     created: (when) => `créée ${when}`,
     blockedSince: (when) => `bloquée ${when}`,
     unassigned: "non assignée",
-    more: (n) => `${n} autres`
+    more: (n) => `${n} ${n === 1 ? "autre" : "autres"}`
   },
   // la boîte des décisions. Les ordres sont à l’impératif ; chaque classe de risque est un mot, jamais une couleur seule.
   orders: {
@@ -8503,10 +8522,10 @@ var fr = {
     target: "Cible :",
     effect: {
       unblock: "La carte passe de « bloquée » à « prête » (ou « à faire » tant qu’une carte dont elle dépend n’est pas terminée) et peut être reprise. Il n’existe pas de moyen simple de la rebloquer.",
-      comment: (n) => `Votre commentaire (${n} caractères) est ajouté à la carte et lu par l’agent qui la traite. Un commentaire kanban ne peut pas être supprimé.`,
+      comment: (n) => `Votre commentaire (${n} ${n === 1 ? "caractère" : "caractères"}) est ajouté à la carte et lu par l’agent qui la traite. Un commentaire kanban ne peut pas être supprimé.`,
       launch: "Le verrou de départ est levé (sa carte est terminée, jamais débloquée) : les cartes qui en dépendaient deviennent prêtes et démarrent au prochain passage de Hermes.",
       launchNamed: (names) => `Le verrou de départ est levé ; prêtes à démarrer : ${names}. Elles démarrent au prochain passage de Hermes.`,
-      cancel: (n) => `Les ${n} cartes de la campagne sont archivées, les dernières d’abord, le verrou en dernier. Rien n’a démarré ; elles ne peuvent pas être désarchivées depuis Officecraft.`
+      cancel: (n) => `${n === 1 ? "La carte de la campagne est archivée" : `Les ${n} cartes de la campagne sont archivées`}, les dernières d’abord, le verrou en dernier. Rien n’a démarré ; elles ne peuvent pas être désarchivées depuis Officecraft.`
     },
     undoNote: (n) => `Après confirmation, vous avez ${n} s pour annuler ; ensuite, c’est définitif.`,
     confirm: "Confirmer",
@@ -8522,7 +8541,7 @@ var fr = {
       comment: (target2, n) => `Commentaire ajouté à ${target2} ; la carte compte maintenant ${n} commentaire(s) (vérifié).`,
       launch: (target2, n) => `${target2} lancée (vérifié) : ${n} carte(s) prête(s).`,
       cancel: (target2, n) => `${target2} annulée (vérifié) : ${n} carte(s) archivée(s).`,
-      campaign: (board, n) => `Campagne créée sur ${board} (vérifié) : ${n} cartes.`
+      campaign: (board, n) => `Campagne créée sur ${board} (vérifié) : ${n} ${n === 1 ? "carte" : "cartes"}.`
     },
     failed: (what2, why) => `${what2} n’a pas abouti. ${why}`,
     unknown: (what2, why) => `${what2} : ${why}`,
@@ -8602,7 +8621,7 @@ var fr = {
     step1: "Identité",
     step2: "Point de départ",
     step3: "Modèle et fournisseur",
-    skillsSum: (own, base) => `${own} propres + ${base} de base`,
+    skillsSum: (own, base) => `${own} ${own === 1 ? "propre" : "propres"} + ${base} de base`,
     modelInherited: "hérité",
     submitNamed: (name) => `Recruter ${name}`,
     newBot: "Nouveau bot",
@@ -8646,11 +8665,11 @@ var fr = {
       unconfiguredList: "Fournisseurs sans clé ni connexion",
       configureIn: "Pour en ajouter un, configurez-le dans Hermes (Paramètres → Modèle). Le bureau ne demande et ne conserve jamais de clé.",
       openSettings: "Ouvrir les paramètres de Hermes",
-      count: (n, total) => n === total ? `${total} modèles` : `${n} sur ${total} modèles`,
+      count: (n, total) => n === total ? `${total} ${total === 1 ? "modèle" : "modèles"}` : `${n} sur ${total} ${total === 1 ? "modèle" : "modèles"}`,
       search: "Rechercher par nom ou identifiant",
       noMatch: "Aucun modèle ne correspond.",
       noModels: "Hermes ne liste aucun modèle pour ce fournisseur.",
-      more: (n) => `${n} autres : affinez la recherche.`,
+      more: (n) => `${n} ${n === 1 ? "autre" : "autres"} : affinez la recherche.`,
       chosen: (model, provider) => `Choisi : ${model} · ${provider}`,
       free: "gratuit",
       priceIn: (p) => `${p} en entrée`,
@@ -8818,7 +8837,7 @@ var fr = {
     level: (n) => `Niveau ${n}`,
     levelName: { garage: "Garage", open_space: "Open space", floor: "Étage", campus: "Campus", skyscraper: "Gratte-ciel" },
     levelNext: (done2, next) => `${done2}/${next} cartes terminées`,
-    levelTop: (done2) => `${done2} cartes terminées`,
+    levelTop: (done2) => `${done2} ${done2 === 1 ? "carte terminée" : "cartes terminées"}`,
     levelTip: "Niveau du bureau : cartes terminées sur tous les projets. Les cartes créées, les sessions ou le temps passé ne comptent jamais.",
     grade: { stagiaire: "Stagiaire", confirme: "Confirmé", senior: "Senior", legende: "Légende" },
     gradeLine: (grade, runs) => `${grade} · ${runs} ${runs === 1 ? "exécution réussie" : "exécutions réussies"}`,
@@ -8837,7 +8856,7 @@ var fr = {
     toast: {
       first: (n) => `Historique analysé : ${n} ${n === 1 ? "trophée" : "trophées"}`,
       new: (names) => `Trophée débloqué : ${names}`,
-      many: (n) => `${n} nouveaux trophées débloqués par l’historique`
+      many: (n) => `${n} ${n === 1 ? "nouveau trophée" : "nouveaux trophées"} débloqués par l’historique`
     },
     journalTier: (name, tier) => `palier ${tier} : ${name}`,
     near: (cur, goal) => `Progression ${cur}/${goal}`,
@@ -8853,7 +8872,7 @@ var fr = {
     unavailable: "Verrouillé · la partie agent d’Officecraft ne fournit pas encore cette donnée (redémarrez le gateway après la mise à jour)",
     where: { medal: "une médaille dans la vitrine" },
     collection: {
-      summary: (got, total) => `${got} sur ${total} débloqués`,
+      summary: (got, total) => `${got} sur ${total} ${got === 1 ? "débloqué" : "débloqués"}`,
       familyHead: (name, summary2) => `${name} : ${summary2}`,
       // summary = « 3 sur 5 débloqués »
       progress: (cur, goal, unit) => `${cur}${unit ? ` ${unit}` : ""} sur ${goal}${unit ? ` ${unit}` : ""}`,
@@ -8916,37 +8935,37 @@ var fr = {
       guardian: { name: "Gardien", cond: "Une première demande d’approbation refusée depuis le bureau." }
     },
     fact: {
-      chain: (board, n) => `Projet ${board} : ${n} cartes, toutes terminées.`,
-      centurion: (board, n) => `${n} cartes terminées sur ${board}.`,
-      zero: (n) => `${n} exécutions terminées d’affilée, aucune plantée ni hors délai.`,
+      chain: (board, n) => `Projet ${board} : ${n} ${n === 1 ? "carte" : "cartes"}, toutes terminées.`,
+      centurion: (board, n) => `${n} ${n === 1 ? "carte" : "cartes"} terminées sur ${board}.`,
+      zero: (n) => `${n} ${n === 1 ? "exécution" : "exécutions"} terminées d’affilée, aucune plantée ni hors délai.`,
       quick: (board, min) => `Une carte ${de(board)} a été débloquée ${min} min après son blocage.`,
       review: (board) => `Une carte ${de(board)} a reçu une demande de modifications, puis a été terminée.`,
-      owl: (board, n) => `${n} cartes terminées en une nuit sur ${board}.`,
+      owl: (board, n) => `${n} ${n === 1 ? "carte" : "cartes"} terminées en une nuit sur ${board}.`,
       thrifty: (pct) => `${pct} % des jetons d’entrée ont été lus depuis le cache.`,
-      hire: (n) => `${n} profils existent.`,
-      builder: (n) => `${n} projets contiennent des cartes.`,
+      hire: (n) => `${n} ${n === 1 ? "profil existe" : "profils existent"}.`,
+      builder: (n) => `${n} ${n === 1 ? "projet contient" : "projets contiennent"} des cartes.`,
       fire: (board, min, fails = 1) => `Sur ${board} : ${fails} ${fails === 1 ? "exécution échouée" : "exécutions échouées"}, puis un succès ${min} min après la première.`,
-      smooth: (board, n) => `Sur ${board} : ${n} cartes liées d’affilée, toutes terminées, aucune jamais bloquée.`,
-      architect: (board, n) => `Sur ${board} : une chaîne de ${n} cartes liées, toutes terminées.`,
-      teamwork: (board, n) => `Sur ${board} : une chaîne liée terminée par au moins ${n} bots différents.`,
+      smooth: (board, n) => `Sur ${board} : ${n} ${n === 1 ? "carte" : "cartes"} liées d’affilée, toutes terminées, aucune jamais bloquée.`,
+      architect: (board, n) => `Sur ${board} : une chaîne de ${n} ${n === 1 ? "carte" : "cartes"} liées, toutes terminées.`,
+      teamwork: (board, n) => `Sur ${board} : une chaîne liée terminée par au moins ${n} ${n === 1 ? "bot" : "bots"} différents.`,
       quickstart: (board, min) => `Sur ${board} : la première carte a été terminée ${min} min après la création du projet.`,
-      wide: (n) => `${n} projets ont chacun terminé une carte le même jour.`,
-      versatile: (who, n) => `${who} a terminé des cartes sur ${n} projets.`,
-      multimodel: (board, n) => `Sur ${board} : des cartes terminées avec ${n} modèles imposés différents.`,
+      wide: (n) => `${n} ${n === 1 ? "projet" : "projets"} ont chacun terminé une carte le même jour.`,
+      versatile: (who, n) => `${who} a terminé des cartes sur ${n} ${n === 1 ? "projet" : "projets"}.`,
+      multimodel: (board, n) => `Sur ${board} : des cartes terminées avec ${n} ${n === 1 ? "modèle" : "modèles"} imposés différents.`,
       rescue: (board, hours) => `Sur ${board} : une carte est restée bloquée ${hours} h, puis a été terminée.`,
-      iron: (board, n) => `${n} jours d’affilée sur ${board} : exécutions terminées, aucun plantage, aucun délai dépassé.`,
-      ontime: (n) => `${n} exécutions terminées d’affilée : aucun délai dépassé, aucune seconde tentative d’une carte.`,
-      firstpass: (n) => `${n} cartes de revue d’affilée terminées sans modifications demandées.`,
-      swiss: (name, n) => `Tâche planifiée ${name} : ${n} exécutions réussies d’affilée.`,
-      present: (n) => `${n} jours d’affilée avec au moins une carte bloquée débloquée.`,
-      noqueue: (n) => `${n} jours d’affilée où aucune carte n’est restée bloquée plus de 24 heures.`,
-      fullteam: (n) => `${n} rôles différents ont chacun terminé une carte.`,
+      iron: (board, n) => `${n} ${n === 1 ? "jour" : "jours"} d’affilée sur ${board} : exécutions terminées, aucun plantage, aucun délai dépassé.`,
+      ontime: (n) => `${n} ${n === 1 ? "exécution" : "exécutions"} terminées d’affilée : aucun délai dépassé, aucune seconde tentative d’une carte.`,
+      firstpass: (n) => `${n} ${n === 1 ? "carte" : "cartes"} de revue d’affilée terminées sans modifications demandées.`,
+      swiss: (name, n) => `Tâche planifiée ${name} : ${n} ${n === 1 ? "exécution" : "exécutions"} réussies d’affilée.`,
+      present: (n) => `${n} ${n === 1 ? "jour" : "jours"} d’affilée avec au moins une carte bloquée débloquée.`,
+      noqueue: (n) => `${n} ${n === 1 ? "jour" : "jours"} d’affilée où aucune carte n’est restée bloquée plus de 24 heures.`,
+      fullteam: (n) => `${n} ${n === 1 ? "rôle" : "rôles"} différents ont chacun terminé une carte.`,
       training: (who, skill) => `${who} a modifié son skill ${skill}, puis terminé une carte dans les 7 jours.`,
       firstmission: (who) => `${who} a terminé sa première carte dans sa première semaine.`,
-      veteran: (days) => `${days} jours depuis la première apparition du plus ancien profil.`,
+      veteran: (days) => `${days} ${days === 1 ? "jour" : "jours"} depuis la première apparition du plus ancien profil.`,
       twin: (board, from, to = "un autre bot") => `Sur ${board} : une exécution de ${from} a échoué, puis ${to} a terminé la carte.`,
       fastlane: (board, min) => `Sur ${board} : une carte terminée ${min} min après sa création, sans blocage ni exécution en échec.`,
-      quiet: (n) => `Une nuit avec ${n} exécutions terminées, toutes réussies, et aucune carte bloquée.`,
+      quiet: (n) => `Une nuit avec ${n} ${n === 1 ? "exécution" : "exécutions"} terminées, toutes réussies, et aucune carte bloquée.`,
       comeback: (board, hours, n = 5) => `Sur ${board} : en panne ${hours} h, puis ${n} exécutions terminées d’affilée, toutes réussies.`,
       pilot: (verb, board) => `${verb === "unblock" ? "Déblocage" : "Commentaire"} sur ${board || "un projet"} : exécuté et vérifié.`,
       recruiter: (who) => `${who || "Un bot"} a été créé depuis le bureau et confirmé par Hermes.`,
@@ -8991,7 +9010,7 @@ var fr = {
   },
   notify: {
     title: "Notifications",
-    hint: (cap) => `Recevez une alerte sur une messagerie déjà connectée à Hermes, même sans page ouverte. Les messages ne donnent que des informations factuelles (projet, code et titre de carte, agent, état, durée), jamais de contenu. Tout est désactivé par défaut ; au plus ${cap} messages par heure et par destinataire, un par événement, regroupés quand plusieurs arrivent ensemble. Pendant une panne, rien ne peut être envoyé. Les projets de test (sandbox-*) ne sont jamais signalés.`,
+    hint: (cap) => `Recevez une alerte sur une messagerie déjà connectée à Hermes, même sans page ouverte. Les messages ne donnent que des informations factuelles (projet, code et titre de carte, agent, état, durée), jamais de contenu. Tout est désactivé par défaut ; au plus ${cap} ${cap === 1 ? "message" : "messages"} par heure et par destinataire, un par événement, regroupés quand plusieurs arrivent ensemble. Pendant une panne, rien ne peut être envoyé. Les projets de test (sandbox-*) ne sont jamais signalés.`,
     type: {
       decision: "Décisions",
       silent: "Silences",
@@ -9021,7 +9040,7 @@ var fr = {
     targetLabel: (platform, label) => `${platform} ${label}`,
     noTarget: "Hermes ne connaît aucun destinataire.",
     noRoute: "Aucun destinataire : rien n’est envoyé.",
-    maxRoutes: (n) => `Jusqu’à ${n} destinataires par type.`,
+    maxRoutes: (n) => `Jusqu’à ${n} ${n === 1 ? "destinataire" : "destinataires"} par type.`,
     oneRecipient: "Une seule messagerie est connectée dans Hermes.",
     addApp: "Ajouter une messagerie",
     addAppNote: "La connexion se fait dans Hermes.",
@@ -9097,7 +9116,7 @@ var fr = {
     loading: "Chargement des événements…",
     error: "Le replay n’a pas pu être chargé. Réessayez dans une minute.",
     unavailable: "Le replay nécessite la partie agent d’Officecraft (redémarrez le gateway après la mise à jour).",
-    state: (working, waiting, silent = 0) => `${working} au travail · ${waiting} vous attendent · ${silent} silencieux`,
+    state: (working, waiting, silent = 0) => `${working} au travail · ${waiting} ${waiting === 1 ? "vous attend" : "vous attendent"} · ${silent} silencieux`,
     stateNone: "Personne n’était au travail à cet instant.",
     titlesNote: "Les titres de cartes sont ceux d’aujourd’hui : Hermes ne conserve pas l’historique des titres. Une carte, un projet ou un agent supprimé n’apparaît pas dans le replay.",
     since: (slug, at) => `Projet ${slug} : événements disponibles seulement depuis ${at}.`,
@@ -9191,19 +9210,19 @@ var fr = {
       loops: "boucles de blocage",
       silences: "silences",
       orders: "actions",
-      ordersDetail: (done2, refused2, failed = 0) => `${done2} réussies · ${refused2} refusées · ${failed} en échec`,
+      ordersDetail: (done2, refused2, failed = 0) => `${done2} ${done2 === 1 ? "réussie" : "réussies"} · ${refused2} ${refused2 === 1 ? "refusée" : "refusées"} · ${failed} en échec`,
       cronsOk: "tâches planifiées exécutées",
       cronsFailed: "tâches planifiées en échec",
       cronsOf: (n) => `sur ${n}`,
       show: "Voir ces événements",
       chart: "Par heure : cartes terminées, blocages, échecs",
       usage: "Consommation",
-      usageLine: (calls, input, output = 0) => `${calls} appels au modèle · ${input} jetons en entrée · ${output} en sortie`,
+      usageLine: (calls, input, output = 0) => `${calls} ${isOne(calls) ? "appel" : "appels"} au modèle · ${input} ${isOne(input) ? "jeton" : "jetons"} en entrée · ${output} en sortie`,
       usageNone: "Aucune consommation enregistrée pour les exécutions de cette période.",
       usageMissing: (n) => `${n} exécution${n === 1 ? "" : "s"} sans consommation enregistrée (non comptée${n === 1 ? "" : "s"} comme zéro).`,
       usageNote: "Les sessions sont comptées à leur démarrage ; les jetons ne sont pas datés appel par appel.",
       byAgent: "Exécutions par agent",
-      agentRuns: (runs, calls) => `${runs} exécution${runs === 1 ? "" : "s"}${calls == null ? " · consommation inconnue" : ` · ${calls} appels`}`,
+      agentRuns: (runs, calls) => `${runs} exécution${runs === 1 ? "" : "s"}${calls == null ? " · consommation inconnue" : ` · ${calls} ${isOne(calls) ? "appel" : "appels"}`}`,
       since: (slug, at) => `Projet ${slug} : événements disponibles seulement depuis ${at}, le décompte peut être incomplet.`,
       truncated: (at) => `Trop d’événements : comptés jusqu’à ${at} seulement.`
     }
@@ -9228,7 +9247,7 @@ var fr = {
     incomplete: "un minimum : certains décomptes n’ont pas été enregistrés",
     split: "Répartition des jetons",
     part: { input: "entrée", output: "sortie", cache: "cache" },
-    exact: (n) => `${n} jetons`,
+    exact: (n) => `${n} ${isOne(n) ? "jeton" : "jetons"}`,
     absent: "non enregistré",
     noSession: "aucune session",
     noRun: "aucune exécution",
@@ -9243,11 +9262,11 @@ var fr = {
     days: {
       title: "Jour par jour",
       span: (n) => n <= 2 ? "hier et aujourd’hui" : `${n} derniers jours`,
-      bar: (day, n) => `${day} : ${n} jetons`,
+      bar: (day, n) => `${day} : ${n} ${isOne(n) ? "jeton" : "jetons"}`,
       none: (day) => `${day} : aucune session démarrée`,
       failed: (day) => `${day} : pas de réponse`,
       hint: "Choisissez un jour pour voir ses chiffres. Chaque jour compte les sessions démarrées ce jour-là.",
-      detail: (day, tokens) => `${day} : ${tokens} jetons`,
+      detail: (day, tokens) => `${day} : ${tokens} ${isOne(tokens) ? "jeton" : "jetons"}`,
       error: "Les jours n’ont pas pu être lus.",
       note: "Hermes ne date pas les jetons appel par appel : une session compte le jour où elle a démarré."
     },
@@ -9263,8 +9282,8 @@ var fr = {
     },
     models: {
       title: "Par modèle",
-      calls: (n) => `${n} appels`,
-      aux: (n) => `${n} auxiliaires`,
+      calls: (n) => `${n} ${isOne(n) ? "appel" : "appels"}`,
+      aux: (n) => `${n} ${n === 1 ? "auxiliaire" : "auxiliaires"}`,
       absent: "Aucune ventilation par modèle n’a été enregistrée.",
       none: "Aucun modèle enregistré.",
       note: "Une ventilation : elle compte les tâches auxiliaires (titres, compression…), donc elle peut dépasser le total des sessions. Des dollars seulement là où Hermes connaît le prix ; jamais additionnés entre routes."
@@ -9314,10 +9333,10 @@ var fr = {
     unavailable: "Les fonctions LLM nécessitent la partie agent d’Officecraft, à jour et redémarrée avec le gateway.",
     month: "Ce mois-ci",
     spendUsd: (usd, cap) => `${usd} $ sur ${cap} $ · estimation`,
-    spendCalls: (n, cap) => `${n} appels sur ${cap} sans prix connu`,
+    spendCalls: (n, cap) => `${n} ${n === 1 ? "appel" : "appels"} sur ${cap} sans prix connu`,
     unknownPrice: (n, cap) => `Prix inconnu pour ce modèle : le plafond est compté en appels (${n}/${cap} ce mois). Pour compter en dollars, choisissez un modèle tarifé dans Paramètres → Modèle → Modèles auxiliaires → Officecraft.`,
     priceUnknown: "Prix inconnu : plafond compté en appels.",
-    gaugeCalls: (n, cap) => `${n} appels sur ${cap} ce mois-ci`,
+    gaugeCalls: (n, cap) => `${n} ${n === 1 ? "appel" : "appels"} sur ${cap} ce mois-ci`,
     gaugeUsd: (usd, cap) => `${usd} $ sur ${cap} $ ce mois-ci`,
     gaugeOf: (cap) => `/ ${cap}`,
     capSummary: "Plafond mensuel",
@@ -9327,6 +9346,7 @@ var fr = {
     capInvalid: "Montant invalide. Le plafond ne change pas.",
     saveFailed: "Le changement n’a pas été enregistré. Rien n’a changé sur le serveur.",
     sends: (s) => `Envoie : ${s}`,
+    sendsLine: (s) => `Envoie : ${s}.`,
     cost: (c) => `Coût : ${c}.`,
     lastKnown: (usd) => `Dernier appel : environ ${usd} $ (estimation de Hermes).`,
     lastUnknown: "Dernier appel : prix inconnu (compté en appels).",
@@ -9448,7 +9468,7 @@ var fr = {
       counted: (n) => `${n} ${n === 1 ? "appel compté" : "appels comptés"}`,
       intact: "formulaire intact",
       capUsd: (usd, cap) => `${usd} $ sur ${cap} $ · relevez-le dans Réglages → Fonctions LLM.`,
-      capCalls: (n, cap) => `${n} appels sur ${cap} · relevez-le dans Réglages → Fonctions LLM.`,
+      capCalls: (n, cap) => `${n} ${n === 1 ? "appel" : "appels"} sur ${cap} · relevez-le dans Réglages → Fonctions LLM.`,
       stopAfter: (s) => `arrêt après ${s} s`,
       again: "Redemander",
       retry: "Réessayer",
@@ -9586,7 +9606,7 @@ var fr = {
       sub: "Des conseils : aucun ne bloque « Créer ».",
       ask: "Relire le brouillon",
       again: "Relire à nouveau",
-      reading: (n) => `Le modèle léger relit ${n} cartes…`,
+      reading: (n) => `Le modèle léger relit ${n} ${n === 1 ? "carte" : "cartes"}…`,
       tipReturns: "8 remarques au plus. Des conseils : aucune ne bloque « Créer ». Elles s’effacent si le brouillon change.",
       sev: { high: "Haute", medium: "Moyenne", low: "Basse" },
       kind: { no_review: "Sans revue", wrong_bot: "Bot mal choisi", vague: "Trop vague", conflict: "Conflit", model: "Modèle", order: "Ordre", other: "À vérifier" },
@@ -9758,6 +9778,7 @@ var fr = {
     pill: {
       label: "État du bureau, en direct",
       working: () => "au travail",
+      workingLabel: (n) => `${n} au travail`,
       workingTip: "Agents qui ont donné signe de vie il y a moins de 2 minutes",
       decisions: (n) => n === 1 ? "décision" : "décisions",
       decisionsTip: "Cartes bloquées et approbations qui attendent votre décision",
@@ -9767,10 +9788,11 @@ var fr = {
       level: (n) => `niv. ${n}`,
       trophies: "trophées",
       streak: "série",
+      streakLabel: (n) => `série de ${n} ${n === 1 ? "jour" : "jours"}`,
       days: (n) => `${n} j`,
       tip: "Ouvrir la vitrine",
       open: (summary2) => `Ouvrir la vitrine : ${summary2}`,
-      levelTip: (done2, next) => next ? `Niveau du bureau : ${done2} cartes terminées sur ${next} pour le niveau suivant` : `Niveau du bureau : ${done2} cartes terminées, niveau maximal`,
+      levelTip: (done2, next) => next ? `Niveau du bureau : ${done2} ${done2 === 1 ? "carte terminée" : "cartes terminées"} sur ${next} pour le niveau suivant` : `Niveau du bureau : ${done2} ${done2 === 1 ? "carte terminée" : "cartes terminées"}, niveau maximal`,
       trophiesTip: (got, total) => `Trophées débloqués : ${got} sur ${total}`
     },
     more: "Plus d’actions",
@@ -9783,7 +9805,8 @@ var fr = {
       partial: (n) => `Données partielles · ${n} ${n === 1 ? "source" : "sources"}`,
       roster: "Agents seulement",
       cronsNames: (names) => `En échec : ${names}`,
-      folded: (short, n) => `${short} + ${n} ${n === 1 ? "alerte" : "alertes"}`
+      folded: (short, n) => `${short} + ${n} ${n === 1 ? "alerte" : "alertes"}`,
+      rest: (n) => `${n} ${n === 1 ? "autre alerte" : "autres alertes"}`
     },
     dock: {
       label: "Projets : filtrer le bureau et les listes",
@@ -9800,6 +9823,8 @@ var fr = {
       byProject: "Par projet",
       byAge: "Plus anciennes",
       group: (n) => `${n} à décider`,
+      more: "Afficher le titre en entier",
+      less: "Réduire",
       unfilter: (slug) => `Retirer le filtre ${slug}`,
       noProject: "Sans projet",
       emptyFiltered: "Rien n’attend dans ce projet.",
@@ -9828,7 +9853,9 @@ var fr = {
       running: "en cours",
       todo: "à faire",
       blocked: "bloquées",
-      queue: (n) => `${n} dernières cartes`,
+      queue: (n) => `${n === 1 ? "Dernière carte" : `${n} dernières cartes`}`,
+      showCards: "Afficher les cartes",
+      hideCards: "Masquer les cartes",
       filter: "Filtrer le bureau",
       filtered: "Filtré",
       kanban: "Kanban"
@@ -9851,7 +9878,7 @@ var ENDONYMS = Object.freeze({ en: "English", fr: "Français", es: "Español" })
 
 // src/ui/OfficePage.jsx
 import { EmptyState, host as host6, useQueryClient as useQueryClient6, useValue as useValue5 } from "@hermes/plugin-sdk";
-import { useCallback as useCallback9, useDeferredValue, useEffect as useEffect28, useLayoutEffect as useLayoutEffect8, useMemo as useMemo17, useRef as useRef29, useState as useState25 } from "react";
+import { useCallback as useCallback9, useDeferredValue, useEffect as useEffect29, useLayoutEffect as useLayoutEffect10, useMemo as useMemo17, useRef as useRef31, useState as useState29 } from "react";
 
 // src/core/achievements.js
 var DAY_MS3 = 864e5;
@@ -11569,6 +11596,14 @@ function foldAlerts(alerts) {
   const worst = [...alerts].sort((a, b) => RANK[a.tone] - RANK[b.tone] || ORDER.indexOf(a.id) - ORDER.indexOf(b.id))[0];
   return { worst, more: alerts.length - 1 };
 }
+function railFit(widths, avail, { gap = 8, plus = 56 } = {}) {
+  const n = widths.length;
+  if (n === 0 || !(avail > 0) || widths.every((w) => !(w > 0))) return n;
+  const used = (k) => widths.slice(0, k).reduce((s, w, i) => s + w + (i ? gap : 0), 0);
+  if (used(n) <= avail) return n;
+  for (let k = n - 1; k >= 1; k--) if (used(k) + gap + plus <= avail) return k;
+  return 1;
+}
 
 // src/core/decisions.js
 var OLD_AFTER_MS = 24 * 36e5;
@@ -12005,7 +12040,7 @@ function useReplay(ctx, { enabled, kind = "night", night, anchor = 0, poll = fal
 }
 
 // src/ui/AlertRail.jsx
-import { useId as useId2 } from "react";
+import { useId as useId2, useLayoutEffect as useLayoutEffect2, useRef as useRef4, useState as useState3 } from "react";
 
 // src/core/tips.js
 function clockText(ms2, lang4 = "en") {
@@ -12189,9 +12224,24 @@ function Ring({ done: done2, total, r = 7, box: box2 = 20, stroke = 3.2, classNa
 
 // src/ui/Popover.jsx
 import { useEffect as useEffect3, useId, useLayoutEffect, useRef as useRef3, useState as useState2 } from "react";
+
+// src/core/popover.js
+var POP_GAP = 8;
+var POP_EDGE = 8;
+function placePopover({ anchor, card, view }) {
+  const below = view.h - anchor.bottom - POP_GAP - POP_EDGE;
+  const above = anchor.top - POP_GAP - POP_EDGE;
+  const useAbove = card.h > below && above > below;
+  const room = Math.max(48, Math.floor(useAbove ? above : below));
+  const h = Math.min(card.h, room);
+  const left2 = Math.min(Math.max(POP_EDGE, anchor.left + anchor.width / 2 - card.w / 2), Math.max(POP_EDGE, view.w - card.w - POP_EDGE));
+  const top = useAbove ? Math.max(POP_EDGE, anchor.top - h - POP_GAP) : anchor.bottom + POP_GAP;
+  return { left: left2, top, maxH: room };
+}
+var scrollCloses = ({ insideCard }) => !insideCard;
+
+// src/ui/Popover.jsx
 import { jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
-var GAP = 8;
-var EDGE = 8;
 function usePopover() {
   const [open, setOpen] = useState2(false);
   const anchor = useRef3(null);
@@ -12203,13 +12253,17 @@ function usePopover() {
       return;
     }
     const a = anchor.current.getBoundingClientRect();
-    const w = card.current.offsetWidth;
-    const h = card.current.offsetHeight;
-    const left2 = Math.min(Math.max(EDGE, a.left + a.width / 2 - w / 2), Math.max(EDGE, window.innerWidth - w - EDGE));
-    let top = a.bottom + GAP;
-    if (top + h > window.innerHeight - EDGE) top = Math.max(EDGE, a.top - h - GAP);
-    setPos({ left: left2, top });
+    setPos(placePopover({
+      anchor: { top: a.top, bottom: a.bottom, left: a.left, width: a.width },
+      card: { w: card.current.offsetWidth, h: card.current.scrollHeight + 2 },
+      // the natural height (the CSS cap does not shorten scrollHeight)
+      view: { w: window.innerWidth, h: window.innerHeight }
+    }));
   }, [open]);
+  useEffect3(() => {
+    const c = card.current;
+    if (c && pos && c.scrollHeight > c.clientHeight + 1) c.tabIndex = 0;
+  }, [pos]);
   useEffect3(() => {
     if (!open) return void 0;
     const close = () => setOpen(false);
@@ -12226,12 +12280,15 @@ function usePopover() {
     document.addEventListener("keydown", onKey, true);
     document.addEventListener("pointerdown", onDown, true);
     window.addEventListener("resize", close);
-    window.addEventListener("scroll", close, true);
+    const onScroll = (e) => {
+      if (scrollCloses({ insideCard: Boolean(card.current && e.target instanceof Node && card.current.contains(e.target)) })) close();
+    };
+    window.addEventListener("scroll", onScroll, true);
     return () => {
       document.removeEventListener("keydown", onKey, true);
       document.removeEventListener("pointerdown", onDown, true);
       window.removeEventListener("resize", close);
-      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("scroll", onScroll, true);
     };
   }, [open]);
   return { open, setOpen, anchor, card, pos };
@@ -12247,7 +12304,7 @@ function PopCard({ pop, id, label, children, className = "", role = "group", ...
       "aria-label": label,
       ...rest3,
       className: `ux-pop ${className}`,
-      style: pop.pos ? { left: pop.pos.left, top: pop.pos.top } : { left: 0, top: 0, visibility: "hidden" },
+      style: pop.pos ? { left: pop.pos.left, top: pop.pos.top, maxHeight: pop.pos.maxH } : { left: 0, top: 0, visibility: "hidden" },
       children
     }
   );
@@ -12301,11 +12358,11 @@ function alertTexts(a, t, { failingNames = [] } = {}) {
       return { short: t("ux.alert.roster"), detail: [t("rosterOnly")] };
   }
 }
-function Chip({ alert, label, children, t, texts }) {
+function Chip({ alert, label, aria, children, t, texts, wkey }) {
   const pop = usePopover();
   const id = useId2();
-  return /* @__PURE__ */ jsxs3("span", { className: "ux-alw", children: [
-    /* @__PURE__ */ jsxs3("button", { ref: pop.anchor, type: "button", className: `ux-al ${alert.tone}`, "data-alert": alert.id, "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, onClick: () => pop.setOpen((v) => !v), children: [
+  return /* @__PURE__ */ jsxs3("span", { className: "ux-alw", "data-alw": wkey, children: [
+    /* @__PURE__ */ jsxs3("button", { ref: pop.anchor, type: "button", className: `ux-al ${alert.tone}`, "data-alert": alert.id, "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, "aria-label": aria, onClick: () => pop.setOpen((v) => !v), children: [
       /* @__PURE__ */ jsx3(Icon, { name: ICON[alert.tone], size: 14 }),
       /* @__PURE__ */ jsx3("span", { children: label }),
       /* @__PURE__ */ jsx3(Icon, { name: "chev", size: 14, className: "chev" })
@@ -12325,11 +12382,47 @@ function AlertRail({ alerts, narrow, t, failingNames }) {
       texts[i].detail.map((line, j) => /* @__PURE__ */ jsx3("p", { children: line }, j))
     ] }, a.id)) }) });
   }
-  return /* @__PURE__ */ jsx3("div", { className: "ux-alerts", role: "region", "aria-label": t("ux.alert.label"), "data-alerts": true, children: alerts.map((a, i) => /* @__PURE__ */ jsx3(Chip, { alert: a, label: texts[i].short, t, texts: texts[i] }, a.id)) });
+  return /* @__PURE__ */ jsx3(WideRail, { alerts, texts, t });
+}
+function WideRail({ alerts, texts, t }) {
+  const rail = useRef4(null);
+  const [avail, setAvail] = useState3(0);
+  const [widths, setWidths] = useState3({});
+  useLayoutEffect2(() => {
+    const el = rail.current;
+    if (!el) return void 0;
+    const read2 = () => setAvail(el.clientWidth);
+    read2();
+    if (typeof ResizeObserver !== "function") return void 0;
+    const ro = new ResizeObserver(read2);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const keys = alerts.map((a, i) => `${a.id}|${texts[i].short}`);
+  useLayoutEffect2(() => {
+    const seen = {};
+    rail.current?.querySelectorAll("[data-alw]").forEach((w) => {
+      if (w.offsetWidth > 0) seen[w.dataset.alw] = Math.ceil(w.getBoundingClientRect().width);
+    });
+    setWidths((prev) => Object.keys(seen).every((k) => prev[k] === seen[k]) ? prev : { ...prev, ...seen });
+  });
+  const shown = railFit(keys.map((k) => widths[k] ?? 0), avail);
+  const rest3 = alerts.slice(shown);
+  const worst = rest3.length ? foldAlerts(rest3).worst : null;
+  return /* @__PURE__ */ jsxs3("div", { ref: rail, className: "ux-alerts", role: "region", "aria-label": t("ux.alert.label"), "data-alerts": true, "data-shown": shown, children: [
+    alerts.slice(0, shown).map((a, i) => /* @__PURE__ */ jsx3(Chip, { alert: a, label: texts[i].short, t, texts: texts[i], wkey: keys[i] }, a.id)),
+    rest3.length ? /* @__PURE__ */ jsx3(Chip, { alert: worst, label: t("banner.more", rest3.length), aria: t("ux.alert.rest", rest3.length), t, texts: texts[alerts.indexOf(worst)], children: rest3.map((a) => {
+      const x = texts[alerts.indexOf(a)];
+      return /* @__PURE__ */ jsxs3("div", { children: [
+        /* @__PURE__ */ jsx3("h5", { children: x.short }),
+        x.detail.map((line, j) => /* @__PURE__ */ jsx3("p", { children: line }, j))
+      ] }, a.id);
+    }) }) : null
+  ] });
 }
 
 // src/ui/DecorDialog.jsx
-import { useEffect as useEffect5, useId as useId4, useRef as useRef5, useState as useState4 } from "react";
+import { useEffect as useEffect5, useId as useId4, useRef as useRef6, useState as useState5 } from "react";
 
 // src/scene/floorprops.js
 var ROOM = 3.4;
@@ -12846,11 +12939,11 @@ function layoutScene(model) {
     const w = Math.max(2.6, cols * SW);
     pods.push({ b, w, n, cols, members, hue: hueOfSlug(b.slug, ranks) });
   }
-  const GAP2 = 1.7;
+  const GAP = 1.7;
   const PITCH = TD + 3.6;
   const LOUNGE_W = 4.4 + 2.4 + 0.4;
   const pack = (r) => {
-    const target2 = pods.reduce((s, p) => s + p.w + GAP2, 0) / r;
+    const target2 = pods.reduce((s, p) => s + p.w + GAP, 0) / r;
     const rows2 = [[]];
     let acc = 0;
     for (const p of pods) {
@@ -12859,7 +12952,7 @@ function layoutScene(model) {
         acc = 0;
       }
       rows2[rows2.length - 1].push(p);
-      acc += p.w + GAP2;
+      acc += p.w + GAP;
     }
     return rows2;
   };
@@ -12867,7 +12960,7 @@ function layoutScene(model) {
   let bestScore = Infinity;
   for (let r = 1; r <= Math.min(4, pods.length); r++) {
     const rs = pack(r);
-    const wide2 = Math.max(...rs.map((row) => row.reduce((s, p) => s + p.w + GAP2, GAP2))) + LOUNGE_W;
+    const wide2 = Math.max(...rs.map((row) => row.reduce((s, p) => s + p.w + GAP, GAP))) + LOUNGE_W;
     const deep = TY + (rs.length - 1) * PITCH + TD + 1.9;
     const score = Math.abs(Math.log(wide2 / deep / 2.6)) + (r - 1) * 0.12;
     if (score < bestScore) {
@@ -12876,7 +12969,7 @@ function layoutScene(model) {
     }
   }
   rows.forEach((row, ri) => {
-    let x = GAP2;
+    let x = GAP;
     const y0 = TY + ri * PITCH;
     for (const p of row) {
       p.x0 = x;
@@ -12889,11 +12982,11 @@ function layoutScene(model) {
         const sx = x + (p.w - p.cols * SW) / 2 + col * SW + SW / 2;
         p.seats.push({ row: sr, x: sx, y: sr ? y0 + TD + 0.5 : y0 - 0.5, agent: p.members[i] || null });
       }
-      x += p.w + GAP2;
+      x += p.w + GAP;
     }
   });
   const ordered = rows.flat();
-  const podsEnd = Math.max(GAP2, ...rows.map((row) => row.reduce((s, p) => s + p.w + GAP2, GAP2)));
+  const podsEnd = Math.max(GAP, ...rows.map((row) => row.reduce((s, p) => s + p.w + GAP, GAP)));
   const wallFrom = 1.3;
   const wallTo = podsEnd - 0.6;
   const slot = (wallTo - wallFrom) / Math.max(1, ordered.length);
@@ -14519,11 +14612,11 @@ function hotspots(layout2, model) {
 
 // src/ui/DialogKit.jsx
 import * as sdk2 from "@hermes/plugin-sdk";
-import { useEffect as useEffect4, useId as useId3, useLayoutEffect as useLayoutEffect2, useRef as useRef4, useState as useState3 } from "react";
+import { useEffect as useEffect4, useId as useId3, useLayoutEffect as useLayoutEffect3, useRef as useRef5, useState as useState4 } from "react";
 
 // src/ui/tokens.js
 var CARD = "var(--ui-bg-elevated, var(--card, Canvas))";
-var EDGE2 = "var(--ui-stroke-secondary)";
+var EDGE = "var(--ui-stroke-secondary)";
 var FIELD_EDGE = "color-mix(in oklab, var(--foreground) 48%, var(--ui-bg-elevated, Canvas))";
 var FIELD_RADIUS = "2.5px";
 var RING = "var(--dt-ring, var(--ring, var(--ui-accent)))";
@@ -14546,14 +14639,14 @@ var RINGED = (sel) => `${sel}{${RING_FOCUS}}`;
 var TIP_CSS = `
 /* the « ? » of a line and its note */
 .oc-dg-tipw{position:relative;display:inline-flex;vertical-align:middle}
-.oc-dg-help{flex:0 0 auto;display:inline-grid;place-items:center;box-sizing:border-box;width:24px;height:24px;padding:0;border:1px solid ${EDGE2};border-radius:12px;background:transparent;color:var(--ui-text-secondary);font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.oc-dg-help{flex:0 0 auto;display:inline-grid;place-items:center;box-sizing:border-box;width:24px;height:24px;padding:0;border:1px solid ${EDGE};border-radius:12px;background:transparent;color:var(--ui-text-secondary);font:inherit;font-size:11px;font-weight:700;cursor:pointer}
 .oc-dg-help:hover,.oc-dg-help[aria-expanded="true"]{border-color:var(--ui-accent);color:var(--foreground)}
 ${RINGED(".oc-dg-help:focus-visible")}
-.oc-dg-tip{position:absolute;z-index:6;left:0;top:calc(100% + 4px);box-sizing:border-box;width:max-content;max-width:min(280px,calc(100vw - 48px));padding:12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD};color:var(--ui-text-secondary);font-size:12px;font-weight:400;line-height:1.45;text-align:left;text-transform:none;letter-spacing:0;box-shadow:0 10px 30px color-mix(in oklab, var(--foreground) 18%, transparent)}
+.oc-dg-tip{position:absolute;z-index:6;left:0;top:calc(100% + 4px);box-sizing:border-box;width:max-content;max-width:min(280px,calc(100vw - 48px));padding:12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD};color:var(--ui-text-secondary);font-size:12px;font-weight:400;line-height:1.45;text-align:left;text-transform:none;letter-spacing:0;box-shadow:0 10px 30px color-mix(in oklab, var(--foreground) 18%, transparent)}
 .oc-dg-tip.up{top:auto;bottom:calc(100% + 4px)}
 `;
 var DIALOG_HEAD = `
-.oc-dg{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(640px,calc(100vw - 32px));max-height:min(760px,calc(100dvh - 32px));padding:0;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};color:var(--foreground);font-size:12px;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 28%, transparent);overflow:hidden}
+.oc-dg{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(640px,calc(100vw - 32px));max-height:min(760px,calc(100dvh - 32px));padding:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);font-size:12px;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 28%, transparent);overflow:hidden}
 .oc-dg-s{width:min(480px,calc(100vw - 32px))}
 .oc-dg-l{width:min(760px,calc(100vw - 32px))}
 .oc-dg[open]{display:flex;flex-direction:column;animation:oc-dg-in .18s ease both}
@@ -14563,7 +14656,7 @@ var DIALOG_HEAD = `
 .oc-dg::backdrop{background:color-mix(in oklab, var(--foreground) 42%, transparent)}
 .oc-dg-frame{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;max-height:inherit}
 /* header: icon, title, risk, close */
-.oc-dg-h{flex:0 0 auto;display:flex;align-items:center;gap:12px;box-sizing:border-box;min-height:56px;padding:12px 16px;border-bottom:1px solid ${EDGE2}}
+.oc-dg-h{flex:0 0 auto;display:flex;align-items:center;gap:12px;box-sizing:border-box;min-height:56px;padding:12px 16px;border-bottom:1px solid ${EDGE}}
 .oc-dg-ico{flex:0 0 auto;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, transparent)}
 .oc-dg-h h2{margin:0;min-width:0;font-size:16px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
 .oc-dg-x{flex:0 0 auto;margin-left:auto;display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:${BTN_RADIUS};background:transparent;color:var(--ui-text-secondary);cursor:pointer}
@@ -14584,13 +14677,13 @@ ${RINGED(".oc-dg-x:focus-visible")}
 .oc-dg-al:not(:empty){padding:8px 16px}
 @media (max-width:560px){.oc-dg-al{padding-left:12px;padding-right:12px}.oc-dg-al:not(:empty){padding:8px 12px}}
 /* foot: help on the left, actions on the right */
-.oc-dg-f{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;box-sizing:border-box;padding:12px 16px;border-top:1px solid ${EDGE2};background:${CARD}}
+.oc-dg-f{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;box-sizing:border-box;padding:12px 16px;border-top:1px solid ${EDGE};background:${CARD}}
 .oc-dg-fs,.oc-dg-fa{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
 .oc-dg-fa{margin-left:auto}
 .oc-dg .oc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:32px;padding:4px 16px;line-height:1.2;text-align:center}   /* a label on two lines (« Crear el proyecto … y 10 tarjetas » at 380 px) keeps 4 px above and below */
 .oc-dg .oc-btn.oc-primary{background:var(--ui-accent);color:var(--ui-accent-fg, var(--background));border-color:var(--ui-accent)}
 .oc-dg .oc-btn.oc-primary:hover:not([aria-disabled="true"]):not(:disabled){background:color-mix(in oklab, var(--ui-accent) 88%, var(--foreground))}
-.oc-dg .oc-btn.oc-ghost{border-color:${EDGE2};color:var(--ui-text-secondary)}
+.oc-dg .oc-btn.oc-ghost{border-color:${EDGE};color:var(--ui-text-secondary)}
 .oc-dg .oc-btn:disabled,.oc-dg .oc-btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-dg-link{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;font:inherit;font-size:12px;color:var(--ui-accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 ${RINGED(".oc-dg-link:focus-visible")}
@@ -14613,7 +14706,7 @@ ${TIP_CSS}
 .oc-dg input[aria-invalid=true]{border-color:${RED}}
 .oc-dg summary:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
 /* a message: refusal, failure, state */
-.oc-dg-note{display:flex;align-items:flex-start;gap:8px;box-sizing:border-box;margin:0;padding:8px 12px;border:1px solid ${EDGE2};border-radius:8px;font-size:12px;line-height:1.4;color:var(--foreground);background:color-mix(in oklab, var(--foreground) 4%, transparent)}
+.oc-dg-note{display:flex;align-items:flex-start;gap:8px;box-sizing:border-box;margin:0;padding:8px 12px;border:1px solid ${EDGE};border-radius:8px;font-size:12px;line-height:1.4;color:var(--foreground);background:color-mix(in oklab, var(--foreground) 4%, transparent)}
 .oc-dg-note svg{flex:0 0 auto;margin-top:1px}
 .oc-dg-note > span{min-width:0;overflow-wrap:anywhere}
 .oc-dg-note.oc-dg-warn{border-color:color-mix(in oklab, ${ORANGE} 60%, transparent);background:color-mix(in oklab, ${ORANGE} 10%, ${CARD})}
@@ -14622,15 +14715,15 @@ ${TIP_CSS}
 .oc-dg .oc-dg-faint{margin:0;font-size:11px;color:${SOFT}}
 /* segmented choice and chips */
 .oc-dg-fl > .oc-dg-seg{align-self:flex-start}
-.oc-dg-seg{display:inline-flex;flex-wrap:nowrap;box-sizing:border-box;padding:4px;gap:2px;border:0;box-shadow:inset 0 0 0 1px ${EDGE2};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
+.oc-dg-seg{display:inline-flex;flex-wrap:nowrap;box-sizing:border-box;padding:4px;gap:2px;border:0;box-shadow:inset 0 0 0 1px ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .oc-dg-seg button,.oc-dg-seg label{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;font-weight:500;color:var(--ui-text-secondary);cursor:pointer;white-space:nowrap}
-.oc-dg-seg button[aria-pressed="true"],.oc-dg-seg label:has(input:checked){background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 0 0 1px ${EDGE2}}
+.oc-dg-seg button[aria-pressed="true"],.oc-dg-seg label:has(input:checked){background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 0 0 1px ${EDGE}}
 .oc-dg-seg button:disabled,.oc-dg-seg button[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-dg-seg input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
 ${RINGED(".oc-dg-seg button:focus-visible")}
 .oc-dg-seg label:has(input:focus-visible){${RING_FOCUS}}
 .oc-dg-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;padding:0;list-style:none}
-.oc-dg-pill{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;max-width:100%;min-height:28px;padding:0 12px;border:1px solid ${EDGE2};border-radius:14px;background:${CARD};font:inherit;font-size:12px;color:var(--foreground);text-align:left;cursor:pointer}
+.oc-dg-pill{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;max-width:100%;min-height:28px;padding:0 12px;border:1px solid ${EDGE};border-radius:14px;background:${CARD};font:inherit;font-size:12px;color:var(--foreground);text-align:left;cursor:pointer}
 button.oc-dg-pill:hover:not(:disabled):not([aria-disabled="true"]){border-color:var(--ui-accent)}
 button.oc-dg-pill:disabled,button.oc-dg-pill[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-dg textarea[aria-disabled="true"]{opacity:.6;cursor:progress}
@@ -14644,17 +14737,17 @@ label.oc-dg-pill:has(input:focus-visible){${RING_FOCUS}}
 .oc-dg-pill svg{flex:0 0 auto}
 .oc-dg-pill > span{min-width:0;overflow-wrap:anywhere}
 /* a card of the body */
-.oc-dg-card{display:flex;flex-direction:column;gap:12px;box-sizing:border-box;padding:12px;border:1px solid ${EDGE2};border-radius:8px}
+.oc-dg-card{display:flex;flex-direction:column;gap:12px;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px}
 .oc-dg-card > h3,.oc-dg-sec > h3{display:flex;align-items:center;gap:8px;margin:0;font-size:12px;font-weight:600}
 .oc-dg-sec{display:flex;flex-direction:column;gap:8px;min-width:0}
 /* stepped form (recruitment) */
 .oc-dg-rc{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
-.oc-dg-prev{display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;padding:12px;border:1px solid ${EDGE2};border-radius:12px;text-align:center;background:linear-gradient(180deg,color-mix(in oklab, var(--ui-accent) 10%, ${CARD}),${CARD})}
+.oc-dg-prev{display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:12px;text-align:center;background:linear-gradient(180deg,color-mix(in oklab, var(--ui-accent) 10%, ${CARD}),${CARD})}
 .oc-dg-prev .oc-portrait{width:112px;height:120px;border-radius:12px;image-rendering:pixelated;background:color-mix(in oklab, var(--foreground) 6%, transparent)}
 .oc-dg-prev b{font-size:14px;max-width:100%;overflow-wrap:anywhere}
 .oc-dg-prev .oc-faint{max-width:100%;overflow-wrap:anywhere}
 .oc-dg-steps{display:flex;flex-direction:column;gap:12px;min-width:0}
-.oc-dg-step{box-sizing:border-box;border:1px solid ${EDGE2};border-radius:8px;min-width:0}
+.oc-dg-step{box-sizing:border-box;border:1px solid ${EDGE};border-radius:8px;min-width:0}
 .oc-dg-sh{display:flex;align-items:center;gap:12px;box-sizing:border-box;min-height:44px;padding:8px 12px;list-style:none}
 .oc-dg-sh h3{margin:0;font-size:13px;font-weight:600}
 .oc-dg-num{flex:0 0 auto;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:700;background:var(--ui-accent);color:var(--ui-accent-fg, var(--background))}
@@ -14670,7 +14763,7 @@ details.oc-dg-step[open] > summary .chev{transform:rotate(180deg)}
 .oc-dg-row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .oc-dg-start{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .oc-dg-skills{max-height:120px;overflow-y:auto}
-.oc-dg-pre{margin:0;padding:8px;max-height:160px;overflow:auto;font-size:11px;line-height:1.4;border:1px solid ${EDGE2};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
+.oc-dg-pre{margin:0;padding:8px;max-height:160px;overflow:auto;font-size:11px;line-height:1.4;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 details.oc-dg-req > summary{display:inline-flex;align-items:center;gap:4px;cursor:pointer;list-style:none;color:var(--ui-accent);font-size:12px;text-decoration:underline;text-underline-offset:2px}
 details.oc-dg-req > summary::-webkit-details-marker{display:none}
 details.oc-dg-req[open] > summary{margin-bottom:8px}
@@ -14680,7 +14773,7 @@ details.oc-dg-req[open] > summary{margin-bottom:8px}
 .oc-dg-sw i{display:block;height:28px;border-radius:6px;border:1px solid ${FIELD_EDGE}}
 .oc-dg-sw span{overflow-wrap:anywhere}
 .oc-dg-pairs{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
-.oc-dg-pairs li{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;min-height:28px;padding:0 12px;border:1px solid ${EDGE2};border-radius:14px;font-size:12px;min-width:0}
+.oc-dg-pairs li{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;min-height:28px;padding:0 12px;border:1px solid ${EDGE};border-radius:14px;font-size:12px;min-width:0}
 .oc-dg-pairs li b{font-weight:600;overflow-wrap:anywhere}
 .oc-dg-pairs li span{color:${SOFT};font-size:11px}
 .oc-dg-pairs li em{font-style:normal;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ui-accent)}
@@ -14699,7 +14792,7 @@ details.oc-dg-req[open] > summary{margin-bottom:8px}
 .oc-rp-sw.none{background:color-mix(in oklab, var(--foreground) 18%, transparent)}
 /* model and provider picked from Hermes' list */
 .oc-mp{display:flex;flex-direction:column;gap:12px;min-width:0}
-.oc-mp-inh{display:flex;align-items:center;gap:12px;box-sizing:border-box;width:100%;min-height:48px;padding:8px 12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD};font:inherit;font-size:12px;color:var(--foreground);text-align:left;cursor:pointer}
+.oc-mp-inh{display:flex;align-items:center;gap:12px;box-sizing:border-box;width:100%;min-height:48px;padding:8px 12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD};font:inherit;font-size:12px;color:var(--foreground);text-align:left;cursor:pointer}
 .oc-mp-inh:hover{border-color:var(--ui-accent)}
 ${RINGED(".oc-mp-inh:focus-visible")}
 .oc-mp-inh[aria-pressed="true"]{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD})}
@@ -14712,7 +14805,7 @@ ${RINGED(".oc-mp-inh:focus-visible")}
 .oc-mp-pv{gap:8px}
 .oc-mp-ok{display:inline-flex;align-items:center;gap:4px;font-style:normal;font-size:11px;font-weight:600;color:${ink(GREEN)}}
 .oc-mp-ok::before{content:"";width:8px;height:8px;border-radius:50%;background:${GREEN}}
-.oc-mp-off{box-sizing:border-box;border:1px dashed ${EDGE2};border-radius:8px;padding:0 12px}
+.oc-mp-off{box-sizing:border-box;border:1px dashed ${EDGE};border-radius:8px;padding:0 12px}
 .oc-mp-off > summary{display:flex;align-items:center;gap:4px;min-height:32px;cursor:pointer;list-style:none;font-size:12px;color:${SOFT}}
 .oc-mp-off > summary::-webkit-details-marker{display:none}
 .oc-mp-off[open] > summary svg{transform:rotate(180deg)}
@@ -14737,11 +14830,11 @@ ${RINGED(".oc-mp-inh:focus-visible")}
 `;
 var LM_CSS = `
 /* violet = written by a model; the mark is a quiet button, the field wears a dashed violet edge until it is read */
-.oc-lm-mk{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;border:0;cursor:pointer;flex:0 0 auto;font:600 11px/1 inherit;color:${VIOLET_INK};background:color-mix(in oklab, ${VIOLET2} 13%, transparent)}
+.oc-lm-mk{display:inline-flex;align-items:center;gap:4px;min-height:24px;min-width:24px;box-sizing:border-box;padding:0 8px;border-radius:12px;border:0;cursor:pointer;flex:0 0 auto;font:600 11px/1 inherit;color:${VIOLET_INK};background:color-mix(in oklab, ${VIOLET2} 13%, transparent)}
 .oc-lm-mk:hover{background:color-mix(in oklab, ${VIOLET2} 22%, transparent)}
 ${RINGED(".oc-lm-mk:focus-visible")}
-.oc-lm-f{border-color:color-mix(in oklab, ${VIOLET2} 60%, ${EDGE2})!important;border-style:dashed!important;background:color-mix(in oklab, ${VIOLET2} 4%, ${CARD})}
-.oc-lm-box{display:flex;flex-direction:column;gap:8px;padding:12px;margin-bottom:16px;border-radius:12px;border:1px solid color-mix(in oklab, ${VIOLET2} 35%, ${EDGE2});background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET2} 8%, ${CARD}), ${CARD} 70%)}
+.oc-lm-f{border-color:color-mix(in oklab, ${VIOLET2} 60%, ${EDGE})!important;border-style:dashed!important;background:color-mix(in oklab, ${VIOLET2} 4%, ${CARD})}
+.oc-lm-box{display:flex;flex-direction:column;gap:8px;padding:12px;margin-bottom:16px;border-radius:12px;border:1px solid color-mix(in oklab, ${VIOLET2} 35%, ${EDGE});background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET2} 8%, ${CARD}), ${CARD} 70%)}
 .oc-lm-ah{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
 .oc-lm-ah b{font-size:13px}
 .oc-lm-ah small,.oc-lm-note{color:${SOFT};font-size:12px}
@@ -14758,8 +14851,8 @@ ${RINGED(".oc-lm-mk:focus-visible")}
 /* the seconds that tick are the proof of life: bold, in the violet of the model's marks, not a grey aside */
 .oc-lm-el{font-weight:700;color:${VIOLET_INK};font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.oc-lm-prog i{animation:none;transform:none;width:100%;opacity:.45}}   /* a still bar must not read as « 40 % done » */
-.oc-lm-ref,.oc-lm-dup{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid color-mix(in oklab, ${RED} 40%, ${EDGE2});background:color-mix(in oklab, ${RED} 6%, ${CARD})}
-.oc-lm-dup{border-color:color-mix(in oklab, ${ORANGE} 45%, ${EDGE2});background:color-mix(in oklab, ${ORANGE} 7%, ${CARD})}
+.oc-lm-ref,.oc-lm-dup{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid color-mix(in oklab, ${RED} 40%, ${EDGE});background:color-mix(in oklab, ${RED} 6%, ${CARD})}
+.oc-lm-dup{border-color:color-mix(in oklab, ${ORANGE} 45%, ${EDGE});background:color-mix(in oklab, ${ORANGE} 7%, ${CARD})}
 .oc-lm-ref>svg{color:${RED};flex:0 0 auto;align-self:flex-start;margin-top:2px}
 .oc-lm-dup>svg{color:${ORANGE};flex:0 0 auto;align-self:flex-start;margin-top:2px}
 .oc-lm-dup{flex-wrap:wrap}
@@ -14769,7 +14862,7 @@ div.oc-lm-dup p{flex:1 1 160px}
 .oc-lm-ref small,.oc-lm-dup small{color:var(--ui-text-secondary);font-size:12px}
 .oc-lm-soul textarea{font-size:12px;line-height:1.5;resize:vertical}
 .oc-lm-left{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:12px;font-size:12px;font-weight:600;color:${VIOLET_INK};background:color-mix(in oklab, ${VIOLET2} 11%, transparent);white-space:nowrap}
-.oc-lm-rv{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;padding:12px;border-radius:12px;border:1px solid color-mix(in oklab, ${VIOLET2} 35%, ${EDGE2});background:linear-gradient(160deg, color-mix(in oklab, ${VIOLET2} 7%, ${CARD}), ${CARD} 70%);font-size:12.5px}
+.oc-lm-rv{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;padding:12px;border-radius:12px;border:1px solid color-mix(in oklab, ${VIOLET2} 35%, ${EDGE});background:linear-gradient(160deg, color-mix(in oklab, ${VIOLET2} 7%, ${CARD}), ${CARD} 70%);font-size:12.5px}
 .oc-lm-ba{display:flex;flex-direction:column;gap:4px}
 .oc-lm-ba .k{font-size:11.5px;font-weight:600;color:${SOFT}}
 .oc-lm-before{margin:0;color:${SOFT};text-decoration:line-through;text-decoration-color:color-mix(in oklab, ${SOFT} 60%, transparent)}
@@ -14859,13 +14952,13 @@ function DlgChip({ risk }) {
 }
 function DlgTip({ name, children }) {
   const t = useT();
-  const [open, setOpen] = useState3(false);
-  const [place, setPlace] = useState3({ up: false, dx: 0 });
+  const [open, setOpen] = useState4(false);
+  const [place, setPlace] = useState4({ up: false, dx: 0 });
   const id = useId3();
-  const wrap = useRef4(null);
-  const btn = useRef4(null);
-  const note = useRef4(null);
-  useLayoutEffect2(() => {
+  const wrap = useRef5(null);
+  const btn = useRef5(null);
+  const note = useRef5(null);
+  useLayoutEffect3(() => {
     if (!open) {
       setPlace({ up: false, dx: 0 });
       return;
@@ -14944,7 +15037,7 @@ function Dlg({
   ...rest3
 }) {
   const t = useT();
-  const ref = useRef4(null);
+  const ref = useRef5(null);
   const id = useId3();
   const motion = sdk2.useValue($motionPref);
   useEffect4(() => {
@@ -15036,16 +15129,16 @@ function Sheet({ style, t }) {
 }
 function DecorDialog({ open, onClose }) {
   const t = useT();
-  const areaRef = useRef5(null);
+  const areaRef = useRef6(null);
   const id = useId4();
   const query = useLlm();
   const { call } = useLlmActions();
-  const [text3, setText] = useState4("");
-  const [pending, setPending] = useState4(false);
-  const [answer, setAnswer] = useState4(null);
-  const [ignored, setIgnored] = useState4(false);
-  const pendingRef = useRef5(false);
-  const closedRef = useRef5(false);
+  const [text3, setText] = useState5("");
+  const [pending, setPending] = useState5(false);
+  const [answer, setAnswer] = useState5(null);
+  const [ignored, setIgnored] = useState5(false);
+  const pendingRef = useRef6(false);
+  const closedRef = useRef6(false);
   useEffect5(() => {
     if (!open && pendingRef.current) closedRef.current = true;
   }, [open]);
@@ -15192,7 +15285,7 @@ function DecorDialog({ open, onClose }) {
 }
 
 // src/ui/CampaignDialog.jsx
-import { Fragment as Fragment6, useCallback as useCallback4, useEffect as useEffect10, useId as useId8, useMemo as useMemo4, useReducer as useReducer2, useRef as useRef11, useState as useState9 } from "react";
+import { Fragment as Fragment6, useCallback as useCallback4, useEffect as useEffect10, useId as useId8, useMemo as useMemo4, useReducer as useReducer2, useRef as useRef12, useState as useState10 } from "react";
 
 // src/core/campaignLayout.js
 var GROUP_MIN = 4;
@@ -15386,6 +15479,38 @@ function graphOf(cards, W, { open = /* @__PURE__ */ new Set(), keep = /* @__PURE
     }
   }
   return { cards: shown, ...L, edges };
+}
+
+// src/core/format.js
+var FORMATTERS3 = /* @__PURE__ */ new Map();
+function formatter2(kind, lang4) {
+  const key = `${kind}|${lang4}`;
+  let f = FORMATTERS3.get(key);
+  if (!f) {
+    const build = (l) => {
+      if (kind === "number") return new Intl.NumberFormat(l);
+      if (kind === "percent") return new Intl.NumberFormat(l, { style: "percent", maximumFractionDigits: 1 });
+      return new Intl.DateTimeFormat(l, { hour: "2-digit", minute: "2-digit" });
+    };
+    try {
+      f = build(lang4);
+    } catch {
+      f = build("en");
+    }
+    FORMATTERS3.set(key, f);
+  }
+  return f;
+}
+var finite5 = (n) => typeof n === "number" && Number.isFinite(n);
+function numberText(n, lang4 = "en") {
+  return finite5(n) ? formatter2("number", lang4).format(n) : null;
+}
+function percentText(p, lang4 = "en") {
+  return finite5(p) ? formatter2("percent", lang4).format(p / 100) : null;
+}
+function timeText(ms2, lang4 = "en") {
+  if (!finite5(ms2)) return "";
+  return formatter2("time", lang4).format(new Date(ms2));
 }
 
 // src/core/llmCampaign.js
@@ -15788,7 +15913,7 @@ function pricesOf(providers) {
 }
 
 // src/ui/CampaignAssist.jsx
-import { useCallback as useCallback3, useEffect as useEffect6, useId as useId5, useMemo, useRef as useRef6, useState as useState5 } from "react";
+import { useCallback as useCallback3, useEffect as useEffect6, useId as useId5, useMemo, useRef as useRef7, useState as useState6 } from "react";
 
 // src/data/llmCampaign.js
 import { useQueryClient as useQueryClient5 } from "@hermes/plugin-sdk";
@@ -15814,12 +15939,12 @@ function useCampaignAssist({ state: state2, open, step, draft, setDraft, bots, b
   const actions = useLlmActions();
   const calls = useCampaignLlm();
   const ready = { campaign: workReady(state2, "campaign"), cardbody: workReady(state2, "cardbody"), lint: workReady(state2, "lint") };
-  const live = useRef6({});
+  const live = useRef7({});
   live.current = { open, step, draft, bots, boards, lang: lang4, prices };
-  const [announce, setAnnounce] = useState5({ k: "", a: null });
+  const [announce, setAnnounce] = useState6({ k: "", a: null });
   const say2 = (k, a = null) => setAnnounce({ k, a });
-  const [marks, setMarks] = useState5(() => recallMarks());
-  const marksRef = useRef6(marks);
+  const [marks, setMarks] = useState6(() => recallMarks());
+  const marksRef = useRef7(marks);
   marksRef.current = marks;
   useEffect6(() => {
     keepMarks(marks);
@@ -15843,12 +15968,12 @@ function useCampaignAssist({ state: state2, open, step, draft, setDraft, bots, b
     clearMarks();
     setMarks(emptyMarks());
   };
-  const [cgOpen, setCgOpen] = useState5(false);
-  const [notes, setNotes] = useState5("");
-  const [cg, setCg] = useState5({ phase: "idle", since: 0, refusal: null, proposal: null, mode: "append", confirm: false, note: "" });
-  const token = useRef6(0);
-  const handled = useRef6(/* @__PURE__ */ new Set());
-  const asked = useRef6("");
+  const [cgOpen, setCgOpen] = useState6(false);
+  const [notes, setNotes] = useState6("");
+  const [cg, setCg] = useState6({ phase: "idle", since: 0, refusal: null, proposal: null, mode: "append", confirm: false, note: "" });
+  const token = useRef7(0);
+  const handled = useRef7(/* @__PURE__ */ new Set());
+  const asked = useRef7("");
   const patchCg = (p) => setCg((c) => ({ ...c, ...p }));
   const ctx = () => ({ bots: live.current.bots, boards: live.current.boards });
   const receive = useCallback3((fiche, meta) => {
@@ -15954,8 +16079,8 @@ function useCampaignAssist({ state: state2, open, step, draft, setDraft, bots, b
       asked.current = "";
     };
   }, [open, step, offer?.id]);
-  const [bd, setBd] = useState5({ phase: "idle", card: "", since: 0, refusal: null, before: "", after: "", text: "" });
-  const btoken = useRef6(0);
+  const [bd, setBd] = useState6({ phase: "idle", card: "", since: 0, refusal: null, before: "", after: "", text: "" });
+  const btoken = useRef7(0);
   const askBody = async (cardId) => {
     const d = live.current.draft;
     const card = d.cards.find((c) => c.id === cardId && c.kind !== "guard");
@@ -16009,9 +16134,9 @@ function useCampaignAssist({ state: state2, open, step, draft, setDraft, bots, b
       setBd((b) => ({ ...b, phase: "idle", card: "" }));
     }
   }, [draft.cards, bd.card]);
-  const [lint, setLint] = useState5({ phase: "idle", since: 0, refusal: null, kept: null, cleared: false });
-  const [lintSel, setLintSel] = useState5(null);
-  const ltoken = useRef6(0);
+  const [lint, setLint] = useState6({ phase: "idle", since: 0, refusal: null, kept: null, cleared: false });
+  const [lintSel, setLintSel] = useState6(null);
+  const ltoken = useRef7(0);
   const askLint = async () => {
     if (lint.phase === "wait") return;
     const d = live.current.draft;
@@ -16111,7 +16236,7 @@ function Live({ A }) {
   return /* @__PURE__ */ jsx6("span", { className: "ux-vh", role: "status", "aria-live": "polite", "data-lm-announce": true, children: k ? t(`llm.live.${k}`, a) : "" });
 }
 function Elapsed({ since, tag }) {
-  const [now, setNow] = useState5(() => Date.now());
+  const [now, setNow] = useState6(() => Date.now());
   useEffect6(() => {
     const i = setInterval(() => setNow(Date.now()), 1e3);
     return () => clearInterval(i);
@@ -16253,7 +16378,7 @@ function GraphPanel({ A, draft, colors, onClose }) {
         /* @__PURE__ */ jsxs6("small", { className: "oc-mono", id: `${fid}-notes-n`, "data-lm-notes-count": true, children: [
           c.notes.length,
           "/",
-          NOTES_MAX.toLocaleString("en").replace(",", " ")
+          numberText(NOTES_MAX, t.lang)
         ] })
       ] }),
       /* @__PURE__ */ jsx6(
@@ -16359,7 +16484,7 @@ function BodyProposal({ A, card, code }) {
         /* @__PURE__ */ jsxs6("small", { className: "oc-mono", id: `${fid}-after-n`, "data-lm-after-count": true, children: [
           b.text.length,
           " / ",
-          MAX_BODY.toLocaleString("en").replace(",", " ")
+          numberText(MAX_BODY, t.lang)
         ] }),
         mine ? /* @__PURE__ */ jsxs6("span", { className: "oc-lm-mk-static", id: `${fid}-after-mk`, children: [
           /* @__PURE__ */ jsx6(DlgIcon, { id: "spark", size: 12 }),
@@ -16449,13 +16574,13 @@ function LintPanel({ A, cardCount }) {
 }
 
 // src/ui/CampaignGraph.jsx
-import { useId as useId6, useLayoutEffect as useLayoutEffect3, useMemo as useMemo2, useRef as useRef8, useState as useState6 } from "react";
+import { useId as useId6, useLayoutEffect as useLayoutEffect4, useMemo as useMemo2, useRef as useRef9, useState as useState7 } from "react";
 
 // src/ui/Portrait.jsx
-import { useEffect as useEffect7, useRef as useRef7 } from "react";
+import { useEffect as useEffect7, useRef as useRef8 } from "react";
 import { jsx as jsx7 } from "react/jsx-runtime";
 function Portrait({ agent, className = "oc-portrait" }) {
-  const ref = useRef7(null);
+  const ref = useRef8(null);
   useEffect7(() => {
     const cv = ref.current;
     if (!cv || !agent) return;
@@ -16471,8 +16596,8 @@ function Portrait({ agent, className = "oc-portrait" }) {
 // src/ui/CampaignGraph.jsx
 import { jsx as jsx8, jsxs as jsxs7 } from "react/jsx-runtime";
 function useBox(ref) {
-  const [w, setW] = useState6(0);
-  useLayoutEffect3(() => {
+  const [w, setW] = useState7(0);
+  useLayoutEffect4(() => {
     const el = ref.current;
     if (!el || typeof ResizeObserver !== "function") return void 0;
     const ro = new ResizeObserver((entries) => {
@@ -16486,18 +16611,18 @@ function useBox(ref) {
 }
 function CampaignGraph({ cards, info, colors, sceneBy, phases, selected = null, onSelect = null, open, onToggle, label, status = null, marked = null }) {
   const t = useT();
-  const ref = useRef8(null);
+  const ref = useRef9(null);
   const W = useBox(ref);
   const mid2 = useId6();
   const g = useMemo2(() => W ? graphOf(cards, W, { open, keep: new Set(selected ? [selected] : []) }) : null, [cards, W, open, selected]);
   const interactive = typeof onSelect === "function";
   const unfolded = useMemo2(() => foldCards(cards, /* @__PURE__ */ new Set(), new Set(selected ? [selected] : [])).filter((c) => c.kind === "group" && open.has(c.id)), [cards, open, selected]);
-  const focusNext = useRef8(null);
+  const focusNext = useRef9(null);
   const toggle = (id, to) => {
     focusNext.current = to;
     onToggle(id);
   };
-  useLayoutEffect3(() => {
+  useLayoutEffect4(() => {
     const to = focusNext.current;
     if (!to) return;
     const el = ref.current?.querySelector(`[data-node="${to.replace(/["\\]/g, "\\$&")}"]`);
@@ -16658,7 +16783,7 @@ var CAMPAIGN_CSS = `
 /* steps */
 .oc-cgsteps{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0;padding:0;list-style:none;font-size:12px;color:${T3}}
 .oc-cgsteps li{display:inline-flex;align-items:center;gap:8px;min-height:24px}
-.oc-cgsteps .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:10px;border:1px solid ${EDGE2};font-size:11px;font-weight:600}
+.oc-cgsteps .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600}
 .oc-cgsteps .now{color:var(--foreground);font-weight:600}
 .oc-cgsteps .now .n{background:var(--ui-accent);border-color:var(--ui-accent);color:var(--ui-accent-fg, var(--background))}
 .oc-cgsteps .past .n{background:color-mix(in oklab, ${GREEN2} 18%, ${CARD});border-color:color-mix(in oklab, ${GREEN2} 60%, transparent);color:${ink2(GREEN2)}}
@@ -16668,7 +16793,7 @@ var CAMPAIGN_CSS = `
 .oc-cghead{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,240px) auto;gap:12px;align-items:end}
 .oc-cghead .oc-dg-fl{min-width:0}
 .oc-cghead .oc-dg select{width:100%}
-.oc-cghead .nb{grid-column:1 / -1;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:4px 12px;align-items:end;padding:12px;border:1px dashed color-mix(in oklab, var(--pc) 60%, ${EDGE2});border-radius:8px;background:color-mix(in oklab, var(--pc) 7%, ${CARD})}
+.oc-cghead .nb{grid-column:1 / -1;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:4px 12px;align-items:end;padding:12px;border:1px dashed color-mix(in oklab, var(--pc) 60%, ${EDGE});border-radius:8px;background:color-mix(in oklab, var(--pc) 7%, ${CARD})}
 .oc-cghead .nbi{display:inline-grid;place-items:center;width:28px;height:32px}
 .oc-cghead .nbi i{width:16px;height:16px;border-radius:4px;background:var(--pc)}
 .oc-cghead .nbh{grid-column:2 / -1;display:flex;align-items:flex-start;gap:8px;margin:0;font-size:12px;line-height:1.4}
@@ -16687,12 +16812,12 @@ var CAMPAIGN_CSS = `
 .oc-cg input[type=number]{box-sizing:border-box;width:100%;max-width:120px;min-height:32px;padding:4px 8px;font-family:inherit;font-size:12.5px;color:var(--foreground);background:${CARD};border:1px solid ${FIELD_EDGE};border-radius:2.5px}
 .oc-cg input[type=number]:focus-visible{${RING_FOCUS}}
 /* templates */
-.oc-cgtpl{display:flex;flex-direction:column;gap:12px;padding:12px;border:1px solid ${EDGE2};border-radius:8px;background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
+.oc-cgtpl{display:flex;flex-direction:column;gap:12px;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
 .oc-cgtpl .hd{display:flex;align-items:center;gap:8px}
 .oc-cgtpl .hd small{color:${T3};font-size:12px;flex:1 1 auto;min-width:0}
 .oc-cgtpl .hd .ux-b{margin-left:auto}
 .oc-cgtpl .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:8px}
-.oc-cgtpl .tc{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0;padding:8px 12px 12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD};color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
+.oc-cgtpl .tc{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0;padding:8px 12px 12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD};color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
 .oc-cgtpl .tc b{font-size:12.5px;font-weight:600}
 .oc-cgtpl .tc small{font-size:11.5px;color:${T3};line-height:1.35}
 .oc-cgtpl .tc:hover{border-color:var(--ui-accent)}
@@ -16711,7 +16836,7 @@ var CAMPAIGN_CSS = `
 .oc-cgbody{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:start}
 .oc-cglist{display:flex;flex-direction:column;gap:12px;min-width:0}
 .oc-cgph{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
-.oc-cgph .ph{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD}}
+.oc-cgph .ph{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 .oc-cgph .phh{display:flex;align-items:center;gap:8px}
 .oc-cgph .pl{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${T3}}
 .oc-cgph .phn{flex:1 1 auto;min-width:0;width:auto!important;font-weight:600!important}
@@ -16725,7 +16850,7 @@ var CAMPAIGN_CSS = `
 .oc-cgguard .lockd{flex:0 0 auto;font-size:11px;color:${T3}}
 .oc-cgguard.off{border-style:dotted;background:transparent;color:${T3}}
 .oc-cgrows{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
-.oc-cgrow{display:flex;flex-direction:column;border:1px solid ${EDGE2};border-radius:8px;background:${CARD};overflow:hidden}
+.oc-cgrow{display:flex;flex-direction:column;border:1px solid ${EDGE};border-radius:8px;background:${CARD};overflow:hidden}
 .oc-cgrow.on{border-color:var(--ui-accent);box-shadow:0 0 0 1px var(--ui-accent) inset}
 .oc-cgrow .hd{display:flex;align-items:center;gap:4px;padding-right:8px;min-width:0}
 .oc-cgrow .sel{position:relative;flex:1 1 auto;display:flex;align-items:center;gap:8px;min-width:0;min-height:52px;padding:8px 8px 8px 16px;border:0;background:none;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
@@ -16740,14 +16865,14 @@ var CAMPAIGN_CSS = `
 .oc-cgrow .tt small{font-size:11.5px;color:${T3};overflow:hidden;text-overflow:ellipsis;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}   /* wraps instead of being cut: « backend · after 16 cards » at 380 px takes 3 lines in Spanish */
 .oc-cgrow .pin,.oc-cgg-node .pin{flex:0 0 auto;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:4px;background:var(--ui-accent);color:var(--ui-accent-fg, var(--background));font-size:10px;font-weight:700}
 .oc-cgrow .nob{flex:0 0 auto;display:inline-grid;place-items:center;color:${ink2(ORANGE2)}}
-.oc-cgrow .ed{display:flex;flex-direction:column;gap:12px;padding:12px 16px 16px;border-top:1px solid ${EDGE2};background:color-mix(in oklab, var(--foreground) 2.5%, ${CARD})}
+.oc-cgrow .ed{display:flex;flex-direction:column;gap:12px;padding:12px 16px 16px;border-top:1px solid ${EDGE};background:color-mix(in oklab, var(--foreground) 2.5%, ${CARD})}
 .oc-cgrow .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .oc-cgrow .two select{width:100%}
 .oc-cgrow .botsel{display:flex;align-items:center;gap:8px}
 .oc-cgrow .botsel canvas{flex:0 0 auto}
 .oc-cgrow fieldset{margin:0;padding:0;border:0;min-width:0}
 .oc-cgrow legend{padding:0;display:flex;align-items:center;gap:8px}
-.oc-cgrow .dep{display:inline-flex;align-items:center;gap:4px;max-width:100%;height:28px;padding:0 8px;border:1px solid ${EDGE2};border-radius:14px;background:${CARD};color:var(--foreground);font:inherit;font-size:12px;cursor:pointer}
+.oc-cgrow .dep{display:inline-flex;align-items:center;gap:4px;max-width:100%;height:28px;padding:0 8px;border:1px solid ${EDGE};border-radius:14px;background:${CARD};color:var(--foreground);font:inherit;font-size:12px;cursor:pointer}
 .oc-cgrow .dep i{width:8px;height:8px;border-radius:2px;background:var(--bc);flex:0 0 auto}
 .oc-cgrow .dep span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oc-cgrow .dep[aria-pressed=true]{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD});font-weight:600}
@@ -16760,7 +16885,7 @@ var CAMPAIGN_CSS = `
 .oc-cgrow details > :not(summary){margin-top:8px}
 .oc-cgaddph{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 /* the graph pane */
-.oc-cgp{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD}}
+.oc-cgp{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 .oc-cgbody .oc-cgp{position:sticky;top:0}
 .oc-cgp .gbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .oc-cgp .gbar .sm{font-size:12px;color:${T3}}
@@ -16776,7 +16901,7 @@ var CAMPAIGN_CSS = `
 .oc-cgg-edges .ge.on{stroke:var(--ui-accent);stroke-width:2;stroke-dasharray:none}
 .oc-cgg-edges .am{fill:${T3}}
 .oc-cgg-edges .am.on{fill:var(--ui-accent)}
-.oc-cgg-node{position:absolute;display:flex;align-items:center;gap:8px;min-width:0;padding:0 8px 0 12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD};color:var(--foreground);font:inherit;text-align:left;overflow:hidden}
+.oc-cgg-node{position:absolute;display:flex;align-items:center;gap:8px;min-width:0;padding:0 8px 0 12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD};color:var(--foreground);font:inherit;text-align:left;overflow:hidden}
 button.oc-cgg-node{cursor:pointer}
 button.oc-cgg-node:hover{border-color:var(--ui-accent)}
 button.oc-cgg-node:focus-visible{${RING_FOCUS}}
@@ -16792,7 +16917,7 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-cgg-node .l2{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.25;color:${T3}}   /* 2 title lines + this one fit in the 52 px node */
 .oc-cgg-node.s-archived{opacity:.55}
 .oc-cgg-node.grp{overflow:visible;flex-direction:column;align-items:stretch;justify-content:center;gap:4px;padding:4px 12px}
-.oc-cgg-node.grp .st{position:absolute;left:0;top:0;right:0;bottom:0;border:1px solid ${EDGE2};border-radius:8px;background:${CARD};z-index:-1}
+.oc-cgg-node.grp .st{position:absolute;left:0;top:0;right:0;bottom:0;border:1px solid ${EDGE};border-radius:8px;background:${CARD};z-index:-1}
 .oc-cgg-node.grp .st1{transform:translate(3px,3px)}
 .oc-cgg-node.grp .st2{transform:translate(6px,6px)}
 .oc-cgg-node.grp{background:${CARD}}
@@ -16813,13 +16938,13 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-cgg-guard .pill em{flex:0 0 auto;font-style:normal;font-size:11px;color:${T3}}
 /* the bots of the graph */
 .oc-cgl{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
-.oc-cgl li{display:inline-flex;align-items:center;gap:8px;min-height:28px;padding:0 8px 0 4px;border:1px solid ${EDGE2};border-radius:14px;font-size:12px}
+.oc-cgl li{display:inline-flex;align-items:center;gap:8px;min-height:28px;padding:0 8px 0 4px;border:1px solid ${EDGE};border-radius:14px;font-size:12px}
 .oc-cgl li i{width:4px;height:16px;border-radius:2px;background:var(--bc)}
 .oc-cgl li canvas{flex:0 0 auto}
 .oc-cgl li span{font-size:11px;color:${T3}}
 /* review */
 .oc-cgrev{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,300px);gap:16px;align-items:start}
-.oc-cgsum{display:flex;flex-direction:column;gap:12px;min-width:0;padding:12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD}}
+.oc-cgsum{display:flex;flex-direction:column;gap:12px;min-width:0;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 .oc-cgsum h4{margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${T3}}
 .oc-cgsum p{margin:0;font-size:12.5px;line-height:1.4;overflow-wrap:anywhere}
 .oc-cgsum .mut{color:${T3}}
@@ -16834,10 +16959,10 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-cgsum .gd svg,.oc-cgsum .after svg{flex:0 0 auto;margin-top:2px;color:${ink2(ORANGE2)}}
 .oc-cgsum .ux-prj.nw{border-style:dashed}
 .oc-cgsum .ux-prj{max-width:100%} /* the project the review names is never cut at the 140 px of the page's chips */
-.oc-cgsum .after{padding-top:12px;border-top:1px solid ${EDGE2}}
+.oc-cgsum .after{padding-top:12px;border-top:1px solid ${EDGE}}
 /* created */
 .oc-cgcre{display:flex;flex-direction:column;gap:12px}
-.oc-cgban{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1px solid ${EDGE2};border-radius:8px}
+.oc-cgban{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1px solid ${EDGE};border-radius:8px}
 .oc-cgban > svg{flex:0 0 auto;margin-top:2px}
 .oc-cgban div{display:flex;flex-direction:column;gap:4px;min-width:0}
 .oc-cgban b{font-size:13px}
@@ -16846,18 +16971,18 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-cgban.ok > svg{color:${ink2(GREEN2)}}
 .oc-cgban.nt{background:color-mix(in oklab, var(--foreground) 4%, ${CARD})}
 .oc-cgkp{display:flex;flex-wrap:wrap;gap:8px}
-.oc-cgkp .k{display:flex;flex-direction:column;gap:2px;min-width:96px;padding:8px 16px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD}}
+.oc-cgkp .k{display:flex;flex-direction:column;gap:2px;min-width:96px;padding:8px 16px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 .oc-cgkp .k b{font-size:20px;line-height:1.1}
 .oc-cgkp .k small{font-size:11.5px;color:${T3}}
 .oc-cgkp .k.ready b{color:${ink2(GREEN2)}}
 .oc-cgkp .k.guard b{color:${ink2(ORANGE2)}}
 .oc-cggo{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
-.oc-cggo .go{flex:1 1 320px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 16px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD}}
+.oc-cggo .go{flex:1 1 320px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 16px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 .oc-cggo .go > div{flex:1 1 200px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .oc-cggo .go small{font-size:12px;color:${T3};line-height:1.4;overflow-wrap:anywhere}
 .oc-cgwhere{display:flex;align-items:flex-start;gap:8px;margin:0;font-size:12px;color:${T3};line-height:1.4}
 .oc-cgwhere svg{flex:0 0 auto;margin-top:1px}
-.oc-cg .ux-b.danger{color:${ink2(RED2)};border-color:color-mix(in oklab, ${RED2} 55%, ${EDGE2})}
+.oc-cg .ux-b.danger{color:${ink2(RED2)};border-color:color-mix(in oklab, ${RED2} 55%, ${EDGE})}
 .oc-cg .ux-b.danger:hover{background:color-mix(in oklab, ${RED2} 8%, ${CARD});border-color:${RED2}}
 .oc-cg .ux-b[aria-disabled=true]{opacity:.5;cursor:default}
 .oc-cg .ux-b.ico{width:32px;padding:0}
@@ -16886,12 +17011,12 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 @media (prefers-reduced-motion:reduce){.oc-cgrow details summary svg{transition:none}}
 /* violet = written by a model; the panel, the marks, the rewritten instructions, the review. Only drawn when a function is on. */
 .oc-cghead .tplb .oc-lm-tb{display:flex;gap:8px;flex-wrap:wrap}
-.oc-cg .ux-b.oc-lm-b{border-color:color-mix(in oklab, ${VIOLET3} 55%, ${EDGE2});color:${VIOLET_INK2};background:color-mix(in oklab, ${VIOLET3} 6%, ${CARD})}
+.oc-cg .ux-b.oc-lm-b{border-color:color-mix(in oklab, ${VIOLET3} 55%, ${EDGE});color:${VIOLET_INK2};background:color-mix(in oklab, ${VIOLET3} 6%, ${CARD})}
 .oc-cg .ux-b.oc-lm-b:hover{background:color-mix(in oklab, ${VIOLET3} 13%, ${CARD})}
-.oc-lm-cg{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid color-mix(in oklab, ${VIOLET3} 40%, ${EDGE2});background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET3} 8%, ${CARD}), ${CARD} 70%);min-width:0}
+.oc-lm-cg{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid color-mix(in oklab, ${VIOLET3} 40%, ${EDGE});background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET3} 8%, ${CARD}), ${CARD} 70%);min-width:0}
 .oc-lm-cg>small,.oc-lm-cg .oc-lm-foot small{color:${T3};font-size:12px}
 .oc-lm-cg textarea{resize:vertical}
-.oc-lm-ic{width:32px;height:32px;border-radius:8px;display:inline-grid;place-items:center;flex:0 0 auto;color:${VIOLET_INK2};background:color-mix(in oklab, ${VIOLET3} 13%, ${CARD});border:1px solid color-mix(in oklab, ${VIOLET3} 30%, ${EDGE2})}
+.oc-lm-ic{width:32px;height:32px;border-radius:8px;display:inline-grid;place-items:center;flex:0 0 auto;color:${VIOLET_INK2};background:color-mix(in oklab, ${VIOLET3} 13%, ${CARD});border:1px solid color-mix(in oklab, ${VIOLET3} 30%, ${EDGE})}
 .oc-lm-meta{margin-left:auto;font-size:11.5px;color:${T3};overflow-wrap:anywhere;text-align:right;text-wrap:balance}
 .oc-lm-t{font-size:12px;color:${T3}}
 .oc-lm-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -16903,13 +17028,13 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-lm-sum small{color:${T3};font-size:12px}
 .oc-lm-mini .mg{stroke:${ORANGE2};stroke-width:2;stroke-dasharray:4 3}
 .oc-lm-cg .oc-dg-seg{align-self:flex-start;max-width:100%;flex-wrap:wrap}
-.oc-lm-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid color-mix(in oklab, ${ORANGE2} 45%, ${EDGE2});background:color-mix(in oklab, ${ORANGE2} 7%, ${CARD});font-size:12.5px}
+.oc-lm-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid color-mix(in oklab, ${ORANGE2} 45%, ${EDGE});background:color-mix(in oklab, ${ORANGE2} 7%, ${CARD});font-size:12.5px}
 .oc-lm-confirm span{flex:1 1 200px;min-width:0}
 .oc-lm-cg .oc-lm-ref{margin:0}
 .oc-lm-cg em{color:${T3}}
 /* the mark of a card in the list, in the graph, in the legend */
 .oc-lm-dot{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:10px;flex:0 0 auto;color:${VIOLET_INK2};background:color-mix(in oklab, ${VIOLET3} 13%, transparent)}
-.oc-cgg-node.lm{border-style:dashed;border-color:color-mix(in oklab, ${VIOLET3} 70%, ${EDGE2})}
+.oc-cgg-node.lm{border-style:dashed;border-color:color-mix(in oklab, ${VIOLET3} 70%, ${EDGE})}
 .oc-cgg-node.lm.on{border-style:solid;border-color:var(--ui-accent)}
 .oc-cgl li.oc-cglm{color:${VIOLET_INK2};font-weight:600}
 .oc-cgl li.oc-cglm i{width:16px;height:10px;border-radius:3px;border:1.5px dashed ${VIOLET3};background:transparent}
@@ -16921,7 +17046,7 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-lm-wait{display:flex;flex-wrap:wrap;align-items:center;gap:8px;align-self:stretch}
 .oc-lm-wait .oc-lm-prog{flex:1 0 100%}
 .oc-lm-wait small{flex:1 1 auto;color:${T3};font-size:12px}
-.oc-lm-bd{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;border:1px solid color-mix(in oklab, ${VIOLET3} 40%, ${EDGE2});background:color-mix(in oklab, ${VIOLET3} 5%, ${CARD});min-width:0}
+.oc-lm-bd{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;border:1px solid color-mix(in oklab, ${VIOLET3} 40%, ${EDGE});background:color-mix(in oklab, ${VIOLET3} 5%, ${CARD});min-width:0}
 .oc-lm-bd textarea{box-sizing:border-box;width:100%;font-size:12.5px;line-height:1.5;resize:vertical;field-sizing:content;min-height:6lh;max-height:22lh}   /* criteria and proof are the last lines: shown, not under the fold */
 .oc-lm-old summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:${T3};min-height:24px}
 .oc-lm-old summary::-webkit-details-marker{display:none}
@@ -16935,7 +17060,7 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-lm-mk-static{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;margin-left:8px;border-radius:10px;font:600 11px/1 inherit;color:${VIOLET_INK2};background:color-mix(in oklab, ${VIOLET3} 13%, transparent)}
 @media (prefers-reduced-motion:reduce){.oc-lm-old summary svg{transition:none}}
 /* the review before launch, at the top of the summary */
-.oc-lm-lint{display:flex;flex-direction:column;gap:8px;padding-bottom:12px;border-bottom:1px solid ${EDGE2}}
+.oc-lm-lint{display:flex;flex-direction:column;gap:8px;padding-bottom:12px;border-bottom:1px solid ${EDGE}}
 .oc-lm-lint h4{display:flex;align-items:center;gap:8px}
 .oc-lm-lint h4>svg{color:${VIOLET_INK2}}
 .oc-lm-lint h4 .grow{flex:1 1 auto}
@@ -16947,7 +17072,7 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-lm-lint .oc-lm-mini2 small{flex:1 1 auto;color:${T3};font-size:12px}
 .oc-lm-lint .ux-b{align-self:flex-start}
 .oc-lm-fl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
-.oc-lm-lf{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:8px 8px 8px 12px;border-radius:8px;border:0;background:${CARD};cursor:pointer;text-align:left;font:inherit;color:inherit;box-shadow:inset 3px 0 0 var(--sv, ${T3}), inset 0 0 0 1px ${EDGE2}}
+.oc-lm-lf{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:8px 8px 8px 12px;border-radius:8px;border:0;background:${CARD};cursor:pointer;text-align:left;font:inherit;color:inherit;box-shadow:inset 3px 0 0 var(--sv, ${T3}), inset 0 0 0 1px ${EDGE}}
 .oc-lm-lf:hover{background:color-mix(in oklab, var(--foreground) 4%, ${CARD})}
 .oc-lm-lf[aria-pressed=true]{box-shadow:inset 3px 0 0 var(--sv), inset 0 0 0 2px var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
 .oc-lm-lf:focus-visible{${RING_FOCUS}}
@@ -16961,7 +17086,7 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 
 // src/ui/ModelPicker.jsx
 import { host as host2 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect8, useId as useId7, useMemo as useMemo3, useRef as useRef9, useState as useState7 } from "react";
+import { useEffect as useEffect8, useId as useId7, useMemo as useMemo3, useRef as useRef10, useState as useState8 } from "react";
 
 // src/data/modelOptions.js
 async function loadModelOptions(request = safeRequest, { timeoutMs = MODEL_OPTIONS_TIMEOUT_MS, schedule = setTimeout, cancel = clearTimeout } = {}) {
@@ -16988,7 +17113,7 @@ async function loadModelOptions(request = safeRequest, { timeoutMs = MODEL_OPTIO
 import { Fragment as Fragment4, jsx as jsx9, jsxs as jsxs8 } from "react/jsx-runtime";
 var IDLE2 = { state: "idle", providers: [], inherited: { model: "", provider: "" } };
 function useModelOptions(active) {
-  const [res, setRes] = useState7(IDLE2);
+  const [res, setRes] = useState8(IDLE2);
   useEffect8(() => {
     if (!active) return void 0;
     let live = true;
@@ -17007,10 +17132,10 @@ var canOpenSettings = () => typeof host2?.navigate === "function";
 function ModelPicker({ opts, model, provider, onChange, invalid = false, describedBy, inheritedTitle = null, inheritedNote = null }) {
   const t = useT();
   const id = useId7();
-  const listRef = useRef9(null);
-  const [browse, setBrowse] = useState7("");
-  const [query, setQuery] = useState7("");
-  const [active, setActive] = useState7(0);
+  const listRef = useRef10(null);
+  const [browse, setBrowse] = useState8("");
+  const [query, setQuery] = useState8("");
+  const [active, setActive] = useState8(0);
   const ready = opts.state === "ready";
   const sorted = useMemo3(() => sortProviders(opts.providers), [opts.providers]);
   const connected = sorted.filter((p) => p.ready);
@@ -17154,7 +17279,7 @@ function ModelPicker({ opts, model, provider, onChange, invalid = false, describ
 }
 
 // src/ui/Orders.jsx
-import { useEffect as useEffect9, useLayoutEffect as useLayoutEffect4, useRef as useRef10, useState as useState8 } from "react";
+import { useEffect as useEffect9, useLayoutEffect as useLayoutEffect5, useRef as useRef11, useState as useState9 } from "react";
 import { Fragment as Fragment5, jsx as jsx10, jsxs as jsxs9 } from "react/jsx-runtime";
 var STATUS = new Set(CARD_STATUSES);
 var statusText = (t, s) => STATUS.has(s) ? t(`status.${s}`) : String(s ?? "");
@@ -17198,7 +17323,7 @@ function OrderButton({ verb, item, orders, t, primary, onClick }) {
 }
 function Draft({ item, orders, t }) {
   const { state: state2, act, setText } = orders;
-  const ref = useRef10(null);
+  const ref = useRef11(null);
   const text3 = state2.order.text || "";
   useEffect9(() => {
     ref.current?.focus();
@@ -17247,7 +17372,7 @@ function OrderConfirm({ orders, blocked = false, children = null }) {
 function Confirm({ orders, t, blocked = false, children = null }) {
   const { state: state2, act } = orders;
   const o = state2.order;
-  const ref = useRef10(null);
+  const ref = useRef11(null);
   useEffect9(() => {
     if (!blocked) ref.current?.focus();
   }, [blocked]);
@@ -17341,7 +17466,7 @@ function outcomeText(o, t) {
 function OrderProgress({ orders, onModelFollowUp = null, floating = false }) {
   const t = useT();
   const { state: state2, act } = orders;
-  const cancelRef = useRef10(null);
+  const cancelRef = useRef11(null);
   const o = state2.order;
   const out = state2.outcome;
   useEffect9(() => {
@@ -17397,8 +17522,8 @@ function OrderBar({ orders, onFocusBack, onModelFollowUp = null }) {
   const { state: state2 } = orders;
   const o = state2.order;
   const out = state2.outcome;
-  const [hosted, setHosted] = useState8(false);
-  useLayoutEffect4(() => {
+  const [hosted, setHosted] = useState9(false);
+  useLayoutEffect5(() => {
     const found = Boolean(document.querySelector("[data-order-host]"));
     setHosted((prev) => prev === found ? prev : found);
   });
@@ -17472,11 +17597,11 @@ function Stepper({ step, t, titleRef }) {
 }
 function Templates({ draft, apply, bots, colors, t, onClose }) {
   const id = useId8();
-  const [tpl, setTpl] = useState9("devreview");
-  const [mode, setMode] = useState9("append");
-  const [n, setN] = useState9({ devreview: 3, audit: 4, phases: 2, chain: 4 });
-  const [per, setPer] = useState9(2);
-  const [pick, setPick] = useState9({ dev: bots[0], review: bots[1] ?? bots[0], audit: bots[0], synth: bots[1] ?? bots[0], work: bots[0], chain: bots[0] });
+  const [tpl, setTpl] = useState10("devreview");
+  const [mode, setMode] = useState10("append");
+  const [n, setN] = useState10({ devreview: 3, audit: 4, phases: 2, chain: 4 });
+  const [per, setPer] = useState10(2);
+  const [pick, setPick] = useState10({ dev: bots[0], review: bots[1] ?? bots[0], audit: bots[0], synth: bots[1] ?? bots[0], work: bots[0], chain: bots[0] });
   const spec = TEMPLATES.find((x) => x.id === tpl);
   const set = (k, v) => setPick((p) => ({ ...p, [k]: v }));
   const botSel = (k, label) => /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl", children: [
@@ -17585,7 +17710,7 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
           /* @__PURE__ */ jsxs10("small", { className: `oc-mono${blen > MAX_BODY * 0.9 ? " near" : ""}`, id: `${id}-body-n`, children: [
             blen,
             " / ",
-            MAX_BODY.toLocaleString("en").replace(",", " ")
+            numberText(MAX_BODY, t.lang)
           ] }),
           /* @__PURE__ */ jsx11(CardMark, { A, card: c, field: "body", label: t("campaign.f.body"), id: `${id}-body-mk` })
         ] }),
@@ -17641,16 +17766,16 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
 function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes, replay = false }) {
   const t = useT();
   const uid = useId8();
-  const [session] = useState9(() => recallSession());
-  const [draft, setDraft] = useState9(() => session?.draft ?? newDraft({ phaseName: t("campaign.tpl.phase", "A") }));
+  const [session] = useState10(() => recallSession());
+  const [draft, setDraft] = useState10(() => session?.draft ?? newDraft({ phaseName: t("campaign.tpl.phase", "A") }));
   const [win, dispatch] = useReducer2(windowReducer, session?.win ?? initialWindow());
-  const [view, setView] = useState9("list");
-  const [tplOpen, setTplOpen] = useState9(false);
-  const [attempted, setAttempted] = useState9(false);
-  const [confirmClear, setConfirmClear] = useState9(false);
-  const [unfolded, setUnfolded] = useState9(() => /* @__PURE__ */ new Set());
-  const [refused2, setRefused] = useState9("");
-  const goalRef = useRef11(null);
+  const [view, setView] = useState10("list");
+  const [tplOpen, setTplOpen] = useState10(false);
+  const [attempted, setAttempted] = useState10(false);
+  const [confirmClear, setConfirmClear] = useState10(false);
+  const [unfolded, setUnfolded] = useState10(() => /* @__PURE__ */ new Set());
+  const [refused2, setRefused] = useState10("");
+  const goalRef = useRef12(null);
   const phase = orders.state.phase;
   const o = orders.state.order;
   const out = orders.state.outcome;
@@ -17665,7 +17790,7 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
   const llmState = useLlm({ enabled: false }).data ?? null;
   const lintOn = workReady(llmState, "lint");
   const modelOpts = useModelOptions(open && (win.step === "compose" || lintOn && win.step === "review"));
-  const keepBots = useRef11(bots);
+  const keepBots = useRef12(bots);
   keepBots.current = bots;
   const L = useMemo4(() => wording(t), [t, lang4]);
   useEffect10(() => {
@@ -17776,8 +17901,8 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
       if (!draft.goal) goalRef.current?.focus();
     }, 0);
   }, [open]);
-  const stepTitle = useRef11(null);
-  const lastStep = useRef11(win.step);
+  const stepTitle = useRef12(null);
+  const lastStep = useRef12(win.step);
   useEffect10(() => {
     if (lastStep.current === win.step) return;
     lastStep.current = win.step;
@@ -18201,7 +18326,7 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
 }
 
 // src/ui/HireDialog.jsx
-import { useEffect as useEffect14, useId as useId12, useMemo as useMemo10, useRef as useRef16, useState as useState13 } from "react";
+import { useEffect as useEffect15, useId as useId15, useMemo as useMemo10, useRef as useRef18, useState as useState17 } from "react";
 
 // src/ui/RolePicker.jsx
 import { useId as useId9 } from "react";
@@ -18230,22 +18355,22 @@ function RolePicker({ value, onPick, guessed, mark = null }) {
 }
 
 // src/ui/HireAssist.jsx
-import { useCallback as useCallback5, useEffect as useEffect11, useId as useId10, useRef as useRef12, useState as useState10 } from "react";
+import { useCallback as useCallback5, useEffect as useEffect11, useId as useId10, useRef as useRef13, useState as useState11 } from "react";
 import { Fragment as Fragment8, jsx as jsx13, jsxs as jsxs12 } from "react/jsx-runtime";
 function useRecruitAssist({ open, draft, setDraft, profiles, lang: lang4 }) {
   const query = useLlm({ enabled: open });
   const actions = useLlmActions();
   const state2 = query.data ?? null;
-  const [mission, setMission] = useState10("");
-  const [phase, setPhase] = useState10("idle");
-  const [refusal, setRefusal] = useState10(null);
-  const [marks, setMarks] = useState10(() => /* @__PURE__ */ new Set());
-  const [overlap, setOverlap] = useState10("");
-  const [stopped, setStopped] = useState10(false);
-  const [since, setSince] = useState10(0);
-  const [announce, setAnnounce] = useState10("");
-  const token = useRef12(0);
-  const live = useRef12({ open, draft, profiles });
+  const [mission, setMission] = useState11("");
+  const [phase, setPhase] = useState11("idle");
+  const [refusal, setRefusal] = useState11(null);
+  const [marks, setMarks] = useState11(() => /* @__PURE__ */ new Set());
+  const [overlap, setOverlap] = useState11("");
+  const [stopped, setStopped] = useState11(false);
+  const [since, setSince] = useState11(0);
+  const [announce, setAnnounce] = useState11("");
+  const token = useRef13(0);
+  const live = useRef13({ open, draft, profiles });
   live.current = { open, draft, profiles };
   useEffect11(() => {
     if (open) actions.refresh();
@@ -18369,7 +18494,7 @@ function LeftCount({ assist }) {
   return /* @__PURE__ */ jsx13("span", { className: "oc-lm-left", "data-lm-left": true, title: t("llm.mark.leftTitle"), children: t("llm.mark.left", assist.left) });
 }
 function Elapsed2({ since }) {
-  const [now, setNow] = useState10(() => Date.now());
+  const [now, setNow] = useState11(() => Date.now());
   useEffect11(() => {
     const i = setInterval(() => setNow(Date.now()), 1e3);
     return () => clearInterval(i);
@@ -18542,13 +18667,13 @@ function ProjectChip({ slug, label = "", className = "" }) {
 }
 
 // src/ui/StateIcon.jsx
-import { useEffect as useEffect12, useRef as useRef13 } from "react";
+import { useEffect as useEffect12, useRef as useRef14 } from "react";
 import { jsx as jsx16 } from "react/jsx-runtime";
 function StateIcon({ state: state2, size = STATE_ICON_SIZE }) {
   return /* @__PURE__ */ jsx16("svg", { className: "oc-sti", viewBox: `0 0 ${STATE_ICON_SIZE} ${STATE_ICON_SIZE}`, width: size, height: size, shapeRendering: "crispEdges", fill: "currentColor", "aria-hidden": "true", focusable: "false", children: stateIconCells(state2).map(([x, y]) => /* @__PURE__ */ jsx16("rect", { x, y, width: "1", height: "1" }, `${x},${y}`)) });
 }
 function Face({ agent }) {
-  const ref = useRef13(null);
+  const ref = useRef14(null);
   const key = agent ? JSON.stringify([agent.name, agent.state, agent.roleOverride, agent.modelRole, agent.description, agent.skills, agent.copiedSkills]) : "";
   useEffect12(() => {
     const cv = ref.current;
@@ -18563,7 +18688,7 @@ function Face({ agent }) {
 }
 
 // src/ui/ReviseBox.jsx
-import { useEffect as useEffect13, useId as useId11, useRef as useRef14, useState as useState11 } from "react";
+import { useEffect as useEffect13, useId as useId11, useRef as useRef15, useState as useState12 } from "react";
 import { Fragment as Fragment9, jsx as jsx17, jsxs as jsxs14 } from "react/jsx-runtime";
 function DescriptionRow({ agent, description, cut: cut3 = false, isDefault, orders }) {
   const t = useT();
@@ -18571,13 +18696,13 @@ function DescriptionRow({ agent, description, cut: cut3 = false, isDefault, orde
   const query = useLlm();
   const actions = useLlmActions();
   const state2 = query.data ?? null;
-  const [phase, setPhase] = useState11("idle");
-  const [refusal, setRefusal] = useState11(null);
-  const [rev, setRev] = useState11(null);
-  const [after, setAfter] = useState11("");
-  const [said, setSaid] = useState11("");
-  const token = useRef14(0);
-  const openRef = useRef14(null);
+  const [phase, setPhase] = useState12("idle");
+  const [refusal, setRefusal] = useState12(null);
+  const [rev, setRev] = useState12(null);
+  const [after, setAfter] = useState12("");
+  const [said, setSaid] = useState12("");
+  const token = useRef15(0);
+  const openRef = useRef15(null);
   const name = agent;
   const bot = { name, description, isDefault };
   const offered = canRevise(state2, bot);
@@ -18731,144 +18856,175 @@ function DescriptionRow({ agent, description, cut: cut3 = false, isDefault, orde
   ] });
 }
 
-// src/ui/AgentTab.jsx
+// src/ui/Why.jsx
+import { useEffect as useEffect14, useId as useId12, useState as useState13 } from "react";
 import { Fragment as Fragment10, jsx as jsx18, jsxs as jsxs15 } from "react/jsx-runtime";
+function useWhy(reason) {
+  const id = useId12();
+  const [said, setSaid] = useState13(false);
+  useEffect14(() => {
+    if (!reason) setSaid(false);
+  }, [reason]);
+  useEffect14(() => {
+    if (!said) return void 0;
+    const timer = setTimeout(() => setSaid(false), 8e3);
+    return () => clearTimeout(timer);
+  }, [said]);
+  return {
+    describedBy: reason ? id : void 0,
+    say: () => setSaid(true),
+    note: reason ? /* @__PURE__ */ jsxs15(Fragment10, { children: [
+      /* @__PURE__ */ jsx18("span", { id, className: "ux-vh", children: reason }),
+      said ? /* @__PURE__ */ jsx18("small", { className: "ux-why", role: "status", "data-why": true, children: reason }) : null
+    ] }) : null
+  };
+}
+function WhyButton({ reason, onGo, buttonRef, children, ...rest3 }) {
+  const why = useWhy(reason);
+  return /* @__PURE__ */ jsxs15(Fragment10, { children: [
+    /* @__PURE__ */ jsx18("button", { ref: buttonRef, type: "button", ...rest3, "aria-disabled": reason ? true : void 0, "aria-describedby": why.describedBy, onClick: () => reason ? why.say() : onGo(), children }),
+    why.note
+  ] });
+}
+
+// src/ui/AgentTab.jsx
+import { Fragment as Fragment11, jsx as jsx19, jsxs as jsxs16 } from "react/jsx-runtime";
 var FLEX = { display: "flex", flexWrap: "wrap", gap: "2px 8px", alignItems: "center" };
 var QUIET = { display: "inline-flex", alignItems: "center", gap: 4, color: "color-mix(in oklab, var(--ui-orange, var(--ui-accent)) 50%, var(--foreground))" };
 function CardRow({ c, nowMs, t }) {
-  return /* @__PURE__ */ jsxs15("span", { "data-insp-card": true, "data-quiet": c.silentMs ? "" : void 0, "data-pin": c.pin ? "" : void 0, style: { display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }, children: [
-    /* @__PURE__ */ jsxs15("span", { style: FLEX, children: [
-      /* @__PURE__ */ jsx18(ProjectChip, { slug: c.board }),
-      /* @__PURE__ */ jsx18("b", { className: "ux-mono", children: c.code }),
-      c.startedMs ? /* @__PURE__ */ jsx18("span", { style: { color: "var(--ui-text-tertiary)" }, children: formatSpan(nowMs - c.startedMs) }) : null,
-      c.pin ? /* @__PURE__ */ jsxs15("span", { title: t("insp.modelCard", c.pin), style: { display: "inline-flex" }, children: [
-        /* @__PURE__ */ jsx18(PixelBadge, { size: 10 }),
-        /* @__PURE__ */ jsx18("span", { className: "ux-vh", children: t("insp.modelCard", c.pin) })
+  return /* @__PURE__ */ jsxs16("span", { "data-insp-card": true, "data-quiet": c.silentMs ? "" : void 0, "data-pin": c.pin ? "" : void 0, style: { display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }, children: [
+    /* @__PURE__ */ jsxs16("span", { style: FLEX, children: [
+      /* @__PURE__ */ jsx19(ProjectChip, { slug: c.board }),
+      /* @__PURE__ */ jsx19("b", { className: "ux-mono", children: c.code }),
+      c.startedMs ? /* @__PURE__ */ jsx19("span", { style: { color: "var(--ui-text-tertiary)" }, children: formatSpan(nowMs - c.startedMs) }) : null,
+      c.pin ? /* @__PURE__ */ jsxs16("span", { title: t("insp.modelCard", c.pin), style: { display: "inline-flex" }, children: [
+        /* @__PURE__ */ jsx19(PixelBadge, { size: 10 }),
+        /* @__PURE__ */ jsx19("span", { className: "ux-vh", children: t("insp.modelCard", c.pin) })
       ] }) : null,
-      c.silentMs ? /* @__PURE__ */ jsxs15("span", { style: QUIET, "data-insp-quiet": true, children: [
-        /* @__PURE__ */ jsx18(StateIcon, { state: "stale" }),
-        /* @__PURE__ */ jsx18("span", { children: t("insp.quietFor", formatSpan(c.silentMs)) })
+      c.silentMs ? /* @__PURE__ */ jsxs16("span", { style: QUIET, "data-insp-quiet": true, children: [
+        /* @__PURE__ */ jsx19(StateIcon, { state: "stale" }),
+        /* @__PURE__ */ jsx19("span", { children: t("insp.quietFor", formatSpan(c.silentMs)) })
       ] }) : null
     ] }),
-    c.title && c.title !== c.code ? /* @__PURE__ */ jsx18("span", { className: "one", children: c.title }) : null
+    c.title && c.title !== c.code ? /* @__PURE__ */ jsx19("span", { className: "one", children: c.title }) : null
   ] });
 }
 var ORDER2 = { waiting: 0, working: 1, stale: 2, active: 3, idle: 4, new: 5, unknown: 6 };
 function StateTag({ state: state2, t }) {
-  return /* @__PURE__ */ jsxs15("span", { className: `ux-st ux-st-${state2}`, children: [
-    /* @__PURE__ */ jsx18("span", { className: "ux-sdot", "aria-hidden": "true" }),
+  return /* @__PURE__ */ jsxs16("span", { className: `ux-st ux-st-${state2}`, children: [
+    /* @__PURE__ */ jsx19("span", { className: "ux-sdot", "aria-hidden": "true" }),
     t(`state.${state2}`)
   ] });
 }
 function Roster({ office, sceneBy, project: project2, selected, onPick, t }) {
   const list = office.agents.filter((a) => !project2 || a.home === project2).sort((a, b) => (ORDER2[a.state] ?? 7) - (ORDER2[b.state] ?? 7) || a.name.localeCompare(b.name, "en"));
-  return /* @__PURE__ */ jsxs15(Fragment10, { children: [
-    /* @__PURE__ */ jsx18("div", { className: "ux-pbar", children: /* @__PURE__ */ jsxs15("span", { className: "lbl", children: [
+  return /* @__PURE__ */ jsxs16(Fragment11, { children: [
+    /* @__PURE__ */ jsx19("div", { className: "ux-pbar", children: /* @__PURE__ */ jsxs16("span", { className: "lbl", children: [
       t("ux.agent.team", list.length),
       " · ",
       t("ux.agent.pick")
     ] }) }),
-    /* @__PURE__ */ jsx18("ul", { className: "ux-roster", "data-roster": true, children: list.map((a) => /* @__PURE__ */ jsx18("li", { children: /* @__PURE__ */ jsxs15("button", { type: "button", className: "ux-rosterb", "data-pick": a.name, "aria-current": selected === a.name ? "true" : void 0, onClick: () => onPick(a.name), children: [
-      sceneBy.get(a.name) ? /* @__PURE__ */ jsx18(Portrait, { agent: sceneBy.get(a.name) }) : null,
-      /* @__PURE__ */ jsx18("span", { className: "nm", children: a.label || a.name }),
-      /* @__PURE__ */ jsx18(ProjectChip, { slug: a.home }),
-      /* @__PURE__ */ jsx18(StateTag, { state: a.state, t })
+    /* @__PURE__ */ jsx19("ul", { className: "ux-roster", "data-roster": true, children: list.map((a) => /* @__PURE__ */ jsx19("li", { children: /* @__PURE__ */ jsxs16("button", { type: "button", className: "ux-rosterb", "data-pick": a.name, "aria-current": selected === a.name ? "true" : void 0, onClick: () => onPick(a.name), children: [
+      sceneBy.get(a.name) ? /* @__PURE__ */ jsx19(Portrait, { agent: sceneBy.get(a.name) }) : null,
+      /* @__PURE__ */ jsx19("span", { className: "nm", title: a.label || a.name, children: a.label || a.name }),
+      /* @__PURE__ */ jsx19(ProjectChip, { slug: a.home }),
+      /* @__PURE__ */ jsx19(StateTag, { state: a.state, t })
     ] }) }, a.name)) })
   ] });
 }
 function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, canOpen, grade, project: project2, onPick, onDecide, openKanban: openKanban2, bots = null, orders = null, t }) {
   const style = useProjectStyle(agent?.home);
-  if (!agent) return /* @__PURE__ */ jsx18(Roster, { office, sceneBy, project: project2, selected: null, onPick, t });
+  if (!agent) return /* @__PURE__ */ jsx19(Roster, { office, sceneBy, project: project2, selected: null, onPick, t });
   const dressed = roleOf(sceneAgent || agent);
   const outfit = outfitSource(dressed.why);
   const models = modelOf(agent);
   const i = inspectorOf(agent, { nowMs, history, models, roleId: dressed.role, grade });
   const why = canOpen ? t("openSession", i.label) : t("noSession", i.label);
   const bot = bots?.get(agent.name) ?? null;
-  return /* @__PURE__ */ jsxs15("section", { "data-insp": true, "data-agent-of": i.name, "aria-label": t("insp.title"), children: [
-    /* @__PURE__ */ jsxs15("div", { className: "ux-ag-h", style, children: [
-      /* @__PURE__ */ jsx18(Portrait, { agent: sceneAgent }),
-      /* @__PURE__ */ jsxs15("div", { className: "tt", children: [
-        /* @__PURE__ */ jsx18("h3", { "data-insp-name": true, children: i.label }),
-        /* @__PURE__ */ jsx18("span", { "data-insp-state": true, children: /* @__PURE__ */ jsx18(StateTag, { state: i.state, t }) }),
+  return /* @__PURE__ */ jsxs16("section", { "data-insp": true, "data-agent-of": i.name, "aria-label": t("insp.title"), children: [
+    /* @__PURE__ */ jsxs16("div", { className: "ux-ag-h", style, children: [
+      /* @__PURE__ */ jsx19(Portrait, { agent: sceneAgent }),
+      /* @__PURE__ */ jsxs16("div", { className: "tt", children: [
+        /* @__PURE__ */ jsx19("h3", { "data-insp-name": true, children: i.label }),
+        /* @__PURE__ */ jsx19("span", { "data-insp-state": true, children: /* @__PURE__ */ jsx19(StateTag, { state: i.state, t }) }),
         " ",
-        /* @__PURE__ */ jsxs15("small", { children: [
+        /* @__PURE__ */ jsxs16("small", { children: [
           "· ",
           t(`role.${i.roleId || "none"}`),
           i.grade ? ` · ${i.grade}` : ""
         ] }),
-        i.since ? /* @__PURE__ */ jsx18("small", { className: "ux-vh", children: t(`insp.since.${i.since.kind}`, t.ago(i.since.ms)) }) : null
+        i.since ? /* @__PURE__ */ jsx19("small", { className: "ux-vh", children: t(`insp.since.${i.since.kind}`, t.ago(i.since.ms)) }) : null
       ] }),
-      /* @__PURE__ */ jsx18("button", { type: "button", className: "ux-b sm ico ghost", "data-pick": "", "aria-label": t("ux.agent.close"), onClick: () => onPick(null), children: /* @__PURE__ */ jsx18(Icon, { name: "x", size: 14 }) })
+      /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm ico ghost", "data-pick": "", "aria-label": t("ux.agent.close"), onClick: () => onPick(null), children: /* @__PURE__ */ jsx19(Icon, { name: "x", size: 14 }) })
     ] }),
-    /* @__PURE__ */ jsxs15("dl", { className: "ux-kv", children: [
-      /* @__PURE__ */ jsx18("dt", { children: t("ux.agent.project") }),
-      /* @__PURE__ */ jsx18("dd", { children: agent.home ? /* @__PURE__ */ jsx18(ProjectChip, { slug: agent.home }) : /* @__PURE__ */ jsx18("span", { children: t("ux.agent.common") }) }),
-      /* @__PURE__ */ jsx18("dt", { children: i.cards && i.cards.length + i.cardsMore > 1 ? t("insp.cards") : t("insp.card") }),
-      /* @__PURE__ */ jsx18("dd", { children: i.cards ? /* @__PURE__ */ jsxs15("span", { "data-insp-cards": true, style: { display: "flex", flexDirection: "column", gap: 6 }, children: [
-        i.cards.map((c) => /* @__PURE__ */ jsx18(CardRow, { c, nowMs, t }, `${c.board}/${c.id}`)),
-        i.cardsMore ? /* @__PURE__ */ jsx18("small", { children: t("insp.more", i.cardsMore) }) : null
-      ] }) : i.current ? /* @__PURE__ */ jsxs15("span", { "data-insp-card": true, children: [
-        /* @__PURE__ */ jsxs15("span", { className: "one", children: [
-          /* @__PURE__ */ jsx18("b", { className: "ux-mono", children: i.current.code }),
+    /* @__PURE__ */ jsxs16("dl", { className: "ux-kv", children: [
+      /* @__PURE__ */ jsx19("dt", { children: t("ux.agent.project") }),
+      /* @__PURE__ */ jsx19("dd", { children: agent.home ? /* @__PURE__ */ jsx19(ProjectChip, { slug: agent.home }) : /* @__PURE__ */ jsx19("span", { children: t("ux.agent.common") }) }),
+      /* @__PURE__ */ jsx19("dt", { children: i.cards && i.cards.length + i.cardsMore > 1 ? t("insp.cards") : t("insp.card") }),
+      /* @__PURE__ */ jsx19("dd", { children: i.cards ? /* @__PURE__ */ jsxs16("span", { "data-insp-cards": true, style: { display: "flex", flexDirection: "column", gap: 6 }, children: [
+        i.cards.map((c) => /* @__PURE__ */ jsx19(CardRow, { c, nowMs, t }, `${c.board}/${c.id}`)),
+        i.cardsMore ? /* @__PURE__ */ jsx19("small", { children: t("insp.more", i.cardsMore) }) : null
+      ] }) : i.current ? /* @__PURE__ */ jsxs16("span", { "data-insp-card": true, children: [
+        /* @__PURE__ */ jsxs16("span", { className: "one", children: [
+          /* @__PURE__ */ jsx19("b", { className: "ux-mono", children: i.current.code }),
           i.current.title && i.current.title !== i.current.code ? ` ${i.current.title}` : ""
         ] }),
-        i.current.startedMs ? /* @__PURE__ */ jsx18("small", { children: formatSpan(nowMs - i.current.startedMs) }) : null
-      ] }) : /* @__PURE__ */ jsx18("span", { children: boardsKnown(office) ? t("insp.noCard") : t("panel.needsAgentHalf") }) }),
-      i.waiting.length ? /* @__PURE__ */ jsxs15(Fragment10, { children: [
-        /* @__PURE__ */ jsx18("dt", { children: t("insp.waiting") }),
-        /* @__PURE__ */ jsxs15("dd", { "data-insp-waiting": true, children: [
-          i.waiting.map((w) => /* @__PURE__ */ jsxs15("span", { className: "one", style: { display: "flex", flexWrap: "wrap", gap: "4px 8px", alignItems: "center" }, children: [
-            /* @__PURE__ */ jsx18(ProjectChip, { slug: w.board }),
-            /* @__PURE__ */ jsx18("b", { className: "ux-mono", children: w.code }),
-            /* @__PURE__ */ jsx18("button", { type: "button", className: "ux-lnk", onClick: () => onDecide(w.board), children: t("ux.agent.decide") })
+        i.current.startedMs ? /* @__PURE__ */ jsx19("small", { children: formatSpan(nowMs - i.current.startedMs) }) : null
+      ] }) : /* @__PURE__ */ jsx19("span", { children: boardsKnown(office) ? t("insp.noCard") : t("panel.needsAgentHalf") }) }),
+      i.waiting.length ? /* @__PURE__ */ jsxs16(Fragment11, { children: [
+        /* @__PURE__ */ jsx19("dt", { children: t("insp.waiting") }),
+        /* @__PURE__ */ jsxs16("dd", { "data-insp-waiting": true, children: [
+          i.waiting.map((w) => /* @__PURE__ */ jsxs16("span", { className: "one", style: { display: "flex", flexWrap: "wrap", gap: "4px 8px", alignItems: "center" }, children: [
+            /* @__PURE__ */ jsx19(ProjectChip, { slug: w.board }),
+            /* @__PURE__ */ jsx19("b", { className: "ux-mono", children: w.code }),
+            /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-lnk", onClick: () => onDecide(w.board), children: t("ux.agent.decide") })
           ] }, `${w.board}/${w.code}`)),
-          i.waitingMore ? /* @__PURE__ */ jsx18("small", { children: t("insp.more", i.waitingMore) }) : null
+          i.waitingMore ? /* @__PURE__ */ jsx19("small", { children: t("insp.more", i.waitingMore) }) : null
         ] })
       ] }) : null,
-      /* @__PURE__ */ jsx18("dt", { children: t("insp.session") }),
-      /* @__PURE__ */ jsx18("dd", { children: i.session ? /* @__PURE__ */ jsxs15("span", { children: [
-        /* @__PURE__ */ jsx18("span", { className: "one", children: i.session.title || t(untitledKey(i.session)) }),
-        i.session.ms ? /* @__PURE__ */ jsx18("small", { children: t.ago(i.session.ms) }) : null
-      ] }) : /* @__PURE__ */ jsx18("span", { children: t("insp.noSession") }) }),
-      i.model ? /* @__PURE__ */ jsxs15(Fragment10, { children: [
-        /* @__PURE__ */ jsx18("dt", { children: t("insp.model") }),
-        /* @__PURE__ */ jsxs15("dd", { "data-insp-model": true, className: "ux-mono", children: [
-          /* @__PURE__ */ jsxs15("span", { className: "one", children: [
-            /* @__PURE__ */ jsx18(PixelBadge, { size: 10 }),
+      /* @__PURE__ */ jsx19("dt", { children: t("insp.session") }),
+      /* @__PURE__ */ jsx19("dd", { children: i.session ? /* @__PURE__ */ jsxs16("span", { children: [
+        /* @__PURE__ */ jsx19("span", { className: "one", children: i.session.title || t(untitledKey(i.session)) }),
+        i.session.ms ? /* @__PURE__ */ jsx19("small", { children: t.ago(i.session.ms) }) : null
+      ] }) : /* @__PURE__ */ jsx19("span", { children: t("insp.noSession") }) }),
+      i.model ? /* @__PURE__ */ jsxs16(Fragment11, { children: [
+        /* @__PURE__ */ jsx19("dt", { children: t("insp.model") }),
+        /* @__PURE__ */ jsxs16("dd", { "data-insp-model": true, className: "ux-mono", children: [
+          /* @__PURE__ */ jsxs16("span", { className: "one", children: [
+            /* @__PURE__ */ jsx19(PixelBadge, { size: 10 }),
             " ",
             t("insp.modelCard", i.model.card)
           ] }),
-          i.model.cardCode ? /* @__PURE__ */ jsx18("small", { "data-insp-model-on": true, children: t("insp.modelOn", i.model.cardCode) }) : null,
-          /* @__PURE__ */ jsx18("small", { children: t("insp.modelDefault", i.model.default) }),
-          i.model.actual ? /* @__PURE__ */ jsx18("small", { children: t("insp.modelActual", i.model.actual) }) : null
+          i.model.cardCode ? /* @__PURE__ */ jsx19("small", { "data-insp-model-on": true, children: t("insp.modelOn", i.model.cardCode) }) : null,
+          /* @__PURE__ */ jsx19("small", { children: t("insp.modelDefault", i.model.default) }),
+          i.model.actual ? /* @__PURE__ */ jsx19("small", { children: t("insp.modelActual", i.model.actual) }) : null
         ] })
       ] }) : null,
-      /* @__PURE__ */ jsx18(DescriptionRow, { agent: i.name, description: bot?.description ?? "", cut: bot?.cut === true, isDefault: bot?.isDefault === true, orders }),
-      i.skills.length ? /* @__PURE__ */ jsxs15(Fragment10, { children: [
-        /* @__PURE__ */ jsx18("dt", { children: t("insp.skills") }),
-        /* @__PURE__ */ jsx18("dd", { "data-insp-skills": true, children: /* @__PURE__ */ jsxs15("span", { className: "ux-chips", children: [
-          i.skills.map((s) => /* @__PURE__ */ jsx18("span", { className: "ux-chip2", title: s.category || void 0, children: /* @__PURE__ */ jsx18("span", { children: s.name }) }, s.name)),
-          i.skillsMore ? /* @__PURE__ */ jsxs15("span", { className: "ux-chip2", children: [
+      /* @__PURE__ */ jsx19(DescriptionRow, { agent: i.name, description: bot?.description ?? "", cut: bot?.cut === true, isDefault: bot?.isDefault === true, orders }),
+      i.skills.length ? /* @__PURE__ */ jsxs16(Fragment11, { children: [
+        /* @__PURE__ */ jsx19("dt", { children: t("insp.skills") }),
+        /* @__PURE__ */ jsx19("dd", { "data-insp-skills": true, children: /* @__PURE__ */ jsxs16("span", { className: "ux-chips", children: [
+          i.skills.map((s) => /* @__PURE__ */ jsx19("span", { className: "ux-chip2", title: s.category || void 0, children: /* @__PURE__ */ jsx19("span", { children: s.name }) }, s.name)),
+          i.skillsMore ? /* @__PURE__ */ jsxs16("span", { className: "ux-chip2", children: [
             "+",
             i.skillsMore
           ] }) : null
         ] }) })
       ] }) : null,
-      outfit.kind === "model" ? /* @__PURE__ */ jsxs15(Fragment10, { children: [
-        /* @__PURE__ */ jsx18("dt", { children: t("insp.role") }),
-        /* @__PURE__ */ jsx18("dd", { "data-insp-role": true, children: /* @__PURE__ */ jsxs15("small", { "data-insp-outfit": "model", children: [
+      outfit.kind === "model" ? /* @__PURE__ */ jsxs16(Fragment11, { children: [
+        /* @__PURE__ */ jsx19("dt", { children: t("insp.role") }),
+        /* @__PURE__ */ jsx19("dd", { "data-insp-role": true, children: /* @__PURE__ */ jsxs16("small", { "data-insp-outfit": "model", children: [
           t("llm.outfits.tip"),
           ". ",
           t("llm.outfits.source", outfit.at ? t.ago(outfit.at) : "")
         ] }) })
       ] }) : null
     ] }),
-    /* @__PURE__ */ jsx18("style", { children: LM_CSS }),
-    /* @__PURE__ */ jsxs15("div", { className: "ux-ag-act", children: [
-      /* @__PURE__ */ jsx18("button", { type: "button", className: "ux-b pri", "aria-disabled": !canOpen, title: why, onClick: () => onOpen(i.name), "data-insp-open": true, children: t("insp.open") }),
-      openKanban2 ? /* @__PURE__ */ jsxs15("button", { type: "button", className: "ux-b", onClick: () => openKanban2(), children: [
-        /* @__PURE__ */ jsx18(Icon, { name: "ext", size: 14 }),
+    /* @__PURE__ */ jsx19("style", { children: LM_CSS }),
+    /* @__PURE__ */ jsxs16("div", { className: "ux-ag-act", children: [
+      /* @__PURE__ */ jsx19(WhyButton, { className: "ux-b pri", reason: canOpen ? "" : why, title: why, onGo: () => onOpen(i.name), "data-insp-open": true, children: t("insp.open") }),
+      openKanban2 ? /* @__PURE__ */ jsxs16("button", { type: "button", className: "ux-b", onClick: () => openKanban2(), children: [
+        /* @__PURE__ */ jsx19(Icon, { name: "ext", size: 14 }),
         t("ux.prj.kanban")
       ] }) : null
     ] })
@@ -18879,32 +19035,48 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
 import { useMemo as useMemo6 } from "react";
 
 // src/ui/Approvals.jsx
-import { useCallback as useCallback6, useLayoutEffect as useLayoutEffect5, useRef as useRef15, useState as useState12 } from "react";
+import { useCallback as useCallback6, useLayoutEffect as useLayoutEffect7, useRef as useRef17, useState as useState15 } from "react";
 
 // src/ui/DecisionCard.jsx
-import { jsx as jsx19, jsxs as jsxs16 } from "react/jsx-runtime";
+import { useId as useId13, useLayoutEffect as useLayoutEffect6, useRef as useRef16, useState as useState14 } from "react";
+import { jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
 function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary: summary2, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
   const style = useProjectStyle(board);
   const old = isOld({ sinceMs }, nowMs);
   const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || "none"}`) : "";
   const who = agent || t("inbox.unassigned");
-  return /* @__PURE__ */ jsxs16("li", { className: `ux-dc${target2 ? " target" : ""}`, style, "data-decision": id, "data-kind": kind, "data-board": board || void 0, "data-unverified": unverified ? "" : void 0, "data-target": target2 ? "" : void 0, ...attrs, children: [
-    /* @__PURE__ */ jsxs16("div", { className: "ux-dc-top", children: [
-      grouped ? board ? /* @__PURE__ */ jsx19("span", { className: "ux-vh", children: board }) : null : /* @__PURE__ */ jsx19(ProjectChip, { slug: board, label: t("ux.dec.project") }),
-      kind === "approval" ? /* @__PURE__ */ jsx19("span", { className: "ux-kind", children: t("ux.dec.approval") }) : code ? /* @__PURE__ */ jsx19("span", { className: "code ux-mono", children: code }) : null,
-      sinceMs != null ? /* @__PURE__ */ jsxs16("span", { className: `ux-age${old ? " old" : ""}`, title: ageTip, "data-age": true, children: [
-        /* @__PURE__ */ jsx19(Icon, { name: "clock", size: 14 }),
+  const titleId = useId13();
+  const titleRef = useRef16(null);
+  const [whole, setWhole] = useState14(false);
+  const [cut3, setCut] = useState14(false);
+  useLayoutEffect6(() => {
+    const p = titleRef.current;
+    if (!p || whole) return void 0;
+    const measure = () => setCut(p.scrollHeight > p.clientHeight + 1);
+    measure();
+    if (typeof ResizeObserver !== "function") return void 0;
+    const ro = new ResizeObserver(measure);
+    ro.observe(p);
+    return () => ro.disconnect();
+  }, [title, whole]);
+  return /* @__PURE__ */ jsxs17("li", { className: `ux-dc${target2 ? " target" : ""}`, style, "data-decision": id, "data-kind": kind, "data-board": board || void 0, "data-unverified": unverified ? "" : void 0, "data-target": target2 ? "" : void 0, ...attrs, children: [
+    /* @__PURE__ */ jsxs17("div", { className: "ux-dc-top", children: [
+      grouped ? board ? /* @__PURE__ */ jsx20("span", { className: "ux-vh", children: board }) : null : /* @__PURE__ */ jsx20(ProjectChip, { slug: board, label: t("ux.dec.project") }),
+      kind === "approval" ? /* @__PURE__ */ jsx20("span", { className: "ux-kind", children: t("ux.dec.approval") }) : code ? /* @__PURE__ */ jsx20("span", { className: "code ux-mono", children: code }) : null,
+      sinceMs != null ? /* @__PURE__ */ jsxs17("span", { className: `ux-age${old ? " old" : ""}`, title: ageTip, "data-age": true, children: [
+        /* @__PURE__ */ jsx20(Icon, { name: "clock", size: 14 }),
         shortAge(nowMs - sinceMs, t("ux.dec.day"))
       ] }) : null,
       open
     ] }),
-    /* @__PURE__ */ jsx19("p", { className: "ux-dc-t", title, children: title }),
-    summary2 ? /* @__PURE__ */ jsx19("p", { className: "ux-dc-s", "data-approval-summary": true, children: summary2 }) : null,
+    /* @__PURE__ */ jsx20("p", { ref: titleRef, id: titleId, className: `ux-dc-t${whole ? " whole" : ""}`, title, children: title }),
+    cut3 || whole ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-lnk ux-dc-more", "data-dc-more": true, "aria-expanded": whole, "aria-controls": titleId, onClick: () => setWhole((v) => !v), children: whole ? t("ux.dec.less") : t("ux.dec.more") }) : null,
+    summary2 ? /* @__PURE__ */ jsx20("p", { className: "ux-dc-s", "data-approval-summary": true, children: summary2 }) : null,
     detail,
-    /* @__PURE__ */ jsxs16("div", { className: "ux-dc-who", children: [
-      sceneAgent ? /* @__PURE__ */ jsx19(Portrait, { agent: sceneAgent }) : null,
-      /* @__PURE__ */ jsx19("span", { className: "nm", children: whoText ?? who }),
-      role && !whoText ? /* @__PURE__ */ jsxs16("span", { className: "role", children: [
+    /* @__PURE__ */ jsxs17("div", { className: "ux-dc-who", children: [
+      sceneAgent ? /* @__PURE__ */ jsx20(Portrait, { agent: sceneAgent }) : null,
+      /* @__PURE__ */ jsx20("span", { className: "nm", children: whoText ?? who }),
+      role && !whoText ? /* @__PURE__ */ jsxs17("span", { className: "role", children: [
         "· ",
         role
       ] }) : null
@@ -18914,15 +19086,15 @@ function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summ
 }
 
 // src/ui/Approvals.jsx
-import { jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
+import { jsx as jsx21, jsxs as jsxs18 } from "react/jsx-runtime";
 function CommandBlock({ req, choice, read: read2, onRead, t }) {
   const panel = commandPanel(req, choice);
-  const box2 = useRef15(null);
+  const box2 = useRef17(null);
   const text3 = panel?.text ?? "";
   const check = useCallback6(() => {
     if (box2.current && readToEnd(box2.current)) onRead(true);
   }, [onRead]);
-  useLayoutEffect5(() => {
+  useLayoutEffect7(() => {
     onRead(false);
     const el = box2.current;
     if (!el) {
@@ -18937,11 +19109,11 @@ function CommandBlock({ req, choice, read: read2, onRead, t }) {
   }, [text3, check, onRead]);
   if (!panel) return null;
   const id = `oc-cmd-${req.requestId}`;
-  return /* @__PURE__ */ jsxs17("div", { className: "ux-cmd", "data-approval-command": true, children: [
-    /* @__PURE__ */ jsx20("p", { id, className: "lbl", children: t("approvals.commandLabel") }),
-    panel.missing ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-missing": true, children: t("approvals.commandMissing") }) : /* @__PURE__ */ jsx20("pre", { className: "ux-cmd-x ux-mono", ref: box2, tabIndex: 0, role: "group", "aria-labelledby": id, onScroll: check, children: panel.text }),
-    panel.cut ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-cut": true, children: t("approvals.commandCut") }) : null,
-    !panel.missing && !read2 ? /* @__PURE__ */ jsx20("p", { className: "fine", role: "status", "data-approval-command-scroll": true, children: t("approvals.commandScroll") }) : null
+  return /* @__PURE__ */ jsxs18("div", { className: "ux-cmd", "data-approval-command": true, children: [
+    /* @__PURE__ */ jsx21("p", { id, className: "lbl", children: t("approvals.commandLabel") }),
+    panel.missing ? /* @__PURE__ */ jsx21("p", { className: "fine", "data-approval-command-missing": true, children: t("approvals.commandMissing") }) : /* @__PURE__ */ jsx21("pre", { className: "ux-cmd-x ux-mono", ref: box2, tabIndex: 0, role: "group", "aria-labelledby": id, onScroll: check, children: panel.text }),
+    panel.cut ? /* @__PURE__ */ jsx21("p", { className: "fine", "data-approval-command-cut": true, children: t("approvals.commandCut") }) : null,
+    !panel.missing && !read2 ? /* @__PURE__ */ jsx21("p", { className: "fine", role: "status", "data-approval-command-scroll": true, children: t("approvals.commandScroll") }) : null
   ] });
 }
 function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFollowUp, t }) {
@@ -18950,15 +19122,15 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
   const phase = orders.state.phase;
   const mine = o?.verb === "approval" && o.sessionId === req.sessionId && o.requestId === req.requestId;
   const busy = isBusy(orders.state);
-  const [more, setMore] = useState12(false);
-  const [read2, setRead] = useState12(false);
+  const [more, setMore] = useState15(false);
+  const [read2, setRead] = useState15(false);
   const locked = denyOnly(req);
   const who = req.profile || t("approvals.unknownAgent");
   const where = req.title || t("approvals.untitled");
   const allowed = CHOICES.filter((c) => req.choices.includes(c));
   const main = allowed.filter((c) => c === "deny" || c === "once");
   const rest3 = allowed.filter((c) => c !== "deny" && c !== "once");
-  const button = (c) => /* @__PURE__ */ jsxs17(
+  const button = (c) => /* @__PURE__ */ jsxs18(
     "button",
     {
       type: "button",
@@ -18969,7 +19141,7 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
       onClick: () => orders.requestApproval(req, c),
       children: [
         t(`approvals.choice.${c}`),
-        /* @__PURE__ */ jsx20(RiskDot, { risk: choiceRisk(c), t })
+        /* @__PURE__ */ jsx21(RiskDot, { risk: choiceRisk(c), t })
       ]
     },
     c
@@ -18977,7 +19149,7 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
   const showConfirm = mine && phase === "confirm";
   const firstLine = showConfirm ? "" : commandLine(req.command);
   const showProgress = mine && (phase === "counting" || phase === "sending" || phase === "verifying" || phase === "done");
-  return /* @__PURE__ */ jsxs17(
+  return /* @__PURE__ */ jsxs18(
     DecisionFrame,
     {
       id: req.requestId,
@@ -18987,7 +19159,7 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
       kind: "approval",
       title: where,
       summary: req.summary || t("approvals.noSummary"),
-      detail: firstLine ? /* @__PURE__ */ jsx20("p", { className: "ux-dc-c ux-mono", "data-approval-command-line": true, children: firstLine }) : null,
+      detail: firstLine ? /* @__PURE__ */ jsx21("p", { className: "ux-dc-c ux-mono", "data-approval-command-line": true, children: firstLine }) : null,
       sinceMs: req.firstSeenMs,
       ageTip: t("approvals.asked", t.ago(req.firstSeenMs)),
       nowMs,
@@ -18998,70 +19170,70 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
       unverified: req.unverified,
       t,
       children: [
-        req.unverified ? /* @__PURE__ */ jsx20("span", { className: "ux-kind", "data-approval-unverified": true, title: t("approvals.unverifiedTip"), children: t("approvals.unverified") }) : null,
-        allowed.map((c) => /* @__PURE__ */ jsx20("span", { id: `oc-ch-${req.requestId}-${c}`, className: "ux-vh", children: t(`approvals.explain.${c}`) }, c)),
-        !showConfirm ? /* @__PURE__ */ jsxs17("div", { className: "ux-dc-o", role: "group", "aria-label": t("approvals.choicesLabel", who), children: [
+        req.unverified ? /* @__PURE__ */ jsx21("span", { className: "ux-kind", "data-approval-unverified": true, title: t("approvals.unverifiedTip"), children: t("approvals.unverified") }) : null,
+        allowed.map((c) => /* @__PURE__ */ jsx21("span", { id: `oc-ch-${req.requestId}-${c}`, className: "ux-vh", children: t(`approvals.explain.${c}`) }, c)),
+        !showConfirm ? /* @__PURE__ */ jsxs18("div", { className: "ux-dc-o", role: "group", "aria-label": t("approvals.choicesLabel", who), children: [
           main.map(button),
-          rest3.length ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-b sm ico more", "aria-expanded": more, "aria-label": t("ux.dec.moreChoices"), onClick: () => setMore((v) => !v), children: /* @__PURE__ */ jsx20(Icon, { name: "more", size: 14 }) }) : null
+          rest3.length ? /* @__PURE__ */ jsx21("button", { type: "button", className: "ux-b sm ico more", "aria-expanded": more, "aria-label": t("ux.dec.moreChoices"), onClick: () => setMore((v) => !v), children: /* @__PURE__ */ jsx21(Icon, { name: "more", size: 14 }) }) : null
         ] }) : null,
-        more && rest3.length && !showConfirm ? /* @__PURE__ */ jsx20("div", { className: "ux-ch-extra", children: rest3.map(button) }) : null,
-        locked && !showConfirm ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-deny-only": true, children: t(locked === "cut" ? "approvals.denyOnlyCut" : "approvals.denyOnlyMissing") }) : null,
-        showConfirm ? /* @__PURE__ */ jsx20(OrderConfirm, { orders, blocked: !read2, children: /* @__PURE__ */ jsx20(CommandBlock, { req, choice: o.choice, read: read2, onRead: setRead, t }) }) : null,
-        showProgress ? /* @__PURE__ */ jsx20(OrderProgress, { orders, onModelFollowUp }) : null
+        more && rest3.length && !showConfirm ? /* @__PURE__ */ jsx21("div", { className: "ux-ch-extra", children: rest3.map(button) }) : null,
+        locked && !showConfirm ? /* @__PURE__ */ jsx21("p", { className: "fine", "data-approval-deny-only": true, children: t(locked === "cut" ? "approvals.denyOnlyCut" : "approvals.denyOnlyMissing") }) : null,
+        showConfirm ? /* @__PURE__ */ jsx21(OrderConfirm, { orders, blocked: !read2, children: /* @__PURE__ */ jsx21(CommandBlock, { req, choice: o.choice, read: read2, onRead: setRead, t }) }) : null,
+        showProgress ? /* @__PURE__ */ jsx21(OrderProgress, { orders, onModelFollowUp }) : null
       ]
     }
   );
 }
 
 // src/ui/DecisionsTab.jsx
-import { jsx as jsx21, jsxs as jsxs18 } from "react/jsx-runtime";
+import { jsx as jsx22, jsxs as jsxs19 } from "react/jsx-runtime";
 function ModelPin({ pin, t }) {
   if (!pin) return null;
   const m = pin.model || pin.provider;
-  return /* @__PURE__ */ jsxs18("span", { className: "ux-dc-pin ux-mono", title: `${t("chains.pinned")}: ${m} (${pin.default.model || pin.default.provider || "—"})`, children: [
-    /* @__PURE__ */ jsx21(PixelBadge, { size: 9 }),
-    /* @__PURE__ */ jsx21("span", { children: m })
+  return /* @__PURE__ */ jsxs19("span", { className: "ux-dc-pin ux-mono", title: `${t("chains.pinned")}: ${m} (${pin.default.model || pin.default.provider || "—"})`, children: [
+    /* @__PURE__ */ jsx22(PixelBadge, { size: 9 }),
+    /* @__PURE__ */ jsx22("span", { children: m })
   ] });
 }
 function GroupHead({ slug, count: count2, t }) {
   const style = useProjectStyle(slug);
-  return /* @__PURE__ */ jsxs18("h3", { className: "ux-grp", style, "data-group": slug ?? "", children: [
-    /* @__PURE__ */ jsx21("span", { className: "sq", "aria-hidden": "true" }),
-    /* @__PURE__ */ jsx21("span", { className: "nm", children: slug ?? t("ux.dec.noProject") }),
-    /* @__PURE__ */ jsx21("span", { className: "n", children: t("ux.dec.group", count2) }),
-    /* @__PURE__ */ jsx21("span", { className: "ln", "aria-hidden": "true" })
+  return /* @__PURE__ */ jsxs19("h3", { className: "ux-grp", style, "data-group": slug ?? "", children: [
+    /* @__PURE__ */ jsx22("span", { className: "sq", "aria-hidden": "true" }),
+    /* @__PURE__ */ jsx22("span", { className: "nm", children: slug ?? t("ux.dec.noProject") }),
+    /* @__PURE__ */ jsx22("span", { className: "n", children: t("ux.dec.group", count2) }),
+    /* @__PURE__ */ jsx22("span", { className: "ln", "aria-hidden": "true" })
   ] });
 }
 function ListHelp({ t }) {
-  return /* @__PURE__ */ jsxs18(Help, { label: t("ux.dec.helpTitle"), title: t("ux.dec.helpTitle"), children: [
-    /* @__PURE__ */ jsxs18("p", { className: "rowk", children: [
-      /* @__PURE__ */ jsx21("span", { className: "ux-rk ux-rk-final", "aria-hidden": "true" }),
-      /* @__PURE__ */ jsxs18("span", { children: [
-        /* @__PURE__ */ jsx21("b", { children: t("orders.risk.final") }),
+  return /* @__PURE__ */ jsxs19(Help, { label: t("ux.dec.helpTitle"), title: t("ux.dec.helpTitle"), children: [
+    /* @__PURE__ */ jsxs19("p", { className: "rowk", children: [
+      /* @__PURE__ */ jsx22("span", { className: "ux-rk ux-rk-final", "aria-hidden": "true" }),
+      /* @__PURE__ */ jsxs19("span", { children: [
+        /* @__PURE__ */ jsx22("b", { children: t("orders.risk.final") }),
         ". ",
         t("ux.dec.helpFinal")
       ] })
     ] }),
-    /* @__PURE__ */ jsxs18("p", { className: "rowk", children: [
-      /* @__PURE__ */ jsx21("span", { className: "ux-rk ux-rk-rev", "aria-hidden": "true" }),
-      /* @__PURE__ */ jsxs18("span", { children: [
-        /* @__PURE__ */ jsx21("b", { children: t("orders.risk.rev") }),
+    /* @__PURE__ */ jsxs19("p", { className: "rowk", children: [
+      /* @__PURE__ */ jsx22("span", { className: "ux-rk ux-rk-rev", "aria-hidden": "true" }),
+      /* @__PURE__ */ jsxs19("span", { children: [
+        /* @__PURE__ */ jsx22("b", { children: t("orders.risk.rev") }),
         ". ",
         t("orders.riskTip.rev")
       ] })
     ] }),
-    /* @__PURE__ */ jsxs18("p", { className: "rowk", children: [
-      /* @__PURE__ */ jsx21("span", { className: "ux-rk ux-rk-safe", "aria-hidden": "true" }),
-      /* @__PURE__ */ jsxs18("span", { children: [
-        /* @__PURE__ */ jsx21("b", { children: t("orders.risk.safe") }),
+    /* @__PURE__ */ jsxs19("p", { className: "rowk", children: [
+      /* @__PURE__ */ jsx22("span", { className: "ux-rk ux-rk-safe", "aria-hidden": "true" }),
+      /* @__PURE__ */ jsxs19("span", { children: [
+        /* @__PURE__ */ jsx22("b", { children: t("orders.risk.safe") }),
         ". ",
         t("ux.dec.helpSafe")
       ] })
     ] }),
-    /* @__PURE__ */ jsx21("p", { children: t("ux.dec.helpOne") }),
-    /* @__PURE__ */ jsx21("p", { children: t("ux.dec.helpAge") }),
-    /* @__PURE__ */ jsx21("p", { children: t("ux.dec.helpApprovalProject") }),
-    /* @__PURE__ */ jsx21("p", { className: "src", children: t("approvals.commandNote") })
+    /* @__PURE__ */ jsx22("p", { children: t("ux.dec.helpOne") }),
+    /* @__PURE__ */ jsx22("p", { children: t("ux.dec.helpAge") }),
+    /* @__PURE__ */ jsx22("p", { children: t("ux.dec.helpApprovalProject") }),
+    /* @__PURE__ */ jsx22("p", { className: "src", children: t("approvals.commandNote") })
   ] });
 }
 function DecisionsTab({ office, history, orders, writes, openCard, approvals = [], answer = null, nowMs, project: project2, onProject, sort, onSort, sceneBy, onModelFollowUp, t }) {
@@ -19078,7 +19250,7 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
     const c = row.card;
     const age2 = c.blockedMs ? t("inbox.blockedSince", t.ago(c.blockedMs)) : c.createdMs ? t("inbox.created", t.ago(c.createdMs)) : "";
     const guard = c.guard === true;
-    return /* @__PURE__ */ jsxs18(
+    return /* @__PURE__ */ jsxs19(
       DecisionFrame,
       {
         id: c.id,
@@ -19094,47 +19266,47 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
         nowMs,
         agent: c.assignee,
         sceneAgent: sceneBy.get(c.assignee),
-        open: /* @__PURE__ */ jsx21(CardOpen, { item: c, openKanban: open, openSession: openCard?.session(c) ?? null, t }),
+        open: /* @__PURE__ */ jsx22(CardOpen, { item: c, openKanban: open, openSession: openCard?.session(c) ?? null, t }),
         target: targeted(c),
         t,
         children: [
-          /* @__PURE__ */ jsx21(ModelPin, { pin: c.pin, t }),
-          orders ? /* @__PURE__ */ jsx21(CardOrders, { item: c, orders, writes, onModelFollowUp, t }) : null
+          /* @__PURE__ */ jsx22(ModelPin, { pin: c.pin, t }),
+          orders ? /* @__PURE__ */ jsx22(CardOrders, { item: c, orders, writes, onModelFollowUp, t }) : null
         ]
       },
       row.key
     );
   };
-  const one = (row) => row.kind === "approval" ? /* @__PURE__ */ jsx21(ApprovalRow, { row, orders: answer, nowMs, grouped, sceneAgent: sceneBy.get(row.req.profile), onModelFollowUp, t }, row.key) : card(row);
-  const list = (rs) => /* @__PURE__ */ jsx21("ul", { className: "ux-dcl", children: rs.map(one) });
+  const one = (row) => row.kind === "approval" ? /* @__PURE__ */ jsx22(ApprovalRow, { row, orders: answer, nowMs, grouped, sceneAgent: sceneBy.get(row.req.profile), onModelFollowUp, t }, row.key) : card(row);
+  const list = (rs) => /* @__PURE__ */ jsx22("ul", { className: "ux-dcl", children: rs.map(one) });
   const groups = grouped ? groupRows(shown) : null;
   const empty = !shown.length;
-  return /* @__PURE__ */ jsxs18("section", { "data-inbox": true, "data-count": view.total, "aria-label": t("ux.tab.decisions"), children: [
-    /* @__PURE__ */ jsxs18("div", { className: "ux-pbar", children: [
-      /* @__PURE__ */ jsx21("span", { className: "lbl", id: "ux-sort-l", children: t("ux.dec.sort") }),
-      /* @__PURE__ */ jsxs18("span", { className: "ux-seg", role: "group", "aria-labelledby": "ux-sort-l", children: [
-        /* @__PURE__ */ jsx21("button", { type: "button", "aria-pressed": sort === "project", "data-sort": "project", onClick: () => onSort("project"), children: t("ux.dec.byProject") }),
-        /* @__PURE__ */ jsx21("button", { type: "button", "aria-pressed": sort === "age", "data-sort": "age", onClick: () => onSort("age"), children: t("ux.dec.byAge") })
+  return /* @__PURE__ */ jsxs19("section", { "data-inbox": true, "data-count": view.total, "aria-label": t("ux.tab.decisions"), children: [
+    /* @__PURE__ */ jsxs19("div", { className: "ux-pbar", children: [
+      /* @__PURE__ */ jsx22("span", { className: "lbl", id: "ux-sort-l", children: t("ux.dec.sort") }),
+      /* @__PURE__ */ jsxs19("span", { className: "ux-seg", role: "group", "aria-labelledby": "ux-sort-l", children: [
+        /* @__PURE__ */ jsx22("button", { type: "button", "aria-pressed": sort === "project", "data-sort": "project", onClick: () => onSort("project"), children: t("ux.dec.byProject") }),
+        /* @__PURE__ */ jsx22("button", { type: "button", "aria-pressed": sort === "age", "data-sort": "age", onClick: () => onSort("age"), children: t("ux.dec.byAge") })
       ] }),
-      project2 ? /* @__PURE__ */ jsx21(FilterChip, { slug: project2, onClear: () => onProject(null), t }) : null,
-      /* @__PURE__ */ jsx21("span", { className: project2 ? "" : "grow", children: /* @__PURE__ */ jsx21(ListHelp, { t }) })
+      project2 ? /* @__PURE__ */ jsx22(FilterChip, { slug: project2, onClear: () => onProject(null), t }) : null,
+      /* @__PURE__ */ jsx22("span", { className: project2 ? "" : "grow", children: /* @__PURE__ */ jsx22(ListHelp, { t }) })
     ] }),
-    empty ? /* @__PURE__ */ jsxs18("p", { className: "ux-empty", "data-empty": true, children: [
-      /* @__PURE__ */ jsx21(Icon, { name: "inbox", size: 32 }),
-      /* @__PURE__ */ jsx21("span", { children: !known2 ? t("panel.needsAgentHalf") : project2 && rows.length ? t("ux.dec.emptyFiltered") : t(office.boards.length ? "inbox.empty" : "inbox.noBoard") })
-    ] }) : groups ? groups.map((g) => /* @__PURE__ */ jsxs18("div", { children: [
-      /* @__PURE__ */ jsx21(GroupHead, { slug: g.slug, count: g.count, t }),
+    empty ? /* @__PURE__ */ jsxs19("p", { className: "ux-empty", "data-empty": true, children: [
+      /* @__PURE__ */ jsx22(Icon, { name: "inbox", size: 32 }),
+      /* @__PURE__ */ jsx22("span", { children: !known2 ? t("panel.needsAgentHalf") : project2 && rows.length ? t("ux.dec.emptyFiltered") : t(office.boards.length ? "inbox.empty" : "inbox.noBoard") })
+    ] }) : groups ? groups.map((g) => /* @__PURE__ */ jsxs19("div", { children: [
+      /* @__PURE__ */ jsx22(GroupHead, { slug: g.slug, count: g.count, t }),
       list(g.rows)
     ] }, g.slug ?? "-")) : list(shown),
-    view.more ? /* @__PURE__ */ jsx21("p", { className: "ux-more", "data-inbox-more": true, children: t("inbox.more", view.more) }) : null
+    view.more ? /* @__PURE__ */ jsx22("p", { className: "ux-more", "data-inbox-more": true, children: t("inbox.more", view.more) }) : null
   ] });
 }
 function FilterChip({ slug, onClear, t }) {
   const style = useProjectStyle(slug);
-  return /* @__PURE__ */ jsxs18("button", { type: "button", className: "ux-prj ux-prjx grow", style, "data-filter-chip": true, onClick: onClear, "aria-label": t("ux.dec.unfilter", slug), children: [
-    /* @__PURE__ */ jsx21("i", { "aria-hidden": "true" }),
-    /* @__PURE__ */ jsx21("span", { children: slug }),
-    /* @__PURE__ */ jsx21(Icon, { name: "x", size: 12 })
+  return /* @__PURE__ */ jsxs19("button", { type: "button", className: "ux-prj ux-prjx grow", style, "data-filter-chip": true, onClick: onClear, "aria-label": t("ux.dec.unfilter", slug), children: [
+    /* @__PURE__ */ jsx22("i", { "aria-hidden": "true" }),
+    /* @__PURE__ */ jsx22("span", { children: slug }),
+    /* @__PURE__ */ jsx22(Icon, { name: "x", size: 12 })
   ] });
 }
 
@@ -19142,7 +19314,7 @@ function FilterChip({ slug, onClear, t }) {
 import { useMemo as useMemo7 } from "react";
 
 // src/ui/NightCard.jsx
-import { Fragment as Fragment11, jsx as jsx22, jsxs as jsxs19 } from "react/jsx-runtime";
+import { Fragment as Fragment12, jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
 var TILES = [
   ["runs", "start", ""],
   ["done", "done", "done"],
@@ -19154,7 +19326,7 @@ var TILES = [
 function Chart({ buckets, label }) {
   const top = Math.max(1, ...buckets.map((b) => b.done + b.blocked + b.failures));
   const n = buckets.length;
-  return /* @__PURE__ */ jsx22("svg", { className: "oc-nt-chart", viewBox: `0 0 ${n} 20`, preserveAspectRatio: "none", role: "img", "aria-label": label, children: buckets.map((b, i) => {
+  return /* @__PURE__ */ jsx23("svg", { className: "oc-nt-chart", viewBox: `0 0 ${n} 20`, preserveAspectRatio: "none", role: "img", "aria-label": label, children: buckets.map((b, i) => {
     const sum = b.done + b.blocked + b.failures;
     if (!sum) return null;
     const h = Math.max(2, sum / top * 18);
@@ -19163,9 +19335,9 @@ function Chart({ buckets, label }) {
       if (!v) return null;
       const hh = v / sum * h;
       y -= hh;
-      return /* @__PURE__ */ jsx22("rect", { className: cls, x: i + 0.08, y, width: 0.84, height: hh }, cls);
+      return /* @__PURE__ */ jsx23("rect", { className: cls, x: i + 0.08, y, width: 0.84, height: hh }, cls);
     };
-    return /* @__PURE__ */ jsxs19("g", { children: [
+    return /* @__PURE__ */ jsxs20("g", { children: [
       seg("d-done", b.done),
       seg("d-block", b.blocked),
       seg("d-fail", b.failures)
@@ -19186,16 +19358,16 @@ function NightCard({ summary: summary2, kind = "night", t, onShow = null, onRepl
   ];
   const peak = Math.max(1, ...summary2.byProfile.map((p) => p.runs));
   const u = summary2.usage;
-  return /* @__PURE__ */ jsxs19("section", { className: "oc-psec oc-nt", "aria-labelledby": headingId, "data-night": true, "data-empty": summary2.empty ? "" : void 0, children: [
-    /* @__PURE__ */ jsx22("h3", { id: headingId, children: t(kind === "night" ? "replay.night.title" : `replay.windowKind.${kind}`) }),
-    /* @__PURE__ */ jsxs19("div", { className: "oc-nt-head", children: [
-      /* @__PURE__ */ jsx22("span", { className: "oc-faint", "data-night-range": true, children: t("replay.night.range", label(summary2.from), label(summary2.to)) }),
-      summary2.ongoing ? /* @__PURE__ */ jsx22("span", { className: "oc-tag", "data-night-ongoing": true, children: t("replay.night.ongoing") }) : null
+  return /* @__PURE__ */ jsxs20("section", { className: "oc-psec oc-nt", "aria-labelledby": headingId, "data-night": true, "data-empty": summary2.empty ? "" : void 0, children: [
+    /* @__PURE__ */ jsx23("h3", { id: headingId, children: t(kind === "night" ? "replay.night.title" : `replay.windowKind.${kind}`) }),
+    /* @__PURE__ */ jsxs20("div", { className: "oc-nt-head", children: [
+      /* @__PURE__ */ jsx23("span", { className: "oc-faint", "data-night-range": true, children: t("replay.night.range", label(summary2.from), label(summary2.to)) }),
+      summary2.ongoing ? /* @__PURE__ */ jsx23("span", { className: "oc-tag", "data-night-ongoing": true, children: t("replay.night.ongoing") }) : null
     ] }),
-    summary2.empty ? /* @__PURE__ */ jsx22("p", { className: "oc-hint oc-dashed", "data-night-none": true, children: t("replay.night.none") }) : /* @__PURE__ */ jsxs19(Fragment11, { children: [
-      /* @__PURE__ */ jsx22("div", { className: "oc-nt-grid", role: "group", "aria-label": t("replay.night.title"), children: tiles.map(([key, group, tone, n, text3, detail]) => {
+    summary2.empty ? /* @__PURE__ */ jsx23("p", { className: "oc-hint oc-dashed", "data-night-none": true, children: t("replay.night.none") }) : /* @__PURE__ */ jsxs20(Fragment12, { children: [
+      /* @__PURE__ */ jsx23("div", { className: "oc-nt-grid", role: "group", "aria-label": t("replay.night.title"), children: tiles.map(([key, group, tone, n, text3, detail]) => {
         const can = onShow && n > 0;
-        return /* @__PURE__ */ jsxs19(
+        return /* @__PURE__ */ jsxs20(
           "button",
           {
             type: "button",
@@ -19206,8 +19378,8 @@ function NightCard({ summary: summary2, kind = "night", t, onShow = null, onRepl
             title: can ? t("replay.night.show") : void 0,
             onClick: can ? () => onShow(group) : void 0,
             children: [
-              /* @__PURE__ */ jsx22("b", { children: nf.format(n) }),
-              /* @__PURE__ */ jsxs19("span", { children: [
+              /* @__PURE__ */ jsx23("b", { children: nf.format(n) }),
+              /* @__PURE__ */ jsxs20("span", { children: [
                 text3,
                 detail ? ` · ${detail}` : ""
               ] })
@@ -19216,37 +19388,37 @@ function NightCard({ summary: summary2, kind = "night", t, onShow = null, onRepl
           key
         );
       }) }),
-      summary2.buckets.some((b) => b.done || b.blocked || b.failures) ? /* @__PURE__ */ jsxs19(Fragment11, { children: [
-        /* @__PURE__ */ jsx22(Chart, { buckets: summary2.buckets, label: t("replay.night.chart") }),
-        /* @__PURE__ */ jsxs19("div", { className: "oc-nt-ends", "aria-hidden": "true", children: [
-          /* @__PURE__ */ jsx22("span", { children: label(summary2.from) }),
-          /* @__PURE__ */ jsx22("span", { children: label(summary2.to) })
+      summary2.buckets.some((b) => b.done || b.blocked || b.failures) ? /* @__PURE__ */ jsxs20(Fragment12, { children: [
+        /* @__PURE__ */ jsx23(Chart, { buckets: summary2.buckets, label: t("replay.night.chart") }),
+        /* @__PURE__ */ jsxs20("div", { className: "oc-nt-ends", "aria-hidden": "true", children: [
+          /* @__PURE__ */ jsx23("span", { children: label(summary2.from) }),
+          /* @__PURE__ */ jsx23("span", { children: label(summary2.to) })
         ] })
       ] }) : null,
-      summary2.byProfile.length ? /* @__PURE__ */ jsxs19("div", { "data-night-agents": true, children: [
-        /* @__PURE__ */ jsx22("h4", { className: "oc-faint", style: { margin: "4px 0" }, children: t("replay.night.byAgent") }),
-        /* @__PURE__ */ jsx22("ul", { className: "oc-nt-agents", children: summary2.byProfile.slice(0, 8).map((p) => /* @__PURE__ */ jsxs19("li", { "data-profile": p.profile ?? "", children: [
-          /* @__PURE__ */ jsx22("b", { title: p.profile ?? void 0, children: p.profile ?? "—" }),
-          /* @__PURE__ */ jsx22("span", { className: "oc-nt-bar", "data-runs": p.runs, style: { width: `${Math.max(4, p.runs / peak * 100)}%` }, "aria-hidden": "true" }),
-          /* @__PURE__ */ jsx22("span", { className: "oc-faint", children: t("replay.night.agentRuns", p.runs, p.calls == null ? null : nf.format(p.calls)) })
+      summary2.byProfile.length ? /* @__PURE__ */ jsxs20("div", { "data-night-agents": true, children: [
+        /* @__PURE__ */ jsx23("h4", { className: "oc-faint", style: { margin: "4px 0" }, children: t("replay.night.byAgent") }),
+        /* @__PURE__ */ jsx23("ul", { className: "oc-nt-agents", children: summary2.byProfile.slice(0, 8).map((p) => /* @__PURE__ */ jsxs20("li", { "data-profile": p.profile ?? "", children: [
+          /* @__PURE__ */ jsx23("b", { title: p.profile ?? void 0, children: p.profile ?? "—" }),
+          /* @__PURE__ */ jsx23("span", { className: "oc-nt-bar", "data-runs": p.runs, style: { width: `${Math.max(4, p.runs / peak * 100)}%` }, "aria-hidden": "true" }),
+          /* @__PURE__ */ jsx23("span", { className: "oc-faint", children: t("replay.night.agentRuns", p.runs, p.calls == null ? null : nf.format(p.calls)) })
         ] }, p.profile ?? "—")) })
       ] }) : null,
-      summary2.runs ? /* @__PURE__ */ jsxs19("div", { "data-night-usage": true, children: [
-        /* @__PURE__ */ jsx22("h4", { className: "oc-faint", style: { margin: "4px 0" }, children: t("replay.night.usage") }),
-        /* @__PURE__ */ jsx22("p", { className: "oc-hint", children: u.runsWith ? t("replay.night.usageLine", nf.format(u.calls), compact.format(u.input), compact.format(u.output)) : t("replay.night.usageNone") }),
-        u.runsWith && u.runsWithout ? /* @__PURE__ */ jsx22("p", { className: "oc-faint", children: t("replay.night.usageMissing", u.runsWithout) }) : null,
-        /* @__PURE__ */ jsx22("p", { className: "oc-faint", children: t("replay.night.usageNote") })
+      summary2.runs ? /* @__PURE__ */ jsxs20("div", { "data-night-usage": true, children: [
+        /* @__PURE__ */ jsx23("h4", { className: "oc-faint", style: { margin: "4px 0" }, children: t("replay.night.usage") }),
+        /* @__PURE__ */ jsx23("p", { className: "oc-hint", children: u.runsWith ? t("replay.night.usageLine", nf.format(u.calls), compact.format(u.input), compact.format(u.output)) : t("replay.night.usageNone") }),
+        u.runsWith && u.runsWithout ? /* @__PURE__ */ jsx23("p", { className: "oc-faint", children: t("replay.night.usageMissing", u.runsWithout) }) : null,
+        /* @__PURE__ */ jsx23("p", { className: "oc-faint", children: t("replay.night.usageNote") })
       ] }) : null
     ] }),
-    summary2.since.map((s) => /* @__PURE__ */ jsx22("p", { className: "oc-faint", "data-night-since": s.slug, children: t("replay.night.since", s.slug, label(s.sinceMs)) }, s.slug)),
-    summary2.truncatedAt ? /* @__PURE__ */ jsx22("p", { className: "oc-faint", "data-night-truncated": true, children: t("replay.night.truncated", label(summary2.truncatedAt)) }) : null,
-    onReplay ? /* @__PURE__ */ jsx22("button", { type: "button", className: "oc-btn oc-nt-go", "data-night-replay": true, onClick: onReplay, children: t("replay.night.replay") }) : null,
-    /* @__PURE__ */ jsx22("p", { className: "oc-faint", children: t("replay.night.refresh") })
+    summary2.since.map((s) => /* @__PURE__ */ jsx23("p", { className: "oc-faint", "data-night-since": s.slug, children: t("replay.night.since", s.slug, label(s.sinceMs)) }, s.slug)),
+    summary2.truncatedAt ? /* @__PURE__ */ jsx23("p", { className: "oc-faint", "data-night-truncated": true, children: t("replay.night.truncated", label(summary2.truncatedAt)) }) : null,
+    onReplay ? /* @__PURE__ */ jsx23("button", { type: "button", className: "oc-btn oc-nt-go", "data-night-replay": true, onClick: onReplay, children: t("replay.night.replay") }) : null,
+    /* @__PURE__ */ jsx23("p", { className: "oc-faint", children: t("replay.night.refresh") })
   ] });
 }
 
 // src/ui/JournalTab.jsx
-import { jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
+import { jsx as jsx24, jsxs as jsxs21 } from "react/jsx-runtime";
 var FILTERS = ["all", "card", "order", "game"];
 var KIND_ICON = { completed: ["check", "ok"], blocked: ["warn", "w"], unblocked: ["unlock", ""], review_requested: ["msg", ""], changes_requested: ["msg", "w"], crashed: ["crit", "ko"], timed_out: ["crit", "ko"] };
 function JournalTab({ history, office, game, journal, night, project: project2, filter, onFilter, nowMs, readMs, t }) {
@@ -19265,37 +19437,37 @@ function JournalTab({ history, office, game, journal, night, project: project2, 
   }, [history, office, game, journal, project2, filter, t]);
   const label = { all: t("ux.jn.all"), card: t("ux.jn.cards"), order: t("ux.jn.orders"), game: t("ux.jn.trophies") };
   const shown = FILTERS.filter((k) => k !== "order" || journal?.served).filter((k) => k !== "game" || game && !game.sober);
-  return /* @__PURE__ */ jsxs20("section", { "data-journal": true, "aria-label": t("ux.tab.journal"), children: [
-    night ? /* @__PURE__ */ jsx23("div", { className: "ux-nightc", children: /* @__PURE__ */ jsx23(NightCardHost, { night, t }) }) : null,
-    /* @__PURE__ */ jsxs20("div", { className: "ux-pbar", children: [
-      /* @__PURE__ */ jsx23("span", { className: "ux-seg", role: "group", "aria-label": t("ux.jn.filter"), children: shown.map((k) => /* @__PURE__ */ jsx23("button", { type: "button", "aria-pressed": filter === k, "data-jf": k, onClick: () => onFilter(k), children: label[k] }, k)) }),
-      /* @__PURE__ */ jsx23("span", { className: "grow", children: /* @__PURE__ */ jsxs20(Help, { label: t("ux.jn.helpTitle"), title: t("ux.jn.helpTitle"), children: [
-        /* @__PURE__ */ jsx23("p", { children: t("ux.jn.help") }),
-        /* @__PURE__ */ jsx23("p", { className: "src", children: t("orders.journalNote") })
+  return /* @__PURE__ */ jsxs21("section", { "data-journal": true, "aria-label": t("ux.tab.journal"), children: [
+    night ? /* @__PURE__ */ jsx24("div", { className: "ux-nightc", children: /* @__PURE__ */ jsx24(NightCardHost, { night, t }) }) : null,
+    /* @__PURE__ */ jsxs21("div", { className: "ux-pbar", children: [
+      /* @__PURE__ */ jsx24("span", { className: "ux-seg", role: "group", "aria-label": t("ux.jn.filter"), children: shown.map((k) => /* @__PURE__ */ jsx24("button", { type: "button", "aria-pressed": filter === k, "data-jf": k, onClick: () => onFilter(k), children: label[k] }, k)) }),
+      /* @__PURE__ */ jsx24("span", { className: "grow", children: /* @__PURE__ */ jsxs21(Help, { label: t("ux.jn.helpTitle"), title: t("ux.jn.helpTitle"), children: [
+        /* @__PURE__ */ jsx24("p", { children: t("ux.jn.help") }),
+        /* @__PURE__ */ jsx24("p", { className: "src", children: t("orders.journalNote") })
       ] }) })
     ] }),
-    rows.length ? /* @__PURE__ */ jsx23("ul", { className: "ux-jl", "data-events": true, children: rows.map((r) => /* @__PURE__ */ jsxs20("li", { "data-kind": r.kind, "data-game": r.kind === "game" ? "" : void 0, "data-result": r.result, children: [
-      /* @__PURE__ */ jsx23("time", { dateTime: new Date(r.ms).toISOString(), title: t.ago(r.ms), children: shortAge(nowMs - r.ms, t("ux.dec.day")) }),
-      /* @__PURE__ */ jsx23("span", { className: `ic ${r.icon[1]}`, children: /* @__PURE__ */ jsx23(Icon, { name: r.icon[0], size: 14 }) }),
-      /* @__PURE__ */ jsxs20("span", { className: "tx", children: [
-        /* @__PURE__ */ jsx23(ProjectChip, { slug: r.board }),
-        /* @__PURE__ */ jsx23("span", { children: r.text }),
-        r.resultText ? /* @__PURE__ */ jsx23("span", { className: "res", children: r.resultText }) : null,
-        r.extra ? /* @__PURE__ */ jsx23("span", { className: "ux-vh", children: r.extra }) : null
+    rows.length ? /* @__PURE__ */ jsx24("ul", { className: "ux-jl", "data-events": true, children: rows.map((r) => /* @__PURE__ */ jsxs21("li", { "data-kind": r.kind, "data-game": r.kind === "game" ? "" : void 0, "data-result": r.result, children: [
+      /* @__PURE__ */ jsx24("time", { dateTime: new Date(r.ms).toISOString(), title: t.ago(r.ms), children: shortAge(nowMs - r.ms, t("ux.dec.day")) }),
+      /* @__PURE__ */ jsx24("span", { className: `ic ${r.icon[1]}`, children: /* @__PURE__ */ jsx24(Icon, { name: r.icon[0], size: 14 }) }),
+      /* @__PURE__ */ jsxs21("span", { className: "tx", children: [
+        /* @__PURE__ */ jsx24(ProjectChip, { slug: r.board }),
+        /* @__PURE__ */ jsx24("span", { children: r.text }),
+        r.resultText ? /* @__PURE__ */ jsx24("span", { className: "res", children: r.resultText }) : null,
+        r.extra ? /* @__PURE__ */ jsx24("span", { className: "ux-vh", children: r.extra }) : null
       ] })
-    ] }, r.key)) }) : /* @__PURE__ */ jsxs20("p", { className: "ux-empty", children: [
-      /* @__PURE__ */ jsx23(Icon, { name: "list", size: 32 }),
-      /* @__PURE__ */ jsx23("span", { children: history?.ok ? t("journal.empty") : t("journal.needsHistory") })
+    ] }, r.key)) }) : /* @__PURE__ */ jsxs21("p", { className: "ux-empty", children: [
+      /* @__PURE__ */ jsx24(Icon, { name: "list", size: 32 }),
+      /* @__PURE__ */ jsx24("span", { children: history?.ok ? t("journal.empty") : t("journal.needsHistory") })
     ] })
   ] });
 }
 function NightCardHost({ night, t }) {
-  return /* @__PURE__ */ jsx23(NightCard, { summary: night.summary, t, onShow: night.onShow, onReplay: night.onReplay });
+  return /* @__PURE__ */ jsx24(NightCard, { summary: night.summary, t, onShow: night.onShow, onReplay: night.onReplay });
 }
 
 // src/ui/ProjectsTab.jsx
-import { useMemo as useMemo8 } from "react";
-import { jsx as jsx24, jsxs as jsxs21 } from "react/jsx-runtime";
+import { useId as useId14, useMemo as useMemo8, useState as useState16 } from "react";
+import { jsx as jsx25, jsxs as jsxs22 } from "react/jsx-runtime";
 var PINNED_SHOWN = 3;
 var STATUS2 = new Set(CARD_STATUSES);
 var statusText2 = (t, s) => STATUS2.has(s) ? t(`status.${s}`) : String(s ?? "");
@@ -19308,46 +19480,44 @@ function Card({ b, c, project: project2, onProject, openKanban: openKanban2, t }
   const todo = TODO.reduce((s, k) => s + n(k), 0);
   const blocked = b.blocked.length;
   const chainLabel = t("ux.prj.queue", c.queue.length);
-  return /* @__PURE__ */ jsxs21("div", { className: `ux-pjc${project2 && !pressed ? " dim" : ""}`, style, "data-chain": b.slug, children: [
-    /* @__PURE__ */ jsxs21("div", { className: "big", children: [
-      /* @__PURE__ */ jsx24(Ring, { done: b.done, total: b.total, r: 21, box: 52, stroke: 5 }),
-      /* @__PURE__ */ jsxs21("span", { className: "pc ux-mono", "aria-hidden": "true", children: [
-        c.pct,
-        "%"
-      ] })
+  const listId = useId14();
+  const [listed, setListed] = useState16(false);
+  return /* @__PURE__ */ jsxs22("div", { className: `ux-pjc${project2 && !pressed ? " dim" : ""}`, style, "data-chain": b.slug, children: [
+    /* @__PURE__ */ jsxs22("div", { className: "big", children: [
+      /* @__PURE__ */ jsx25(Ring, { done: b.done, total: b.total, r: 21, box: 52, stroke: 5 }),
+      /* @__PURE__ */ jsx25("span", { className: "pc ux-mono", "aria-hidden": "true", children: percentText(c.pct, t.lang) })
     ] }),
-    /* @__PURE__ */ jsxs21("h4", { children: [
-      /* @__PURE__ */ jsx24("span", { className: "sq", "aria-hidden": "true" }),
-      /* @__PURE__ */ jsx24("span", { className: "nm", children: b.slug }),
-      /* @__PURE__ */ jsxs21("span", { className: "n ux-mono", children: [
+    /* @__PURE__ */ jsxs22("h4", { children: [
+      /* @__PURE__ */ jsx25("span", { className: "sq", "aria-hidden": "true" }),
+      /* @__PURE__ */ jsx25("span", { className: "nm", children: b.slug }),
+      /* @__PURE__ */ jsxs22("span", { className: "n ux-mono", children: [
         b.done,
         "/",
         b.total,
-        /* @__PURE__ */ jsxs21("span", { className: "ux-vh", children: [
+        /* @__PURE__ */ jsxs22("span", { className: "ux-vh", children: [
           " · ",
-          c.pct,
-          " %"
+          percentText(c.pct, t.lang)
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs21("div", { className: "cn", children: [
-      /* @__PURE__ */ jsxs21("span", { children: [
-        /* @__PURE__ */ jsx24("b", { children: running }),
+    /* @__PURE__ */ jsxs22("div", { className: "cn", children: [
+      /* @__PURE__ */ jsxs22("span", { children: [
+        /* @__PURE__ */ jsx25("b", { children: running }),
         " ",
         t("ux.prj.running")
       ] }),
-      /* @__PURE__ */ jsxs21("span", { children: [
-        /* @__PURE__ */ jsx24("b", { children: todo }),
+      /* @__PURE__ */ jsxs22("span", { children: [
+        /* @__PURE__ */ jsx25("b", { children: todo }),
         " ",
         t("ux.prj.todo")
       ] }),
-      /* @__PURE__ */ jsxs21("span", { className: blocked ? "w" : "", children: [
-        /* @__PURE__ */ jsx24("b", { children: blocked }),
+      /* @__PURE__ */ jsxs22("span", { className: blocked ? "w" : "", children: [
+        /* @__PURE__ */ jsx25("b", { children: blocked }),
         " ",
         t("ux.prj.blocked")
       ] })
     ] }),
-    /* @__PURE__ */ jsx24("div", { className: "ux-pips", role: "list", "aria-label": t("chains.queue", b.slug), title: chainLabel, children: c.queue.map((q) => /* @__PURE__ */ jsx24(
+    /* @__PURE__ */ jsx25("div", { className: "ux-pips", role: "list", "aria-label": t("chains.queue", b.slug), title: chainLabel, children: c.queue.map((q) => /* @__PURE__ */ jsx25(
       "i",
       {
         role: "listitem",
@@ -19358,21 +19528,32 @@ function Card({ b, c, project: project2, onProject, openKanban: openKanban2, t }
       },
       q.id
     )) }),
-    c.pinned.slice(-PINNED_SHOWN).reverse().map((q) => /* @__PURE__ */ jsxs21("div", { className: "pin", "data-pinrow": q.id, children: [
-      /* @__PURE__ */ jsx24("span", { className: "ux-mono", children: q.code }),
-      /* @__PURE__ */ jsxs21("span", { className: "ux-dc-pin ux-mono", title: `${t("chains.pinned")}: ${q.pin.model || q.pin.provider}`, children: [
-        /* @__PURE__ */ jsx24(PixelBadge, { size: 9 }),
-        /* @__PURE__ */ jsx24("span", { children: q.pin.model || q.pin.provider })
+    c.queue.length ? /* @__PURE__ */ jsx25("button", { type: "button", className: "ux-lnk ux-pq-toggle", "data-queue-toggle": true, "aria-expanded": listed, "aria-controls": listId, onClick: () => setListed((v) => !v), children: listed ? t("ux.prj.hideCards") : t("ux.prj.showCards") }) : null,
+    listed ? /* @__PURE__ */ jsx25("ol", { className: "ux-pq", id: listId, "data-queue": true, "aria-label": t("chains.queue", b.slug), children: c.queue.map((q) => /* @__PURE__ */ jsxs22("li", { "data-status": q.status, children: [
+      /* @__PURE__ */ jsx25("i", { className: `ux-pip ${q.status}`, "aria-hidden": "true" }),
+      /* @__PURE__ */ jsx25("span", { className: "ux-mono code", children: q.code }),
+      /* @__PURE__ */ jsx25("span", { className: "st", children: statusText2(t, q.status) }),
+      q.title && q.title !== q.code ? /* @__PURE__ */ jsx25("span", { className: "tt", children: q.title }) : null,
+      q.pin ? /* @__PURE__ */ jsxs22("span", { className: "ux-dc-pin ux-mono", children: [
+        /* @__PURE__ */ jsx25(PixelBadge, { size: 9 }),
+        /* @__PURE__ */ jsx25("span", { children: q.pin.model || q.pin.provider })
+      ] }) : null
+    ] }, q.id)) }) : null,
+    c.pinned.slice(-PINNED_SHOWN).reverse().map((q) => /* @__PURE__ */ jsxs22("div", { className: "pin", "data-pinrow": q.id, children: [
+      /* @__PURE__ */ jsx25("span", { className: "ux-mono", children: q.code }),
+      /* @__PURE__ */ jsxs22("span", { className: "ux-dc-pin ux-mono", title: `${t("chains.pinned")}: ${q.pin.model || q.pin.provider}`, children: [
+        /* @__PURE__ */ jsx25(PixelBadge, { size: 9 }),
+        /* @__PURE__ */ jsx25("span", { children: q.pin.model || q.pin.provider })
       ] })
     ] }, q.id)),
-    c.pinned.length > PINNED_SHOWN ? /* @__PURE__ */ jsx24("div", { className: "pin", children: /* @__PURE__ */ jsx24("small", { children: t("insp.more", c.pinned.length - PINNED_SHOWN) }) }) : null,
-    /* @__PURE__ */ jsxs21("div", { className: "ac", children: [
-      /* @__PURE__ */ jsxs21("button", { type: "button", className: "ux-b sm", "aria-pressed": pressed, "data-project-filter": b.slug, onClick: () => onProject(pressed ? null : b.slug), children: [
-        /* @__PURE__ */ jsx24(Icon, { name: "filter", size: 14 }),
+    c.pinned.length > PINNED_SHOWN ? /* @__PURE__ */ jsx25("div", { className: "pin", children: /* @__PURE__ */ jsx25("small", { children: t("insp.more", c.pinned.length - PINNED_SHOWN) }) }) : null,
+    /* @__PURE__ */ jsxs22("div", { className: "ac", children: [
+      /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-b sm", "aria-pressed": pressed, "data-project-filter": b.slug, onClick: () => onProject(pressed ? null : b.slug), children: [
+        /* @__PURE__ */ jsx25(Icon, { name: "filter", size: 14 }),
         pressed ? t("ux.prj.filtered") : t("ux.prj.filter")
       ] }),
-      openKanban2 ? /* @__PURE__ */ jsxs21("button", { type: "button", className: "ux-b sm ghost", onClick: () => openKanban2(), children: [
-        /* @__PURE__ */ jsx24(Icon, { name: "ext", size: 14 }),
+      openKanban2 ? /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-b sm ghost", onClick: () => openKanban2(), children: [
+        /* @__PURE__ */ jsx25(Icon, { name: "ext", size: 14 }),
         t("ux.prj.kanban")
       ] }) : null
     ] })
@@ -19381,15 +19562,15 @@ function Card({ b, c, project: project2, onProject, openKanban: openKanban2, t }
 function ProjectsTab({ office, project: project2, onProject, openKanban: openKanban2, t }) {
   const chains2 = useMemo8(() => chainsView(office), [office]);
   const by4 = new Map(chains2.map((c) => [c.slug, c]));
-  if (!office.boards.length) return /* @__PURE__ */ jsxs21("p", { className: "ux-empty", "data-chains": true, children: [
-    /* @__PURE__ */ jsx24(Icon, { name: "folder", size: 32 }),
-    /* @__PURE__ */ jsx24("span", { children: boardsKnown(office) ? t("chains.empty") : t("panel.needsAgentHalf") })
+  if (!office.boards.length) return /* @__PURE__ */ jsxs22("p", { className: "ux-empty", "data-chains": true, children: [
+    /* @__PURE__ */ jsx25(Icon, { name: "folder", size: 32 }),
+    /* @__PURE__ */ jsx25("span", { children: boardsKnown(office) ? t("chains.empty") : t("panel.needsAgentHalf") })
   ] });
-  return /* @__PURE__ */ jsx24("section", { "data-chains": true, "aria-label": t("ux.tab.projects"), children: office.boards.map((b) => /* @__PURE__ */ jsx24(Card, { b, c: by4.get(b.slug), project: project2, onProject, openKanban: openKanban2, t }, b.slug)) });
+  return /* @__PURE__ */ jsx25("section", { "data-chains": true, "aria-label": t("ux.tab.projects"), children: office.boards.map((b) => /* @__PURE__ */ jsx25(Card, { b, c: by4.get(b.slug), project: project2, onProject, openKanban: openKanban2, t }, b.slug)) });
 }
 
 // src/ui/SidePanel.jsx
-import { jsx as jsx25, jsxs as jsxs22 } from "react/jsx-runtime";
+import { jsx as jsx26, jsxs as jsxs23 } from "react/jsx-runtime";
 var ICON3 = { decisions: "inbox", agent: "office", projects: "folder", journal: "list" };
 function SidePanel({
   office,
@@ -19439,7 +19620,7 @@ function SidePanel({
   };
   let body;
   if (tab === "agent") {
-    body = /* @__PURE__ */ jsx25(
+    body = /* @__PURE__ */ jsx26(
       AgentTab,
       {
         office,
@@ -19464,11 +19645,11 @@ function SidePanel({
       }
     );
   } else if (tab === "projects") {
-    body = /* @__PURE__ */ jsx25(ProjectsTab, { office, project: project2, onProject, openKanban: openCard?.kanban ?? null, t });
+    body = /* @__PURE__ */ jsx26(ProjectsTab, { office, project: project2, onProject, openKanban: openCard?.kanban ?? null, t });
   } else if (tab === "journal") {
-    body = /* @__PURE__ */ jsx25(JournalTab, { history, office, game, journal, night, project: project2, filter: jfilter, onFilter: onJfilter, nowMs, readMs, t });
+    body = /* @__PURE__ */ jsx26(JournalTab, { history, office, game, journal, night, project: project2, filter: jfilter, onFilter: onJfilter, nowMs, readMs, t });
   } else {
-    body = /* @__PURE__ */ jsx25(
+    body = /* @__PURE__ */ jsx26(
       DecisionsTab,
       {
         office,
@@ -19489,19 +19670,19 @@ function SidePanel({
       }
     );
   }
-  return /* @__PURE__ */ jsxs22("aside", { id: "oc-panel", className: "ux-panel", "aria-label": t("panel.region"), "data-panel": true, "data-tab": tab, children: [
-    /* @__PURE__ */ jsx25("h2", { ref: headRef, tabIndex: -1, className: "ux-vh", children: t("panel.title") }),
-    /* @__PURE__ */ jsx25("div", { className: "ux-tabs", role: "tablist", "aria-label": t("panel.title"), onKeyDown: onKey, children: TABS.map((k) => /* @__PURE__ */ jsxs22("button", { type: "button", role: "tab", id: `oc-tab-${k}`, "data-tab": k, "aria-selected": tab === k, "aria-controls": "oc-tabpanel", tabIndex: tab === k ? 0 : -1, className: "ux-tab", onClick: () => onTab(k), children: [
-      /* @__PURE__ */ jsx25(Icon, { name: ICON3[k], size: 14 }),
+  return /* @__PURE__ */ jsxs23("aside", { id: "oc-panel", className: "ux-panel", "aria-label": t("panel.region"), "data-panel": true, "data-tab": tab, children: [
+    /* @__PURE__ */ jsx26("h2", { ref: headRef, tabIndex: -1, className: "ux-vh", children: t("panel.title") }),
+    /* @__PURE__ */ jsx26("div", { className: "ux-tabs", role: "tablist", "aria-label": t("panel.title"), onKeyDown: onKey, children: TABS.map((k) => /* @__PURE__ */ jsxs23("button", { type: "button", role: "tab", id: `oc-tab-${k}`, "data-tab": k, "aria-selected": tab === k, "aria-controls": "oc-tabpanel", tabIndex: tab === k ? 0 : -1, className: "ux-tab", onClick: () => onTab(k), children: [
+      /* @__PURE__ */ jsx26(Icon, { name: ICON3[k], size: 14 }),
       t(`ux.tab.${k}`),
-      k === "decisions" && decisions ? /* @__PURE__ */ jsx25("span", { className: "ux-n warn", "aria-label": String(decisions), children: decisions }) : null
+      k === "decisions" && decisions ? /* @__PURE__ */ jsx26("span", { className: "ux-n warn", "aria-label": String(decisions), children: decisions }) : null
     ] }, k)) }),
-    /* @__PURE__ */ jsx25("div", { className: "ux-pbody", id: "oc-tabpanel", role: "tabpanel", "aria-labelledby": `oc-tab-${tab}`, tabIndex: 0, "data-narrow": narrow ? "" : void 0, children: body })
+    /* @__PURE__ */ jsx26("div", { className: "ux-pbody", id: "oc-tabpanel", role: "tabpanel", "aria-labelledby": `oc-tab-${tab}`, tabIndex: 0, "data-narrow": narrow ? "" : void 0, children: body })
   ] });
 }
 
 // src/ui/HireDialog.jsx
-import { Fragment as Fragment12, jsx as jsx26, jsxs as jsxs23 } from "react/jsx-runtime";
+import { Fragment as Fragment13, jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
 var RECRUIT2 = /* @__PURE__ */ new Set(["recruit", "recruitModel"]);
 var WORKING = /* @__PURE__ */ new Set(["counting", "sending", "verifying"]);
 function hireProfiles(desks, sceneProfiles2) {
@@ -19509,26 +19690,26 @@ function hireProfiles(desks, sceneProfiles2) {
 }
 function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
   const t = useT();
-  const nameRef = useRef16(null);
-  const id = useId12();
-  const [reqOpen, setReqOpen] = useState13(false);
-  const [draft, setDraft] = useState13(() => hireDraft(profiles));
-  const [touched, setTouched] = useState13(false);
+  const nameRef = useRef18(null);
+  const id = useId15();
+  const [reqOpen, setReqOpen] = useState17(false);
+  const [draft, setDraft] = useState17(() => hireDraft(profiles));
+  const [touched, setTouched] = useState17(false);
   const assist = useRecruitAssist({ open, draft, setDraft, profiles, lang: t.lang });
   const phase = orders.state.phase;
   const o = orders.state.order;
   const confirming = phase === "confirm" && o && RECRUIT2.has(o.verb);
-  useEffect14(() => {
+  useEffect15(() => {
     setDraft((d) => profiles.some((p) => p.name === d.from) ? d : { ...d, from: hireDraft(profiles).from });
   }, [profiles]);
-  useEffect14(() => {
+  useEffect15(() => {
     if (open && WORKING.has(phase) && o && RECRUIT2.has(o.verb)) onClose();
   }, [open, phase, o, onClose]);
-  useEffect14(() => {
+  useEffect15(() => {
     if (open && !confirming) setTimeout(() => nameRef.current?.focus(), 0);
   }, [open, confirming]);
   const outcome = orders.state.outcome;
-  useEffect14(() => {
+  useEffect15(() => {
     if (outcome?.verb === "recruit" && !outcome.cancelled && outcome.ok) {
       setDraft(hireDraft(profiles));
       setTouched(false);
@@ -19566,7 +19747,7 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
     if (confirming) orders.act("cancel");
     else close();
   };
-  return /* @__PURE__ */ jsx26(
+  return /* @__PURE__ */ jsx27(
     Dlg,
     {
       open,
@@ -19575,7 +19756,7 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
       icon: "hire",
       size: "l",
       "data-hire-dialog": true,
-      chip: /* @__PURE__ */ jsx26(DlgChip, { risk: confirming && o.verb === "recruitModel" ? "rev" : "final" }),
+      chip: /* @__PURE__ */ jsx27(DlgChip, { risk: confirming && o.verb === "recruitModel" ? "rev" : "final" }),
       onSubmit: confirming ? (e) => e.preventDefault() : submit,
       onCancel: exit,
       onKeyDown: (e) => {
@@ -19585,41 +19766,41 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
           exit();
         }
       },
-      alert: confirming ? null : /* @__PURE__ */ jsx26("div", { id: `${id}-err`, role: "alert", "data-hire-errors": true, className: "oc-dg-al", children: shown.map((e) => /* @__PURE__ */ jsx26(Notice, { tone: "bad", icon: "alert", children: t(`recruit.err.${e}`) }, e)) }),
-      start: confirming ? null : /* @__PURE__ */ jsxs23(Fragment12, { children: [
-        /* @__PURE__ */ jsxs23("button", { type: "button", className: "oc-dg-link", "aria-expanded": reqOpen, onClick: () => setReqOpen((v) => !v), children: [
-          /* @__PURE__ */ jsx26(DlgIcon, { id: "chev", size: 12 }),
+      alert: confirming ? null : /* @__PURE__ */ jsx27("div", { id: `${id}-err`, role: "alert", "data-hire-errors": true, className: "oc-dg-al", children: shown.map((e) => /* @__PURE__ */ jsx27(Notice, { tone: "bad", icon: "alert", children: t(`recruit.err.${e}`) }, e)) }),
+      start: confirming ? null : /* @__PURE__ */ jsxs24(Fragment13, { children: [
+        /* @__PURE__ */ jsxs24("button", { type: "button", className: "oc-dg-link", "aria-expanded": reqOpen, onClick: () => setReqOpen((v) => !v), children: [
+          /* @__PURE__ */ jsx27(DlgIcon, { id: "chev", size: 12 }),
           t("recruit.requests")
         ] }),
-        /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.submit"), children: t("recruit.riskNote") }),
-        /* @__PURE__ */ jsx26(LeftCount, { assist })
+        /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.submit"), children: t("recruit.riskNote") }),
+        /* @__PURE__ */ jsx27(LeftCount, { assist })
       ] }),
-      actions: confirming ? null : /* @__PURE__ */ jsxs23(Fragment12, { children: [
-        /* @__PURE__ */ jsx26("button", { type: "button", className: "oc-btn", "data-hire-cancel": true, onClick: close, children: t("recruit.cancel") }),
-        /* @__PURE__ */ jsx26("button", { type: "submit", className: "oc-btn oc-primary", "data-hire-ok": true, "aria-disabled": errors.length || busy ? true : void 0, children: nameOk ? t("recruit.submitNamed", draft.name) : t("recruit.submit") })
+      actions: confirming ? null : /* @__PURE__ */ jsxs24(Fragment13, { children: [
+        /* @__PURE__ */ jsx27("button", { type: "button", className: "oc-btn", "data-hire-cancel": true, onClick: close, children: t("recruit.cancel") }),
+        /* @__PURE__ */ jsx27("button", { type: "submit", className: "oc-btn oc-primary", "data-hire-ok": true, "aria-disabled": errors.length || busy ? true : void 0, children: nameOk ? t("recruit.submitNamed", draft.name) : t("recruit.submit") })
       ] }),
-      children: confirming ? /* @__PURE__ */ jsx26(OrderConfirm, { orders }) : /* @__PURE__ */ jsxs23(Fragment12, { children: [
-        /* @__PURE__ */ jsx26(AssistPanel, { assist, onSee: onSeeBot }),
-        /* @__PURE__ */ jsxs23("div", { className: "oc-dg-rc", children: [
-          /* @__PURE__ */ jsxs23("div", { className: "oc-dg-prev", "data-hire-preview": true, children: [
-            /* @__PURE__ */ jsx26(Portrait, { agent }),
-            /* @__PURE__ */ jsx26("b", { children: draft.title || draft.name || t("recruit.newBot") }),
-            /* @__PURE__ */ jsxs23("span", { className: "oc-faint", "data-hire-role-label": true, children: [
+      children: confirming ? /* @__PURE__ */ jsx27(OrderConfirm, { orders }) : /* @__PURE__ */ jsxs24(Fragment13, { children: [
+        /* @__PURE__ */ jsx27(AssistPanel, { assist, onSee: onSeeBot }),
+        /* @__PURE__ */ jsxs24("div", { className: "oc-dg-rc", children: [
+          /* @__PURE__ */ jsxs24("div", { className: "oc-dg-prev", "data-hire-preview": true, children: [
+            /* @__PURE__ */ jsx27(Portrait, { agent }),
+            /* @__PURE__ */ jsx27("b", { children: draft.title || draft.name || t("recruit.newBot") }),
+            /* @__PURE__ */ jsxs24("span", { className: "oc-faint", "data-hire-role-label": true, children: [
               t(`role.${role || "none"}`),
               draft.role === AUTO_ROLE && role ? ` · ${t("recruit.roleGuessedTag")}` : ""
             ] }),
-            /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.newBot"), children: t("recruit.previewNote") })
+            /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.newBot"), children: t("recruit.previewNote") })
           ] }),
-          /* @__PURE__ */ jsxs23("div", { className: "oc-dg-steps", children: [
-            /* @__PURE__ */ jsxs23(Step, { n: 1, title: t("recruit.step1"), children: [
-              /* @__PURE__ */ jsxs23("div", { className: "oc-dg-fl", children: [
-                /* @__PURE__ */ jsxs23("span", { className: "oc-dg-lab", children: [
-                  /* @__PURE__ */ jsx26("label", { htmlFor: `${id}-name`, children: t("recruit.name") }),
-                  /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.name"), children: t("recruit.nameHint", draft.name || "…") }),
-                  nameOk ? /* @__PURE__ */ jsx26("span", { className: "oc-dg-ok", id: `${id}-free`, "data-hire-free": true, children: t("recruit.free") }) : null,
-                  /* @__PURE__ */ jsx26(Mark, { assist, field: "name", label: t("recruit.name"), id: `${id}-name-mk` })
+          /* @__PURE__ */ jsxs24("div", { className: "oc-dg-steps", children: [
+            /* @__PURE__ */ jsxs24(Step, { n: 1, title: t("recruit.step1"), children: [
+              /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
+                /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
+                  /* @__PURE__ */ jsx27("label", { htmlFor: `${id}-name`, children: t("recruit.name") }),
+                  /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.name"), children: t("recruit.nameHint", draft.name || "…") }),
+                  nameOk ? /* @__PURE__ */ jsx27("span", { className: "oc-dg-ok", id: `${id}-free`, "data-hire-free": true, children: t("recruit.free") }) : null,
+                  /* @__PURE__ */ jsx27(Mark, { assist, field: "name", label: t("recruit.name"), id: `${id}-name-mk` })
                 ] }),
-                /* @__PURE__ */ jsx26(
+                /* @__PURE__ */ jsx27(
                   "input",
                   {
                     ref: nameRef,
@@ -19637,65 +19818,65 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
                   }
                 )
               ] }),
-              /* @__PURE__ */ jsxs23("div", { className: "oc-dg-fl", children: [
-                /* @__PURE__ */ jsxs23("span", { className: "oc-dg-lab", children: [
-                  /* @__PURE__ */ jsx26("label", { htmlFor: `${id}-title`, children: t("recruit.titleField") }),
-                  /* @__PURE__ */ jsx26(Mark, { assist, field: "title", label: t("recruit.titleField"), id: `${id}-title-mk` })
+              /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
+                /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
+                  /* @__PURE__ */ jsx27("label", { htmlFor: `${id}-title`, children: t("recruit.titleField") }),
+                  /* @__PURE__ */ jsx27(Mark, { assist, field: "title", label: t("recruit.titleField"), id: `${id}-title-mk` })
                 ] }),
-                /* @__PURE__ */ jsx26("input", { id: `${id}-title`, "data-h": "title", className: marked("title").trim() || void 0, value: draft.title, maxLength: TITLE_MAX, placeholder: t("recruit.titlePh"), "aria-describedby": `${id}-title-mk`, onChange: (e) => set({ title: e.target.value }) })
+                /* @__PURE__ */ jsx27("input", { id: `${id}-title`, "data-h": "title", className: marked("title").trim() || void 0, value: draft.title, maxLength: TITLE_MAX, placeholder: t("recruit.titlePh"), "aria-describedby": `${id}-title-mk`, onChange: (e) => set({ title: e.target.value }) })
               ] }),
-              /* @__PURE__ */ jsxs23("div", { className: "oc-dg-fl", children: [
-                /* @__PURE__ */ jsxs23("span", { className: "oc-dg-lab", children: [
-                  /* @__PURE__ */ jsx26("label", { htmlFor: `${id}-desc`, children: t("recruit.description") }),
-                  /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.description"), children: t("recruit.descriptionTip") }),
-                  /* @__PURE__ */ jsx26(Mark, { assist, field: "description", label: t("recruit.description"), id: `${id}-desc-mk` })
+              /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", children: [
+                /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", children: [
+                  /* @__PURE__ */ jsx27("label", { htmlFor: `${id}-desc`, children: t("recruit.description") }),
+                  /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.description"), children: t("recruit.descriptionTip") }),
+                  /* @__PURE__ */ jsx27(Mark, { assist, field: "description", label: t("recruit.description"), id: `${id}-desc-mk` })
                 ] }),
-                /* @__PURE__ */ jsx26("textarea", { id: `${id}-desc`, "data-h": "description", className: marked("description").trim() || void 0, rows: assist.phase === "done" ? 4 : 2, value: draft.description, maxLength: DESCRIPTION_MAX2, placeholder: t("recruit.descriptionPh"), "aria-describedby": `${id}-desc-mk`, onChange: (e) => set({ description: e.target.value }) })
+                /* @__PURE__ */ jsx27("textarea", { id: `${id}-desc`, "data-h": "description", className: marked("description").trim() || void 0, rows: assist.phase === "done" ? 4 : 2, value: draft.description, maxLength: DESCRIPTION_MAX2, placeholder: t("recruit.descriptionPh"), "aria-describedby": `${id}-desc-mk`, onChange: (e) => set({ description: e.target.value }) })
               ] }),
-              /* @__PURE__ */ jsx26(RolePicker, { value: draft.role, onPick: (r) => set({ role: r }), guessed, mark: /* @__PURE__ */ jsx26(Mark, { assist, field: "role", label: t("recruit.roleField") }) })
+              /* @__PURE__ */ jsx27(RolePicker, { value: draft.role, onPick: (r) => set({ role: r }), guessed, mark: /* @__PURE__ */ jsx27(Mark, { assist, field: "role", label: t("recruit.roleField") }) })
             ] }),
-            /* @__PURE__ */ jsxs23(Step, { n: 2, title: /* @__PURE__ */ jsxs23(Fragment12, { children: [
+            /* @__PURE__ */ jsxs24(Step, { n: 2, title: /* @__PURE__ */ jsxs24(Fragment13, { children: [
               t("recruit.step2"),
               " ",
-              /* @__PURE__ */ jsx26(Mark, { assist, field: "start", label: t("recruit.step2") })
+              /* @__PURE__ */ jsx27(Mark, { assist, field: "start", label: t("recruit.step2") })
             ] }), summary: draft.start === "clone" && src ? t("recruit.skillsSum", own.length, baseSkills) : null, children: [
-              /* @__PURE__ */ jsxs23("div", { className: "oc-dg-start", children: [
-                /* @__PURE__ */ jsx26("span", { className: "oc-dg-seg", role: "radiogroup", "aria-label": t("recruit.start"), children: STARTS.map((s) => /* @__PURE__ */ jsxs23("label", { children: [
-                  /* @__PURE__ */ jsx26("input", { type: "radio", name: `${id}-start`, "data-h": "start", value: s, checked: draft.start === s, onChange: () => set({ start: s, off: [] }) }),
-                  /* @__PURE__ */ jsx26("span", { children: t(`recruit.starts.${s}`) })
+              /* @__PURE__ */ jsxs24("div", { className: "oc-dg-start", children: [
+                /* @__PURE__ */ jsx27("span", { className: "oc-dg-seg", role: "radiogroup", "aria-label": t("recruit.start"), children: STARTS.map((s) => /* @__PURE__ */ jsxs24("label", { children: [
+                  /* @__PURE__ */ jsx27("input", { type: "radio", name: `${id}-start`, "data-h": "start", value: s, checked: draft.start === s, onChange: () => set({ start: s, off: [] }) }),
+                  /* @__PURE__ */ jsx27("span", { children: t(`recruit.starts.${s}`) })
                 ] }, s)) }),
-                draft.start === "clone" ? /* @__PURE__ */ jsx26("select", { "data-h": "copy", value: draft.from, "aria-label": t("recruit.copyOf"), onChange: (e) => set({ from: e.target.value, off: [] }), children: profiles.map((p) => /* @__PURE__ */ jsx26("option", { value: p.name, children: p.name }, p.name)) }) : null,
-                /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.start"), children: t(`recruit.startHint.${draft.start}`) })
+                draft.start === "clone" ? /* @__PURE__ */ jsx27("select", { "data-h": "copy", value: draft.from, "aria-label": t("recruit.copyOf"), onChange: (e) => set({ from: e.target.value, off: [] }), children: profiles.map((p) => /* @__PURE__ */ jsx27("option", { value: p.name, children: p.name }, p.name)) }) : null,
+                /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.start"), children: t(`recruit.startHint.${draft.start}`) })
               ] }),
-              own.length ? /* @__PURE__ */ jsxs23("div", { className: "oc-dg-fl", "data-hire-skills": true, children: [
-                /* @__PURE__ */ jsxs23("span", { className: "oc-dg-lab", id: `${id}-sk`, children: [
+              own.length ? /* @__PURE__ */ jsxs24("div", { className: "oc-dg-fl", "data-hire-skills": true, children: [
+                /* @__PURE__ */ jsxs24("span", { className: "oc-dg-lab", id: `${id}-sk`, children: [
                   t("recruit.skills", own.length),
-                  /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.skills", own.length), children: t("recruit.skillsHint", baseSkills, draft.from) })
+                  /* @__PURE__ */ jsx27(DlgTip, { name: t("recruit.skills", own.length), children: t("recruit.skillsHint", baseSkills, draft.from) })
                 ] }),
-                /* @__PURE__ */ jsx26("div", { className: "oc-dg-chips oc-dg-skills", role: "group", "aria-labelledby": `${id}-sk`, children: own.map((s) => {
+                /* @__PURE__ */ jsx27("div", { className: "oc-dg-chips oc-dg-skills", role: "group", "aria-labelledby": `${id}-sk`, children: own.map((s) => {
                   const on = !draft.off.includes(s.name);
-                  return /* @__PURE__ */ jsxs23("label", { className: `oc-dg-pill ${on ? "on" : "off"}`, children: [
-                    /* @__PURE__ */ jsx26("input", { type: "checkbox", "data-hskill": s.name, checked: on, onChange: (e) => toggleSkill(s.name, e.target.checked) }),
-                    on ? /* @__PURE__ */ jsx26(DlgIcon, { id: "check", size: 12 }) : null,
-                    /* @__PURE__ */ jsx26("span", { children: s.name })
+                  return /* @__PURE__ */ jsxs24("label", { className: `oc-dg-pill ${on ? "on" : "off"}`, children: [
+                    /* @__PURE__ */ jsx27("input", { type: "checkbox", "data-hskill": s.name, checked: on, onChange: (e) => toggleSkill(s.name, e.target.checked) }),
+                    on ? /* @__PURE__ */ jsx27(DlgIcon, { id: "check", size: 12 }) : null,
+                    /* @__PURE__ */ jsx27("span", { children: s.name })
                   ] }, s.name);
                 }) })
               ] }) : null
             ] }),
-            /* @__PURE__ */ jsxs23("details", { className: "oc-dg-step", open: modelSet, children: [
-              /* @__PURE__ */ jsxs23("summary", { children: [
-                /* @__PURE__ */ jsx26("span", { className: "oc-dg-num", "aria-hidden": "true", children: "3" }),
-                /* @__PURE__ */ jsx26("h3", { children: t("recruit.step3") }),
-                /* @__PURE__ */ jsx26("span", { className: "oc-dg-sum", children: modelSet ? draft.model || draft.provider : t("recruit.modelInherited") }),
-                /* @__PURE__ */ jsx26("span", { className: "chev", children: /* @__PURE__ */ jsx26(DlgIcon, { id: "chev", size: 16 }) })
+            /* @__PURE__ */ jsxs24("details", { className: "oc-dg-step", open: modelSet, children: [
+              /* @__PURE__ */ jsxs24("summary", { children: [
+                /* @__PURE__ */ jsx27("span", { className: "oc-dg-num", "aria-hidden": "true", children: "3" }),
+                /* @__PURE__ */ jsx27("h3", { children: t("recruit.step3") }),
+                /* @__PURE__ */ jsx27("span", { className: "oc-dg-sum", children: modelSet ? draft.model || draft.provider : t("recruit.modelInherited") }),
+                /* @__PURE__ */ jsx27("span", { className: "chev", children: /* @__PURE__ */ jsx27(DlgIcon, { id: "chev", size: 16 }) })
               ] }),
-              /* @__PURE__ */ jsx26("div", { className: "oc-dg-sb", children: /* @__PURE__ */ jsx26(ModelPicker, { opts: modelOpts, model: draft.model, provider: draft.provider, onChange: set, invalid: shown.includes("model_pair"), describedBy: `${id}-err` }) })
+              /* @__PURE__ */ jsx27("div", { className: "oc-dg-sb", children: /* @__PURE__ */ jsx27(ModelPicker, { opts: modelOpts, model: draft.model, provider: draft.provider, onChange: set, invalid: shown.includes("model_pair"), describedBy: `${id}-err` }) })
             ] }),
-            /* @__PURE__ */ jsx26(SoulStep, { n: 4, draft, set, assist, from: draft.from })
+            /* @__PURE__ */ jsx27(SoulStep, { n: 4, draft, set, assist, from: draft.from })
           ] })
         ] }),
-        notice ? /* @__PURE__ */ jsx26(Notice, { tone: "warn", icon: "alert", "data-refused": true, children: notice }) : null,
-        reqOpen ? /* @__PURE__ */ jsx26("pre", { className: "oc-dg-pre", "data-hire-requests": true, children: errors.includes("name_empty") ? t("recruit.requestsEmpty") : requestsPreview(draft).map(([m, p]) => `${m} ${JSON.stringify(p, null, 1)}`).join("\n") }) : null
+        notice ? /* @__PURE__ */ jsx27(Notice, { tone: "warn", icon: "alert", "data-refused": true, children: notice }) : null,
+        reqOpen ? /* @__PURE__ */ jsx27("pre", { className: "oc-dg-pre", "data-hire-requests": true, children: errors.includes("name_empty") ? t("recruit.requestsEmpty") : requestsPreview(draft).map(([m, p]) => `${m} ${JSON.stringify(p, null, 1)}`).join("\n") }) : null
       ] })
     }
   );
@@ -19706,7 +19887,7 @@ var SHEET_AT = 600;
 var settingsSheet = (width) => width > 0 && width <= SHEET_AT;
 
 // src/ui/OfficeScene.jsx
-import { useCallback as useCallback7, useEffect as useEffect15, useId as useId13, useLayoutEffect as useLayoutEffect6, useMemo as useMemo11, useRef as useRef17, useState as useState14 } from "react";
+import { useCallback as useCallback7, useEffect as useEffect16, useId as useId16, useLayoutEffect as useLayoutEffect8, useMemo as useMemo11, useRef as useRef19, useState as useState18 } from "react";
 
 // src/core/dpr.js
 function watchDpr(win, onChange) {
@@ -19838,7 +20019,7 @@ var SOFT2 = "color-mix(in oklab, var(--ui-text-secondary) 60%, var(--ui-text-ter
 var ink3 = (hue) => `color-mix(in oklab, ${hue} 50%, var(--foreground))`;
 var ORANGE3 = "var(--ui-orange, var(--ui-accent))";
 var SCENE_CSS = `
-.oc-box{position:relative;flex:1 1 auto;min-width:0;min-height:0;box-sizing:border-box;padding:8px 8px 4px;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};overflow:hidden}
+.oc-box{position:relative;flex:1 1 auto;min-width:0;min-height:0;box-sizing:border-box;padding:8px 8px 4px;border:1px solid ${EDGE};border-radius:12px;background:${CARD};overflow:hidden}
 .oc-box.oc-listing{overflow-x:hidden;overflow-y:auto}
 .oc-box[data-view="scene"]{display:flex;flex-direction:column;justify-content:safe center}
 .oc-stage{position:relative;margin:0 auto;flex:0 0 auto;isolation:isolate}
@@ -19849,7 +20030,7 @@ var SCENE_CSS = `
 .oc-station{position:absolute;pointer-events:auto;border:0;background:transparent;padding:0;cursor:pointer;border-radius:10px;font:inherit;color:var(--foreground)}
 .oc-station:focus-visible,.oc-lrow:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
 .oc-chip{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);display:inline-flex;align-items:center;gap:5px;padding:1px 7px 1px 5px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;
-  background:${CARD2};border:1px solid ${EDGE2};color:var(--foreground);box-shadow:${SHADOW};backdrop-filter:blur(3px);transition:transform .15s ease;z-index:1}
+  background:${CARD2};border:1px solid ${EDGE};color:var(--foreground);box-shadow:${SHADOW};backdrop-filter:blur(3px);transition:transform .15s ease;z-index:1}
 .oc-below .oc-chip{bottom:auto;top:calc(100% + 2px)}
 /* a placed label sits where src/scene/labels.js put it (left / top set by OfficeScene), not centred on its station */
 .oc-chip[data-placed]{transform:none!important;transition:none}
@@ -19857,6 +20038,7 @@ var SCENE_CSS = `
 .oc-dot{display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;flex:0 0 auto;color:var(--ui-text-tertiary)}
 .oc-sti{display:block;width:9px;height:9px}
 /* the agent's head, cut from its sprite */
+.oc-station .oc-chip .oc-nm{min-width:0;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oc-face{display:block;flex:0 0 auto;width:14px;height:14px;margin:0 -1px 0 -2px;border-radius:4px;image-rendering:pixelated;image-rendering:crisp-edges;background:color-mix(in oklab, var(--foreground) 24%, transparent)}
 /* time on the running card, a 2 px line at the foot of the label (full after 30 min, then orange: it drags) */
 .oc-bar{position:absolute;left:8px;right:8px;bottom:-1px;height:2px;border-radius:1px;overflow:hidden;background:color-mix(in oklab, var(--ui-accent) 22%, transparent)}
@@ -19870,8 +20052,8 @@ var SCENE_CSS = `
 .oc-task{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:0 5px;border-radius:5px;color:${ink3("var(--ui-accent)")};background:color-mix(in oklab, var(--ui-accent) 16%, transparent)}
 .oc-s-waiting .oc-task{color:${ink3(ORANGE3)};background:color-mix(in oklab, ${ORANGE3} 18%, transparent)}
 .oc-s-stale .oc-task{color:${SOFT2};background:color-mix(in oklab, var(--ui-text-tertiary) 14%, transparent)}
-.oc-s-working .oc-chip{border-color:color-mix(in oklab, var(--ui-accent) 70%, ${EDGE2})}
-.oc-s-active .oc-chip{border-color:color-mix(in oklab, var(--ui-green, var(--ui-accent)) 60%, ${EDGE2})}
+.oc-s-working .oc-chip{border-color:color-mix(in oklab, var(--ui-accent) 70%, ${EDGE})}
+.oc-s-active .oc-chip{border-color:color-mix(in oklab, var(--ui-green, var(--ui-accent)) 60%, ${EDGE})}
 .oc-s-working .oc-dot{color:var(--ui-accent)}
 .oc-s-active .oc-dot{color:var(--ui-green, var(--ui-accent))}
 .oc-s-waiting .oc-chip{border-color:var(--ui-orange, var(--ui-accent))}
@@ -19890,12 +20072,12 @@ var SCENE_CSS = `
 .oc-station[aria-pressed="true"] .oc-chip{border-color:var(--sel)}
 .oc-station[aria-pressed="true"]{box-shadow:0 0 0 2px var(--sel);background:color-mix(in oklab, var(--sel) 12%, transparent)}
 .oc-zone{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:8px;font:inherit;font-size:11px;line-height:1;white-space:nowrap;
-  background:${CARD2};border:1px solid ${EDGE2};color:var(--foreground);box-shadow:${SHADOW};pointer-events:auto}
+  background:${CARD2};border:1px solid ${EDGE};color:var(--foreground);box-shadow:${SHADOW};pointer-events:auto}
 .oc-zone b{font-weight:600;text-transform:capitalize}
 .oc-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
 .oc-warn{color:${ink3(ORANGE3)};font-weight:600}
 /* an island's label: on the front edge of its rug, in the project's colour, a short stem to the edge, a button that filters on the project */
-.oc-isl{cursor:pointer;border-color:color-mix(in oklab, var(--pc) 45%, ${EDGE2});box-shadow:inset 3px 0 0 var(--pc), ${SHADOW};padding-left:10px}
+.oc-isl{cursor:pointer;border-color:color-mix(in oklab, var(--pc) 45%, ${EDGE});box-shadow:inset 3px 0 0 var(--pc), ${SHADOW};padding-left:10px}
 .oc-isl:hover{background:color-mix(in oklab, var(--pc) 10%, ${CARD})}
 .oc-isl:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
 .oc-isl[aria-pressed="true"]{background:color-mix(in oklab, var(--pc) 16%, ${CARD});border-color:var(--pc)}
@@ -19919,12 +20101,18 @@ var SCENE_CSS = `
 .oc-leads line.s-working{stroke:var(--ui-accent)}
 .oc-leads line.s-waiting{stroke:${ORANGE3}}
 .oc-leads line.s-active{stroke:var(--ui-green, var(--ui-accent))}
-/* the project filter dims the scene: the canvas is washed by the engine (src/scene/draw.js); what is written on it fades here,
+/* the project filter dims the scene: the canvas is washed by the engine (src/scene/draw.js); what is written on it keeps its colour
+   (an opacity of .45 / .5 / .62 measured 3.1 / 2.9 / 3.9:1 on the light theme) and recedes by its edge (dashed), its weight and its face;
    a label wakes up on hover, on focus and when selected */
-.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip{opacity:.45}
-.oc-zone[data-dim]:not(:hover):not(:focus-visible){opacity:.5}
-.oc-lzone[data-dim],.oc-lrow[data-dim]:not([aria-pressed="true"]){opacity:.62}
-.oc-lzone[data-dim] .oc-lrow[data-dim]{opacity:1}
+.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip{border-style:dashed;border-color:${EDGE};box-shadow:none}
+.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-nm{font-weight:500}
+.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-face{filter:grayscale(1);opacity:.7}
+.oc-zone[data-dim]:not(:hover):not(:focus-visible){border-style:dashed;border-color:${EDGE};box-shadow:none}
+.oc-zone[data-dim]:not(:hover):not(:focus-visible) b{font-weight:500}
+.oc-lzone[data-dim] > h2,.oc-lzone[data-dim] > h2 .oc-warn{font-weight:500}
+.oc-lrow[data-dim]:not([aria-pressed="true"]) .oc-chip{border-style:dashed}
+.oc-lrow[data-dim]:not([aria-pressed="true"]) .oc-nm{font-weight:500}
+.oc-lrow[data-dim]:not([aria-pressed="true"]) .oc-face{filter:grayscale(1);opacity:.7}
 .oc-note{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
 .oc-notebtn{display:inline-flex;align-items:center;height:24px;padding:0 8px;border:1px solid var(--ui-stroke-secondary);border-radius:6px;background:${CARD};color:var(--foreground);font:inherit;font-size:11px;font-weight:600;cursor:pointer}
 .oc-notebtn:hover{border-color:var(--ui-accent)}
@@ -19943,7 +20131,7 @@ var SCENE_CSS = `
    When the label is folded into its dot it stays, as a small pip on the dot's corner (out of the flow: the dot keeps its size): a silent card is never invisible. */
 .oc-quiet{display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;flex:0 0 auto;color:${ink3(ORANGE3)}}
 .oc-dense .oc-station:not(.oc-s-working):not(.oc-s-waiting):not(.oc-s-stale):not([aria-pressed="true"]):not(:hover):not(:focus-visible) .oc-chip > .oc-quiet,
-.oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-quiet{display:inline-flex!important;position:absolute;top:-7px;right:-7px;border-radius:50%;background:${CARD2};box-shadow:0 0 0 1px ${EDGE2}}
+.oc-station[data-fold]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip > .oc-quiet{display:inline-flex!important;position:absolute;top:-7px;right:-7px;border-radius:50%;background:${CARD2};box-shadow:0 0 0 1px ${EDGE}}
 .oc-list{display:flex;flex-direction:column;gap:10px;padding:4px 2px;width:100%;box-sizing:border-box;min-width:0}
 .oc-list p{margin:0;font-size:11px;color:${SOFT2}}
 .oc-lzone{min-width:0}
@@ -19951,13 +20139,13 @@ var SCENE_CSS = `
 .oc-lzone h2 span{font-weight:400;color:${SOFT2}}
 .oc-lzone h2 .oc-warn{font-weight:600;color:${ink3(ORANGE3)}}
 .oc-lrow{display:block;width:100%;text-align:left;background:none;border:0;padding:0;margin:0 0 3px;font:inherit;color:inherit;cursor:pointer;border-radius:6px}
-.oc-lrow .oc-chip{position:static;transform:none;display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid ${EDGE2};border-radius:6px;background:${CARD};font-size:12px;min-width:0;box-shadow:none;backdrop-filter:none}
+.oc-lrow .oc-chip{position:static;transform:none;display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid ${EDGE};border-radius:6px;background:${CARD};font-size:12px;min-width:0;box-shadow:none;backdrop-filter:none}
 .oc-lrow .oc-nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:8ch}
 .oc-lrow .oc-sl{display:inline;white-space:nowrap}
 .oc-lrow .oc-task{margin-left:auto;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .oc-lrow[aria-pressed="true"] .oc-chip{border-color:var(--sel)}
 /* a row with a thought bubble keeps the bubble inside its frame (the border moves from the chip to the whole row) */
-.oc-lrow:has(.oc-lthought){border:1px solid ${EDGE2};border-radius:6px;background:${CARD}}
+.oc-lrow:has(.oc-lthought){border:1px solid ${EDGE};border-radius:6px;background:${CARD}}
 .oc-lrow:has(.oc-lthought) .oc-chip{border-color:transparent;background:none}
 .oc-lrow[aria-pressed="true"]:has(.oc-lthought){border-color:var(--sel)}
 .oc-lrow[aria-pressed="true"]:has(.oc-lthought) .oc-chip{border-color:transparent}
@@ -19966,7 +20154,7 @@ var SCENE_CSS = `
 .oc-spot{position:absolute;z-index:0;pointer-events:auto;display:block;margin:0;padding:0;border:0;border-radius:6px;background:transparent;font:inherit;cursor:help}
 .oc-spot:hover{box-shadow:0 0 0 1px color-mix(in oklab, var(--ui-accent) 70%, transparent);background:color-mix(in oklab, var(--ui-accent) 10%, transparent)}
 .oc-spot:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px;background:color-mix(in oklab, var(--ui-accent) 14%, transparent)}
-.oc-tip{position:absolute;z-index:30;pointer-events:none;width:max-content;max-width:min(260px,92%);padding:6px 9px;border-radius:8px;font-size:11.5px;line-height:1.35;color:var(--foreground);background:${CARD};border:1px solid var(--ui-accent);box-shadow:${SHADOW}}
+.oc-tip{position:absolute;z-index:30;pointer-events:auto;width:max-content;max-width:min(260px,92%);padding:6px 9px;border-radius:8px;font-size:11.5px;line-height:1.35;color:var(--foreground);background:${CARD};border:1px solid var(--ui-accent);box-shadow:${SHADOW}}
 .oc-tip b{display:block;font-weight:600;font-size:11px;margin-bottom:2px;color:${SOFT2}}
 .oc-tip small{display:block;margin-top:3px;font-size:11px;color:${SOFT2}}
 /* 11 px like every other label text */
@@ -19975,12 +20163,12 @@ var SCENE_CSS = `
 .oc-chip .oc-pin{width:11px;height:11px;margin-left:-1px}
 .oc-lrow .oc-chip .oc-pin{width:12px;height:12px}
 /* thought bubbles: above the label of an agent at work, labelled AI, never over another label (OfficeScene hides the one that would) */
-.oc-thought{--dx:0px;--lift:0px;position:absolute;left:50%;bottom:calc(100% + 24px);transform:translate(calc(-50% + var(--dx)), calc(-1 * var(--lift)));width:max-content;max-width:156px;padding:2px 7px 3px;border-radius:9px;font-size:11px;font-weight:500;line-height:1.2;text-align:center;overflow-wrap:anywhere;pointer-events:none;color:var(--foreground);background:${CARD2};border:1px solid ${EDGE2};box-shadow:${SHADOW}}
-.oc-thought::before{content:'';position:absolute;left:calc(50% - var(--dx));top:100%;width:1px;height:var(--lift);margin-left:-.5px;background:${EDGE2}}
-.oc-thought::after{content:'';position:absolute;left:calc(50% - var(--dx));top:100%;width:6px;height:6px;margin:-4px 0 0 -3px;transform:rotate(45deg);background:${CARD2};border:solid ${EDGE2};border-width:0 1px 1px 0}
+.oc-thought{--dx:0px;--lift:0px;position:absolute;left:50%;bottom:calc(100% + 24px);transform:translate(calc(-50% + var(--dx)), calc(-1 * var(--lift)));width:max-content;max-width:156px;padding:2px 7px 3px;border-radius:9px;font-size:11px;font-weight:500;line-height:1.2;text-align:center;overflow-wrap:anywhere;pointer-events:none;color:var(--foreground);background:${CARD2};border:1px solid ${EDGE};box-shadow:${SHADOW}}
+.oc-thought::before{content:'';position:absolute;left:calc(50% - var(--dx));top:100%;width:1px;height:var(--lift);margin-left:-.5px;background:${EDGE}}
+.oc-thought::after{content:'';position:absolute;left:calc(50% - var(--dx));top:100%;width:6px;height:6px;margin:-4px 0 0 -3px;transform:rotate(45deg);background:${CARD2};border:solid ${EDGE};border-width:0 1px 1px 0}
 .oc-below .oc-thought{bottom:calc(100% + 4px)}
 .oc-thought[data-hide]{visibility:hidden}
-.oc-thought i,.oc-lthought i{font-style:normal;font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.1;margin-right:5px;padding:0 3px;border-radius:4px;border:1px solid ${EDGE2};color:${SOFT2}}
+.oc-thought i,.oc-lthought i{font-style:normal;font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.1;margin-right:5px;padding:0 3px;border-radius:4px;border:1px solid ${EDGE};color:${SOFT2}}
 .oc-lthought{display:block;margin:0 8px;padding:0 0 5px;font-size:11.5px;line-height:1.3;color:var(--foreground);overflow-wrap:anywhere}
 @media (prefers-reduced-motion: reduce){.oc-chip{transition:none}}
 `;
@@ -20010,9 +20198,10 @@ function focusBackTarget(candidates) {
 }
 
 // src/ui/OfficeScene.jsx
-import { jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
+import { jsx as jsx28, jsxs as jsxs25 } from "react/jsx-runtime";
 var HUD_SPRITES = Object.freeze({ art: true, marker: false });
 var ACCENT = { at: -Infinity, rgb: null, el: null, g: null };
+var TIP_LEAVE_MS = 200;
 var forgetAccent = () => {
   ACCENT.el = null;
   ACCENT.rgb = null;
@@ -20072,8 +20261,8 @@ var baseKeyOf = (layout2, model) => JSON.stringify([
   model.boards.map((b) => [b.slug, b.total, b.counts])
 ]);
 function useMedia(query) {
-  const [on, setOn] = useState14(() => typeof matchMedia === "function" ? matchMedia(query).matches : false);
-  useEffect15(() => {
+  const [on, setOn] = useState18(() => typeof matchMedia === "function" ? matchMedia(query).matches : false);
+  useEffect16(() => {
     if (typeof matchMedia !== "function") return void 0;
     const mq = matchMedia(query);
     const h = () => setOn(mq.matches);
@@ -20084,8 +20273,8 @@ function useMedia(query) {
   return on;
 }
 function usePageVisible() {
-  const [visible, setVisible] = useState14(() => typeof document === "undefined" ? true : !document.hidden);
-  useEffect15(() => {
+  const [visible, setVisible] = useState18(() => typeof document === "undefined" ? true : !document.hidden);
+  useEffect16(() => {
     const h = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", h);
     h();
@@ -20108,14 +20297,14 @@ function agentFacts(a, t, nowMs, badge) {
 function Island({ board, hall, count: count2, dim, active, onPick, t }) {
   const style = useProjectStyle(hall ? null : board.slug);
   if (hall) {
-    return /* @__PURE__ */ jsxs24("div", { className: "oc-zone", "data-zone": true, "data-hall": true, "data-dim": dim ? "" : void 0, style, children: [
-      /* @__PURE__ */ jsx27("b", { children: t("hall") }),
-      /* @__PURE__ */ jsx27("span", { className: "oc-mono", children: count2 })
+    return /* @__PURE__ */ jsxs25("div", { className: "oc-zone", "data-zone": true, "data-hall": true, "data-dim": dim ? "" : void 0, style, children: [
+      /* @__PURE__ */ jsx28("b", { children: t("hall") }),
+      /* @__PURE__ */ jsx28("span", { className: "oc-mono", children: count2 })
     ] });
   }
   const blocked = board.blocked.length;
   const progress = `${board.done}/${board.total}`;
-  return /* @__PURE__ */ jsxs24(
+  return /* @__PURE__ */ jsxs25(
     "button",
     {
       type: "button",
@@ -20129,13 +20318,13 @@ function Island({ board, hall, count: count2, dim, active, onPick, t }) {
       style,
       onClick: () => onPick?.(active ? null : board.slug),
       children: [
-        /* @__PURE__ */ jsx27("span", { className: "oc-pdot", "aria-hidden": "true" }),
-        /* @__PURE__ */ jsx27("b", { children: board.slug }),
-        /* @__PURE__ */ jsx27(Ring, { done: board.done, total: board.total, r: 5, box: 14, stroke: 2.4, className: "ux-ring oc-ring" }),
-        /* @__PURE__ */ jsx27("span", { className: "oc-mono oc-prog", children: progress }),
-        blocked ? /* @__PURE__ */ jsxs24("span", { className: "oc-warn oc-wb", children: [
-          /* @__PURE__ */ jsx27(Icon, { name: "warn", size: 12 }),
-          /* @__PURE__ */ jsx27("span", { "aria-hidden": "true", children: blocked })
+        /* @__PURE__ */ jsx28("span", { className: "oc-pdot", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx28("b", { children: board.slug }),
+        /* @__PURE__ */ jsx28(Ring, { done: board.done, total: board.total, r: 5, box: 14, stroke: 2.4, className: "ux-ring oc-ring" }),
+        /* @__PURE__ */ jsx28("span", { className: "oc-mono oc-prog", children: progress }),
+        blocked ? /* @__PURE__ */ jsxs25("span", { className: "oc-warn oc-wb", children: [
+          /* @__PURE__ */ jsx28(Icon, { name: "warn", size: 12 }),
+          /* @__PURE__ */ jsx28("span", { "aria-hidden": "true", children: blocked })
         ] }) : null
       ]
     }
@@ -20143,26 +20332,26 @@ function Island({ board, hall, count: count2, dim, active, onPick, t }) {
 }
 var say = (t, parts2) => parts2 ? t(...parts2) : "";
 function ListDot({ slug }) {
-  return /* @__PURE__ */ jsx27("span", { className: "oc-pdot", "aria-hidden": "true", style: useProjectStyle(slug) });
+  return /* @__PURE__ */ jsx28("span", { className: "oc-pdot", "aria-hidden": "true", style: useProjectStyle(slug) });
 }
 function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpen, badges = [], motion = "auto", readMs = null, decor = null, grades = null, exportRef = null, seating = null, thoughts = null, project: filter = null, onProject = null, onFit = null, listNote = null }) {
   const t = useT();
-  const thoughtId = useId13();
-  const boxRef = useRef17(null);
-  const stageRef = useRef17(null);
-  const canvasRef = useRef17(null);
-  const hudRef = useRef17(null);
-  const accentRef = useRef17(null);
-  const baseRef = useRef17({ key: "", base: null });
-  const frameRef = useRef17(0);
-  const paintedRef = useRef17(0);
-  const [size, setSize] = useState14({ w: 0, h: 0 });
-  const [dpr, setDpr] = useState14(() => typeof window === "undefined" ? 1 : window.devicePixelRatio || 1);
+  const thoughtId = useId16();
+  const boxRef = useRef19(null);
+  const stageRef = useRef19(null);
+  const canvasRef = useRef19(null);
+  const hudRef = useRef19(null);
+  const accentRef = useRef19(null);
+  const baseRef = useRef19({ key: "", base: null });
+  const frameRef = useRef19(0);
+  const paintedRef = useRef19(0);
+  const [size, setSize] = useState18({ w: 0, h: 0 });
+  const [dpr, setDpr] = useState18(() => typeof window === "undefined" ? 1 : window.devicePixelRatio || 1);
   const visible = usePageVisible();
   const reduced = motionReduced(motion, useMedia("(prefers-reduced-motion: reduce)"));
-  const animatedRef = useRef17(0);
-  const [tip, setTip] = useState14(null);
-  useLayoutEffect6(() => {
+  const animatedRef = useRef19(0);
+  const [tip, setTip] = useState18(null);
+  useLayoutEffect8(() => {
     const el = boxRef.current;
     if (!el || typeof ResizeObserver !== "function") return void 0;
     const ro = new ResizeObserver((entries) => {
@@ -20175,11 +20364,11 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  useEffect15(() => watchDpr(window, setDpr), []);
-  useEffect15(() => forgetAccent, []);
+  useEffect16(() => watchDpr(window, setDpr), []);
+  useEffect16(() => forgetAccent, []);
   const fresh = useMemo11(() => toSceneModel(office, { nowMs, night, profiles, decor: decor || void 0, seating }), [office, profiles, nowMs, night, decor, seating]);
   const factsKey = useMemo11(() => sceneFacts(fresh), [fresh]);
-  const kept2 = useRef17({ key: null, model: null });
+  const kept2 = useRef19({ key: null, model: null });
   if (kept2.current.key !== factsKey) kept2.current = { key: factsKey, model: fresh };
   const model = kept2.current.model;
   const layout2 = useMemo11(() => layoutScene(model), [model]);
@@ -20189,22 +20378,22 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
   const S = view.scale;
   const byName2 = useMemo11(() => new Map(office.agents.map((a) => [a.name, a])), [office]);
   const faceBy = useMemo11(() => new Map(model.agents.map((a) => [a.name, a])), [model]);
-  const live = useRef17(null);
+  const live = useRef19(null);
   const dim = useMemo11(() => dimOf(filter, layout2), [filter, layout2]);
   live.current = { layout: layout2, model, selected, asScene, dim };
-  useEffect15(() => {
+  useEffect16(() => {
     if (onFit && size.h > 0) onFit({ W: layout2.W, H: layout2.H, availW: size.w, availH: size.h, dpr, people, mode: view.mode });
   }, [onFit, layout2.W, layout2.H, size.w, size.h, dpr, people, view.mode]);
   const bleed = useMemo11(() => asScene ? bleedOf({ availW: size.w, availH: size.h, W: layout2.W, H: layout2.H, S }) : null, [asScene, size.w, size.h, layout2.W, layout2.H, S]);
   const groundKey = bleed ? JSON.stringify([layout2.X, layout2.Y, layout2.lounge.x0, layout2.W, layout2.H, layout2.origin, !!model.night, bleed]) : "";
-  const groundRef = useRef17(null);
-  const groundBuf = useRef17(null);
-  const artStore = useRef17(null);
-  const groundStore = useRef17(null);
-  const [ground, setGround] = useState14(null);
+  const groundRef = useRef19(null);
+  const groundBuf = useRef19(null);
+  const artStore = useRef19(null);
+  const groundStore = useRef19(null);
+  const [ground, setGround] = useState18(null);
   const back = useMemo11(() => backingOf({ W: layout2.W, H: layout2.H, S, dpr }), [layout2.W, layout2.H, S, dpr]);
   const gback = useMemo11(() => ground ? backingOf({ W: ground.w, H: ground.h, S, dpr }) : null, [ground, S, dpr]);
-  useEffect15(() => {
+  useEffect16(() => {
     if (!bleed || groundBuf.current?.key === groundKey) return void 0;
     const id = setTimeout(() => {
       const cur = live.current;
@@ -20214,13 +20403,13 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     }, groundBuf.current ? 120 : 0);
     return () => clearTimeout(id);
   }, [groundKey]);
-  useLayoutEffect6(() => {
+  useLayoutEffect8(() => {
     const cv = groundRef.current;
     const buf = groundBuf.current;
     if (!cv || !ground || !buf || buf.key !== ground.key) return;
     blit(cv, buf.d, ground.w, ground.h, groundStore);
   }, [ground, asScene, gback?.w, gback?.h]);
-  useEffect15(() => {
+  useEffect16(() => {
     if (!exportRef) return void 0;
     exportRef.current = () => postcardBuffer(live.current.layout, live.current.model);
     return () => {
@@ -20241,11 +20430,11 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     if (animated) animatedRef.current += 1;
     cv.dataset.animFrames = String(animatedRef.current);
   }, []);
-  useLayoutEffect6(() => {
+  useLayoutEffect8(() => {
     if (asScene) paint(frameRef.current);
   }, [asScene, paint, layout2, model, selected, S, visible, dim, back.w, back.h]);
   const animate = shouldAnimate({ needs: needsAnimation(model), visible, reducedMotion: reduced }) && asScene;
-  useEffect15(() => {
+  useEffect16(() => {
     if (!animate) return void 0;
     const ticker = createTicker({
       paint: (f) => {
@@ -20258,9 +20447,9 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     ticker.start();
     return () => ticker.stop();
   }, [animate, paint]);
-  const geomRef = useRef17({ key: "", sprites: null, frac: null });
-  const leadsRef = useRef17(null);
-  useLayoutEffect6(() => {
+  const geomRef = useRef19({ key: "", sprites: null, frac: null });
+  const leadsRef = useRef19(null);
+  useLayoutEffect8(() => {
     const hud = hudRef.current;
     const stage = stageRef.current;
     if (!asScene || !hud || !stage) return;
@@ -20384,14 +20573,36 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     const p = sp.poster;
     return posterTip(p, { achName: t(`game.ach.${p.kind}.name`), date: dateText(p.ms, t.lang), tierName: p.tier ? t(`game.tier.${p.tier}`) : "", readClock: clockText(tipCtx.readMs, t.lang) });
   };
+  const leaving = useRef19(0);
+  const keepTip = () => {
+    clearTimeout(leaving.current);
+    leaving.current = 0;
+  };
+  useEffect16(() => keepTip, []);
+  useEffect16(() => {
+    if (!tip) return void 0;
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        setTip(null);
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [tip]);
   const show = (id, el) => {
     const stage = stageRef.current;
     if (!stage || !el) return;
+    keepTip();
     const sr = stage.getBoundingClientRect();
     const r = el.getBoundingClientRect();
     setTip({ id, x: r.left + r.width / 2 - sr.left, top: r.top - sr.top, bottom: r.bottom - sr.top });
   };
-  const hide = (id) => setTip((cur) => cur && cur.id === id ? null : cur);
+  const hide = (id) => {
+    keepTip();
+    leaving.current = setTimeout(() => setTip((cur) => cur && cur.id === id ? null : cur), TIP_LEAVE_MS);
+  };
   const badgeText = (b) => {
     const bt = badgeTip(b);
     return [say(t, bt.fact), say(t, bt.extra), say(t, bt.source)].filter(Boolean).join(" — ");
@@ -20417,7 +20628,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
       const [x, y] = at(a.sx, a.sy);
       const below = a.below;
       const bar = cardProgress(agent, nowMs);
-      return /* @__PURE__ */ jsxs24(
+      return /* @__PURE__ */ jsxs25(
         "button",
         {
           type: "button",
@@ -20440,44 +20651,38 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
           onBlur: badge ? () => hide(`badge:${a.name}`) : void 0,
           style: hitBox({ left: x - 11 * S, top: y - (below ? 30 : 47) * S, width: 22 * S, height: (below ? 32 : 49) * S }),
           children: [
-            /* @__PURE__ */ jsxs24("span", { className: "oc-chip", "data-chip": true, children: [
-              /* @__PURE__ */ jsx27("span", { className: "oc-dot", "aria-hidden": "true", children: /* @__PURE__ */ jsx27(StateIcon, { state: agent.state }) }),
-              faceBy.get(a.name) ? /* @__PURE__ */ jsx27(Face, { agent: faceBy.get(a.name) }) : null,
-              /* @__PURE__ */ jsx27("span", { className: "oc-nm", children: agent.label || agent.name }),
-              badge ? /* @__PURE__ */ jsx27("span", { className: "oc-pinwrap", "data-pin": a.name, onMouseEnter: (e) => show(`badge:${a.name}`, e.currentTarget), onMouseLeave: () => hide(`badge:${a.name}`), children: /* @__PURE__ */ jsx27(PixelBadge, {}) }) : null,
-              f.code ? /* @__PURE__ */ jsx27("span", { className: "oc-task", children: f.code }) : null,
-              f.quiet ? /* @__PURE__ */ jsx27("span", { className: "oc-quiet", "data-quiet": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx27(StateIcon, { state: "stale" }) }) : null,
-              bar ? /* @__PURE__ */ jsx27("span", { className: "oc-bar", "data-late": bar.late ? "" : void 0, "aria-hidden": "true", children: /* @__PURE__ */ jsx27("i", { style: { width: `${Math.round(bar.f * 100)}%` } }) }) : null
+            /* @__PURE__ */ jsxs25("span", { className: "oc-chip", "data-chip": true, children: [
+              /* @__PURE__ */ jsx28("span", { className: "oc-dot", "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: agent.state }) }),
+              faceBy.get(a.name) ? /* @__PURE__ */ jsx28(Face, { agent: faceBy.get(a.name) }) : null,
+              /* @__PURE__ */ jsx28("span", { className: "oc-nm", children: agent.label || agent.name }),
+              badge ? /* @__PURE__ */ jsx28("span", { className: "oc-pinwrap", "data-pin": a.name, onMouseEnter: (e) => show(`badge:${a.name}`, e.currentTarget), onMouseLeave: () => hide(`badge:${a.name}`), children: /* @__PURE__ */ jsx28(PixelBadge, {}) }) : null,
+              f.code ? /* @__PURE__ */ jsx28("span", { className: "oc-task", children: f.code }) : null,
+              f.quiet ? /* @__PURE__ */ jsx28("span", { className: "oc-quiet", "data-quiet": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: "stale" }) }) : null,
+              bar ? /* @__PURE__ */ jsx28("span", { className: "oc-bar", "data-late": bar.late ? "" : void 0, "aria-hidden": "true", children: /* @__PURE__ */ jsx28("i", { style: { width: `${Math.round(bar.f * 100)}%` } }) }) : null
             ] }),
-            thought ? /* @__PURE__ */ jsxs24("span", { className: "oc-thought", "data-thought": a.name, "aria-hidden": "true", children: [
-              /* @__PURE__ */ jsx27("i", { children: t("llm.thoughts.badge") }),
+            thought ? /* @__PURE__ */ jsxs25("span", { className: "oc-thought", "data-thought": a.name, "aria-hidden": "true", children: [
+              /* @__PURE__ */ jsx28("i", { children: t("llm.thoughts.badge") }),
               thought
             ] }) : null,
-            thought ? /* @__PURE__ */ jsx27("span", { className: "ux-vh", id: `${thoughtId}-${i}`, "data-thought-text": true, children: t("llm.thoughts.say", thought) }) : null
+            thought ? /* @__PURE__ */ jsx28("span", { className: "ux-vh", id: `${thoughtId}-${i}`, "data-thought-text": true, children: t("llm.thoughts.say", thought) }) : null
           ]
         },
         a.name
       );
     });
-    const islands = layout2.pods.map((p) => /* @__PURE__ */ jsx27(Island, { board: p.b, dim: Boolean(filter) && filter !== p.b.slug, active: filter === p.b.slug, onPick: onProject, t }, `b:${p.b.slug}`));
+    const islands = layout2.pods.map((p) => /* @__PURE__ */ jsx28(Island, { board: p.b, dim: Boolean(filter) && filter !== p.b.slug, active: filter === p.b.slug, onPick: onProject, t }, `b:${p.b.slug}`));
     const shown = tipContent();
-    body = /* @__PURE__ */ jsxs24(
+    body = /* @__PURE__ */ jsxs25(
       "div",
       {
         ref: stageRef,
         className: "oc-stage",
         role: "group",
         "aria-label": t("sceneLabel"),
-        onKeyDown: (e) => {
-          if (e.key === "Escape" && tip) {
-            e.stopPropagation();
-            setTip(null);
-          }
-        },
         "data-store": `${back.w}x${back.h}`,
         style: { width: back.cssW, height: back.cssH },
         children: [
-          ground ? /* @__PURE__ */ jsx27(
+          ground ? /* @__PURE__ */ jsx28(
             "canvas",
             {
               ref: groundRef,
@@ -20494,7 +20699,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
               }
             }
           ) : null,
-          /* @__PURE__ */ jsx27(
+          /* @__PURE__ */ jsx28(
             "canvas",
             {
               ref: canvasRef,
@@ -20504,15 +20709,15 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
               style: { width: back.cssW, height: back.cssH }
             }
           ),
-          /* @__PURE__ */ jsxs24("div", { ref: hudRef, className: "oc-hud", children: [
-            /* @__PURE__ */ jsx27("svg", { ref: leadsRef, className: "oc-leads", width: layout2.W * S, height: layout2.H * S, "aria-hidden": "true", focusable: "false" }),
+          /* @__PURE__ */ jsxs25("div", { ref: hudRef, className: "oc-hud", children: [
+            /* @__PURE__ */ jsx28("svg", { ref: leadsRef, className: "oc-leads", width: layout2.W * S, height: layout2.H * S, "aria-hidden": "true", focusable: "false" }),
             stations,
             islands,
-            /* @__PURE__ */ jsx27(Island, { hall: true, count: layout2.lounge.seats.length, dim: Boolean(filter), t }),
+            /* @__PURE__ */ jsx28(Island, { hall: true, count: layout2.lounge.seats.length, dim: Boolean(filter), t }),
             spots.map((sp) => {
               const label = say(t, tipFor(sp).name);
               const box2 = hitBox({ left: sp.rect.x * S, top: sp.rect.y * S, width: sp.rect.w * S, height: sp.rect.h * S });
-              return /* @__PURE__ */ jsx27(
+              return /* @__PURE__ */ jsx28(
                 "button",
                 {
                   type: "button",
@@ -20531,23 +20736,25 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
                 sp.id
               );
             }),
-            shown ? /* @__PURE__ */ jsxs24(
+            shown ? /* @__PURE__ */ jsxs25(
               "div",
               {
                 id: "oc-tip",
                 role: "tooltip",
                 className: "oc-tip",
                 "data-tip": tip.id,
+                onMouseEnter: keepTip,
+                onMouseLeave: () => hide(tip.id),
                 style: {
                   left: Math.min(Math.max(tip.x, Math.min(130, layout2.W * S / 2)), layout2.W * S - Math.min(130, layout2.W * S / 2)),
                   top: tip.top > 80 ? tip.top - 6 : tip.bottom + 6,
                   transform: tip.top > 80 ? "translate(-50%, -100%)" : "translate(-50%, 0)"
                 },
                 children: [
-                  /* @__PURE__ */ jsx27("b", { children: say(t, shown.name) }),
+                  /* @__PURE__ */ jsx28("b", { children: say(t, shown.name) }),
                   say(t, shown.fact),
-                  shown.extra ? /* @__PURE__ */ jsx27("small", { children: say(t, shown.extra) }) : null,
-                  /* @__PURE__ */ jsx27("small", { children: say(t, shown.source) })
+                  shown.extra ? /* @__PURE__ */ jsx28("small", { children: say(t, shown.extra) }) : null,
+                  /* @__PURE__ */ jsx28("small", { children: say(t, shown.source) })
                 ]
               }
             ) : null
@@ -20556,25 +20763,25 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
       }
     );
   } else if (view.mode === "list") {
-    body = /* @__PURE__ */ jsxs24("div", { className: "oc-list", "data-view": "list", children: [
-      listNote ? /* @__PURE__ */ jsxs24("p", { className: "oc-note", role: "status", "data-list-beside": true, children: [
+    body = /* @__PURE__ */ jsxs25("div", { className: "oc-list", "data-view": "list", children: [
+      listNote ? /* @__PURE__ */ jsxs25("p", { className: "oc-note", role: "status", "data-list-beside": true, children: [
         t("ux.stage.listBeside"),
         " ",
-        /* @__PURE__ */ jsx27("button", { type: "button", className: "oc-notebtn", "data-list-beside-close": true, onClick: listNote.onClose, children: t("ux.stage.showDrawing") })
-      ] }) : /* @__PURE__ */ jsx27("p", { children: t("narrowNote") }),
-      listZones(layout2).map((z) => /* @__PURE__ */ jsxs24("section", { className: "oc-lzone", "data-dim": filter && (z.board ? z.board.slug !== filter : true) ? "" : void 0, "aria-label": z.board ? z.board.slug : t("hall"), children: [
-        /* @__PURE__ */ jsxs24("h2", { children: [
-          z.board ? /* @__PURE__ */ jsx27(ListDot, { slug: z.board.slug }) : null,
+        /* @__PURE__ */ jsx28("button", { type: "button", className: "oc-notebtn", "data-list-beside-close": true, onClick: listNote.onClose, children: t("ux.stage.showDrawing") })
+      ] }) : /* @__PURE__ */ jsx28("p", { children: t("narrowNote") }),
+      listZones(layout2).map((z) => /* @__PURE__ */ jsxs25("section", { className: "oc-lzone", "data-dim": filter && (z.board ? z.board.slug !== filter : true) ? "" : void 0, "aria-label": z.board ? z.board.slug : t("hall"), children: [
+        /* @__PURE__ */ jsxs25("h2", { children: [
+          z.board ? /* @__PURE__ */ jsx28(ListDot, { slug: z.board.slug }) : null,
           z.board ? z.board.slug : t("hall"),
-          z.board ? /* @__PURE__ */ jsx27("span", { className: "oc-mono", children: t("boardCards", z.board.done, z.board.total) }) : null,
-          z.board?.blocked.length ? /* @__PURE__ */ jsx27("span", { className: "oc-warn", children: t("blockedCards", z.board.blocked.length) }) : null
+          z.board ? /* @__PURE__ */ jsx28("span", { className: "oc-mono", children: t("boardCards", z.board.done, z.board.total) }) : null,
+          z.board?.blocked.length ? /* @__PURE__ */ jsx28("span", { className: "oc-warn", children: t("blockedCards", z.board.blocked.length) }) : null
         ] }),
         z.agents.map((a) => {
           const agent = byName2.get(a.name);
           if (!agent) return null;
           const badge = badgeBy.get(a.name) || null;
           const f = agentFacts(agent, t, nowMs, badge);
-          return /* @__PURE__ */ jsxs24(
+          return /* @__PURE__ */ jsxs25(
             "button",
             {
               type: "button",
@@ -20589,17 +20796,17 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
               onClick: fire(onSelect, a.name),
               onDoubleClick: fire(onOpen, a.name),
               children: [
-                /* @__PURE__ */ jsxs24("span", { className: "oc-chip", children: [
-                  /* @__PURE__ */ jsx27("span", { className: "oc-dot", "aria-hidden": "true", children: /* @__PURE__ */ jsx27(StateIcon, { state: agent.state }) }),
-                  faceBy.get(a.name) ? /* @__PURE__ */ jsx27(Face, { agent: faceBy.get(a.name) }) : null,
-                  /* @__PURE__ */ jsx27("span", { className: "oc-nm", children: agent.label || agent.name }),
-                  badge ? /* @__PURE__ */ jsx27("span", { className: "oc-pinwrap", "data-pin": a.name, children: /* @__PURE__ */ jsx27(PixelBadge, {}) }) : null,
-                  f.state ? /* @__PURE__ */ jsx27("span", { className: "oc-sl", children: f.state }) : null,
-                  f.code ? /* @__PURE__ */ jsx27("span", { className: "oc-task", children: f.code }) : null,
-                  f.quiet ? /* @__PURE__ */ jsx27("span", { className: "oc-quiet", "data-quiet": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx27(StateIcon, { state: "stale" }) }) : null
+                /* @__PURE__ */ jsxs25("span", { className: "oc-chip", children: [
+                  /* @__PURE__ */ jsx28("span", { className: "oc-dot", "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: agent.state }) }),
+                  faceBy.get(a.name) ? /* @__PURE__ */ jsx28(Face, { agent: faceBy.get(a.name) }) : null,
+                  /* @__PURE__ */ jsx28("span", { className: "oc-nm", children: agent.label || agent.name }),
+                  badge ? /* @__PURE__ */ jsx28("span", { className: "oc-pinwrap", "data-pin": a.name, children: /* @__PURE__ */ jsx28(PixelBadge, {}) }) : null,
+                  f.state ? /* @__PURE__ */ jsx28("span", { className: "oc-sl", children: f.state }) : null,
+                  f.code ? /* @__PURE__ */ jsx28("span", { className: "oc-task", children: f.code }) : null,
+                  f.quiet ? /* @__PURE__ */ jsx28("span", { className: "oc-quiet", "data-quiet": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx28(StateIcon, { state: "stale" }) }) : null
                 ] }),
-                thoughts?.[a.name] ? /* @__PURE__ */ jsxs24("span", { className: "oc-lthought", "data-thought": a.name, children: [
-                  /* @__PURE__ */ jsx27("i", { children: t("llm.thoughts.badge") }),
+                thoughts?.[a.name] ? /* @__PURE__ */ jsxs25("span", { className: "oc-lthought", "data-thought": a.name, children: [
+                  /* @__PURE__ */ jsx28("i", { children: t("llm.thoughts.badge") }),
                   thoughts[a.name]
                 ] }) : null
               ]
@@ -20610,7 +20817,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
       ] }, z.key))
     ] });
   }
-  return /* @__PURE__ */ jsxs24(
+  return /* @__PURE__ */ jsxs25(
     "div",
     {
       ref: boxRef,
@@ -20618,8 +20825,8 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
       "data-view": view.mode,
       "data-scale": S,
       children: [
-        /* @__PURE__ */ jsx27("style", { children: SCENE_CSS }),
-        /* @__PURE__ */ jsx27("span", { ref: accentRef, style: { display: "none", color: "var(--ui-accent)" }, "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx28("style", { children: SCENE_CSS }),
+        /* @__PURE__ */ jsx28("span", { ref: accentRef, style: { display: "none", color: "var(--ui-accent)" }, "aria-hidden": "true" }),
         body
       ]
     }
@@ -20627,14 +20834,14 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
 }
 
 // src/ui/PageHeader.jsx
-import { useEffect as useEffect17, useId as useId14 } from "react";
+import { useEffect as useEffect18, useId as useId17 } from "react";
 
 // src/ui/PixelIcon.jsx
-import { useEffect as useEffect16, useRef as useRef18 } from "react";
-import { jsx as jsx28 } from "react/jsx-runtime";
+import { useEffect as useEffect17, useRef as useRef20 } from "react";
+import { jsx as jsx29 } from "react/jsx-runtime";
 function PixelIcon({ id, size = 20, className = "oc-icon", ...rest3 }) {
-  const ref = useRef18(null);
-  useEffect16(() => {
+  const ref = useRef20(null);
+  useEffect17(() => {
     const cv = ref.current;
     if (!cv) return;
     try {
@@ -20643,11 +20850,11 @@ function PixelIcon({ id, size = 20, className = "oc-icon", ...rest3 }) {
     } catch {
     }
   }, [id]);
-  return /* @__PURE__ */ jsx28("canvas", { ref, className, width: 14, height: 14, style: { width: size, height: size }, "aria-hidden": "true", ...rest3 });
+  return /* @__PURE__ */ jsx29("canvas", { ref, className, width: 14, height: 14, style: { width: size, height: size }, "aria-hidden": "true", ...rest3 });
 }
 function PixelMedal({ id, family, tier, unlocked, hidden, size = 56, className = "oc-medal", ...rest3 }) {
-  const ref = useRef18(null);
-  useEffect16(() => {
+  const ref = useRef20(null);
+  useEffect17(() => {
     const cv = ref.current;
     if (!cv) return;
     try {
@@ -20656,11 +20863,11 @@ function PixelMedal({ id, family, tier, unlocked, hidden, size = 56, className =
     } catch {
     }
   }, [id, family, tier, unlocked, hidden]);
-  return /* @__PURE__ */ jsx28("canvas", { ref, className, width: MEDAL_SIZE, height: MEDAL_SIZE, style: { width: size, height: size }, "aria-hidden": "true", ...rest3 });
+  return /* @__PURE__ */ jsx29("canvas", { ref, className, width: MEDAL_SIZE, height: MEDAL_SIZE, style: { width: size, height: size }, "aria-hidden": "true", ...rest3 });
 }
 
 // src/ui/PageHeader.jsx
-import { jsx as jsx29, jsxs as jsxs25 } from "react/jsx-runtime";
+import { jsx as jsx30, jsxs as jsxs26 } from "react/jsx-runtime";
 function GameBadge({ game, onOpen, t }) {
   const lvl = game.office;
   const got = game.achievements.filter((a) => a.unlocked).length;
@@ -20668,49 +20875,49 @@ function GameBadge({ game, onOpen, t }) {
   const pct = lvl.next ? Math.min(100, Math.round(lvl.done / lvl.next * 1e3) / 10) : 100;
   const streak = game.quests?.streakDays ?? 0;
   const name = t(`game.levelName.${lvl.name}`);
-  return /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-game", "data-game": true, "data-badge": true, "aria-haspopup": "dialog", title: t("ux.badge.tip"), "aria-label": t("ux.badge.open", [`${name}, ${t("ux.badge.level", lvl.level)}`, t("ux.badge.trophiesTip", got, total), streak > 0 ? `${t("ux.badge.streak")} ${t("ux.badge.days", streak)}` : ""].filter(Boolean).join(", ")), onClick: onOpen, children: [
-    /* @__PURE__ */ jsxs25("span", { className: "ux-gs lvl", "data-game": true, "data-level": lvl.level, "data-level-name": lvl.name, title: t("ux.badge.levelTip", lvl.done, lvl.next), children: [
-      /* @__PURE__ */ jsx29(PixelIcon, { id: "office", size: 20 }),
-      /* @__PURE__ */ jsxs25("span", { className: "ux-g2", children: [
-        /* @__PURE__ */ jsxs25("b", { children: [
+  return /* @__PURE__ */ jsxs26("button", { type: "button", className: "ux-game", "data-game": true, "data-badge": true, "aria-haspopup": "dialog", title: t("ux.badge.tip"), "aria-label": t("ux.badge.open", [`${name}, ${t("ux.badge.level", lvl.level)}`, t("ux.badge.trophiesTip", got, total), streak > 0 ? t("ux.badge.streakLabel", streak) : ""].filter(Boolean).join(", ")), onClick: onOpen, children: [
+    /* @__PURE__ */ jsxs26("span", { className: "ux-gs lvl", "data-game": true, "data-level": lvl.level, "data-level-name": lvl.name, title: t("ux.badge.levelTip", lvl.done, lvl.next), children: [
+      /* @__PURE__ */ jsx30(PixelIcon, { id: "office", size: 20 }),
+      /* @__PURE__ */ jsxs26("span", { className: "ux-g2", children: [
+        /* @__PURE__ */ jsxs26("b", { children: [
           name,
           " · ",
           t("ux.badge.level", lvl.level)
         ] }),
-        /* @__PURE__ */ jsxs25("span", { className: "ux-g2b", children: [
-          /* @__PURE__ */ jsx29("span", { className: "ux-mbar", "aria-hidden": "true", children: /* @__PURE__ */ jsx29("i", { style: { width: `${pct}%` } }) }),
-          /* @__PURE__ */ jsx29("small", { className: "ux-mono", children: lvl.next ? `${lvl.done}/${lvl.next}` : lvl.done })
+        /* @__PURE__ */ jsxs26("span", { className: "ux-g2b", children: [
+          /* @__PURE__ */ jsx30("span", { className: "ux-mbar", "aria-hidden": "true", children: /* @__PURE__ */ jsx30("i", { style: { width: `${pct}%` } }) }),
+          /* @__PURE__ */ jsx30("small", { className: "ux-mono", children: lvl.next ? `${lvl.done}/${lvl.next}` : lvl.done })
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs25("span", { className: "ux-gs", "data-game": true, "data-trophy-count": true, title: t("ux.badge.trophiesTip", got, total), children: [
-      /* @__PURE__ */ jsx29(PixelIcon, { id: "chain", size: 20 }),
-      /* @__PURE__ */ jsxs25("span", { className: "ux-g2", children: [
-        /* @__PURE__ */ jsxs25("b", { className: "ux-mono", children: [
+    /* @__PURE__ */ jsxs26("span", { className: "ux-gs", "data-game": true, "data-trophy-count": true, title: t("ux.badge.trophiesTip", got, total), children: [
+      /* @__PURE__ */ jsx30(PixelIcon, { id: "chain", size: 20 }),
+      /* @__PURE__ */ jsxs26("span", { className: "ux-g2", children: [
+        /* @__PURE__ */ jsxs26("b", { className: "ux-mono", children: [
           got,
-          /* @__PURE__ */ jsxs25("span", { className: "of", children: [
+          /* @__PURE__ */ jsxs26("span", { className: "of", children: [
             "/",
             total
           ] })
         ] }),
-        /* @__PURE__ */ jsx29("small", { children: t("ux.badge.trophies") })
+        /* @__PURE__ */ jsx30("small", { children: t("ux.badge.trophies") })
       ] })
     ] }),
-    streak > 0 ? /* @__PURE__ */ jsxs25("span", { className: "ux-gs", "data-game": true, "data-streak": streak, title: t("game.streakTip"), children: [
-      /* @__PURE__ */ jsx29(PixelIcon, { id: "flame", size: 20 }),
-      /* @__PURE__ */ jsxs25("span", { className: "ux-g2", children: [
-        /* @__PURE__ */ jsx29("b", { className: "ux-mono", children: t("ux.badge.days", streak) }),
-        /* @__PURE__ */ jsx29("small", { children: t("ux.badge.streak") })
+    streak > 0 ? /* @__PURE__ */ jsxs26("span", { className: "ux-gs", "data-game": true, "data-streak": streak, title: t("game.streakTip"), children: [
+      /* @__PURE__ */ jsx30(PixelIcon, { id: "flame", size: 20 }),
+      /* @__PURE__ */ jsxs26("span", { className: "ux-g2", children: [
+        /* @__PURE__ */ jsx30("b", { className: "ux-mono", children: t("ux.badge.days", streak) }),
+        /* @__PURE__ */ jsx30("small", { children: t("ux.badge.streak") })
       ] })
     ] }) : null
   ] });
 }
 function MoreMenu({ items, label }) {
   const pop = usePopover();
-  const id = useId14();
+  const id = useId17();
   const placed = Boolean(pop.pos);
   const entries = () => [...pop.card.current?.querySelectorAll('[role^="menuitem"]') ?? []];
-  useEffect17(() => {
+  useEffect18(() => {
     if (pop.open && placed) entries()[0]?.focus();
   }, [pop.open, placed]);
   const onKeyDown = (e) => {
@@ -20725,9 +20932,9 @@ function MoreMenu({ items, label }) {
       pop.anchor.current?.focus();
     }
   };
-  return /* @__PURE__ */ jsxs25("span", { className: "ux-menu only-n-wrap", children: [
-    /* @__PURE__ */ jsx29("button", { ref: pop.anchor, type: "button", className: "ux-b ico keep only-n", "data-more-toggle": true, "aria-haspopup": "menu", "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, "aria-label": label, onClick: () => pop.setOpen((v) => !v), children: /* @__PURE__ */ jsx29(Icon, { name: "more" }) }),
-    /* @__PURE__ */ jsx29(PopCard, { pop, id, label, className: "menu", role: "menu", onKeyDown, children: items.map((it) => /* @__PURE__ */ jsxs25(
+  return /* @__PURE__ */ jsxs26("span", { className: "ux-menu only-n-wrap", children: [
+    /* @__PURE__ */ jsx30("button", { ref: pop.anchor, type: "button", className: "ux-b ico keep only-n", "data-more-toggle": true, "aria-haspopup": "menu", "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, "aria-label": label, onClick: () => pop.setOpen((v) => !v), children: /* @__PURE__ */ jsx30(Icon, { name: "more" }) }),
+    /* @__PURE__ */ jsx30(PopCard, { pop, id, label, className: "menu", role: "menu", onKeyDown, children: items.map((it) => /* @__PURE__ */ jsxs26(
       "button",
       {
         type: "button",
@@ -20741,8 +20948,9 @@ function MoreMenu({ items, label }) {
           if (!it.disabled) it.onClick();
         },
         children: [
-          /* @__PURE__ */ jsx29(Icon, { name: it.icon, size: 14 }),
-          it.label
+          /* @__PURE__ */ jsx30(Icon, { name: it.icon, size: 14 }),
+          it.label,
+          it.disabled && it.why ? /* @__PURE__ */ jsx30("small", { className: "why", children: it.why }) : null
         ]
       },
       it.key
@@ -20751,55 +20959,55 @@ function MoreMenu({ items, label }) {
 }
 function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, replayOn, replay, usage, recruit, campaign, decor, panel, gear, narrow }) {
   const more = [];
-  if (replay) more.push({ key: "replay", icon: "replay", label: t("replay.open"), pressed: replayOn, disabled: replay.disabled, onClick: replay.onClick });
+  if (replay) more.push({ key: "replay", icon: "replay", label: t("replay.open"), pressed: replayOn, disabled: replay.disabled, why: replay.disabled ? t("replay.openBusy") : "", onClick: replay.onClick });
   if (usage) more.push({ key: "usage", icon: "usage", label: t("usage.open"), onClick: usage.onClick });
   if (recruit) more.push({ key: "recruit", icon: "recruit", label: t("recruit.open"), onClick: recruit.onClick });
   if (campaign) more.push({ key: "campaign", icon: "layers", label: t("campaign.open"), onClick: campaign.onClick });
   if (decor) more.push({ key: "decor", icon: "spark", label: t("llm.decor.open"), onClick: decor.onClick });
-  return /* @__PURE__ */ jsxs25("header", { className: "ux-top", children: [
-    /* @__PURE__ */ jsxs25("div", { className: "ux-brand", children: [
-      /* @__PURE__ */ jsx29("span", { className: "mk", "aria-hidden": "true", children: /* @__PURE__ */ jsx29(Icon, { name: "house", size: 20 }) }),
-      /* @__PURE__ */ jsx29("h1", { children: t("title") })
+  return /* @__PURE__ */ jsxs26("header", { className: "ux-top", children: [
+    /* @__PURE__ */ jsxs26("div", { className: "ux-brand", children: [
+      /* @__PURE__ */ jsx30("span", { className: "mk", "aria-hidden": "true", children: /* @__PURE__ */ jsx30(Icon, { name: "house", size: 20 }) }),
+      /* @__PURE__ */ jsx30("h1", { children: t("title") })
     ] }),
-    counts.total > 0 ? /* @__PURE__ */ jsxs25("div", { className: "ux-live", role: "group", "aria-label": t("ux.pill.label"), children: [
-      /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-lvp working", "data-go": "agent", "aria-label": `${counts.working} ${t("ux.pill.working", counts.working)}`, title: t("ux.pill.workingTip"), onClick: () => onGo("agent"), children: [
-        /* @__PURE__ */ jsx29("span", { className: `ux-pulse${counts.working ? "" : " off"}`, "aria-hidden": "true" }),
-        /* @__PURE__ */ jsx29("b", { children: counts.working }),
-        /* @__PURE__ */ jsx29("span", { className: "w", children: t("ux.pill.working", counts.working) })
+    counts.total > 0 ? /* @__PURE__ */ jsxs26("div", { className: "ux-live", role: "group", "aria-label": t("ux.pill.label"), children: [
+      /* @__PURE__ */ jsxs26("button", { type: "button", className: "ux-lvp working", "data-go": "agent", "aria-label": t("ux.pill.workingLabel", counts.working), title: t("ux.pill.workingTip"), onClick: () => onGo("agent"), children: [
+        /* @__PURE__ */ jsx30("span", { className: `ux-pulse${counts.working ? "" : " off"}`, "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx30("b", { children: counts.working }),
+        /* @__PURE__ */ jsx30("span", { className: "w", children: t("ux.pill.working", counts.working) })
       ] }),
-      /* @__PURE__ */ jsxs25("button", { type: "button", className: `ux-lvp dec${decisionCount ? " warn" : ""}`, "data-go": "decisions", title: t("ux.pill.decisionsTip"), onClick: () => onGo("decisions"), children: [
-        /* @__PURE__ */ jsx29(Icon, { name: "warn", size: 14 }),
-        /* @__PURE__ */ jsx29("b", { children: decisionCount ?? "—" }),
-        t("ux.pill.decisions", decisionCount ?? 0)
+      /* @__PURE__ */ jsxs26("button", { type: "button", className: `ux-lvp dec${decisionCount ? " warn" : ""}`, "data-go": "decisions", title: t("ux.pill.decisionsTip"), onClick: () => onGo("decisions"), children: [
+        /* @__PURE__ */ jsx30(Icon, { name: "warn", size: 14 }),
+        /* @__PURE__ */ jsx30("b", { children: decisionCount ?? "—" }),
+        /* @__PURE__ */ jsx30("span", { className: "w", children: t("ux.pill.decisions", decisionCount ?? 0) })
       ] }),
-      /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-lvp agents", "data-go": "agent", onClick: () => onGo("agent"), children: [
-        /* @__PURE__ */ jsx29("b", { children: counts.total }),
+      /* @__PURE__ */ jsxs26("button", { type: "button", className: "ux-lvp agents", "data-go": "agent", onClick: () => onGo("agent"), children: [
+        /* @__PURE__ */ jsx30("b", { children: counts.total }),
         t("ux.pill.agents", counts.total)
       ] })
     ] }) : null,
-    /* @__PURE__ */ jsx29("span", { className: "ux-sp" }),
-    game ? /* @__PURE__ */ jsx29(GameBadge, { game, onOpen: onBadge, t }) : null,
-    /* @__PURE__ */ jsxs25("div", { className: "ux-acts", children: [
-      replay ? /* @__PURE__ */ jsxs25("button", { ref: replay.ref, type: "button", className: "ux-b", "data-replay-open": true, "aria-pressed": replayOn, "aria-disabled": replay.disabled || void 0, title: replay.disabled ? t("replay.openBusy") : t("replay.openTip"), "aria-label": t("replay.open"), onClick: replay.onClick, children: [
-        /* @__PURE__ */ jsx29(Icon, { name: "replay" }),
-        /* @__PURE__ */ jsx29("span", { className: "lb", children: t("replay.open") })
+    /* @__PURE__ */ jsx30("span", { className: "ux-sp" }),
+    game ? /* @__PURE__ */ jsx30(GameBadge, { game, onOpen: onBadge, t }) : null,
+    /* @__PURE__ */ jsxs26("div", { className: "ux-acts", children: [
+      replay ? /* @__PURE__ */ jsxs26(WhyButton, { buttonRef: replay.ref, className: "ux-b", "data-replay-open": true, "aria-pressed": replayOn, reason: replay.disabled ? t("replay.openBusy") : "", title: replay.disabled ? t("replay.openBusy") : t("replay.openTip"), "aria-label": t("replay.open"), onGo: replay.onClick, children: [
+        /* @__PURE__ */ jsx30(Icon, { name: "replay" }),
+        /* @__PURE__ */ jsx30("span", { className: "lb", children: t("replay.open") })
       ] }) : null,
-      usage ? /* @__PURE__ */ jsxs25("button", { ref: usage.ref, type: "button", className: "ux-b", "data-usage-open": true, title: t("usage.openTip"), "aria-label": t("usage.open"), onClick: usage.onClick, children: [
-        /* @__PURE__ */ jsx29(Icon, { name: "usage" }),
-        /* @__PURE__ */ jsx29("span", { className: "lb", children: t("usage.open") })
+      usage ? /* @__PURE__ */ jsxs26("button", { ref: usage.ref, type: "button", className: "ux-b", "data-usage-open": true, title: t("usage.openTip"), "aria-label": t("usage.open"), onClick: usage.onClick, children: [
+        /* @__PURE__ */ jsx30(Icon, { name: "usage" }),
+        /* @__PURE__ */ jsx30("span", { className: "lb", children: t("usage.open") })
       ] }) : null,
-      recruit ? /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-b", "data-recruit-open": true, title: t("recruit.openTip"), "aria-label": t("recruit.open"), onClick: recruit.onClick, children: [
-        /* @__PURE__ */ jsx29(Icon, { name: "recruit" }),
-        /* @__PURE__ */ jsx29("span", { className: "lb", children: t("recruit.open") })
+      recruit ? /* @__PURE__ */ jsxs26("button", { type: "button", className: "ux-b", "data-recruit-open": true, title: t("recruit.openTip"), "aria-label": t("recruit.open"), onClick: recruit.onClick, children: [
+        /* @__PURE__ */ jsx30(Icon, { name: "recruit" }),
+        /* @__PURE__ */ jsx30("span", { className: "lb", children: t("recruit.open") })
       ] }) : null,
-      campaign ? /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-b", "data-campaign-open": true, title: t("campaign.openTip"), "aria-label": t("campaign.open"), onClick: campaign.onClick, children: [
-        /* @__PURE__ */ jsx29(Icon, { name: "layers" }),
-        /* @__PURE__ */ jsx29("span", { className: "lb", children: t("campaign.open") })
+      campaign ? /* @__PURE__ */ jsxs26("button", { type: "button", className: "ux-b", "data-campaign-open": true, title: t("campaign.openTip"), "aria-label": t("campaign.open"), onClick: campaign.onClick, children: [
+        /* @__PURE__ */ jsx30(Icon, { name: "layers" }),
+        /* @__PURE__ */ jsx30("span", { className: "lb", children: t("campaign.open") })
       ] }) : null,
-      decor ? /* @__PURE__ */ jsx29("button", { type: "button", className: "ux-b ico", "data-decor-open": true, title: t("llm.decor.openTip"), "aria-label": t("llm.decor.open"), onClick: decor.onClick, children: /* @__PURE__ */ jsx29(Icon, { name: "spark" }) }) : null,
-      panel ? /* @__PURE__ */ jsx29("span", { className: "sep", "aria-hidden": "true" }) : null,
-      panel ? /* @__PURE__ */ jsx29("button", { ref: panel.ref, type: "button", className: `ux-b ico${replayOn ? " keep" : ""}`, "data-panel-toggle": true, "aria-expanded": panel.open, "aria-controls": "oc-panel", title: panel.open ? t("panel.hideTip") : t("panel.showTip"), "aria-label": panel.open ? t("panel.hide") : t("panel.show"), onClick: panel.onClick, children: /* @__PURE__ */ jsx29(Icon, { name: "panel" }) }) : null,
-      narrow && more.length ? /* @__PURE__ */ jsx29(MoreMenu, { items: more, label: t("ux.more") }) : null,
+      decor ? /* @__PURE__ */ jsx30("button", { type: "button", className: "ux-b ico", "data-decor-open": true, title: t("llm.decor.openTip"), "aria-label": t("llm.decor.open"), onClick: decor.onClick, children: /* @__PURE__ */ jsx30(Icon, { name: "spark" }) }) : null,
+      panel ? /* @__PURE__ */ jsx30("span", { className: "sep", "aria-hidden": "true" }) : null,
+      panel ? /* @__PURE__ */ jsx30("button", { ref: panel.ref, type: "button", className: `ux-b ico${replayOn ? " keep" : ""}`, "data-panel-toggle": true, "aria-expanded": panel.open, "aria-controls": "oc-panel", title: panel.open ? t("panel.hideTip") : t("panel.showTip"), "aria-label": panel.open ? t("panel.hide") : t("panel.show"), onClick: panel.onClick, children: /* @__PURE__ */ jsx30(Icon, { name: "panel" }) }) : null,
+      narrow && more.length ? /* @__PURE__ */ jsx30(MoreMenu, { items: more, label: t("ux.more") }) : null,
       gear
     ] })
   ] });
@@ -20851,7 +21059,7 @@ var PAGE_CSS = `
 .ux-riskchip.safe{color:${ink4(GREEN3)};background:color-mix(in oklab, ${GREEN3} 11%, transparent)}
 .ux-riskchip.rev{color:${ink4("var(--ui-accent)")};background:color-mix(in oklab, var(--ui-accent) 11%, transparent)}
 /* ---------- project chip: the island's colour + the name, always written ---------- */
-.ux-prj{display:inline-flex;align-items:center;gap:4px;flex:0 1 auto;height:20px;max-width:140px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;color:var(--foreground);background:color-mix(in oklab, var(--pc) 16%, ${CARD});border:1px solid color-mix(in oklab, var(--pc) 45%, ${EDGE2})}
+.ux-prj{display:inline-flex;align-items:center;gap:4px;flex:0 1 auto;height:20px;max-width:140px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;color:var(--foreground);background:color-mix(in oklab, var(--pc) 16%, ${CARD});border:1px solid color-mix(in oklab, var(--pc) 45%, ${EDGE})}
 .ux-prj i{width:8px;height:8px;flex:0 0 auto;border-radius:2px;background:var(--pc)}
 .ux-prj > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-prjx{height:28px;padding:0 8px 0 12px;border-radius:14px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;max-width:200px}
@@ -20865,25 +21073,27 @@ var PAGE_CSS = `
 .ux-st-working .ux-sdot{background:var(--ui-accent)}.ux-st-waiting .ux-sdot{background:${ORANGE4}}.ux-st-active .ux-sdot{background:${GREEN3}}
 /* ---------- header: one row ---------- */
 .ux-top{display:flex;align-items:center;gap:16px;min-height:44px;flex:0 0 auto;min-width:0}
-.ux-brand{display:flex;align-items:center;gap:12px;flex:0 0 auto;min-width:0}
+.ux-brand{display:flex;align-items:center;gap:12px;flex:0 1 auto;min-width:32px}
 .ux-brand .mk{display:grid;place-items:center;flex:0 0 auto;width:32px;height:32px;border-radius:8px;background:var(--ui-accent);color:${ON_ACCENT}}
-.ux-brand h1{margin:0;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--foreground)}
-.ux-live{display:flex;align-items:center;gap:8px;flex:0 0 auto}   /* the pills never shrink under the game badge; the header yields by folding words (container queries below) */
-.ux-lvp{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:14px;border:1px solid ${EDGE2};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer}
+.ux-brand h1{margin:0;min-width:0;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--foreground)}
+.ux-live{display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}   /* the header yields by folding words (container queries below); if a row is still too long the title, then the word of the decisions pill, are cut: never the actions nor the gear */
+.ux-lvp.dec{min-width:0}
+.ux-lvp.dec .w{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.ux-lvp{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:14px;border:1px solid ${EDGE};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer}
 .ux-lvp b{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
 .ux-lvp:hover{border-color:var(--ui-accent)}
 .ux-lvp.working b{color:${ink4("var(--ui-accent)")}}
-.ux-lvp.warn{border-color:color-mix(in oklab, ${ORANGE4} 60%, ${EDGE2});background:color-mix(in oklab, ${ORANGE4} 9%, ${CARD})}
+.ux-lvp.warn{border-color:color-mix(in oklab, ${ORANGE4} 60%, ${EDGE});background:color-mix(in oklab, ${ORANGE4} 9%, ${CARD})}
 .ux-lvp.warn b{color:${ink4(ORANGE4)}}
 .ux-pulse{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:var(--ui-accent);animation:ux-pulse 2s ease-out infinite}
 .ux-pulse.off{animation:none;background:${T32}}
 @keyframes ux-pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab, var(--ui-accent) 55%, transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
 .ux-sp{flex:1 1 auto;min-width:0}
 /* the game badge: three segments of the same structure (icon + value over its caption), centred on one axis, 40 px */
-.ux-game{display:inline-flex;align-items:stretch;flex:0 0 auto;box-sizing:border-box;height:32px;padding:0;border:1px solid color-mix(in oklab, ${ORANGE4} 35%, ${EDGE2});border-radius:12px;overflow:hidden;background:linear-gradient(180deg, color-mix(in oklab, ${ORANGE4} 9%, ${CARD}), ${CARD});color:var(--foreground);font:inherit;cursor:pointer;text-align:left}
+.ux-game{display:inline-flex;align-items:stretch;flex:0 0 auto;box-sizing:border-box;height:32px;padding:0;border:1px solid color-mix(in oklab, ${ORANGE4} 35%, ${EDGE});border-radius:12px;overflow:hidden;background:linear-gradient(180deg, color-mix(in oklab, ${ORANGE4} 9%, ${CARD}), ${CARD});color:var(--foreground);font:inherit;cursor:pointer;text-align:left}
 .ux-game:hover{border-color:${ORANGE4}}
 .ux-gs{display:inline-flex;align-items:center;gap:8px;padding:0 12px;white-space:nowrap;min-height:0}
-.ux-gs + .ux-gs{border-left:1px solid color-mix(in oklab, ${ORANGE4} 22%, ${EDGE2})}
+.ux-gs + .ux-gs{border-left:1px solid color-mix(in oklab, ${ORANGE4} 22%, ${EDGE})}
 .ux-g2{display:flex;flex-direction:column;justify-content:center;gap:1px}
 .ux-g2 b{font-size:12.5px;line-height:14px;font-weight:700}
 .ux-g2 b .of{font-weight:500;color:${T32}}
@@ -20892,32 +21102,34 @@ var PAGE_CSS = `
 .ux-mbar{display:block;flex:0 0 auto;width:56px;height:4px;border-radius:2px;background:${SUNKEN};overflow:hidden}
 .ux-mbar i{display:block;height:100%;background:linear-gradient(90deg, ${ORANGE4}, color-mix(in oklab, ${ORANGE4} 60%, ${RED3}))}
 .ux-acts{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-.ux-acts .sep{width:1px;height:24px;background:${EDGE2};margin:0 4px}
+.ux-acts .sep{width:1px;height:24px;background:${EDGE};margin:0 4px}
 .ux-acts .only-n{display:none}
+.ux-acts .ux-b .lb{display:none}
+.ux-acts .ux-b:not(.ico){width:32px;padding:0}
 .ux-menu{position:relative}
 /* ---------- the rail of alerts: one line of chips, the detail on demand ---------- */
-.ux-alerts{display:flex;align-items:center;gap:8px;flex:0 0 auto;min-width:0;overflow:hidden}
+.ux-alerts{display:flex;align-items:center;gap:8px;align-self:stretch;flex:0 0 auto;min-width:0}   /* not clipped (the focus ring of a chip shows): what does not fit folds into « +N » */
 .ux-alerts:empty{display:none}
-.ux-alw{display:inline-flex;min-width:0}
-.ux-al{display:inline-flex;align-items:center;gap:8px;min-width:0;height:28px;padding:0 8px 0 12px;border-radius:14px;border:1px solid ${EDGE2};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer}
+.ux-alw{display:inline-flex;flex:0 0 auto;min-width:0;max-width:100%}
+.ux-al{display:inline-flex;align-items:center;gap:8px;min-width:0;height:28px;padding:0 8px 0 12px;border-radius:14px;border:1px solid ${EDGE};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer}
 .ux-al > span{min-width:0;overflow:hidden;text-overflow:ellipsis}
-.ux-al.crit{border-color:color-mix(in oklab, ${RED3} 55%, ${EDGE2});background:color-mix(in oklab, ${RED3} 8%, ${CARD})}
+.ux-al.crit{border-color:color-mix(in oklab, ${RED3} 55%, ${EDGE});background:color-mix(in oklab, ${RED3} 8%, ${CARD})}
 .ux-al.crit .ux-i:first-child{color:${RED3}}
-.ux-al.warn{border-color:color-mix(in oklab, ${ORANGE4} 55%, ${EDGE2})}
+.ux-al.warn{border-color:color-mix(in oklab, ${ORANGE4} 55%, ${EDGE})}
 .ux-al.warn .ux-i:first-child{color:${ORANGE4}}
 .ux-al.info{border-style:dashed;color:${T22}}
 .ux-al .chev{color:${T32}}
 /* ---------- main: the stage (scene + dock) and the panel ---------- */
 .ux-main{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;flex:1 1 auto;min-width:0;min-height:0}
 .ux-main.nopanel{grid-template-columns:minmax(0,1fr)}
-.ux-stage{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE2};border-radius:12px;overflow:hidden;background:${CARD}}
+.ux-stage{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;overflow:hidden;background:${CARD}}
 .ux-stage .oc-box{flex:1 1 auto;border:0;border-radius:0;padding:8px 0 4px}
 .ux-stage .oc-box.oc-listing{padding:8px 12px}
 .ux-stage .oc-rp-tag{z-index:3}
-.ux-dock{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;padding:8px 12px;border-top:1px solid ${EDGE2};background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
+.ux-dock{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;padding:8px 12px;border-top:1px solid ${EDGE};background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
 /* a small basis, so the selected-agent bar wraps under the chips of a 390 px stage instead of squeezing their names to 0 px */
 .ux-dk-l{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1 1 240px;min-width:0}
-.ux-pj{display:inline-flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;height:32px;padding:0 12px 0 8px;border-radius:8px;border:1px solid ${EDGE2};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .12s,background-color .12s,box-shadow .12s}
+.ux-pj{display:inline-flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;height:32px;padding:0 12px 0 8px;border-radius:8px;border:1px solid ${EDGE};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .12s,background-color .12s,box-shadow .12s}
 .ux-pj b{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .ux-pj:hover{border-color:var(--pc)}
 .ux-pj[aria-pressed="true"]{border-color:var(--pc);background:color-mix(in oklab, var(--pc) 14%, ${CARD});box-shadow:inset 3px 0 0 var(--pc)}
@@ -20928,13 +21140,13 @@ var PAGE_CSS = `
 .ux-pj .wb{display:inline-flex;align-items:center;gap:4px;color:${ink4(ORANGE4)};font-weight:700;font-size:12px}
 .ux-pj.all{--pc:var(--ui-accent)}
 .ux-pj.all .ux-i{color:${T22}}
-.ux-sel{display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;padding-left:8px;border-left:1px solid ${EDGE2}}
+.ux-sel{display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;padding-left:8px;border-left:1px solid ${EDGE}}
 .ux-sel>b{font-size:12.5px;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-sel .hint{font-size:12px;color:${T32};white-space:nowrap}
 .ux-sel .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
 /* ---------- the panel: four tabs (WAI-ARIA tab list), one scrolling body ---------- */
-.ux-panel{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
-.ux-tabs{display:flex;gap:4px;flex:0 0 auto;padding:4px 12px 0;border-bottom:1px solid ${EDGE2}}
+.ux-panel{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
+.ux-tabs{display:flex;gap:4px;flex:0 0 auto;padding:4px 12px 0;border-bottom:1px solid ${EDGE}}
 .ux-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1 1 auto;min-width:0;height:36px;padding:0 8px;border:0;border-radius:6px 6px 0 0;background:transparent;color:${T32};font:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer}
 .ux-tab:hover{color:var(--foreground);background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .ux-tab[aria-selected="true"]{color:var(--foreground)}
@@ -20946,18 +21158,18 @@ var PAGE_CSS = `
 .ux-pbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
 .ux-pbar .lbl{font-size:12px;color:${T32}}
 .ux-pbar .grow{margin-left:auto}
-.ux-seg{display:inline-flex;padding:4px;border:0;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});box-shadow:inset 0 0 0 1px ${EDGE2}}
+.ux-seg{display:inline-flex;padding:4px;border:0;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});box-shadow:inset 0 0 0 1px ${EDGE}}
 .ux-seg button{height:24px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:${T22};font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 .ux-seg button[aria-pressed="true"]{background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 1px 2px color-mix(in oklab, var(--foreground) 14%, transparent)}
 .ux-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 12px;text-align:center;color:${T32};font-size:12.5px}
 .ux-empty .ux-i{color:${T32}}
 /* the page with no agent — a card centred in the stage, the three things that make the office live, the button that starts it */
-.ux-void{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px;width:min(480px,100%);margin:auto;padding:32px 24px;text-align:center;border:1px dashed ${EDGE2};border-radius:16px;background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
-.ux-void-art{display:grid;place-items:center;width:96px;height:96px;border-radius:20px;background:color-mix(in oklab, var(--ui-accent) 10%, ${CARD});border:1px solid ${EDGE2}}
+.ux-void{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px;width:min(480px,100%);margin:auto;padding:32px 24px;text-align:center;border:1px dashed ${EDGE};border-radius:16px;background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
+.ux-void-art{display:grid;place-items:center;width:96px;height:96px;border-radius:20px;background:color-mix(in oklab, var(--ui-accent) 10%, ${CARD});border:1px solid ${EDGE}}
 .ux-void h2{margin:0;font-size:18px;line-height:24px;font-weight:700}
 .ux-void .lead{margin:0;color:${T22};font-size:13px;line-height:20px}
 .ux-void-steps{display:flex;flex-direction:column;gap:8px;margin:4px 0;padding:0;list-style:none;text-align:left;width:100%}
-.ux-void-steps li{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD};font-size:12.5px;line-height:16px}
+.ux-void-steps li{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD};font-size:12.5px;line-height:16px}
 .ux-void-steps .n{flex:0 0 auto;display:grid;place-items:center;width:24px;height:24px;border-radius:12px;font-weight:700;font-size:12px;background:var(--ui-accent);color:${ON_ACCENT}}
 .ux-void .hint{margin:0;color:${T32};font-size:12px}
 .ux-void .hint{font-family:var(--font-mono, ui-monospace, monospace)}
@@ -20968,12 +21180,12 @@ var PAGE_CSS = `
 .ux-grp .sq{width:12px;height:12px;flex:0 0 auto;border-radius:3px;background:var(--pc)}
 .ux-grp .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-grp .n{flex:0 0 auto;color:${T32};font-weight:500}
-.ux-grp .ln{flex:1 1 auto;min-width:8px;height:1px;background:linear-gradient(90deg, color-mix(in oklab, var(--pc) 50%, ${EDGE2}), transparent)}
+.ux-grp .ln{flex:1 1 auto;min-width:8px;height:1px;background:linear-gradient(90deg, color-mix(in oklab, var(--pc) 50%, ${EDGE}), transparent)}
 /* decision card: project stripe, code + age, title, who, orders */
 .ux-dcl{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
-.ux-dc{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px 12px 12px 16px;border:1px solid ${EDGE2};border-radius:10px;background:${CARD};animation:ux-in .16s ease both}
+.ux-dc{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px 12px 12px 16px;border:1px solid ${EDGE};border-radius:10px;background:${CARD};animation:ux-in .16s ease both}
 .ux-dc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:10px 0 0 10px;background:var(--pc)}
-.ux-dc:hover{border-color:color-mix(in oklab, var(--pc) 50%, ${EDGE2})}
+.ux-dc:hover{border-color:color-mix(in oklab, var(--pc) 50%, ${EDGE})}
 .ux-dc.target{box-shadow:0 0 0 2px color-mix(in oklab, var(--ui-accent) 55%, transparent)}
 .ux-dc[data-unverified]{border-style:dashed}
 @keyframes ux-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -20986,6 +21198,8 @@ var PAGE_CSS = `
 .ux-dc-top .ux-b.op:last-child{margin-right:-4px}
 .ux-dc-top .ux-b.op:hover{color:var(--foreground)}
 .ux-dc-t{margin:0;font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.ux-dc-t.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
+.ux-dc-more{align-self:flex-start;font-size:12px}
 .ux-dc-s{margin:0;font-size:12px;line-height:1.4;color:${T22};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-c{margin:0;min-width:0;font-size:11.5px;line-height:1.4;color:${T22};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
 .ux-dc-who{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:${T22}}
@@ -21002,12 +21216,12 @@ var PAGE_CSS = `
 .ux-slot:empty{display:none}
 .ux-slot{display:block}
 /* the confirmation, the draft and the 6 s window live IN the card */
-.ux-cf{display:flex;flex-direction:column;gap:8px;padding:8px 12px;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE2};animation:ux-in .14s ease both}
+.ux-cf{display:flex;flex-direction:column;gap:8px;padding:8px 12px;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};animation:ux-in .14s ease both}
 .ux-cf p{margin:0;font-size:12.5px;overflow-wrap:anywhere}
 .ux-cf .ctitle{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .ux-cmd{display:flex;flex-direction:column;gap:4px;min-width:0}
 .ux-cmd .lbl{font-size:11.5px;font-weight:600;color:${T22}}
-.ux-cmd-x{box-sizing:border-box;max-width:100%;max-height:min(168px,30vh);margin:0;padding:8px;overflow-x:hidden;overflow-y:auto;font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;tab-size:4;color:var(--foreground);background:${CARD};border:1px solid ${EDGE2};border-radius:6px}
+.ux-cmd-x{box-sizing:border-box;max-width:100%;max-height:min(168px,30vh);margin:0;padding:8px;overflow-x:hidden;overflow-y:auto;font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;tab-size:4;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:6px}
 .ux-cmd-x:focus-visible{${RING_FOCUS}}
 .ux-cf .fine{font-size:12px;color:${T32}}
 .ux-cf .row{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
@@ -21016,17 +21230,17 @@ var PAGE_CSS = `
 .ux-cf .meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:11.5px;color:${T32}}
 .ux-cf .meta .near{color:${ink4(ORANGE4)};font-weight:600}
 .ux-cf .note{color:${ink4(RED3)};font-size:12px}
-.ux-cd{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 8px 12px 12px;border-radius:8px;overflow:hidden;background:color-mix(in oklab, var(--ui-accent) 9%, ${CARD});border:1px solid color-mix(in oklab, var(--ui-accent) 40%, ${EDGE2});font-size:12.5px}
+.ux-cd{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 8px 12px 12px;border-radius:8px;overflow:hidden;background:color-mix(in oklab, var(--ui-accent) 9%, ${CARD});border:1px solid color-mix(in oklab, var(--ui-accent) 40%, ${EDGE});font-size:12.5px}
 .ux-cd .tx{flex:1 1 8rem;min-width:0;display:flex;align-items:center;gap:8px;overflow-wrap:anywhere}
 .ux-cd .tx .ux-i{color:${ink4("var(--ui-accent)")}}
 .ux-cd .bar{position:absolute;left:0;bottom:0;height:4px;width:100%;background:var(--ui-accent);transform-origin:left center;animation:ux-drain linear forwards}
 @keyframes ux-drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-.ux-cd.ok{border-color:color-mix(in oklab, ${GREEN3} 50%, ${EDGE2});background:color-mix(in oklab, ${GREEN3} 9%, ${CARD})}
-.ux-cd.ko{border-color:color-mix(in oklab, ${RED3} 50%, ${EDGE2});background:color-mix(in oklab, ${RED3} 8%, ${CARD})}
-.ux-cd.cancel{border-color:${EDGE2};background:color-mix(in oklab, var(--foreground) 4%, ${CARD})}
+.ux-cd.ok{border-color:color-mix(in oklab, ${GREEN3} 50%, ${EDGE});background:color-mix(in oklab, ${GREEN3} 9%, ${CARD})}
+.ux-cd.ko{border-color:color-mix(in oklab, ${RED3} 50%, ${EDGE});background:color-mix(in oklab, ${RED3} 8%, ${CARD})}
+.ux-cd.cancel{border-color:${EDGE};background:color-mix(in oklab, var(--foreground) 4%, ${CARD})}
 .ux-cd .tag{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
 .ux-cd.ok .tag{color:${ink4(GREEN3)}}.ux-cd.ko .tag{color:${ink4(RED3)}}.ux-cd.cancel .tag{color:${T32}}
-.ux-cd .ux-spin{width:12px;height:12px;flex:0 0 auto;border:2px solid ${EDGE2};border-top-color:var(--ui-accent);border-radius:50%;animation:oc-turn .8s linear infinite}
+.ux-cd .ux-spin{width:12px;height:12px;flex:0 0 auto;border:2px solid ${EDGE};border-top-color:var(--ui-accent);border-radius:50%;animation:oc-turn .8s linear infinite}
 /* the floating bar stays for an order that has no card on screen (panel folded, recruitment, card filtered out) */
 /* agent tab */
 .ux-ag-h{display:flex;align-items:center;gap:12px;margin:0 0 12px}
@@ -21040,7 +21254,7 @@ var PAGE_CSS = `
 .ux-kv .one{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-kv small{display:block;color:${T32};font-size:11.5px}
 .ux-chips{display:flex;flex-wrap:wrap;gap:4px}
-.ux-chip2{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:12px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE2};font-size:11.5px;max-width:100%}
+.ux-chip2{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:12px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};font-size:11.5px;max-width:100%}
 .ux-chip2 > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-ag-act{display:flex;flex-wrap:wrap;gap:8px}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
@@ -21049,15 +21263,19 @@ var PAGE_CSS = `
 .ux-rosterb:hover{background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .ux-rosterb[aria-current="true"]{background:color-mix(in oklab, var(--ui-accent) 10%, transparent)}
 .ux-rosterb .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
-/* the NAME is what the row is for: it never shrinks nor is cut; the project chip (flex 1) gives way, and the state word is kept whole */
-.ux-rosterb .nm{flex:0 0 auto;white-space:nowrap;font-weight:600;font-size:12.5px}
-.ux-rosterb .ux-prj{flex:0 1 auto;min-width:0;overflow:hidden}
+/* a long name is cut with an ellipsis (the whole name is the button's name): the project chip gives way first, then the name; the state word is kept whole */
+.ux-rosterb .nm{flex:0 1 auto;min-width:8ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:12.5px}
+.ux-rosterb .ux-prj{flex:0 100 auto;min-width:28px;overflow:hidden}
 .ux-rosterb .ux-st{flex:0 0 auto;white-space:nowrap}
 .ux-rosterb .ux-st{margin-left:auto;font-size:11.5px}
 /* projects tab */
-.ux-pjc{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr);gap:4px 12px;margin:0 0 12px;padding:16px 12px 12px;border:1px solid ${EDGE2};border-radius:10px;overflow:hidden}
+.ux-pjc{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr);gap:4px 12px;margin:0 0 12px;padding:16px 12px 12px;border:1px solid ${EDGE};border-radius:10px;overflow:hidden}
 .ux-pjc::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--pc)}
-.ux-pjc.dim{opacity:.6}
+/* a project the filter leaves out: its text keeps its contrast (opacity .6 measured 3.7:1 on the light theme), the card recedes by its dashed edge, its pale ring and stripe */
+.ux-pjc.dim{border-style:dashed}
+.ux-pjc.dim::before{opacity:.4}
+.ux-pjc.dim .big svg{opacity:.5}
+.ux-pjc.dim .ux-pips{opacity:.6}
 .ux-pjc .big{grid-row:1/3;position:relative;width:52px;height:52px}
 .ux-pjc .big .ux-ring{width:52px;height:52px}
 .ux-pjc .big .pc{position:absolute;inset:0;display:grid;place-items:center;font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -21074,14 +21292,28 @@ var PAGE_CSS = `
 .ux-pips i.blocked{background:${ORANGE4}}
 .ux-pips i.running,.ux-pips i.review{background:var(--ui-accent)}
 .ux-pips i.todo,.ux-pips i.ready,.ux-pips i.triage,.ux-pips i.scheduled{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ui-stroke-secondary)}
+/* the status is also a shape: filled = done, arrow tip = running, hatched = blocked, hollow = to do */
+.ux-pips i.running,.ux-pips i.review,.ux-pq .ux-pip.running,.ux-pq .ux-pip.review{clip-path:polygon(0 0,calc(100% - 4px) 0,100% 50%,calc(100% - 4px) 100%,0 100%);border-radius:2px 0 0 2px}
+.ux-pips i.blocked,.ux-pq .ux-pip.blocked{background:repeating-linear-gradient(135deg, ${ORANGE4} 0 3px, color-mix(in oklab, ${ORANGE4} 35%, ${CARD}) 3px 6px)}
 .ux-pips i[data-pin]{box-shadow:inset 0 -3px 0 var(--foreground)}
+.ux-pq-toggle{grid-column:1/-1;justify-self:start;margin-top:4px;font-size:12px}
+.ux-pq{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;margin:4px 0 0;padding:0;list-style:none}
+.ux-pq li{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-width:0;font-size:12px}
+.ux-pq .ux-pip{flex:0 0 16px;height:8px;border-radius:2px;background:${SUNKEN}}
+.ux-pq .ux-pip.done{background:color-mix(in oklab, var(--pc) 75%, ${CARD})}
+.ux-pq .ux-pip.running,.ux-pq .ux-pip.review{background:var(--ui-accent)}
+.ux-pq .ux-pip.todo,.ux-pq .ux-pip.ready,.ux-pq .ux-pip.triage,.ux-pq .ux-pip.scheduled{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ui-stroke-secondary)}
+.ux-pq .code{color:${T22}}
+.ux-pq .st{color:${T22};font-weight:600}
+.ux-pq .tt{flex:1 1 100%;min-width:0;padding-left:24px;overflow-wrap:anywhere;color:var(--foreground)}
+.ux-why{display:block;flex:1 1 100%;margin:4px 0 0;font-size:11.5px;line-height:1.35;color:${T22}}
 .ux-pjc .pin{grid-column:1/-1;display:flex;gap:8px;align-items:baseline;min-width:0;font-size:11px}
 .ux-pjc .pin small{font-size:11px;color:${T32}}
 .ux-pjc .ac{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 /* journal tab */
 .ux-nightc{margin:0 0 12px}
 .ux-jl{display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
-.ux-jl li{display:grid;grid-template-columns:52px 20px minmax(0,1fr);gap:8px;align-items:center;min-height:36px;padding:4px 0;border-bottom:1px solid color-mix(in oklab, ${EDGE2} 70%, transparent);font-size:12.5px}
+.ux-jl li{display:grid;grid-template-columns:52px 20px minmax(0,1fr);gap:8px;align-items:center;min-height:36px;padding:4px 0;border-bottom:1px solid color-mix(in oklab, ${EDGE} 70%, transparent);font-size:12.5px}
 .ux-jl time{font-size:11.5px;color:${T32};white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ux-jl .ic{display:inline-flex;color:${T32}}
 .ux-jl .ic.ok{color:${ink4(GREEN3)}}.ux-jl .ic.w{color:${ink4(ORANGE4)}}.ux-jl .ic.ko{color:${ink4(RED3)}}
@@ -21090,7 +21322,8 @@ var PAGE_CSS = `
 .ux-jl .ux-prj{max-width:100%} /* the chip has its own line in a journal row, so a long name (« customer-support… ») is not cut at 140 px beside free space */
 .ux-jl .res{font-size:11px;font-weight:600}
 /* popover (the « ? » texts, alert details) */
-.ux-pop{position:fixed;z-index:70;box-sizing:border-box;width:max-content;max-width:min(300px,calc(100vw - 16px));padding:12px;border:1px solid ${EDGE2};border-radius:10px;background:${CARD};color:var(--foreground);font-size:12.5px;line-height:1.45;box-shadow:0 10px 30px color-mix(in oklab, var(--foreground) 18%, transparent);animation:ux-in .14s ease both}
+.ux-pop{position:fixed;z-index:70;box-sizing:border-box;width:max-content;max-width:min(300px,calc(100vw - 16px));padding:12px;border:1px solid ${EDGE};border-radius:10px;background:${CARD};color:var(--foreground);font-size:12.5px;line-height:1.45;max-height:calc(100vh - 16px);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 10px 30px color-mix(in oklab, var(--foreground) 18%, transparent);animation:ux-in .14s ease both}
+.ux-pop:focus-visible{${RING_FOCUS}}
 .ux-pop h5{margin:0 0 4px;font-size:12.5px;font-weight:700}
 .ux-pop p{margin:0 0 8px;color:${T22}}
 .ux-pop p:last-child{margin:0}
@@ -21099,6 +21332,7 @@ var PAGE_CSS = `
 .ux-pop .rowk .ux-rk{flex:0 0 auto;transform:translateY(0)}
 .ux-pop.menu{display:flex;flex-direction:column;gap:4px;padding:4px;min-width:200px}
 .ux-pop.menu button{display:flex;align-items:center;gap:8px;width:100%;height:36px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
+.ux-pop.menu button .why{display:block;margin-left:8px;font-size:11px;color:${T32};white-space:normal}
 .ux-pop.menu button:hover{background:color-mix(in oklab, var(--foreground) 6%, transparent)}
 /* ---------- bottom tab bar of a narrow pane ---------- */
 .ux-bar{display:none}
@@ -21112,12 +21346,12 @@ var PAGE_CSS = `
   .ux-panel{align-self:start;max-height:100%;min-height:min(100%,320px)}
   .ux-dk-l .ux-pj:not(.all){flex:1 1 auto;max-width:260px}   /* from their content width (a 0 basis would squeeze 8 projects to a ring and a cut count) */
   .ux-dk-l .ux-pj .n{margin-left:auto}
+  .ux-acts .ux-b .lb{display:inline}
+  .ux-acts .ux-b:not(.ico){width:auto;padding:0 12px}
 }
-/* ---------- a medium pane: the actions fold into icons ---------- */
+/* ---------- a medium pane (up to 1320 px) ---------- */
 @container ux (max-width: 1320px){
   .ux-main{grid-template-columns:minmax(0,1fr) 328px}
-  .ux-acts .ux-b .lb{display:none}
-  .ux-acts .ux-b:not(.ico){width:32px;padding:0}
   .ux-lvp.agents{display:none}
   .ux-tab svg{display:none}
   .ux-tab{padding:0 4px}
@@ -21160,7 +21394,7 @@ var PAGE_CSS = `
   .ux-sel{flex:1 1 100%;flex-wrap:wrap;min-width:0;padding:0;border-left:0}
   .ux-sel .hint{display:inline}
   .ux-tabs{display:none}
-  .ux-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex:0 0 auto;margin:0 -16px -12px;border-top:1px solid ${EDGE2};background:${CARD}}
+  .ux-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex:0 0 auto;margin:0 -16px -12px;border-top:1px solid ${EDGE};background:${CARD}}
   .ux-panel{border-radius:12px}
 }
 @container ux (max-width: 420px){ .ux-brand h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)} }
@@ -21174,11 +21408,11 @@ var PAGE_CSS = `
 `;
 
 // src/ui/Legend.jsx
-import { useEffect as useEffect18, useId as useId15, useRef as useRef19, useState as useState15 } from "react";
-import { jsx as jsx30, jsxs as jsxs26 } from "react/jsx-runtime";
+import { useEffect as useEffect19, useId as useId18, useRef as useRef21, useState as useState19 } from "react";
+import { jsx as jsx31, jsxs as jsxs27 } from "react/jsx-runtime";
 function Swatch({ rgb }) {
-  const ref = useRef19(null);
-  useEffect18(() => {
+  const ref = useRef21(null);
+  useEffect19(() => {
     const g = ref.current?.getContext("2d");
     if (!g || !rgb) return;
     const img = g.createImageData(10, 10);
@@ -21195,16 +21429,16 @@ function Swatch({ rgb }) {
     }
     g.putImageData(img, 0, 0);
   }, [rgb]);
-  if (!rgb) return /* @__PURE__ */ jsx30("span", { className: "oc-sw oc-sw-none", "aria-hidden": "true" });
-  return /* @__PURE__ */ jsx30("canvas", { ref, className: "oc-sw", width: 10, height: 10, "aria-hidden": "true", "data-rgb": rgb.join(",") });
+  if (!rgb) return /* @__PURE__ */ jsx31("span", { className: "oc-sw oc-sw-none", "aria-hidden": "true" });
+  return /* @__PURE__ */ jsx31("canvas", { ref, className: "oc-sw", width: 10, height: 10, "aria-hidden": "true", "data-rgb": rgb.join(",") });
 }
 function Legend() {
   const t = useT();
-  const [open, setOpen] = useState15(false);
-  const id = useId15();
-  const wrap = useRef19(null);
+  const [open, setOpen] = useState19(false);
+  const id = useId18();
+  const wrap = useRef21(null);
   const rows = legendRows(HALO, { workingMs: WORKER_LIVE_WINDOW_MS, staleMs: STALE_AFTER_MS, activeMs: RECENT_WINDOW_MS });
-  useEffect18(() => {
+  useEffect19(() => {
     if (!open) return void 0;
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -21224,68 +21458,68 @@ function Legend() {
       document.removeEventListener("pointerdown", onDown);
     };
   }, [open]);
-  return /* @__PURE__ */ jsxs26("span", { className: "oc-legend", ref: wrap, "data-legend": true, children: [
-    /* @__PURE__ */ jsx30("button", { type: "button", className: "oc-legend-btn", "aria-expanded": open, "aria-controls": id, "aria-label": t("legend.button"), onClick: () => setOpen((v) => !v), children: "?" }),
-    open ? /* @__PURE__ */ jsxs26("div", { id, className: "oc-legend-pop", role: "group", "aria-label": t("legend.title"), children: [
-      /* @__PURE__ */ jsx30("b", { children: t("legend.title") }),
-      /* @__PURE__ */ jsx30("ul", { children: rows.map((r) => /* @__PURE__ */ jsxs26("li", { "data-legend-state": r.state, children: [
-        /* @__PURE__ */ jsx30(Swatch, { rgb: r.rgb }),
-        /* @__PURE__ */ jsx30("span", { className: "oc-lg-sti", children: /* @__PURE__ */ jsx30(StateIcon, { state: r.state }) }),
-        /* @__PURE__ */ jsx30("span", { className: "oc-lg-name", children: t(`state.${r.state}`) }),
-        /* @__PURE__ */ jsx30("span", { className: "oc-lg-hint", children: r.arg == null ? t(r.hint) : t(r.hint, r.arg) })
+  return /* @__PURE__ */ jsxs27("span", { className: "oc-legend", ref: wrap, "data-legend": true, children: [
+    /* @__PURE__ */ jsx31("button", { type: "button", className: "oc-legend-btn", "aria-expanded": open, "aria-controls": id, "aria-label": t("legend.button"), onClick: () => setOpen((v) => !v), children: "?" }),
+    open ? /* @__PURE__ */ jsxs27("div", { id, className: "oc-legend-pop", role: "group", "aria-label": t("legend.title"), children: [
+      /* @__PURE__ */ jsx31("b", { children: t("legend.title") }),
+      /* @__PURE__ */ jsx31("ul", { children: rows.map((r) => /* @__PURE__ */ jsxs27("li", { "data-legend-state": r.state, children: [
+        /* @__PURE__ */ jsx31(Swatch, { rgb: r.rgb }),
+        /* @__PURE__ */ jsx31("span", { className: "oc-lg-sti", children: /* @__PURE__ */ jsx31(StateIcon, { state: r.state }) }),
+        /* @__PURE__ */ jsx31("span", { className: "oc-lg-name", children: t(`state.${r.state}`) }),
+        /* @__PURE__ */ jsx31("span", { className: "oc-lg-hint", children: r.arg == null ? t(r.hint) : t(r.hint, r.arg) })
       ] }, r.state)) })
     ] }) : null
   ] });
 }
 
 // src/ui/ProjectDock.jsx
-import { Fragment as Fragment13, jsx as jsx31, jsxs as jsxs27 } from "react/jsx-runtime";
+import { Fragment as Fragment14, jsx as jsx32, jsxs as jsxs28 } from "react/jsx-runtime";
 function ProjectButton({ b, pressed, onPick, t }) {
   const style = useProjectStyle(b.slug);
   const blocked = b.blocked.length;
-  return /* @__PURE__ */ jsxs27("button", { type: "button", className: "ux-pj", style, "data-dock-board": b.slug, "aria-pressed": pressed, title: `${t("ux.dock.chip", b.slug, `${b.done}/${b.total}`)}${blocked ? `, ${t("blockedCards", blocked)}` : ""}`, onClick: () => onPick(pressed ? null : b.slug), children: [
-    /* @__PURE__ */ jsx31(Ring, { done: b.done, total: b.total }),
-    /* @__PURE__ */ jsx31("b", { children: b.slug }),
-    /* @__PURE__ */ jsxs27("span", { className: "n ux-mono", children: [
+  return /* @__PURE__ */ jsxs28("button", { type: "button", className: "ux-pj", style, "data-dock-board": b.slug, "aria-pressed": pressed, title: `${t("ux.dock.chip", b.slug, `${b.done}/${b.total}`)}${blocked ? `, ${t("blockedCards", blocked)}` : ""}`, onClick: () => onPick(pressed ? null : b.slug), children: [
+    /* @__PURE__ */ jsx32(Ring, { done: b.done, total: b.total }),
+    /* @__PURE__ */ jsx32("b", { children: b.slug }),
+    /* @__PURE__ */ jsxs28("span", { className: "n ux-mono", children: [
       b.done,
       "/",
       b.total
     ] }),
-    blocked ? /* @__PURE__ */ jsxs27("span", { className: "wb", children: [
-      /* @__PURE__ */ jsx31(Icon, { name: "warn", size: 14 }),
-      /* @__PURE__ */ jsx31("span", { "aria-hidden": "true", children: blocked }),
-      /* @__PURE__ */ jsx31("span", { className: "ux-vh", children: t("blockedCards", blocked) })
+    blocked ? /* @__PURE__ */ jsxs28("span", { className: "wb", children: [
+      /* @__PURE__ */ jsx32(Icon, { name: "warn", size: 14 }),
+      /* @__PURE__ */ jsx32("span", { "aria-hidden": "true", children: blocked }),
+      /* @__PURE__ */ jsx32("span", { className: "ux-vh", children: t("blockedCards", blocked) })
     ] }) : null
   ] });
 }
 function ProjectDock({ boards, project: project2, onProject, picked, sceneAgent, replayOn, canOpen, why, onOpen, onDetails, narrow, announce, t }) {
-  return /* @__PURE__ */ jsxs27("div", { className: "ux-dock", "data-dock": true, children: [
-    boards.length ? /* @__PURE__ */ jsxs27("div", { className: "ux-dk-l", role: "group", "aria-label": t("ux.dock.label"), children: [
-      /* @__PURE__ */ jsxs27("button", { type: "button", className: "ux-pj all", "aria-pressed": !project2, "aria-label": t("ux.dock.all"), onClick: () => onProject(null), children: [
-        /* @__PURE__ */ jsx31(Icon, { name: "filter", size: 14 }),
-        /* @__PURE__ */ jsx31("b", { children: t("ux.dock.all") })
+  return /* @__PURE__ */ jsxs28("div", { className: "ux-dock", "data-dock": true, children: [
+    boards.length ? /* @__PURE__ */ jsxs28("div", { className: "ux-dk-l", role: "group", "aria-label": t("ux.dock.label"), children: [
+      /* @__PURE__ */ jsxs28("button", { type: "button", className: "ux-pj all", "aria-pressed": !project2, "aria-label": t("ux.dock.all"), onClick: () => onProject(null), children: [
+        /* @__PURE__ */ jsx32(Icon, { name: "filter", size: 14 }),
+        /* @__PURE__ */ jsx32("b", { children: t("ux.dock.all") })
       ] }),
-      boards.map((b) => /* @__PURE__ */ jsx31(ProjectButton, { b, pressed: project2 === b.slug, onPick: onProject, t }, b.slug))
-    ] }) : /* @__PURE__ */ jsx31("span", { className: "ux-sp" }),
-    /* @__PURE__ */ jsxs27("div", { className: "ux-sel", children: [
-      picked ? /* @__PURE__ */ jsxs27(Fragment13, { children: [
-        sceneAgent ? /* @__PURE__ */ jsx31(Portrait, { agent: sceneAgent }) : null,
-        /* @__PURE__ */ jsx31("b", { title: picked.label, children: picked.label }),
-        /* @__PURE__ */ jsxs27("span", { className: `ux-st ux-st-${picked.state}`, children: [
-          /* @__PURE__ */ jsx31("span", { className: "ux-sdot", "aria-hidden": "true" }),
+      boards.map((b) => /* @__PURE__ */ jsx32(ProjectButton, { b, pressed: project2 === b.slug, onPick: onProject, t }, b.slug))
+    ] }) : /* @__PURE__ */ jsx32("span", { className: "ux-sp" }),
+    /* @__PURE__ */ jsxs28("div", { className: "ux-sel", children: [
+      picked ? /* @__PURE__ */ jsxs28(Fragment14, { children: [
+        sceneAgent ? /* @__PURE__ */ jsx32(Portrait, { agent: sceneAgent }) : null,
+        /* @__PURE__ */ jsx32("b", { title: picked.label, children: picked.label }),
+        /* @__PURE__ */ jsxs28("span", { className: `ux-st ux-st-${picked.state}`, children: [
+          /* @__PURE__ */ jsx32("span", { className: "ux-sdot", "aria-hidden": "true" }),
           t(`state.${picked.state}`)
         ] }),
-        narrow ? /* @__PURE__ */ jsx31("button", { type: "button", className: "ux-b sm", onClick: onDetails, children: t("ux.dock.details") }) : null,
-        /* @__PURE__ */ jsx31("button", { type: "button", className: "ux-b sm pri oc-btn-open", "aria-disabled": !canOpen, title: why, "data-selected-open": true, onClick: onOpen, children: t("openBtn") })
-      ] }) : /* @__PURE__ */ jsx31("span", { className: "hint", children: t("ux.dock.hint") }),
-      /* @__PURE__ */ jsx31("span", { className: "oc-announce", "data-announce": true, "aria-live": "polite", children: announce }),
-      /* @__PURE__ */ jsx31(Legend, {})
+        narrow ? /* @__PURE__ */ jsx32("button", { type: "button", className: "ux-b sm", onClick: onDetails, children: t("ux.dock.details") }) : null,
+        /* @__PURE__ */ jsx32(WhyButton, { className: "ux-b sm pri oc-btn-open", reason: canOpen ? "" : why, title: why, "data-selected-open": true, onGo: onOpen, children: t("openBtn") })
+      ] }) : /* @__PURE__ */ jsx32("span", { className: "hint", children: t("ux.dock.hint") }),
+      /* @__PURE__ */ jsx32("span", { className: "oc-announce", "data-announce": true, "aria-live": "polite", children: announce }),
+      /* @__PURE__ */ jsx32(Legend, {})
     ] })
   ] });
 }
 
 // src/ui/TabBar.jsx
-import { jsx as jsx32, jsxs as jsxs28 } from "react/jsx-runtime";
+import { jsx as jsx33, jsxs as jsxs29 } from "react/jsx-runtime";
 var ICON4 = { office: "office", decisions: "inbox", projects: "folder", journal: "list" };
 function TabBar({ view, onView, decisions, t }) {
   const onKey = (e) => {
@@ -21296,21 +21530,21 @@ function TabBar({ view, onView, decisions, t }) {
     const bar = e.currentTarget.parentElement;
     requestAnimationFrame(() => bar?.querySelector(`[data-view="${next}"]`)?.focus());
   };
-  return /* @__PURE__ */ jsx32("nav", { className: "ux-bar", role: "tablist", "aria-label": t("ux.bar.label"), "data-tabbar": true, children: BAR.map((k) => /* @__PURE__ */ jsxs28("button", { type: "button", role: "tab", "data-view": k, "aria-selected": barOf(view) === k, tabIndex: barOf(view) === k ? 0 : -1, onKeyDown: onKey, onClick: () => onView(k), children: [
-    /* @__PURE__ */ jsx32(Icon, { name: ICON4[k], size: 20 }),
+  return /* @__PURE__ */ jsx33("nav", { className: "ux-bar", role: "tablist", "aria-label": t("ux.bar.label"), "data-tabbar": true, children: BAR.map((k) => /* @__PURE__ */ jsxs29("button", { type: "button", role: "tab", "data-view": k, "aria-selected": barOf(view) === k, tabIndex: barOf(view) === k ? 0 : -1, onKeyDown: onKey, onClick: () => onView(k), children: [
+    /* @__PURE__ */ jsx33(Icon, { name: ICON4[k], size: 20 }),
     k === "office" ? t("ux.bar.office") : t(`ux.tab.${k}`),
-    k === "decisions" && decisions ? /* @__PURE__ */ jsx32("span", { className: "ux-n warn", "aria-label": String(decisions), children: decisions }) : null
+    k === "decisions" && decisions ? /* @__PURE__ */ jsx33("span", { className: "ux-n warn", "aria-label": String(decisions), children: decisions }) : null
   ] }, k)) });
 }
 
 // src/ui/ReplayBar.jsx
 import { useMemo as useMemo12 } from "react";
-import { Fragment as Fragment14, jsx as jsx33, jsxs as jsxs29 } from "react/jsx-runtime";
+import { Fragment as Fragment15, jsx as jsx34, jsxs as jsxs30 } from "react/jsx-runtime";
 var BINS = 96;
 function Density({ entries, fromMs, toMs: toMs2 }) {
   const bins = useMemo12(() => density(entries, fromMs, toMs2, BINS), [entries, fromMs, toMs2]);
   const top = Math.max(1, ...bins.map((b) => b.all));
-  return /* @__PURE__ */ jsx33("svg", { className: "oc-rp-dens", viewBox: `0 0 ${BINS} 20`, preserveAspectRatio: "none", "aria-hidden": "true", focusable: "false", children: bins.map((b, i) => {
+  return /* @__PURE__ */ jsx34("svg", { className: "oc-rp-dens", viewBox: `0 0 ${BINS} 20`, preserveAspectRatio: "none", "aria-hidden": "true", focusable: "false", children: bins.map((b, i) => {
     if (!b.all) return null;
     const h = Math.max(2, b.all / top * 18);
     const hOf = (n) => n / b.all * h;
@@ -21319,9 +21553,9 @@ function Density({ entries, fromMs, toMs: toMs2 }) {
       if (!n) return null;
       const hh = hOf(n);
       y -= hh;
-      return /* @__PURE__ */ jsx33("rect", { className: cls, x: i + 0.1, y, width: 0.8, height: hh }, cls);
+      return /* @__PURE__ */ jsx34("rect", { className: cls, x: i + 0.1, y, width: 0.8, height: hh }, cls);
     };
-    return /* @__PURE__ */ jsxs29("g", { children: [
+    return /* @__PURE__ */ jsxs30("g", { children: [
       seg("d-done", b.done),
       seg("d-block", b.block),
       seg("d-fail", b.fail),
@@ -21342,17 +21576,17 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
       onAt(to);
     }
   };
-  return /* @__PURE__ */ jsxs29("section", { className: "oc-rp", role: "region", "aria-label": t("replay.region"), "data-replay-bar": true, children: [
-    /* @__PURE__ */ jsx33("style", { children: TIP_CSS }),
-    /* @__PURE__ */ jsxs29("div", { className: "oc-rp-top", children: [
-      /* @__PURE__ */ jsx33("span", { className: "oc-rp-win", role: "group", "aria-label": t("replay.window"), children: WINDOWS.map((w) => /* @__PURE__ */ jsx33("button", { type: "button", "aria-pressed": kind === w, "data-replay-window": w, title: t(`replay.windowKind.${w}`), onClick: () => onKind(w), children: t(`replay.windowShort.${w}`) }, w)) }),
-      replay ? /* @__PURE__ */ jsx33("span", { className: "oc-rp-range", "data-replay-range": true, children: t("replay.range", label(replay.fromMs), label(replay.toMs)) }) : null,
-      replay && counts ? /* @__PURE__ */ jsx33("span", { className: "oc-rp-state", "aria-live": "polite", "data-replay-state": true, children: counts.working + counts.waiting + counts.silent ? t("replay.state", counts.working, counts.waiting, counts.silent) : t("replay.stateNone") }) : null
+  return /* @__PURE__ */ jsxs30("section", { className: "oc-rp", role: "region", "aria-label": t("replay.region"), "data-replay-bar": true, children: [
+    /* @__PURE__ */ jsx34("style", { children: TIP_CSS }),
+    /* @__PURE__ */ jsxs30("div", { className: "oc-rp-top", children: [
+      /* @__PURE__ */ jsx34("span", { className: "oc-rp-win", role: "group", "aria-label": t("replay.window"), children: WINDOWS.map((w) => /* @__PURE__ */ jsx34("button", { type: "button", "aria-pressed": kind === w, "data-replay-window": w, title: t(`replay.windowKind.${w}`), onClick: () => onKind(w), children: t(`replay.windowShort.${w}`) }, w)) }),
+      replay ? /* @__PURE__ */ jsx34("span", { className: "oc-rp-range", "data-replay-range": true, children: t("replay.range", label(replay.fromMs), label(replay.toMs)) }) : null,
+      replay && counts ? /* @__PURE__ */ jsx34("span", { className: "oc-rp-state", "aria-live": "polite", "data-replay-state": true, children: counts.working + counts.waiting + counts.silent ? t("replay.state", counts.working, counts.waiting, counts.silent) : t("replay.stateNone") }) : null
     ] }),
-    replay ? /* @__PURE__ */ jsxs29(Fragment14, { children: [
-      /* @__PURE__ */ jsxs29("div", { className: "oc-rp-track", children: [
-        /* @__PURE__ */ jsx33(Density, { entries, fromMs: replay.fromMs, toMs: replay.toMs }),
-        /* @__PURE__ */ jsx33(
+    replay ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+      /* @__PURE__ */ jsxs30("div", { className: "oc-rp-track", children: [
+        /* @__PURE__ */ jsx34(Density, { entries, fromMs: replay.fromMs, toMs: replay.toMs }),
+        /* @__PURE__ */ jsx34(
           "input",
           {
             type: "range",
@@ -21369,33 +21603,33 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
           }
         )
       ] }),
-      /* @__PURE__ */ jsxs29("div", { className: "oc-rp-ends", "aria-hidden": "true", children: [
-        /* @__PURE__ */ jsx33("span", { children: label(replay.fromMs) }),
-        /* @__PURE__ */ jsx33("span", { children: label(replay.toMs) })
+      /* @__PURE__ */ jsxs30("div", { className: "oc-rp-ends", "aria-hidden": "true", children: [
+        /* @__PURE__ */ jsx34("span", { children: label(replay.fromMs) }),
+        /* @__PURE__ */ jsx34("span", { children: label(replay.toMs) })
       ] }),
-      /* @__PURE__ */ jsxs29("div", { className: "oc-rp-steps", children: [
-        /* @__PURE__ */ jsxs29("button", { type: "button", className: "oc-rp-step", "data-replay-prev": true, "aria-disabled": prev == null, title: prev == null ? t("replay.atEdge") : void 0, onClick: () => {
+      /* @__PURE__ */ jsxs30("div", { className: "oc-rp-steps", children: [
+        /* @__PURE__ */ jsxs30("button", { type: "button", className: "oc-rp-step", "data-replay-prev": true, "aria-disabled": prev == null, title: prev == null ? t("replay.atEdge") : void 0, onClick: () => {
           if (prev != null) onAt(prev);
         }, children: [
-          /* @__PURE__ */ jsx33(DlgIcon, { id: "prev", size: 14 }),
+          /* @__PURE__ */ jsx34(DlgIcon, { id: "prev", size: 14 }),
           t("replay.prev")
         ] }),
-        /* @__PURE__ */ jsxs29("button", { type: "button", className: "oc-rp-step", "data-replay-next": true, "aria-disabled": next == null, title: next == null ? t("replay.atEdge") : void 0, onClick: () => {
+        /* @__PURE__ */ jsxs30("button", { type: "button", className: "oc-rp-step", "data-replay-next": true, "aria-disabled": next == null, title: next == null ? t("replay.atEdge") : void 0, onClick: () => {
           if (next != null) onAt(next);
         }, children: [
           t("replay.next"),
-          /* @__PURE__ */ jsx33(DlgIcon, { id: "next", size: 14 })
+          /* @__PURE__ */ jsx34(DlgIcon, { id: "next", size: 14 })
         ] }),
-        /* @__PURE__ */ jsx33("span", { className: "oc-rp-help", children: /* @__PURE__ */ jsx33(DlgTip, { name: t("replay.cursor"), children: t("replay.cursorHelp") }) })
+        /* @__PURE__ */ jsx34("span", { className: "oc-rp-help", children: /* @__PURE__ */ jsx34(DlgTip, { name: t("replay.cursor"), children: t("replay.cursorHelp") }) })
       ] }),
       children
-    ] }) : status === "loading" ? /* @__PURE__ */ jsx33("p", { className: "oc-rp-msg", role: "status", children: t("replay.loading") }) : /* @__PURE__ */ jsx33("p", { className: "oc-rp-msg", role: "alert", "data-replay-error": true, children: t(status === "unavailable" ? "replay.unavailable" : "replay.error") })
+    ] }) : status === "loading" ? /* @__PURE__ */ jsx34("p", { className: "oc-rp-msg", role: "status", children: t("replay.loading") }) : /* @__PURE__ */ jsx34("p", { className: "oc-rp-msg", role: "alert", "data-replay-error": true, children: t(status === "unavailable" ? "replay.unavailable" : "replay.error") })
   ] });
 }
 
 // src/ui/ReplayPanel.jsx
 import { useMemo as useMemo13 } from "react";
-import { Fragment as Fragment15, jsx as jsx34, jsxs as jsxs30 } from "react/jsx-runtime";
+import { Fragment as Fragment16, jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
 var STATUS3 = new Set(CARD_STATUSES);
 var MAX_ROWS = 120;
 function factText(e, t) {
@@ -21415,57 +21649,57 @@ function Moment({ office, nowMs, t }) {
   const agents = office.agents.filter((a) => ["working", "stale", "waiting"].includes(a.state) || a.quiet?.length);
   const blocked = office.boards.flatMap((b) => b.blocked.map((c) => ({ ...c, board: b.slug })));
   const cardOf = (a) => (a.state === "waiting" ? a.blocked[0] ?? runningCards(a, nowMs)[0] : runningCards(a, nowMs)[0] ?? a.blocked[0]) ?? null;
-  return /* @__PURE__ */ jsxs30("section", { className: "oc-psec", "aria-labelledby": "oc-h-moment", "data-moment": true, children: [
-    /* @__PURE__ */ jsx34("h3", { id: "oc-h-moment", children: t("replay.moment.title") }),
-    agents.length || blocked.length ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
-      /* @__PURE__ */ jsx34("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.agents"), children: agents.map((a) => {
+  return /* @__PURE__ */ jsxs31("section", { className: "oc-psec", "aria-labelledby": "oc-h-moment", "data-moment": true, children: [
+    /* @__PURE__ */ jsx35("h3", { id: "oc-h-moment", children: t("replay.moment.title") }),
+    agents.length || blocked.length ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+      /* @__PURE__ */ jsx35("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.agents"), children: agents.map((a) => {
         const c = cardOf(a);
         const tag = taskTag(a, nowMs);
         const many = a.running.length > 1 && a.state !== "waiting";
         const quiet2 = quietTip(tag, t);
-        return /* @__PURE__ */ jsx34("li", { "data-moment-agent": a.name, "data-state": a.state, children: /* @__PURE__ */ jsxs30("span", { className: "oc-fact oc-fact-static", children: [
-          /* @__PURE__ */ jsx34("span", { className: `oc-tag oc-t-${a.state}`, children: t(`state.${a.state}`) }),
-          /* @__PURE__ */ jsxs30("span", { className: "oc-fact-main", children: [
-            /* @__PURE__ */ jsx34("b", { children: a.label }),
-            c ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+        return /* @__PURE__ */ jsx35("li", { "data-moment-agent": a.name, "data-state": a.state, children: /* @__PURE__ */ jsxs31("span", { className: "oc-fact oc-fact-static", children: [
+          /* @__PURE__ */ jsx35("span", { className: `oc-tag oc-t-${a.state}`, children: t(`state.${a.state}`) }),
+          /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
+            /* @__PURE__ */ jsx35("b", { children: a.label }),
+            c ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
               " ",
-              /* @__PURE__ */ jsx34("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
+              /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
               " ",
-              /* @__PURE__ */ jsxs30("span", { className: "oc-faint", children: [
+              /* @__PURE__ */ jsxs31("span", { className: "oc-faint", children: [
                 "(",
                 c.board,
                 ")"
               ] })
             ] }) : null,
-            many ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+            many ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
               " ",
-              /* @__PURE__ */ jsx34("span", { className: "oc-faint oc-mono", "data-moment-more": true, title: cardsTip(tag, t), children: c.title ? plusOf(tag.more) : codeText("", tag.more, t) })
+              /* @__PURE__ */ jsx35("span", { className: "oc-faint oc-mono", "data-moment-more": true, title: cardsTip(tag, t), children: c.title ? plusOf(tag.more) : codeText("", tag.more, t) })
             ] }) : null,
-            quiet2 ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+            quiet2 ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
               " ",
-              /* @__PURE__ */ jsxs30("span", { className: "oc-faint", "data-moment-quiet": true, style: { display: "inline-flex", alignItems: "center", gap: 4 }, children: [
-                /* @__PURE__ */ jsx34(StateIcon, { state: "stale" }),
+              /* @__PURE__ */ jsxs31("span", { className: "oc-faint", "data-moment-quiet": true, style: { display: "inline-flex", alignItems: "center", gap: 4 }, children: [
+                /* @__PURE__ */ jsx35(StateIcon, { state: "stale" }),
                 quiet2
               ] })
             ] }) : null
           ] })
         ] }) }, a.name);
       }) }),
-      blocked.length ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
-        /* @__PURE__ */ jsx34("h4", { className: "oc-faint", style: { margin: "8px 0 4px" }, children: t("replay.moment.blocked", blocked.length) }),
-        /* @__PURE__ */ jsx34("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.blocked", blocked.length), children: blocked.slice(0, 12).map((c) => /* @__PURE__ */ jsx34("li", { "data-moment-blocked": c.id, children: /* @__PURE__ */ jsx34("span", { className: "oc-fact oc-fact-static", children: /* @__PURE__ */ jsxs30("span", { className: "oc-fact-main", children: [
-          /* @__PURE__ */ jsx34("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
+      blocked.length ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
+        /* @__PURE__ */ jsx35("h4", { className: "oc-faint", style: { margin: "8px 0 4px" }, children: t("replay.moment.blocked", blocked.length) }),
+        /* @__PURE__ */ jsx35("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.blocked", blocked.length), children: blocked.slice(0, 12).map((c) => /* @__PURE__ */ jsx35("li", { "data-moment-blocked": c.id, children: /* @__PURE__ */ jsx35("span", { className: "oc-fact oc-fact-static", children: /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
+          /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
           " ",
-          /* @__PURE__ */ jsxs30("span", { className: "oc-faint", children: [
+          /* @__PURE__ */ jsxs31("span", { className: "oc-faint", children: [
             "(",
             c.board,
             c.assignee ? ` · ${c.assignee}` : "",
             ")"
           ] })
         ] }) }) }, `${c.board}/${c.id}`)) }),
-        blocked.length > 12 ? /* @__PURE__ */ jsx34("p", { className: "oc-faint", children: t("insp.more", blocked.length - 12) }) : null
+        blocked.length > 12 ? /* @__PURE__ */ jsx35("p", { className: "oc-faint", children: t("insp.more", blocked.length - 12) }) : null
       ] }) : null
-    ] }) : /* @__PURE__ */ jsx34("p", { className: "oc-hint", "data-moment-none": true, children: t("replay.stateNone") })
+    ] }) : /* @__PURE__ */ jsx35("p", { className: "oc-hint", "data-moment-none": true, children: t("replay.stateNone") })
   ] });
 }
 function ReplayPanel({ replay, office, summary: summary2, entries, atMs, nowMs, filter, onFilter, onAt, onShowGroup, onClose, drawer, headRef, t }) {
@@ -21474,80 +21708,80 @@ function ReplayPanel({ replay, office, summary: summary2, entries, atMs, nowMs, 
   const shown = useMemo13(() => filterJournal(entries, filter), [entries, filter]);
   const view = useMemo13(() => journalView(shown, atMs, MAX_ROWS), [shown, atMs]);
   const nowIndex = view.rows.findIndex((r) => !r.future);
-  return /* @__PURE__ */ jsxs30("aside", { id: "oc-panel", className: `oc-panel${drawer ? " oc-drawer" : ""}`, "aria-label": t("panel.region"), "data-panel": true, "data-replay-panel": true, "data-drawer": drawer ? "" : void 0, children: [
-    /* @__PURE__ */ jsxs30("div", { className: "oc-phead", children: [
-      /* @__PURE__ */ jsx34("h2", { ref: headRef, tabIndex: -1, children: t("replay.journal.title") }),
-      /* @__PURE__ */ jsx34("button", { type: "button", className: "oc-x", onClick: onClose, "aria-label": t("panel.close"), children: /* @__PURE__ */ jsx34("svg", { viewBox: "0 0 7 7", width: "10", height: "10", shapeRendering: "crispEdges", fill: "currentColor", "aria-hidden": "true", focusable: "false", children: [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [6, 0], [5, 1], [4, 2], [2, 4], [1, 5], [0, 6]].map(([x, y]) => /* @__PURE__ */ jsx34("rect", { x, y, width: "1", height: "1" }, `${x},${y}`)) }) })
+  return /* @__PURE__ */ jsxs31("aside", { id: "oc-panel", className: `oc-panel${drawer ? " oc-drawer" : ""}`, "aria-label": t("panel.region"), "data-panel": true, "data-replay-panel": true, "data-drawer": drawer ? "" : void 0, children: [
+    /* @__PURE__ */ jsxs31("div", { className: "oc-phead", children: [
+      /* @__PURE__ */ jsx35("h2", { ref: headRef, tabIndex: -1, children: t("replay.journal.title") }),
+      /* @__PURE__ */ jsx35("button", { type: "button", className: "oc-x", onClick: onClose, "aria-label": t("panel.close"), children: /* @__PURE__ */ jsx35("svg", { viewBox: "0 0 7 7", width: "10", height: "10", shapeRendering: "crispEdges", fill: "currentColor", "aria-hidden": "true", focusable: "false", children: [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [6, 0], [5, 1], [4, 2], [2, 4], [1, 5], [0, 6]].map(([x, y]) => /* @__PURE__ */ jsx35("rect", { x, y, width: "1", height: "1" }, `${x},${y}`)) }) })
     ] }),
-    /* @__PURE__ */ jsx34("style", { children: TIP_CSS }),
-    /* @__PURE__ */ jsxs30("div", { className: "oc-pbody", role: "region", "aria-label": t("replay.journal.title"), tabIndex: 0, children: [
-      /* @__PURE__ */ jsx34(Moment, { office, nowMs, t }),
-      /* @__PURE__ */ jsx34(NightCard, { summary: summary2, kind: replay.kind, t, onShow: onShowGroup, headingId: "oc-h-rp-night" }),
-      /* @__PURE__ */ jsxs30("section", { className: "oc-psec", "aria-labelledby": "oc-h-facts", "data-facts": true, children: [
-        /* @__PURE__ */ jsxs30("h3", { id: "oc-h-facts", children: [
+    /* @__PURE__ */ jsx35("style", { children: TIP_CSS }),
+    /* @__PURE__ */ jsxs31("div", { className: "oc-pbody", role: "region", "aria-label": t("replay.journal.title"), tabIndex: 0, children: [
+      /* @__PURE__ */ jsx35(Moment, { office, nowMs, t }),
+      /* @__PURE__ */ jsx35(NightCard, { summary: summary2, kind: replay.kind, t, onShow: onShowGroup, headingId: "oc-h-rp-night" }),
+      /* @__PURE__ */ jsxs31("section", { className: "oc-psec", "aria-labelledby": "oc-h-facts", "data-facts": true, children: [
+        /* @__PURE__ */ jsxs31("h3", { id: "oc-h-facts", children: [
           t("replay.journal.title"),
           " ",
-          /* @__PURE__ */ jsx34("span", { className: "oc-count", "data-facts-count": true, children: shown.length })
+          /* @__PURE__ */ jsx35("span", { className: "oc-count", "data-facts-count": true, children: shown.length })
         ] }),
-        /* @__PURE__ */ jsxs30("div", { className: "oc-rp-filters", children: [
-          /* @__PURE__ */ jsxs30("span", { className: "oc-rp-f", children: [
-            /* @__PURE__ */ jsx34("label", { htmlFor: "oc-rp-board", children: t("replay.journal.boardLabel") }),
-            /* @__PURE__ */ jsxs30("select", { id: "oc-rp-board", className: "oc-rp-sel", "data-filter": "board", value: filter.board ?? "", onChange: (e) => onFilter({ ...filter, board: e.target.value || null }), children: [
-              /* @__PURE__ */ jsx34("option", { value: "", children: t("replay.journal.anyBoard") }),
-              facets.boards.map((b) => /* @__PURE__ */ jsx34("option", { value: b, children: b }, b))
+        /* @__PURE__ */ jsxs31("div", { className: "oc-rp-filters", children: [
+          /* @__PURE__ */ jsxs31("span", { className: "oc-rp-f", children: [
+            /* @__PURE__ */ jsx35("label", { htmlFor: "oc-rp-board", children: t("replay.journal.boardLabel") }),
+            /* @__PURE__ */ jsxs31("select", { id: "oc-rp-board", className: "oc-rp-sel", "data-filter": "board", value: filter.board ?? "", onChange: (e) => onFilter({ ...filter, board: e.target.value || null }), children: [
+              /* @__PURE__ */ jsx35("option", { value: "", children: t("replay.journal.anyBoard") }),
+              facets.boards.map((b) => /* @__PURE__ */ jsx35("option", { value: b, children: b }, b))
             ] })
           ] }),
-          /* @__PURE__ */ jsxs30("span", { className: "oc-rp-f", children: [
-            /* @__PURE__ */ jsx34("label", { htmlFor: "oc-rp-agent", children: t("replay.journal.agentLabel") }),
-            /* @__PURE__ */ jsxs30("select", { id: "oc-rp-agent", className: "oc-rp-sel", "data-filter": "agent", value: filter.agent ?? "", onChange: (e) => onFilter({ ...filter, agent: e.target.value || null }), children: [
-              /* @__PURE__ */ jsx34("option", { value: "", children: t("replay.journal.anyAgent") }),
-              facets.agents.map((a) => /* @__PURE__ */ jsx34("option", { value: a, children: a }, a))
+          /* @__PURE__ */ jsxs31("span", { className: "oc-rp-f", children: [
+            /* @__PURE__ */ jsx35("label", { htmlFor: "oc-rp-agent", children: t("replay.journal.agentLabel") }),
+            /* @__PURE__ */ jsxs31("select", { id: "oc-rp-agent", className: "oc-rp-sel", "data-filter": "agent", value: filter.agent ?? "", onChange: (e) => onFilter({ ...filter, agent: e.target.value || null }), children: [
+              /* @__PURE__ */ jsx35("option", { value: "", children: t("replay.journal.anyAgent") }),
+              facets.agents.map((a) => /* @__PURE__ */ jsx35("option", { value: a, children: a }, a))
             ] })
           ] }),
-          /* @__PURE__ */ jsxs30("span", { className: "oc-rp-f", children: [
-            /* @__PURE__ */ jsx34("label", { htmlFor: "oc-rp-group", children: t("replay.journal.group") }),
-            /* @__PURE__ */ jsxs30("select", { id: "oc-rp-group", className: "oc-rp-sel", "data-filter": "group", value: filter.group ?? "", onChange: (e) => onFilter({ ...filter, group: e.target.value || null }), children: [
-              /* @__PURE__ */ jsx34("option", { value: "", children: t("replay.journal.anyGroup") }),
-              GROUPS.map((g) => /* @__PURE__ */ jsx34("option", { value: g, children: t(`replay.journal.group2.${g}`) }, g))
+          /* @__PURE__ */ jsxs31("span", { className: "oc-rp-f", children: [
+            /* @__PURE__ */ jsx35("label", { htmlFor: "oc-rp-group", children: t("replay.journal.group") }),
+            /* @__PURE__ */ jsxs31("select", { id: "oc-rp-group", className: "oc-rp-sel", "data-filter": "group", value: filter.group ?? "", onChange: (e) => onFilter({ ...filter, group: e.target.value || null }), children: [
+              /* @__PURE__ */ jsx35("option", { value: "", children: t("replay.journal.anyGroup") }),
+              GROUPS.map((g) => /* @__PURE__ */ jsx35("option", { value: g, children: t(`replay.journal.group2.${g}`) }, g))
             ] })
           ] }),
-          /* @__PURE__ */ jsxs30("label", { className: "oc-rp-all", htmlFor: "oc-rp-minor", children: [
-            /* @__PURE__ */ jsx34("input", { id: "oc-rp-minor", type: "checkbox", "data-filter": "all", checked: Boolean(filter.all), onChange: (e) => onFilter({ ...filter, all: e.target.checked }) }),
+          /* @__PURE__ */ jsxs31("label", { className: "oc-rp-all", htmlFor: "oc-rp-minor", children: [
+            /* @__PURE__ */ jsx35("input", { id: "oc-rp-minor", type: "checkbox", "data-filter": "all", checked: Boolean(filter.all), onChange: (e) => onFilter({ ...filter, all: e.target.checked }) }),
             t("replay.journal.all")
           ] })
         ] }),
-        view.newerHidden ? /* @__PURE__ */ jsx34("p", { className: "oc-faint", "data-facts-newer": true, children: t("replay.journal.newer", view.newerHidden) }) : null,
-        view.rows.length ? /* @__PURE__ */ jsx34("ul", { className: "oc-facts", "aria-label": t("replay.journal.title"), children: view.rows.map((e, i) => /* @__PURE__ */ jsx34("li", { "data-future": e.future ? "" : void 0, "data-now": i === nowIndex ? "" : void 0, "aria-current": i === nowIndex ? "true" : void 0, children: /* @__PURE__ */ jsxs30("button", { type: "button", className: "oc-fact", "data-fact": true, "data-source": e.source, "data-kind": e.kind, "data-group": e.group, "data-ms": e.ms, title: e.future ? `${t("replay.journal.go")} (${t("replay.journal.future")})` : t("replay.journal.go"), onClick: () => onAt(e.ms), children: [
-          /* @__PURE__ */ jsx34("time", { dateTime: new Date(e.ms).toISOString(), children: clockLabel(e.ms, t.lang, { day }) }),
-          /* @__PURE__ */ jsxs30("span", { className: "oc-fact-main", children: [
-            /* @__PURE__ */ jsx34("span", { className: "oc-fk", children: factText(e, t) }),
-            e.group === "order" && e.result ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+        view.newerHidden ? /* @__PURE__ */ jsx35("p", { className: "oc-faint", "data-facts-newer": true, children: t("replay.journal.newer", view.newerHidden) }) : null,
+        view.rows.length ? /* @__PURE__ */ jsx35("ul", { className: "oc-facts", "aria-label": t("replay.journal.title"), children: view.rows.map((e, i) => /* @__PURE__ */ jsx35("li", { "data-future": e.future ? "" : void 0, "data-now": i === nowIndex ? "" : void 0, "aria-current": i === nowIndex ? "true" : void 0, children: /* @__PURE__ */ jsxs31("button", { type: "button", className: "oc-fact", "data-fact": true, "data-source": e.source, "data-kind": e.kind, "data-group": e.group, "data-ms": e.ms, title: e.future ? `${t("replay.journal.go")} (${t("replay.journal.future")})` : t("replay.journal.go"), onClick: () => onAt(e.ms), children: [
+          /* @__PURE__ */ jsx35("time", { dateTime: new Date(e.ms).toISOString(), children: clockLabel(e.ms, t.lang, { day }) }),
+          /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
+            /* @__PURE__ */ jsx35("span", { className: "oc-fk", children: factText(e, t) }),
+            e.group === "order" && e.result ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
               " ",
-              /* @__PURE__ */ jsx34("span", { className: "oc-tag", children: t(`orders.result.${e.result}`) })
+              /* @__PURE__ */ jsx35("span", { className: "oc-tag", children: t(`orders.result.${e.result}`) })
             ] }) : null,
-            e.to ? /* @__PURE__ */ jsxs30("span", { className: "oc-faint", children: [
+            e.to ? /* @__PURE__ */ jsxs31("span", { className: "oc-faint", children: [
               " ",
               t("replay.fact.to", STATUS3.has(e.to) ? t(`status.${e.to}`) : e.to)
             ] }) : null,
-            e.group === "cron" && e.title ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+            e.group === "cron" && e.title ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
               " ",
-              /* @__PURE__ */ jsx34("span", { className: "oc-mono", children: e.title })
+              /* @__PURE__ */ jsx35("span", { className: "oc-mono", children: e.title })
             ] }) : null,
-            e.task && e.source !== "cron" ? /* @__PURE__ */ jsxs30(Fragment15, { children: [
+            e.task && e.source !== "cron" ? /* @__PURE__ */ jsxs31(Fragment16, { children: [
               " ",
-              /* @__PURE__ */ jsx34("span", { className: "oc-mono", title: e.title ? void 0 : t("replay.journal.noTitle"), children: e.title || e.task })
+              /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: e.title ? void 0 : t("replay.journal.noTitle"), children: e.title || e.task })
             ] }) : null,
-            e.profile ? /* @__PURE__ */ jsxs30("span", { className: "oc-faint", children: [
+            e.profile ? /* @__PURE__ */ jsxs31("span", { className: "oc-faint", children: [
               " · ",
               e.profile
             ] }) : null
           ] }),
-          /* @__PURE__ */ jsx34("span", { className: "oc-fact-src", "data-fact-source": true, children: sourceText(e, t) })
-        ] }) }, `${e.source}/${e.board}/${e.task}/${e.kind}/${e.ms}/${i}`)) }) : /* @__PURE__ */ jsx34("p", { className: "oc-hint oc-dashed", "data-facts-empty": true, children: t("replay.journal.empty") }),
-        view.olderHidden ? /* @__PURE__ */ jsx34("p", { className: "oc-faint", "data-facts-older": true, children: t("replay.journal.older", view.olderHidden) }) : null,
-        /* @__PURE__ */ jsx34("p", { className: "oc-faint oc-rp-note", children: /* @__PURE__ */ jsx34(DlgTip, { name: t("replay.journal.title"), children: t("replay.titlesNote") }) }),
-        replay.truncatedAt ? /* @__PURE__ */ jsx34("p", { className: "oc-rp-warn", "data-replay-truncated": true, children: t("replay.truncated", clockLabel(replay.truncatedAt, t.lang, { day })) }) : null,
-        replay.partial.length ? /* @__PURE__ */ jsx34("p", { className: "oc-rp-warn", "data-replay-partial": true, children: t("replay.partial") }) : null
+          /* @__PURE__ */ jsx35("span", { className: "oc-fact-src", "data-fact-source": true, children: sourceText(e, t) })
+        ] }) }, `${e.source}/${e.board}/${e.task}/${e.kind}/${e.ms}/${i}`)) }) : /* @__PURE__ */ jsx35("p", { className: "oc-hint oc-dashed", "data-facts-empty": true, children: t("replay.journal.empty") }),
+        view.olderHidden ? /* @__PURE__ */ jsx35("p", { className: "oc-faint", "data-facts-older": true, children: t("replay.journal.older", view.olderHidden) }) : null,
+        /* @__PURE__ */ jsx35("p", { className: "oc-faint oc-rp-note", children: /* @__PURE__ */ jsx35(DlgTip, { name: t("replay.journal.title"), children: t("replay.titlesNote") }) }),
+        replay.truncatedAt ? /* @__PURE__ */ jsx35("p", { className: "oc-rp-warn", "data-replay-truncated": true, children: t("replay.truncated", clockLabel(replay.truncatedAt, t.lang, { day })) }) : null,
+        replay.partial.length ? /* @__PURE__ */ jsx35("p", { className: "oc-rp-warn", "data-replay-partial": true, children: t("replay.partial") }) : null
       ] })
     ] })
   ] });
@@ -21576,9 +21810,9 @@ var REPLAY_CSS = `
 .oc-rp-tag:has(+ .oc-box.oc-listing){display:none}
 .oc-rp-tag{position:absolute;top:8px;left:8px;z-index:4;display:inline-flex;align-items:center;gap:6px;max-width:calc(100% - 16px);box-sizing:border-box;padding:3px 9px;border:1px solid var(--ui-accent);border-radius:999px;background:${CARD};color:var(--foreground);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;box-shadow:0 1px 3px color-mix(in oklab, var(--foreground) 18%, transparent)}
 /* the time bar under the scene */
-.oc-rp{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid ${EDGE2};border-radius:10px;background:${CARD};min-width:0}
+.oc-rp{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid ${EDGE};border-radius:10px;background:${CARD};min-width:0}
 .oc-rp-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-width:0}
-.oc-rp-win{display:inline-flex;max-width:100%;box-sizing:border-box;gap:2px;padding:4px;border:0;box-shadow:inset 0 0 0 1px ${EDGE2};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
+.oc-rp-win{display:inline-flex;max-width:100%;box-sizing:border-box;gap:2px;padding:4px;border:0;box-shadow:inset 0 0 0 1px ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .oc-rp-win button{box-sizing:border-box;flex:1 1 auto;min-width:0;min-height:28px;padding:0 12px;line-height:1.2;font:inherit;font-size:12px;font-weight:500;color:var(--ui-text-secondary);background:transparent;border:0;border-radius:6px;cursor:pointer}
 .oc-rp-win button[aria-pressed="true"]{background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 0 0 1px var(--ui-accent)}
 .oc-rp-range{font-size:12px;color:${SOFT3};font-variant-numeric:tabular-nums}
@@ -21597,7 +21831,7 @@ var REPLAY_CSS = `
 .oc-rp-range-input:focus-visible{outline:2px solid ${RING};outline-offset:2px;border-radius:4px}
 .oc-rp-ends{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:${SOFT3};font-variant-numeric:tabular-nums}
 .oc-rp-steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
-.oc-rp-step{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;height:28px;padding:0 12px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE2};border-radius:${BTN_RADIUS};cursor:pointer}
+.oc-rp-step{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;height:28px;padding:0 12px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-rp-step:hover{border-color:var(--ui-accent)}
 .oc-rp-step[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-rp-help{margin-left:auto;display:inline-flex;align-items:center}
@@ -21613,7 +21847,7 @@ var REPLAY_CSS = `
 .oc-facts{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
 .oc-facts li{min-width:0}
 .oc-fact{display:grid;grid-template-columns:auto minmax(0,1fr);gap:1px 8px;width:100%;padding:4px 6px;font:inherit;font-size:12px;text-align:left;color:var(--foreground);background:transparent;border:1px solid transparent;border-radius:6px;cursor:pointer}
-.oc-fact:hover{background:color-mix(in oklab, var(--ui-accent) 8%, transparent);border-color:${EDGE2}}
+.oc-fact:hover{background:color-mix(in oklab, var(--ui-accent) 8%, transparent);border-color:${EDGE}}
 .oc-fact time{grid-row:1;font-variant-numeric:tabular-nums;color:${SOFT3};white-space:nowrap}
 .oc-fact .oc-fact-main{grid-column:2;min-width:0;overflow-wrap:anywhere}
 .oc-fact .oc-fact-src{grid-column:2;font-size:11px;color:${SOFT3};min-width:0;overflow-wrap:anywhere}
@@ -21621,7 +21855,7 @@ var REPLAY_CSS = `
 .oc-fact-static .oc-fact-main{min-width:0;overflow-wrap:anywhere}
 /* a fact after the cursor is said by a dashed rule and a lighter weight, not by opacity (.55 puts time and source at 3.0:1 dark,
    2.2:1 light): every text keeps its own contrast */
-.oc-facts li[data-future] .oc-fact{border-left:2px dashed ${EDGE2};border-radius:0 6px 6px 0}
+.oc-facts li[data-future] .oc-fact{border-left:2px dashed ${EDGE};border-radius:0 6px 6px 0}
 .oc-facts li[data-future] .oc-fact .oc-fk{font-weight:400;color:${SOFT3}}
 .oc-facts li[data-now] .oc-fact{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 10%, transparent)}
 .oc-fact .oc-fk{font-weight:600}
@@ -21633,13 +21867,13 @@ var REPLAY_CSS = `
 .oc-nt-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
 .oc-nt-head .oc-faint{font-variant-numeric:tabular-nums}
 .oc-nt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.oc-nt-tile{display:flex;flex-direction:column;gap:1px;padding:6px 8px;font:inherit;text-align:left;color:var(--foreground);background:transparent;border:1px solid ${EDGE2};border-radius:8px;min-width:0;cursor:pointer}
+.oc-nt-tile{display:flex;flex-direction:column;gap:1px;padding:6px 8px;font:inherit;text-align:left;color:var(--foreground);background:transparent;border:1px solid ${EDGE};border-radius:8px;min-width:0;cursor:pointer}
 .oc-nt-grid .oc-nt-tile:nth-child(8):last-child{grid-column:span 2}
 .oc-nt-tile:hover{border-color:var(--ui-accent)}
 /* a tile with nothing to show (0) says so by its dashed edge and a neutral number (a red « 0 failures » reads as an alarm), not by
    opacity (.7 puts the label at 2.8:1 on the light theme) */
 .oc-nt-tile[aria-disabled="true"],.oc-nt-tile:disabled{cursor:default;border-style:dashed}
-.oc-nt-grid .oc-nt-tile:disabled:hover{border-color:${EDGE2}}
+.oc-nt-grid .oc-nt-tile:disabled:hover{border-color:${EDGE}}
 .oc-nt-grid .oc-nt-tile:disabled b{color:${SOFT3}}
 .oc-nt-tile b{font-size:1.05rem;font-variant-numeric:tabular-nums}
 .oc-nt-tile span{font-size:11px;color:${SOFT3};overflow-wrap:anywhere}
@@ -21661,7 +21895,7 @@ var REPLAY_CSS = `
 `;
 
 // src/ui/Collection.jsx
-import { useMemo as useMemo14, useRef as useRef20, useState as useState16 } from "react";
+import { useMemo as useMemo14, useRef as useRef22, useState as useState20 } from "react";
 
 // src/core/vitrine.js
 var RECENT_MS = 2 * 864e5;
@@ -21700,69 +21934,69 @@ function vitrineView(game, nowMs = 0) {
 }
 
 // src/ui/GameBar.jsx
-import { jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
+import { jsx as jsx36, jsxs as jsxs32 } from "react/jsx-runtime";
 function GameBar({ game, view, t, onPostcard }) {
   const { level: lvl } = view;
   const streak = game.quests?.streakDays ?? 0;
   const name = t(`game.levelName.${lvl.name}`);
-  return /* @__PURE__ */ jsxs31("section", { className: "oc-vh", "data-game": true, "data-gamebar": true, "aria-label": t("vit.heroLabel"), children: [
-    /* @__PURE__ */ jsx35("span", { className: "oc-vh-lvl", "aria-hidden": "true", children: /* @__PURE__ */ jsx35(PixelIcon, { id: "office", size: 40 }) }),
-    /* @__PURE__ */ jsxs31("div", { className: "oc-vh-main", children: [
-      /* @__PURE__ */ jsxs31("h3", { "data-level": lvl.level, "data-level-name": lvl.name, children: [
+  return /* @__PURE__ */ jsxs32("section", { className: "oc-vh", "data-game": true, "data-gamebar": true, "aria-label": t("vit.heroLabel"), children: [
+    /* @__PURE__ */ jsx36("span", { className: "oc-vh-lvl", "aria-hidden": "true", children: /* @__PURE__ */ jsx36(PixelIcon, { id: "office", size: 40 }) }),
+    /* @__PURE__ */ jsxs32("div", { className: "oc-vh-main", children: [
+      /* @__PURE__ */ jsxs32("h3", { "data-level": lvl.level, "data-level-name": lvl.name, children: [
         name,
         " ",
-        /* @__PURE__ */ jsx35("small", { children: t("game.level", lvl.level) })
+        /* @__PURE__ */ jsx36("small", { children: t("game.level", lvl.level) })
       ] }),
-      /* @__PURE__ */ jsx35("div", { className: "oc-xp", role: "progressbar", "aria-label": t("game.levelTip"), "aria-valuemin": 0, "aria-valuemax": lvl.next ?? lvl.done, "aria-valuenow": lvl.done, "aria-valuetext": lvl.next ? t("game.levelNext", lvl.done, lvl.next) : t("game.levelTop", lvl.done), children: /* @__PURE__ */ jsx35("i", { style: { width: `${lvl.pct}%` } }) }),
-      /* @__PURE__ */ jsxs31("ul", { className: "oc-vh-stats", "aria-label": t("vit.stats"), children: [
-        /* @__PURE__ */ jsxs31("li", { children: [
-          /* @__PURE__ */ jsxs31("b", { children: [
+      /* @__PURE__ */ jsx36("div", { className: "oc-xp", role: "progressbar", "aria-label": t("game.levelTip"), "aria-valuemin": 0, "aria-valuemax": lvl.next ?? lvl.done, "aria-valuenow": lvl.done, "aria-valuetext": lvl.next ? t("game.levelNext", lvl.done, lvl.next) : t("game.levelTop", lvl.done), children: /* @__PURE__ */ jsx36("i", { style: { width: `${lvl.pct}%` } }) }),
+      /* @__PURE__ */ jsxs32("ul", { className: "oc-vh-stats", "aria-label": t("vit.stats"), children: [
+        /* @__PURE__ */ jsxs32("li", { children: [
+          /* @__PURE__ */ jsxs32("b", { children: [
             lvl.done,
-            lvl.next ? /* @__PURE__ */ jsxs31("span", { className: "oc-faint", children: [
+            lvl.next ? /* @__PURE__ */ jsxs32("span", { className: "oc-faint", children: [
               "/",
               lvl.next
             ] }) : null
           ] }),
-          /* @__PURE__ */ jsx35("span", { children: lvl.nextName ? t("vit.toLevel", t(`game.levelName.${lvl.nextName}`)) : t("vit.cards") })
+          /* @__PURE__ */ jsx36("span", { children: lvl.nextName ? t("vit.toLevel", t(`game.levelName.${lvl.nextName}`)) : t("vit.cards") })
         ] }),
-        /* @__PURE__ */ jsxs31("li", { "data-trophy-count": true, title: t("game.trophiesTip"), children: [
-          /* @__PURE__ */ jsxs31("b", { children: [
+        /* @__PURE__ */ jsxs32("li", { "data-trophy-count": true, title: t("game.trophiesTip"), children: [
+          /* @__PURE__ */ jsxs32("b", { children: [
             view.got,
-            /* @__PURE__ */ jsxs31("span", { className: "oc-faint", children: [
+            /* @__PURE__ */ jsxs32("span", { className: "oc-faint", children: [
               "/",
               view.total
             ] })
           ] }),
-          /* @__PURE__ */ jsx35("span", { children: t("vit.trophies") })
+          /* @__PURE__ */ jsx36("span", { children: t("vit.trophies") })
         ] }),
-        view.hidden ? /* @__PURE__ */ jsxs31("li", { "data-hidden-chip": true, title: t("game.hidden.cond"), children: [
-          /* @__PURE__ */ jsx35("b", { children: view.hidden }),
-          /* @__PURE__ */ jsx35("span", { children: t("vit.hidden", view.hidden) })
+        view.hidden ? /* @__PURE__ */ jsxs32("li", { "data-hidden-chip": true, title: t("game.hidden.cond"), children: [
+          /* @__PURE__ */ jsx36("b", { children: view.hidden }),
+          /* @__PURE__ */ jsx36("span", { children: t("vit.hidden", view.hidden) })
         ] }) : null,
-        streak > 0 ? /* @__PURE__ */ jsxs31("li", { "data-streak": streak, title: t("game.streakTip"), children: [
-          /* @__PURE__ */ jsx35(PixelIcon, { id: "flame", size: 16 }),
-          /* @__PURE__ */ jsx35("b", { children: streak }),
-          /* @__PURE__ */ jsx35("span", { children: t("vit.streakDays", streak) })
+        streak > 0 ? /* @__PURE__ */ jsxs32("li", { "data-streak": streak, title: t("game.streakTip"), children: [
+          /* @__PURE__ */ jsx36(PixelIcon, { id: "flame", size: 16 }),
+          /* @__PURE__ */ jsx36("b", { children: streak }),
+          /* @__PURE__ */ jsx36("span", { children: t("vit.streakDays", streak) })
         ] }) : null
       ] }),
-      /* @__PURE__ */ jsxs31("ul", { className: "oc-vh-chips", "aria-label": t("vit.moods"), children: [
-        view.grades.map((g) => /* @__PURE__ */ jsxs31("li", { className: "oc-vh-chip", "data-grade": g.id, title: t("vit.gradesTip"), children: [
-          /* @__PURE__ */ jsx35("b", { children: g.n }),
-          /* @__PURE__ */ jsx35("span", { children: t(`game.grade.${g.id}`) })
+      /* @__PURE__ */ jsxs32("ul", { className: "oc-vh-chips", "aria-label": t("vit.moods"), children: [
+        view.grades.map((g) => /* @__PURE__ */ jsxs32("li", { className: "oc-vh-chip", "data-grade": g.id, title: t("vit.gradesTip"), children: [
+          /* @__PURE__ */ jsx36("b", { children: g.n }),
+          /* @__PURE__ */ jsx36("span", { children: t(`game.grade.${g.id}`) })
         ] }, g.id)),
-        /* @__PURE__ */ jsxs31("li", { className: "oc-vh-chip", "data-mascot": game.mascotMood, title: t("game.mascotTip"), children: [
-          /* @__PURE__ */ jsx35(Cat, { mood: game.mascotMood }),
-          /* @__PURE__ */ jsx35("span", { children: t(`game.mascot.${game.mascotMood}`) })
+        /* @__PURE__ */ jsxs32("li", { className: "oc-vh-chip", "data-mascot": game.mascotMood, title: t("game.mascotTip"), children: [
+          /* @__PURE__ */ jsx36(Cat, { mood: game.mascotMood }),
+          /* @__PURE__ */ jsx36("span", { children: t(`game.mascot.${game.mascotMood}`) })
         ] }),
-        game.season ? /* @__PURE__ */ jsxs31("li", { className: "oc-vh-chip", "data-season": game.season, title: t("game.seasonTip"), children: [
-          /* @__PURE__ */ jsx35(PixelIcon, { id: game.season === "halloween" ? "flame" : "spark", size: 16 }),
-          /* @__PURE__ */ jsx35("span", { children: t(`game.season.${game.season}`) })
+        game.season ? /* @__PURE__ */ jsxs32("li", { className: "oc-vh-chip", "data-season": game.season, title: t("game.seasonTip"), children: [
+          /* @__PURE__ */ jsx36(PixelIcon, { id: game.season === "halloween" ? "flame" : "spark", size: 16 }),
+          /* @__PURE__ */ jsx36("span", { children: t(`game.season.${game.season}`) })
         ] }) : null
       ] })
     ] }),
-    onPostcard ? /* @__PURE__ */ jsxs31("button", { type: "button", className: "oc-vh-card", "data-game": true, "data-postcard": true, title: t("game.postcardTip"), "aria-label": t("game.postcard"), onClick: onPostcard, children: [
-      /* @__PURE__ */ jsx35(Icon, { name: "camera", size: 16 }),
-      /* @__PURE__ */ jsx35("span", { children: t("game.postcard") })
+    onPostcard ? /* @__PURE__ */ jsxs32("button", { type: "button", className: "oc-vh-card", "data-game": true, "data-postcard": true, title: t("game.postcardTip"), "aria-label": t("game.postcard"), onClick: onPostcard, children: [
+      /* @__PURE__ */ jsx36(Icon, { name: "camera", size: 16 }),
+      /* @__PURE__ */ jsx36("span", { children: t("game.postcard") })
     ] }) : null
   ] });
 }
@@ -21770,11 +22004,11 @@ var CAT = ["#.....#", "##...##", "#######", "##.#.##", "###.###", ".#####."];
 var CAT_SLEEP = ["#.....#", "##...##", "#######", "#######", "###.###", ".#####."];
 function Cat({ mood }) {
   const art = mood === "hide" ? CAT.slice(0, 2) : mood === "sleep" ? CAT_SLEEP : CAT;
-  return /* @__PURE__ */ jsx35("svg", { className: `oc-cat oc-cat-${mood}`, viewBox: `0 0 7 ${art.length}`, width: "14", height: art.length * 2, shapeRendering: "crispEdges", fill: "currentColor", "aria-hidden": "true", focusable: "false", children: art.flatMap((row, y) => [...row].map((c, x) => c === "#" ? /* @__PURE__ */ jsx35("rect", { x, y, width: "1", height: "1" }, `${x},${y}`) : null)) });
+  return /* @__PURE__ */ jsx36("svg", { className: `oc-cat oc-cat-${mood}`, viewBox: `0 0 7 ${art.length}`, width: "14", height: art.length * 2, shapeRendering: "crispEdges", fill: "currentColor", "aria-hidden": "true", focusable: "false", children: art.flatMap((row, y) => [...row].map((c, x) => c === "#" ? /* @__PURE__ */ jsx36("rect", { x, y, width: "1", height: "1" }, `${x},${y}`) : null)) });
 }
 
 // src/ui/Collection.jsx
-import { jsx as jsx36, jsxs as jsxs32 } from "react/jsx-runtime";
+import { jsx as jsx37, jsxs as jsxs33 } from "react/jsx-runtime";
 var unitOf = (a) => a.id === "thrifty" ? "%" : "";
 var secretOf = (a) => Boolean(a.hidden && !a.unlocked);
 var medalProps = (a) => ({ id: a.id, family: a.family, tier: a.tier ?? null, unlocked: a.unlocked, hidden: a.hidden });
@@ -21791,7 +22025,7 @@ function sentence(a, t, lang4) {
 }
 function Medal({ a, t, lang: lang4, selected, fresh, tab, onPick, onFocus, refCb }) {
   const secret = secretOf(a);
-  return /* @__PURE__ */ jsxs32(
+  return /* @__PURE__ */ jsxs33(
     "button",
     {
       type: "button",
@@ -21809,27 +22043,27 @@ function Medal({ a, t, lang: lang4, selected, fresh, tab, onPick, onFocus, refCb
       onClick: onPick,
       onFocus,
       children: [
-        /* @__PURE__ */ jsx36(PixelMedal, { ...medalProps(a), size: 48 }),
-        /* @__PURE__ */ jsx36("span", { className: "oc-md-n", "aria-hidden": "true", children: secret ? "???" : t(`game.ach.${a.id}.name`) }),
-        fresh ? /* @__PURE__ */ jsx36("i", { className: "oc-md-new", "aria-hidden": "true" }) : null
+        /* @__PURE__ */ jsx37(PixelMedal, { ...medalProps(a), size: 48 }),
+        /* @__PURE__ */ jsx37("span", { className: "oc-md-n", "aria-hidden": "true", children: secret ? "???" : t(`game.ach.${a.id}.name`) }),
+        fresh ? /* @__PURE__ */ jsx37("i", { className: "oc-md-new", "aria-hidden": "true" }) : null
       ]
     }
   );
 }
 function Almost({ a, t, onPick }) {
   const unit = unitOf(a);
-  return /* @__PURE__ */ jsxs32("button", { type: "button", className: "oc-alm", "data-almost": a.id, onClick: onPick, "aria-label": `${t(`game.ach.${a.id}.name`)}. ${t("game.collection.progress", a.progress[0], a.progress[1], unit)}`, children: [
-    /* @__PURE__ */ jsx36(PixelMedal, { ...medalProps(a), size: 36 }),
-    /* @__PURE__ */ jsxs32("span", { className: "oc-alm-t", "aria-hidden": "true", children: [
-      /* @__PURE__ */ jsx36("b", { children: t(`game.ach.${a.id}.name`) }),
-      /* @__PURE__ */ jsxs32("small", { className: "oc-mono", children: [
+  return /* @__PURE__ */ jsxs33("button", { type: "button", className: "oc-alm", "data-almost": a.id, onClick: onPick, "aria-label": `${t(`game.ach.${a.id}.name`)}. ${t("game.collection.progress", a.progress[0], a.progress[1], unit)}`, children: [
+    /* @__PURE__ */ jsx37(PixelMedal, { ...medalProps(a), size: 36 }),
+    /* @__PURE__ */ jsxs33("span", { className: "oc-alm-t", "aria-hidden": "true", children: [
+      /* @__PURE__ */ jsx37("b", { children: t(`game.ach.${a.id}.name`) }),
+      /* @__PURE__ */ jsxs33("small", { className: "oc-mono", children: [
         a.progress[0],
         unit ? ` ${unit}` : "",
         "/",
         a.progress[1],
         unit ? ` ${unit}` : ""
       ] }),
-      /* @__PURE__ */ jsx36("span", { className: "oc-pb", children: /* @__PURE__ */ jsx36("i", { style: { width: `${pctOf(a)}%` } }) })
+      /* @__PURE__ */ jsx37("span", { className: "oc-pb", children: /* @__PURE__ */ jsx37("i", { style: { width: `${pctOf(a)}%` } }) })
     ] })
   ] });
 }
@@ -21840,39 +22074,39 @@ function Detail({ a, t, lang: lang4, readMs, boards, refEl }) {
   const line = (parts2) => parts2 ? t(...parts2) : "";
   const condText = secret ? t("game.hidden.cond") : t(`game.ach.${a.id}.cond`);
   const showBar = !secret && !a.unavailable && (!a.unlocked || a.tiered && a.nextTier);
-  return /* @__PURE__ */ jsxs32("aside", { ref: refEl, className: `oc-det${a.unlocked ? " on" : ""}`, "data-detail": a.id, "data-tier": a.tier ?? void 0, "aria-label": t("vit.detail"), "aria-live": "polite", children: [
-    /* @__PURE__ */ jsx36(PixelMedal, { ...medalProps(a), size: 96, className: "oc-medal oc-det-medal" }),
-    /* @__PURE__ */ jsx36("h4", { children: secret ? t("game.hidden.name") : t(`game.ach.${a.id}.name`) }),
-    /* @__PURE__ */ jsxs32("div", { className: "oc-det-chips", children: [
-      /* @__PURE__ */ jsxs32("span", { className: "oc-fchip", "data-family": a.family, style: { "--fc": familyColor(a.family) }, children: [
-        /* @__PURE__ */ jsx36("i", { "aria-hidden": "true" }),
+  return /* @__PURE__ */ jsxs33("aside", { ref: refEl, className: `oc-det${a.unlocked ? " on" : ""}`, "data-detail": a.id, "data-tier": a.tier ?? void 0, "aria-label": t("vit.detail"), "aria-live": "polite", children: [
+    /* @__PURE__ */ jsx37(PixelMedal, { ...medalProps(a), size: 96, className: "oc-medal oc-det-medal" }),
+    /* @__PURE__ */ jsx37("h4", { children: secret ? t("game.hidden.name") : t(`game.ach.${a.id}.name`) }),
+    /* @__PURE__ */ jsxs33("div", { className: "oc-det-chips", children: [
+      /* @__PURE__ */ jsxs33("span", { className: "oc-fchip", "data-family": a.family, style: { "--fc": familyColor(a.family) }, children: [
+        /* @__PURE__ */ jsx37("i", { "aria-hidden": "true" }),
         t(`game.family.${a.family}`)
       ] }),
-      a.tier ? /* @__PURE__ */ jsxs32("span", { className: "oc-fchip", "data-tier": a.tier, children: [
-        /* @__PURE__ */ jsx36("span", { className: "oc-stars", "aria-hidden": "true", children: Array.from({ length: { bronze: 1, silver: 2, gold: 3 }[a.tier] }, (_, i) => /* @__PURE__ */ jsx36(PixelIcon, { id: `star_${a.tier}`, size: 12 }, i)) }),
+      a.tier ? /* @__PURE__ */ jsxs33("span", { className: "oc-fchip", "data-tier": a.tier, children: [
+        /* @__PURE__ */ jsx37("span", { className: "oc-stars", "aria-hidden": "true", children: Array.from({ length: { bronze: 1, silver: 2, gold: 3 }[a.tier] }, (_, i) => /* @__PURE__ */ jsx37(PixelIcon, { id: `star_${a.tier}`, size: 12 }, i)) }),
         t(`game.tier.${a.tier}`)
       ] }) : null
     ] }),
-    /* @__PURE__ */ jsx36("p", { className: `oc-det-when${a.unlocked ? " ok" : ""}`, children: line(tip.when) }),
-    showBar ? /* @__PURE__ */ jsx36("span", { className: "oc-pb oc-pb-l", role: "progressbar", "aria-label": t(`game.ach.${a.id}.name`), "aria-valuemin": 0, "aria-valuemax": a.progress[1], "aria-valuenow": a.progress[0], "aria-valuetext": t("game.collection.progress", a.progress[0], a.progress[1], unit), children: /* @__PURE__ */ jsx36("i", { style: { width: `${pctOf(a)}%` } }) }) : null,
-    /* @__PURE__ */ jsx36("p", { className: "oc-det-cond", children: condText }),
-    a.unlocked && !a.unavailable && line(a.fact) !== condText ? /* @__PURE__ */ jsx36("p", { className: "oc-det-fact", children: line(a.fact) }) : null,
-    a.tiered ? /* @__PURE__ */ jsx36("ul", { className: "oc-tiers", "aria-label": t("vit.tiers"), children: a.tiers.map((x) => /* @__PURE__ */ jsxs32("li", { className: x.unlocked ? "on" : "", "data-tier": x.tier, children: [
-      /* @__PURE__ */ jsx36(PixelIcon, { id: `star_${x.tier}`, size: 14 }),
-      /* @__PURE__ */ jsx36("span", { children: t(`game.tier.${x.tier}`) }),
-      /* @__PURE__ */ jsx36("small", { children: x.unlocked ? x.ms != null ? dateText(x.ms, lang4) : t("vit.wholeHistory") : t("vit.tierAt", x.at, unit) })
+    /* @__PURE__ */ jsx37("p", { className: `oc-det-when${a.unlocked ? " ok" : ""}`, children: line(tip.when) }),
+    showBar ? /* @__PURE__ */ jsx37("span", { className: "oc-pb oc-pb-l", role: "progressbar", "aria-label": t(`game.ach.${a.id}.name`), "aria-valuemin": 0, "aria-valuemax": a.progress[1], "aria-valuenow": a.progress[0], "aria-valuetext": t("game.collection.progress", a.progress[0], a.progress[1], unit), children: /* @__PURE__ */ jsx37("i", { style: { width: `${pctOf(a)}%` } }) }) : null,
+    /* @__PURE__ */ jsx37("p", { className: "oc-det-cond", children: condText }),
+    a.unlocked && !a.unavailable && line(a.fact) !== condText ? /* @__PURE__ */ jsx37("p", { className: "oc-det-fact", children: line(a.fact) }) : null,
+    a.tiered ? /* @__PURE__ */ jsx37("ul", { className: "oc-tiers", "aria-label": t("vit.tiers"), children: a.tiers.map((x) => /* @__PURE__ */ jsxs33("li", { className: x.unlocked ? "on" : "", "data-tier": x.tier, children: [
+      /* @__PURE__ */ jsx37(PixelIcon, { id: `star_${x.tier}`, size: 14 }),
+      /* @__PURE__ */ jsx37("span", { children: t(`game.tier.${x.tier}`) }),
+      /* @__PURE__ */ jsx37("small", { children: x.unlocked ? x.ms != null ? dateText(x.ms, lang4) : t("vit.wholeHistory") : t("vit.tierAt", x.at, unit) })
     ] }, x.tier)) }) : null,
-    tip.where && !secret ? /* @__PURE__ */ jsx36("p", { className: "oc-det-src", children: t("game.tip.where", line(tip.where)) }) : null,
-    tip.source ? /* @__PURE__ */ jsx36("p", { className: "oc-det-src", children: line(tip.source) }) : null
+    tip.where && !secret ? /* @__PURE__ */ jsx37("p", { className: "oc-det-src", children: t("game.tip.where", line(tip.where)) }) : null,
+    tip.source ? /* @__PURE__ */ jsx37("p", { className: "oc-det-src", children: line(tip.source) }) : null
   ] });
 }
 function Vitrine({ open, onClose, game, office, readMs, nowMs, onPostcard, t }) {
   const lang4 = t.lang;
   const view = useMemo14(() => vitrineView(game, nowMs), [game, nowMs]);
-  const [picked, setPicked] = useState16(null);
-  const [rov, setRov] = useState16(0);
-  const refs = useRef20([]);
-  const detailRef = useRef20(null);
+  const [picked, setPicked] = useState20(null);
+  const [rov, setRov] = useState20(0);
+  const refs = useRef22([]);
+  const detailRef = useRef22(null);
   const byId = useMemo14(() => new Map(view.shelves.flatMap((f) => f.items).map((a) => [a.id, a])), [view]);
   const selId = picked && byId.has(picked) ? picked : view.first;
   const sel = byId.get(selId) ?? null;
@@ -21895,7 +22129,7 @@ function Vitrine({ open, onClose, game, office, readMs, nowMs, onPostcard, t }) 
     setRov(i);
     refs.current[i]?.focus();
   };
-  return /* @__PURE__ */ jsxs32(
+  return /* @__PURE__ */ jsxs33(
     Dlg,
     {
       open,
@@ -21916,34 +22150,34 @@ function Vitrine({ open, onClose, game, office, readMs, nowMs, onPostcard, t }) 
         }
       },
       children: [
-        /* @__PURE__ */ jsx36("style", { children: VITRINE_CSS }),
-        /* @__PURE__ */ jsxs32("div", { "data-game": true, "data-vitrine": true, "data-unlocked": view.got, "data-total": view.total, "data-hidden-count": view.hidden, children: [
-          /* @__PURE__ */ jsx36(GameBar, { game, view, t, onPostcard }),
-          /* @__PURE__ */ jsxs32("div", { className: "oc-vt-grid", children: [
-            /* @__PURE__ */ jsxs32("div", { className: "oc-vt-shelves", onKeyDown: onKey, children: [
-              view.almost.length ? /* @__PURE__ */ jsxs32("section", { className: "oc-vt-almost", "aria-label": t("vit.almost"), children: [
-                /* @__PURE__ */ jsx36("h4", { children: t("vit.almost") }),
-                /* @__PURE__ */ jsx36("div", { className: "oc-alm-row", children: view.almost.map((a) => /* @__PURE__ */ jsx36(Almost, { a, t, onPick: () => pick(a.id) }, a.id)) })
+        /* @__PURE__ */ jsx37("style", { children: VITRINE_CSS }),
+        /* @__PURE__ */ jsxs33("div", { "data-game": true, "data-vitrine": true, "data-unlocked": view.got, "data-total": view.total, "data-hidden-count": view.hidden, children: [
+          /* @__PURE__ */ jsx37(GameBar, { game, view, t, onPostcard }),
+          /* @__PURE__ */ jsxs33("div", { className: "oc-vt-grid", children: [
+            /* @__PURE__ */ jsxs33("div", { className: "oc-vt-shelves", onKeyDown: onKey, children: [
+              view.almost.length ? /* @__PURE__ */ jsxs33("section", { className: "oc-vt-almost", "aria-label": t("vit.almost"), children: [
+                /* @__PURE__ */ jsx37("h4", { children: t("vit.almost") }),
+                /* @__PURE__ */ jsx37("div", { className: "oc-alm-row", children: view.almost.map((a) => /* @__PURE__ */ jsx37(Almost, { a, t, onPick: () => pick(a.id) }, a.id)) })
               ] }) : null,
-              view.shelves.map((f) => /* @__PURE__ */ jsxs32("section", { className: "oc-fam", "data-family": f.family, style: { "--fc": familyColor(f.family) }, "aria-label": t("game.collection.familyHead", t(`game.family.${f.family}`), t("game.collection.summary", f.unlocked, f.items.length)), children: [
-                /* @__PURE__ */ jsxs32("h4", { children: [
-                  /* @__PURE__ */ jsx36("i", { "aria-hidden": "true" }),
+              view.shelves.map((f) => /* @__PURE__ */ jsxs33("section", { className: "oc-fam", "data-family": f.family, style: { "--fc": familyColor(f.family) }, "aria-label": t("game.collection.familyHead", t(`game.family.${f.family}`), t("game.collection.summary", f.unlocked, f.items.length)), children: [
+                /* @__PURE__ */ jsxs33("h4", { children: [
+                  /* @__PURE__ */ jsx37("i", { "aria-hidden": "true" }),
                   t(`game.family.${f.family}`),
-                  /* @__PURE__ */ jsxs32("span", { className: "oc-mono", children: [
+                  /* @__PURE__ */ jsxs33("span", { className: "oc-mono", children: [
                     f.unlocked,
                     "/",
                     f.items.length
                   ] })
                 ] }),
-                /* @__PURE__ */ jsx36("div", { className: "oc-shelf", role: "group", children: f.items.map((a) => {
+                /* @__PURE__ */ jsx37("div", { className: "oc-shelf", role: "group", children: f.items.map((a) => {
                   const i = view.order.indexOf(a.id);
-                  return /* @__PURE__ */ jsx36(Medal, { a, t, lang: lang4, selected: a.id === selId, fresh: view.recent.has(a.id), tab: i === rov, refCb: (el) => {
+                  return /* @__PURE__ */ jsx37(Medal, { a, t, lang: lang4, selected: a.id === selId, fresh: view.recent.has(a.id), tab: i === rov, refCb: (el) => {
                     refs.current[i] = el;
                   }, onPick: () => pick(a.id), onFocus: () => setRov(i) }, a.id);
                 }) })
               ] }, f.family))
             ] }),
-            sel ? /* @__PURE__ */ jsx36(Detail, { a: sel, t, lang: lang4, readMs, boards: office.boards.length, refEl: detailRef }) : null
+            sel ? /* @__PURE__ */ jsx37(Detail, { a: sel, t, lang: lang4, readMs, boards: office.boards.length, refEl: detailRef }) : null
           ] })
         ] })
       ]
@@ -21962,8 +22196,8 @@ var VITRINE_CSS = `
 .oc-vt [data-vitrine]{display:flex;flex-direction:column;gap:16px;min-width:0}
 .oc-medal,.oc-icon{flex:0 0 auto;image-rendering:pixelated;image-rendering:crisp-edges}
 /* the game bar: level on a bar, the numbers, the grades, the cat, the season, the postcard */
-.oc-vh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;box-sizing:border-box;padding:16px;border-radius:12px;border:1px solid color-mix(in oklab, ${ORANGE6} 30%, ${EDGE2});background:radial-gradient(120% 140% at 0% 0%, color-mix(in oklab, ${ORANGE6} 20%, ${CARD}) 0%, ${CARD} 62%)}
-.oc-vh-lvl{display:grid;place-items:center;width:64px;height:64px;border-radius:12px;background:color-mix(in oklab, ${ORANGE6} 18%, ${CARD});border:1px solid color-mix(in oklab, ${ORANGE6} 40%, ${EDGE2})}
+.oc-vh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;box-sizing:border-box;padding:16px;border-radius:12px;border:1px solid color-mix(in oklab, ${ORANGE6} 30%, ${EDGE});background:radial-gradient(120% 140% at 0% 0%, color-mix(in oklab, ${ORANGE6} 20%, ${CARD}) 0%, ${CARD} 62%)}
+.oc-vh-lvl{display:grid;place-items:center;width:64px;height:64px;border-radius:12px;background:color-mix(in oklab, ${ORANGE6} 18%, ${CARD});border:1px solid color-mix(in oklab, ${ORANGE6} 40%, ${EDGE})}
 .oc-vh-main{min-width:0;display:flex;flex-direction:column;gap:8px}
 .oc-vh h3{margin:0;font-size:20px;line-height:24px;font-weight:700}
 .oc-vh h3 small{margin-left:8px;font-size:13px;font-weight:500;color:${T33}}
@@ -21975,12 +22209,12 @@ var VITRINE_CSS = `
 .oc-vh-stats b{font-family:var(--oc-mono, ui-monospace, monospace);color:var(--foreground)}
 .oc-vh-stats b .oc-faint{font-weight:400}
 .oc-vh-chips{gap:8px}
-.oc-vh-chip{display:inline-flex;align-items:center;gap:6px;min-height:24px;box-sizing:border-box;padding:0 8px;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};font-size:11px}
+.oc-vh-chip{display:inline-flex;align-items:center;gap:6px;min-height:24px;box-sizing:border-box;padding:0 8px;border:1px solid ${EDGE};border-radius:12px;background:${CARD};font-size:11px}
 .oc-vh-chip b{font-family:var(--oc-mono, ui-monospace, monospace);color:var(--foreground)}
 .oc-cat{flex:0 0 auto;color:color-mix(in oklab, var(--ui-accent) 50%, var(--foreground))}
 .oc-cat-alert{color:color-mix(in oklab, ${ORANGE6} 50%, var(--foreground))}
 .oc-cat-sleep,.oc-cat-hide{color:${T33}}
-.oc-vh-card{display:inline-flex;align-items:center;gap:8px;height:32px;box-sizing:border-box;padding:0 12px;border:1px solid ${EDGE2};border-radius:4px;background:${CARD};color:var(--foreground);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.oc-vh-card{display:inline-flex;align-items:center;gap:8px;height:32px;box-sizing:border-box;padding:0 12px;border:1px solid ${EDGE};border-radius:4px;background:${CARD};color:var(--foreground);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 .oc-vh-card:hover{border-color:var(--ui-accent)}
 .oc-vh-card:focus-visible,.oc-md:focus-visible,.oc-alm:focus-visible{${RING_FOCUS}}
 /* the grid: shelves, the detail beside */
@@ -22009,13 +22243,13 @@ var VITRINE_CSS = `
 .oc-md.new .oc-medal{animation:oc-shine 1.2s ease 2}
 @keyframes oc-shine{0%,100%{filter:none}50%{filter:brightness(1.35) drop-shadow(0 0 6px color-mix(in oklab, ${ORANGE6} 70%, transparent))}}
 /* the detail */
-.oc-det{position:sticky;top:0;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;padding:16px;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};text-align:center;overflow-wrap:anywhere}
-.oc-det.on{border-color:color-mix(in oklab, ${GREEN5} 40%, ${EDGE2})}
+.oc-det{position:sticky;top:0;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;padding:16px;border:1px solid ${EDGE};border-radius:12px;background:${CARD};text-align:center;overflow-wrap:anywhere}
+.oc-det.on{border-color:color-mix(in oklab, ${GREEN5} 40%, ${EDGE})}
 .oc-det h4{margin:0;font-size:16px;line-height:20px}
 .oc-det p{margin:0;font-size:12px;line-height:16px}
 .oc-det-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
-.oc-fchip{display:inline-flex;align-items:center;gap:6px;min-height:20px;box-sizing:border-box;padding:0 8px;border:1px solid ${EDGE2};border-radius:10px;font-size:11px}
-.oc-fchip[data-family]{border-color:var(--fc, ${EDGE2})}
+.oc-fchip{display:inline-flex;align-items:center;gap:6px;min-height:20px;box-sizing:border-box;padding:0 8px;border:1px solid ${EDGE};border-radius:10px;font-size:11px}
+.oc-fchip[data-family]{border-color:var(--fc, ${EDGE})}
 .oc-fchip i{width:8px;height:8px;border-radius:2px;background:var(--fc, var(--ui-accent))}
 .oc-stars{display:inline-flex;align-items:center;gap:1px}
 .oc-det-when{font-weight:600;color:${T33}}
@@ -22051,7 +22285,7 @@ var VITRINE_CSS = `
 `;
 
 // src/ui/UsageDialog.jsx
-import { useEffect as useEffect20, useId as useId16, useMemo as useMemo15, useState as useState17 } from "react";
+import { useEffect as useEffect21, useId as useId19, useMemo as useMemo15, useState as useState21 } from "react";
 
 // src/core/usage.js
 var USAGE_WINDOWS = Object.freeze(["24h", "7d", "30d"]);
@@ -22320,7 +22554,7 @@ function tokenLabel(n, lang4 = "en") {
 function exactLabel(n, lang4 = "en") {
   if (n == null || !Number.isFinite(n)) return null;
   try {
-    return new Intl.NumberFormat(lang4).format(n);
+    return numberText(n, lang4);
   } catch {
     return String(n);
   }
@@ -22350,7 +22584,7 @@ var percentLabel = (p) => p == null || !Number.isFinite(p) ? null : String(Math.
 
 // src/data/usage.js
 import { useQuery as useQuery8 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect19, useRef as useRef21 } from "react";
+import { useEffect as useEffect20, useRef as useRef23 } from "react";
 var USAGE_POLL_MS = 6e4;
 var QUOTA_POLL_MS = 12e4;
 var QUOTA_RETRY_MS = 8e3;
@@ -22440,9 +22674,9 @@ function useQuota({ enabled }) {
   return query;
 }
 function useQuotaRetry(query, hasWindows) {
-  const tried = useRef21(false);
+  const tried = useRef23(false);
   const at = query.dataUpdatedAt;
-  useEffect19(() => {
+  useEffect20(() => {
     if (!at || hasWindows || tried.current) return void 0;
     tried.current = true;
     const id = setTimeout(() => {
@@ -22453,31 +22687,31 @@ function useQuotaRetry(query, hasWindows) {
 }
 
 // src/ui/UsageDialog.jsx
-import { Fragment as Fragment16, jsx as jsx37, jsxs as jsxs33 } from "react/jsx-runtime";
+import { Fragment as Fragment17, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
 var WIN_KEY = { "24h": "24h", "7d": "7d", "30d": "30d" };
 function Bar({ parts: parts2, peak, label }) {
-  if (!parts2) return /* @__PURE__ */ jsx37("span", { className: "oc-us-bar oc-us-bar-none", "aria-hidden": "true" });
+  if (!parts2) return /* @__PURE__ */ jsx38("span", { className: "oc-us-bar oc-us-bar-none", "aria-hidden": "true" });
   const total = parts2.total;
   const w = share(total, peak) ?? 0;
-  const seg = (cls, v) => v ? /* @__PURE__ */ jsx37("i", { className: cls, style: { flexGrow: v } }) : null;
-  return /* @__PURE__ */ jsx37("span", { className: "oc-us-bar", "aria-hidden": "true", title: label, children: /* @__PURE__ */ jsxs33("span", { className: "oc-us-fill", style: { width: `${w * 100}%` }, children: [
+  const seg = (cls, v) => v ? /* @__PURE__ */ jsx38("i", { className: cls, style: { flexGrow: v } }) : null;
+  return /* @__PURE__ */ jsx38("span", { className: "oc-us-bar", "aria-hidden": "true", title: label, children: /* @__PURE__ */ jsxs34("span", { className: "oc-us-fill", style: { width: `${w * 100}%` }, children: [
     seg("s-in", parts2.input),
     seg("s-out", parts2.output),
     seg("s-cache", parts2.cache)
   ] }) });
 }
 function Cost({ cost, t }) {
-  if (cost.kind === "none") return /* @__PURE__ */ jsx37("span", { className: "oc-faint", "data-cost": "none", children: t("usage.cost.none") });
-  if (cost.kind === "unpriced") return /* @__PURE__ */ jsx37("span", { className: "oc-faint", "data-cost": "unpriced", title: t("usage.cost.unpricedTip"), children: t("usage.cost.unpriced") });
-  if (cost.kind === "mixed") return /* @__PURE__ */ jsx37("span", { "data-cost": "mixed", title: t("usage.cost.mixedTip", cost.unpriced, cost.source || "—"), children: t("usage.cost.mixed", usdLabel(cost.pricedUsd, t.lang)) });
-  return /* @__PURE__ */ jsx37("span", { "data-cost": "priced", "data-usd": cost.usd, title: t("usage.cost.estTip", cost.source || "—"), children: t("usage.cost.est", usdLabel(cost.usd, t.lang)) });
+  if (cost.kind === "none") return /* @__PURE__ */ jsx38("span", { className: "oc-faint", "data-cost": "none", children: t("usage.cost.none") });
+  if (cost.kind === "unpriced") return /* @__PURE__ */ jsx38("span", { className: "oc-faint", "data-cost": "unpriced", title: t("usage.cost.unpricedTip"), children: t("usage.cost.unpriced") });
+  if (cost.kind === "mixed") return /* @__PURE__ */ jsx38("span", { "data-cost": "mixed", title: t("usage.cost.mixedTip", cost.unpriced, cost.source || "—"), children: t("usage.cost.mixed", usdLabel(cost.pricedUsd, t.lang)) });
+  return /* @__PURE__ */ jsx38("span", { "data-cost": "priced", "data-usd": cost.usd, title: t("usage.cost.estTip", cost.source || "—"), children: t("usage.cost.est", usdLabel(cost.usd, t.lang)) });
 }
 function Tile({ id, icon: icon2, value, exact, label, note, t }) {
-  return /* @__PURE__ */ jsxs33("div", { className: "oc-us-tile", "data-usage-tile": id, "data-value": exact ?? "", children: [
-    /* @__PURE__ */ jsx37("span", { className: "oc-us-tico", children: /* @__PURE__ */ jsx37(DlgIcon, { id: icon2, size: 16 }) }),
-    /* @__PURE__ */ jsx37("b", { title: exact ? t("usage.exact", exact) : void 0, children: value ?? t("usage.absent") }),
-    /* @__PURE__ */ jsx37("span", { children: label }),
-    note ? /* @__PURE__ */ jsx37("small", { className: "oc-faint", children: note }) : null
+  return /* @__PURE__ */ jsxs34("div", { className: "oc-us-tile", "data-usage-tile": id, "data-value": exact ?? "", children: [
+    /* @__PURE__ */ jsx38("span", { className: "oc-us-tico", children: /* @__PURE__ */ jsx38(DlgIcon, { id: icon2, size: 16 }) }),
+    /* @__PURE__ */ jsx38("b", { title: exact ? t("usage.exact", exact) : void 0, children: value ?? t("usage.absent") }),
+    /* @__PURE__ */ jsx38("span", { children: label }),
+    note ? /* @__PURE__ */ jsx38("small", { className: "oc-faint", children: note }) : null
   ] });
 }
 function Donut({ parts: parts2, total, t }) {
@@ -22486,25 +22720,22 @@ function Donut({ parts: parts2, total, t }) {
   const R = 40;
   const C = 2 * Math.PI * R;
   let at = 0;
-  return /* @__PURE__ */ jsxs33("div", { className: "oc-us-split", "data-usage-split": true, children: [
-    /* @__PURE__ */ jsxs33("svg", { viewBox: "0 0 100 100", className: "oc-us-donut", "aria-hidden": "true", focusable: "false", children: [
-      /* @__PURE__ */ jsx37("circle", { cx: "50", cy: "50", r: R, className: "p-track" }),
+  return /* @__PURE__ */ jsxs34("div", { className: "oc-us-split", "data-usage-split": true, children: [
+    /* @__PURE__ */ jsxs34("svg", { viewBox: "0 0 100 100", className: "oc-us-donut", "aria-hidden": "true", focusable: "false", children: [
+      /* @__PURE__ */ jsx38("circle", { cx: "50", cy: "50", r: R, className: "p-track" }),
       items.map(({ key, share: part }) => {
         const len = part * C;
-        const el = /* @__PURE__ */ jsx37("circle", { cx: "50", cy: "50", r: R, className: `p-${key}`, strokeDasharray: `${Math.max(0, len - 1.5)} ${C}`, strokeDashoffset: -at, transform: "rotate(-90 50 50)" }, key);
+        const el = /* @__PURE__ */ jsx38("circle", { cx: "50", cy: "50", r: R, className: `p-${key}`, strokeDasharray: `${Math.max(0, len - 1.5)} ${C}`, strokeDashoffset: -at, transform: "rotate(-90 50 50)" }, key);
         at += len;
         return el;
       }),
-      /* @__PURE__ */ jsx37("text", { x: "50", y: "55", textAnchor: "middle", className: "p-total", children: total })
+      /* @__PURE__ */ jsx38("text", { x: "50", y: "55", textAnchor: "middle", className: "p-total", children: total })
     ] }),
-    /* @__PURE__ */ jsx37("ul", { className: "oc-us-legend", "aria-label": t("usage.split"), children: items.map(({ key, pct }) => /* @__PURE__ */ jsxs33("li", { children: [
-      /* @__PURE__ */ jsx37("i", { className: `s-${key}`, "aria-hidden": "true" }),
+    /* @__PURE__ */ jsx38("ul", { className: "oc-us-legend", "aria-label": t("usage.split"), children: items.map(({ key, pct }) => /* @__PURE__ */ jsxs34("li", { children: [
+      /* @__PURE__ */ jsx38("i", { className: `s-${key}`, "aria-hidden": "true" }),
       t(`usage.part.${key === "in" ? "input" : key === "out" ? "output" : "cache"}`),
       " ",
-      /* @__PURE__ */ jsxs33("b", { children: [
-        pct,
-        " %"
-      ] })
+      /* @__PURE__ */ jsx38("b", { children: percentText(pct, t.lang) })
     ] }, key)) })
   ] });
 }
@@ -22513,69 +22744,69 @@ function Days({ series, metric, t, selected, onSelect }) {
   const peak = peakOf(totals);
   const label = (ms2) => new Date(ms2).toLocaleDateString(t.lang, { weekday: "short", day: "numeric" });
   const sel = selected != null ? series[selected] : null;
-  return /* @__PURE__ */ jsxs33("div", { "data-usage-days": true, children: [
-    /* @__PURE__ */ jsx37("div", { className: "oc-us-days", role: "group", "aria-label": t("usage.days.title"), "data-n": series.length, style: { "--n": series.length }, children: series.map((d, i) => {
+  return /* @__PURE__ */ jsxs34("div", { "data-usage-days": true, children: [
+    /* @__PURE__ */ jsx38("div", { className: "oc-us-days", role: "group", "aria-label": t("usage.days.title"), "data-n": series.length, style: { "--n": series.length }, children: series.map((d, i) => {
       const sparse = series.length > 10;
       const axis = !sparse || (series.length - 1 - i) % 5 === 0;
       const h = share(d.parts?.total ?? null, peak);
       const text3 = d.state === "ok" ? `${t("usage.days.bar", label(d.fromMs), exactLabel(d.parts.total, t.lang))} (${t(`usage.metric.${metric}`)})` : d.state === "none" ? t("usage.days.none", label(d.fromMs)) : t("usage.days.failed", label(d.fromMs));
-      return /* @__PURE__ */ jsxs33("button", { type: "button", className: "oc-us-day", "data-day-state": d.state, "data-day-total": d.parts?.total ?? "", "aria-label": text3, "aria-pressed": selected === i, onClick: () => onSelect(selected === i ? null : i), children: [
-        /* @__PURE__ */ jsx37("span", { className: "oc-us-col", "aria-hidden": "true", children: d.state === "ok" ? /* @__PURE__ */ jsxs33("span", { className: "oc-us-colfill", style: { height: `${h * 100}%` }, children: [
-          d.parts.cache ? /* @__PURE__ */ jsx37("i", { className: "s-cache", style: { flexGrow: d.parts.cache } }) : null,
-          d.parts.output ? /* @__PURE__ */ jsx37("i", { className: "s-out", style: { flexGrow: d.parts.output } }) : null,
-          d.parts.input ? /* @__PURE__ */ jsx37("i", { className: "s-in", style: { flexGrow: d.parts.input } }) : null
-        ] }) : /* @__PURE__ */ jsx37("span", { className: `oc-us-gap${d.state === "failed" ? " fail" : ""}` }) }),
-        /* @__PURE__ */ jsx37("span", { className: "oc-us-val", "aria-hidden": "true", children: sparse ? null : d.state === "ok" ? tokenLabel(d.parts.total, t.lang) : d.state === "none" ? "·" : "?" }),
-        /* @__PURE__ */ jsx37("span", { className: "oc-us-lab", "aria-hidden": "true", children: axis ? sparse ? new Date(d.fromMs).getDate() : label(d.fromMs) : " " })
+      return /* @__PURE__ */ jsxs34("button", { type: "button", className: "oc-us-day", "data-day-state": d.state, "data-day-total": d.parts?.total ?? "", "aria-label": text3, "aria-pressed": selected === i, onClick: () => onSelect(selected === i ? null : i), children: [
+        /* @__PURE__ */ jsx38("span", { className: "oc-us-col", "aria-hidden": "true", children: d.state === "ok" ? /* @__PURE__ */ jsxs34("span", { className: "oc-us-colfill", style: { height: `${h * 100}%` }, children: [
+          d.parts.cache ? /* @__PURE__ */ jsx38("i", { className: "s-cache", style: { flexGrow: d.parts.cache } }) : null,
+          d.parts.output ? /* @__PURE__ */ jsx38("i", { className: "s-out", style: { flexGrow: d.parts.output } }) : null,
+          d.parts.input ? /* @__PURE__ */ jsx38("i", { className: "s-in", style: { flexGrow: d.parts.input } }) : null
+        ] }) : /* @__PURE__ */ jsx38("span", { className: `oc-us-gap${d.state === "failed" ? " fail" : ""}` }) }),
+        /* @__PURE__ */ jsx38("span", { className: "oc-us-val", "aria-hidden": "true", children: sparse ? null : d.state === "ok" ? tokenLabel(d.parts.total, t.lang) : d.state === "none" ? "·" : "?" }),
+        /* @__PURE__ */ jsx38("span", { className: "oc-us-lab", "aria-hidden": "true", children: axis ? sparse ? new Date(d.fromMs).getDate() : label(d.fromMs) : " " })
       ] }, d.fromMs);
     }) }),
-    /* @__PURE__ */ jsx37("p", { className: "oc-faint oc-us-daynote", role: "status", "data-usage-day-note": true, children: sel ? sel.state === "ok" ? `${t("usage.days.detail", label(sel.fromMs), exactLabel(sel.parts.total, t.lang))} · ${t("usage.agents.calls", exactLabel(sel.calls, t.lang) ?? t("usage.absent"), exactLabel(sel.sessions, t.lang) ?? t("usage.absent"))}` : sel.state === "none" ? t("usage.days.none", label(sel.fromMs)) : t("usage.days.failed", label(sel.fromMs)) : "" })
+    /* @__PURE__ */ jsx38("p", { className: "oc-faint oc-us-daynote", role: "status", "data-usage-day-note": true, children: sel ? sel.state === "ok" ? `${t("usage.days.detail", label(sel.fromMs), exactLabel(sel.parts.total, t.lang))} · ${t("usage.agents.calls", exactLabel(sel.calls, t.lang) ?? t("usage.absent"), exactLabel(sel.sessions, t.lang) ?? t("usage.absent"))}` : sel.state === "none" ? t("usage.days.none", label(sel.fromMs)) : t("usage.days.failed", label(sel.fromMs)) : "" })
   ] });
 }
 function Quota({ quota, query, t }) {
   const nowMs = Date.now();
-  if (query.isError && !query.data) return /* @__PURE__ */ jsx37("p", { className: "oc-hint oc-dashed", "data-usage-quota": "error", children: t("usage.quota.error") });
-  if (!query.data) return /* @__PURE__ */ jsx37("p", { className: "oc-hint", "data-usage-quota": "loading", children: t("usage.loading") });
-  if (!query.data.options) return /* @__PURE__ */ jsx37("p", { className: "oc-hint oc-dashed", "data-usage-quota": "error", children: t("usage.quota.error") });
+  if (query.isError && !query.data) return /* @__PURE__ */ jsx38("p", { className: "oc-hint oc-dashed", "data-usage-quota": "error", children: t("usage.quota.error") });
+  if (!query.data) return /* @__PURE__ */ jsx38("p", { className: "oc-hint", "data-usage-quota": "loading", children: t("usage.loading") });
+  if (!query.data.options) return /* @__PURE__ */ jsx38("p", { className: "oc-hint oc-dashed", "data-usage-quota": "error", children: t("usage.quota.error") });
   const read2 = clockLabel(query.data.atMs, t.lang, { day: false });
-  return /* @__PURE__ */ jsxs33("div", { "data-usage-quota": quota.groups.length ? "ok" : "absent", children: [
-    quota.groups.map((g) => /* @__PURE__ */ jsxs33("div", { className: "oc-us-quota", "data-quota-group": g.providers.join(","), children: [
-      /* @__PURE__ */ jsxs33("p", { className: "oc-us-qhead", children: [
-        /* @__PURE__ */ jsx37("b", { children: g.account ?? g.providers.join(" · ") }),
-        g.account ? /* @__PURE__ */ jsxs33("span", { className: "oc-faint", children: [
+  return /* @__PURE__ */ jsxs34("div", { "data-usage-quota": quota.groups.length ? "ok" : "absent", children: [
+    quota.groups.map((g) => /* @__PURE__ */ jsxs34("div", { className: "oc-us-quota", "data-quota-group": g.providers.join(","), children: [
+      /* @__PURE__ */ jsxs34("p", { className: "oc-us-qhead", children: [
+        /* @__PURE__ */ jsx38("b", { children: g.account ?? g.providers.join(" · ") }),
+        g.account ? /* @__PURE__ */ jsxs34("span", { className: "oc-faint", children: [
           " ",
           g.providers.join(" · ")
         ] }) : null
       ] }),
-      g.windows.map((w) => /* @__PURE__ */ jsxs33("div", { className: "oc-us-gauge", "data-quota-window": w.label, "data-percent": w.usedPercent, children: [
-        /* @__PURE__ */ jsxs33("svg", { viewBox: "0 0 44 44", className: "oc-us-ring", role: "img", "aria-label": t("usage.quota.gauge", w.label, percentLabel(w.usedPercent)), "data-level": w.usedPercent >= 90 ? "high" : w.usedPercent >= 70 ? "mid" : "low", children: [
-          /* @__PURE__ */ jsx37("circle", { cx: "22", cy: "22", r: "18", className: "r-track" }),
-          /* @__PURE__ */ jsx37("circle", { cx: "22", cy: "22", r: "18", className: "r-fill", pathLength: "100", strokeDasharray: `${Math.max(1, Math.min(100, w.usedPercent))} 100`, transform: "rotate(-90 22 22)" }),
-          /* @__PURE__ */ jsx37("text", { x: "22", y: "26", textAnchor: "middle", className: "r-pct", children: percentLabel(w.usedPercent) })
+      g.windows.map((w) => /* @__PURE__ */ jsxs34("div", { className: "oc-us-gauge", "data-quota-window": w.label, "data-percent": w.usedPercent, children: [
+        /* @__PURE__ */ jsxs34("svg", { viewBox: "0 0 44 44", className: "oc-us-ring", role: "img", "aria-label": t("usage.quota.gauge", w.label, percentLabel(w.usedPercent)), "data-level": w.usedPercent >= 90 ? "high" : w.usedPercent >= 70 ? "mid" : "low", children: [
+          /* @__PURE__ */ jsx38("circle", { cx: "22", cy: "22", r: "18", className: "r-track" }),
+          /* @__PURE__ */ jsx38("circle", { cx: "22", cy: "22", r: "18", className: "r-fill", pathLength: "100", strokeDasharray: `${Math.max(1, Math.min(100, w.usedPercent))} 100`, transform: "rotate(-90 22 22)" }),
+          /* @__PURE__ */ jsx38("text", { x: "22", y: "26", textAnchor: "middle", className: "r-pct", children: percentLabel(w.usedPercent) })
         ] }),
-        /* @__PURE__ */ jsxs33("span", { className: "oc-us-gl", title: w.label, children: [
+        /* @__PURE__ */ jsxs34("span", { className: "oc-us-gl", title: w.label, children: [
           w.label,
           w.scope === "model" ? ` · ${t("usage.quota.perModel")}` : ""
         ] }),
-        /* @__PURE__ */ jsx37("span", { className: "oc-faint oc-us-reset", children: w.resetsAtMs ? w.resetsAtMs > nowMs ? t("usage.quota.resets", clockLabel(w.resetsAtMs, t.lang, { day: w.resetsAtMs - nowMs > 20 * 36e5 })) : t("usage.quota.resetPast") : t("usage.quota.noReset") })
+        /* @__PURE__ */ jsx38("span", { className: "oc-faint oc-us-reset", children: w.resetsAtMs ? w.resetsAtMs > nowMs ? t("usage.quota.resets", clockLabel(w.resetsAtMs, t.lang, { day: w.resetsAtMs - nowMs > 20 * 36e5 })) : t("usage.quota.resetPast") : t("usage.quota.noReset") })
       ] }, w.label))
     ] }, `${g.providers.join(",")}-${g.account ?? ""}`)),
-    !quota.groups.length ? /* @__PURE__ */ jsx37("p", { className: "oc-hint oc-dashed", "data-usage-quota-none": true, children: quota.missing.length ? t("usage.quota.none", quota.missing.join(", ")) : t("usage.quota.noRoute") }) : null,
-    quota.groups.length && quota.missing.length ? /* @__PURE__ */ jsx37("p", { className: "oc-faint", children: t("usage.quota.some", quota.missing.join(", ")) }) : null,
-    /* @__PURE__ */ jsxs33("p", { className: "oc-faint oc-us-read", "data-usage-read": true, children: [
+    !quota.groups.length ? /* @__PURE__ */ jsx38("p", { className: "oc-hint oc-dashed", "data-usage-quota-none": true, children: quota.missing.length ? t("usage.quota.none", quota.missing.join(", ")) : t("usage.quota.noRoute") }) : null,
+    quota.groups.length && quota.missing.length ? /* @__PURE__ */ jsx38("p", { className: "oc-faint", children: t("usage.quota.some", quota.missing.join(", ")) }) : null,
+    /* @__PURE__ */ jsxs34("p", { className: "oc-faint oc-us-read", "data-usage-read": true, children: [
       t("usage.quota.readAt", read2),
-      /* @__PURE__ */ jsx37(DlgTip, { name: t("usage.quota.title"), children: t("usage.quota.note", read2) })
+      /* @__PURE__ */ jsx38(DlgTip, { name: t("usage.quota.title"), children: t("usage.quota.note", read2) })
     ] })
   ] });
 }
 function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
   const t = useT();
-  const id = useId16();
-  const [kind, setKind] = useState17("24h");
-  const [metric, setMetric] = useState17("fresh");
-  const [day, setDay] = useState17(null);
-  const [nowMs, setNowMs] = useState17(() => Date.now());
-  useEffect20(() => {
+  const id = useId19();
+  const [kind, setKind] = useState21("24h");
+  const [metric, setMetric] = useState21("fresh");
+  const [day, setDay] = useState21(null);
+  const [nowMs, setNowMs] = useState21(() => Date.now());
+  useEffect21(() => {
     if (open) setNowMs(Date.now());
   }, [open]);
   const on = Boolean(open && usageServed);
@@ -22602,7 +22833,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
   const windows = USAGE_WINDOWS.map((k) => [k, t(`usage.win.${WIN_KEY[k]}`)]);
   const metrics = USAGE_METRICS.map((m) => [m, t(`usage.metric.${m}`), false, t(`usage.metricTip.${m}`)]);
   const hasSplit = tot?.parts && (tot.parts.input || tot.parts.output || tot.parts.cache);
-  return /* @__PURE__ */ jsxs33(
+  return /* @__PURE__ */ jsxs34(
     Dlg,
     {
       open,
@@ -22622,127 +22853,127 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
           onClose();
         }
       },
-      start: data ? /* @__PURE__ */ jsxs33("span", { className: "oc-us-range", children: [
-        /* @__PURE__ */ jsx37("span", { "data-usage-range": true, children: range }),
-        /* @__PURE__ */ jsx37(DlgTip, { name: t("usage.window"), children: t("usage.range", range) })
+      start: data ? /* @__PURE__ */ jsxs34("span", { className: "oc-us-range", children: [
+        /* @__PURE__ */ jsx38("span", { "data-usage-range": true, children: range }),
+        /* @__PURE__ */ jsx38(DlgTip, { name: t("usage.window"), children: t("usage.range", range) })
       ] }) : null,
-      actions: /* @__PURE__ */ jsx37("button", { type: "button", className: "oc-btn", onClick: onClose, children: t("dlg.close") }),
+      actions: /* @__PURE__ */ jsx38("button", { type: "button", className: "oc-btn", onClick: onClose, children: t("dlg.close") }),
       children: [
-        /* @__PURE__ */ jsxs33("div", { className: "oc-us-controls", children: [
-          /* @__PURE__ */ jsx37(Seg, { label: t("usage.window"), items: windows, value: kind, attr: "data-usage-window", onPick: (k) => {
+        /* @__PURE__ */ jsxs34("div", { className: "oc-us-controls", children: [
+          /* @__PURE__ */ jsx38(Seg, { label: t("usage.window"), items: windows, value: kind, attr: "data-usage-window", onPick: (k) => {
             setKind(k);
             setDay(null);
           } }),
-          /* @__PURE__ */ jsx37(Seg, { label: t("usage.metricLabel"), items: metrics, value: metric, attr: "data-usage-metric", onPick: setMetric })
+          /* @__PURE__ */ jsx38(Seg, { label: t("usage.metricLabel"), items: metrics, value: metric, attr: "data-usage-metric", onPick: setMetric })
         ] }),
-        !usageServed ? /* @__PURE__ */ jsx37(Notice, { tone: "neutral", icon: "info", "data-usage-state": "unserved", children: t("usage.unserved") }) : null,
-        usageServed && !data && usage.isError ? /* @__PURE__ */ jsx37(Notice, { tone: "bad", icon: "alert", "data-usage-state": "error", children: t("usage.error") }) : null,
-        usageServed && !data && !usage.isError ? /* @__PURE__ */ jsxs33("p", { className: "oc-dg-busy", "data-usage-state": "loading", children: [
-          /* @__PURE__ */ jsx37("span", { className: "oc-dg-spin", "aria-hidden": "true" }),
+        !usageServed ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", icon: "info", "data-usage-state": "unserved", children: t("usage.unserved") }) : null,
+        usageServed && !data && usage.isError ? /* @__PURE__ */ jsx38(Notice, { tone: "bad", icon: "alert", "data-usage-state": "error", children: t("usage.error") }) : null,
+        usageServed && !data && !usage.isError ? /* @__PURE__ */ jsxs34("p", { className: "oc-dg-busy", "data-usage-state": "loading", children: [
+          /* @__PURE__ */ jsx38("span", { className: "oc-dg-spin", "aria-hidden": "true" }),
           t("usage.loading")
         ] }) : null,
-        data ? /* @__PURE__ */ jsxs33(Fragment16, { children: [
-          partial.length ? /* @__PURE__ */ jsx37(Notice, { tone: "warn", icon: "alert", role: "status", "data-usage-partial": true, children: t("usage.partial", partial.map((p) => p.source).join(", ")) }) : null,
-          !tot ? /* @__PURE__ */ jsx37(Notice, { tone: "neutral", icon: "info", "data-usage-none": true, children: agents.absent ? t("usage.noneAbsent", agents.absent) : t("usage.none") }) : /* @__PURE__ */ jsxs33("div", { className: "oc-us-top", children: [
-            /* @__PURE__ */ jsxs33("div", { className: "oc-us-tiles", role: "group", "aria-label": t("usage.title"), children: [
-              /* @__PURE__ */ jsx37(Tile, { id: "tokens", icon: "tokens", value: tokenLabel(tot.parts?.total ?? null, t.lang), exact: nf(tot.parts?.total ?? null), label: t(`usage.tile.tokens.${metric}`), note: tot.incomplete ? t("usage.incomplete") : null, t }),
-              /* @__PURE__ */ jsx37(Tile, { id: "calls", icon: "calls", value: nf(tot.calls), exact: tot.calls != null ? String(tot.calls) : null, label: t("usage.tile.calls"), t }),
-              /* @__PURE__ */ jsx37(Tile, { id: "sessions", icon: "sessions", value: nf(tot.sessions), exact: tot.sessions != null ? String(tot.sessions) : null, label: t("usage.tile.sessions"), t })
+        data ? /* @__PURE__ */ jsxs34(Fragment17, { children: [
+          partial.length ? /* @__PURE__ */ jsx38(Notice, { tone: "warn", icon: "alert", role: "status", "data-usage-partial": true, children: t("usage.partial", partial.map((p) => p.source).join(", ")) }) : null,
+          !tot ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", icon: "info", "data-usage-none": true, children: agents.absent ? t("usage.noneAbsent", agents.absent) : t("usage.none") }) : /* @__PURE__ */ jsxs34("div", { className: "oc-us-top", children: [
+            /* @__PURE__ */ jsxs34("div", { className: "oc-us-tiles", role: "group", "aria-label": t("usage.title"), children: [
+              /* @__PURE__ */ jsx38(Tile, { id: "tokens", icon: "tokens", value: tokenLabel(tot.parts?.total ?? null, t.lang), exact: nf(tot.parts?.total ?? null), label: t(`usage.tile.tokens.${metric}`), note: tot.incomplete ? t("usage.incomplete") : null, t }),
+              /* @__PURE__ */ jsx38(Tile, { id: "calls", icon: "calls", value: nf(tot.calls), exact: tot.calls != null ? String(tot.calls) : null, label: t("usage.tile.calls"), t }),
+              /* @__PURE__ */ jsx38(Tile, { id: "sessions", icon: "sessions", value: nf(tot.sessions), exact: tot.sessions != null ? String(tot.sessions) : null, label: t("usage.tile.sessions"), t })
             ] }),
-            hasSplit ? /* @__PURE__ */ jsx37(Donut, { parts: tot.parts, total: tokenLabel(tot.parts.total, t.lang), t }) : null
+            hasSplit ? /* @__PURE__ */ jsx38(Donut, { parts: tot.parts, total: tokenLabel(tot.parts.total, t.lang), t }) : null
           ] }),
-          /* @__PURE__ */ jsxs33("section", { className: "oc-us-sec", "aria-labelledby": `${id}-d`, "data-usage-section": "days", children: [
-            /* @__PURE__ */ jsxs33("h3", { id: `${id}-d`, children: [
+          /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-d`, "data-usage-section": "days", children: [
+            /* @__PURE__ */ jsxs34("h3", { id: `${id}-d`, children: [
               t("usage.days.title"),
               " ",
-              /* @__PURE__ */ jsxs33("small", { className: "oc-faint", "data-usage-days-span": true, children: [
+              /* @__PURE__ */ jsxs34("small", { className: "oc-faint", "data-usage-days-span": true, children: [
                 "· ",
                 t("usage.days.span", daysFor(kind))
               ] }),
-              /* @__PURE__ */ jsxs33(DlgTip, { name: t("usage.days.title"), children: [
+              /* @__PURE__ */ jsxs34(DlgTip, { name: t("usage.days.title"), children: [
                 t("usage.days.note"),
                 " ",
                 t("usage.days.hint")
               ] })
             ] }),
-            series ? /* @__PURE__ */ jsx37(Days, { series, metric, t, selected: day, onSelect: setDay }) : /* @__PURE__ */ jsx37("p", { className: "oc-hint", "data-usage-days-state": days.isError ? "error" : "loading", children: days.isError ? t("usage.days.error") : t("usage.loading") })
+            series ? /* @__PURE__ */ jsx38(Days, { series, metric, t, selected: day, onSelect: setDay }) : /* @__PURE__ */ jsx38("p", { className: "oc-hint", "data-usage-days-state": days.isError ? "error" : "loading", children: days.isError ? t("usage.days.error") : t("usage.loading") })
           ] }),
-          /* @__PURE__ */ jsxs33("section", { className: "oc-us-sec", "aria-labelledby": `${id}-a`, "data-usage-section": "agents", children: [
-            /* @__PURE__ */ jsx37("h3", { id: `${id}-a`, children: t("usage.agents.title") }),
-            agents.rows.length ? /* @__PURE__ */ jsx37("ul", { className: "oc-us-rows", children: agents.rows.map((r) => /* @__PURE__ */ jsxs33("li", { "data-usage-agent": r.profile, "data-agent-state": r.state, children: [
-              /* @__PURE__ */ jsx37("b", { className: "oc-us-name", title: r.profile, children: r.profile }),
-              /* @__PURE__ */ jsx37(Bar, { parts: r.parts, peak: agentPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
-              /* @__PURE__ */ jsx37("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: r.state === "ok" ? tokenLabel(r.parts?.total ?? null, t.lang) ?? t("usage.absent") : r.state === "none" ? t("usage.noSession") : t(`usage.reason.${r.reason ?? "missing"}`) }),
-              /* @__PURE__ */ jsx37("span", { className: "oc-faint oc-us-sub", children: r.state === "ok" ? /* @__PURE__ */ jsxs33(Fragment16, { children: [
+          /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-a`, "data-usage-section": "agents", children: [
+            /* @__PURE__ */ jsx38("h3", { id: `${id}-a`, children: t("usage.agents.title") }),
+            agents.rows.length ? /* @__PURE__ */ jsx38("ul", { className: "oc-us-rows", children: agents.rows.map((r) => /* @__PURE__ */ jsxs34("li", { "data-usage-agent": r.profile, "data-agent-state": r.state, children: [
+              /* @__PURE__ */ jsx38("b", { className: "oc-us-name", title: r.profile, children: r.profile }),
+              /* @__PURE__ */ jsx38(Bar, { parts: r.parts, peak: agentPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
+              /* @__PURE__ */ jsx38("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: r.state === "ok" ? tokenLabel(r.parts?.total ?? null, t.lang) ?? t("usage.absent") : r.state === "none" ? t("usage.noSession") : t(`usage.reason.${r.reason ?? "missing"}`) }),
+              /* @__PURE__ */ jsx38("span", { className: "oc-faint oc-us-sub", children: r.state === "ok" ? /* @__PURE__ */ jsxs34(Fragment17, { children: [
                 t("usage.agents.calls", nf(r.calls) ?? t("usage.absent"), nf(r.sessions) ?? t("usage.absent")),
                 " · ",
-                /* @__PURE__ */ jsx37(Cost, { cost: r.cost, t })
+                /* @__PURE__ */ jsx38(Cost, { cost: r.cost, t })
               ] }) : null })
-            ] }, r.profile)) }) : /* @__PURE__ */ jsx37(Notice, { tone: "neutral", children: t("usage.agents.none") })
+            ] }, r.profile)) }) : /* @__PURE__ */ jsx38(Notice, { tone: "neutral", children: t("usage.agents.none") })
           ] }),
-          /* @__PURE__ */ jsxs33("section", { className: "oc-us-sec", "aria-labelledby": `${id}-m`, "data-usage-section": "models", children: [
-            /* @__PURE__ */ jsxs33("h3", { id: `${id}-m`, children: [
+          /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-m`, "data-usage-section": "models", children: [
+            /* @__PURE__ */ jsxs34("h3", { id: `${id}-m`, children: [
               t("usage.models.title"),
-              /* @__PURE__ */ jsx37(DlgTip, { name: t("usage.models.title"), children: t("usage.models.note") })
+              /* @__PURE__ */ jsx38(DlgTip, { name: t("usage.models.title"), children: t("usage.models.note") })
             ] }),
-            models.rows.length ? /* @__PURE__ */ jsx37("ul", { className: "oc-us-rows", children: models.rows.map((r) => /* @__PURE__ */ jsxs33("li", { "data-usage-model": r.model, children: [
-              /* @__PURE__ */ jsx37("b", { className: "oc-us-name", title: `${r.model} · ${r.provider}`, children: r.model }),
-              /* @__PURE__ */ jsx37(Bar, { parts: r.parts, peak: modelPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
-              /* @__PURE__ */ jsx37("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: tokenLabel(r.parts?.total ?? null, t.lang) ?? t("usage.absent") }),
-              /* @__PURE__ */ jsxs33("span", { className: "oc-faint oc-us-sub", children: [
+            models.rows.length ? /* @__PURE__ */ jsx38("ul", { className: "oc-us-rows", children: models.rows.map((r) => /* @__PURE__ */ jsxs34("li", { "data-usage-model": r.model, children: [
+              /* @__PURE__ */ jsx38("b", { className: "oc-us-name", title: `${r.model} · ${r.provider}`, children: r.model }),
+              /* @__PURE__ */ jsx38(Bar, { parts: r.parts, peak: modelPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
+              /* @__PURE__ */ jsx38("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: tokenLabel(r.parts?.total ?? null, t.lang) ?? t("usage.absent") }),
+              /* @__PURE__ */ jsxs34("span", { className: "oc-faint oc-us-sub", children: [
                 r.provider,
                 " · ",
                 t("usage.models.calls", nf(r.calls) ?? t("usage.absent")),
                 r.auxCalls ? ` (${t("usage.models.aux", nf(r.auxCalls))})` : "",
                 " · ",
-                /* @__PURE__ */ jsx37(Cost, { cost: r.cost, t })
+                /* @__PURE__ */ jsx38(Cost, { cost: r.cost, t })
               ] })
-            ] }, `${r.provider}|${r.model}`)) }) : /* @__PURE__ */ jsx37(Notice, { tone: "neutral", "data-usage-models-none": true, children: models.withoutBreakdown ? t("usage.models.absent") : t("usage.models.none") })
+            ] }, `${r.provider}|${r.model}`)) }) : /* @__PURE__ */ jsx38(Notice, { tone: "neutral", "data-usage-models-none": true, children: models.withoutBreakdown ? t("usage.models.absent") : t("usage.models.none") })
           ] })
         ] }) : null,
-        usageServed ? /* @__PURE__ */ jsxs33("section", { className: "oc-us-sec", "aria-labelledby": `${id}-b`, "data-usage-section": "boards", children: [
-          /* @__PURE__ */ jsxs33("h3", { id: `${id}-b`, children: [
+        usageServed ? /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-b`, "data-usage-section": "boards", children: [
+          /* @__PURE__ */ jsxs34("h3", { id: `${id}-b`, children: [
             t("usage.boards.title"),
-            /* @__PURE__ */ jsx37(DlgTip, { name: t("usage.boards.title"), children: t("usage.boards.note") })
+            /* @__PURE__ */ jsx38(DlgTip, { name: t("usage.boards.title"), children: t("usage.boards.note") })
           ] }),
-          !boardsAvailable(kind) ? /* @__PURE__ */ jsx37(Notice, { tone: "neutral", "data-usage-boards": "range", children: t("usage.boards.range") }) : !replayServed ? /* @__PURE__ */ jsx37(Notice, { tone: "neutral", "data-usage-boards": "unserved", children: t("usage.boards.unserved") }) : !byBoard ? /* @__PURE__ */ jsx37("p", { className: "oc-hint", "data-usage-boards": "loading", children: boards.isError ? t("usage.boards.error") : t("usage.loading") }) : byBoard.rows.length ? /* @__PURE__ */ jsx37("ul", { className: "oc-us-rows", "data-usage-boards": "ok", children: byBoard.rows.map((r) => /* @__PURE__ */ jsxs33("li", { "data-usage-board": r.slug, children: [
-            /* @__PURE__ */ jsx37("b", { className: "oc-us-name", title: r.slug, children: r.slug }),
-            /* @__PURE__ */ jsx37(Bar, { parts: r.parts, peak: boardPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
-            /* @__PURE__ */ jsx37("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: tokenLabel(r.parts?.total ?? null, t.lang) ?? (r.runs ? t("usage.absent") : t("usage.noRun")) }),
-            /* @__PURE__ */ jsxs33("span", { className: "oc-faint oc-us-sub", children: [
+          !boardsAvailable(kind) ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", "data-usage-boards": "range", children: t("usage.boards.range") }) : !replayServed ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", "data-usage-boards": "unserved", children: t("usage.boards.unserved") }) : !byBoard ? /* @__PURE__ */ jsx38("p", { className: "oc-hint", "data-usage-boards": "loading", children: boards.isError ? t("usage.boards.error") : t("usage.loading") }) : byBoard.rows.length ? /* @__PURE__ */ jsx38("ul", { className: "oc-us-rows", "data-usage-boards": "ok", children: byBoard.rows.map((r) => /* @__PURE__ */ jsxs34("li", { "data-usage-board": r.slug, children: [
+            /* @__PURE__ */ jsx38("b", { className: "oc-us-name", title: r.slug, children: r.slug }),
+            /* @__PURE__ */ jsx38(Bar, { parts: r.parts, peak: boardPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
+            /* @__PURE__ */ jsx38("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: tokenLabel(r.parts?.total ?? null, t.lang) ?? (r.runs ? t("usage.absent") : t("usage.noRun")) }),
+            /* @__PURE__ */ jsxs34("span", { className: "oc-faint oc-us-sub", children: [
               t("usage.boards.runs", r.runs, r.with),
               r.without ? ` · ${t("usage.boards.without", r.without)}` : ""
             ] })
-          ] }, r.slug)) }) : /* @__PURE__ */ jsx37(Notice, { tone: "neutral", "data-usage-boards": "empty", children: t("usage.boards.none") })
+          ] }, r.slug)) }) : /* @__PURE__ */ jsx38(Notice, { tone: "neutral", "data-usage-boards": "empty", children: t("usage.boards.none") })
         ] }) : null,
-        usageServed ? /* @__PURE__ */ jsxs33("section", { className: "oc-us-sec", "aria-labelledby": `${id}-q`, "data-usage-section": "quota", children: [
-          /* @__PURE__ */ jsx37("h3", { id: `${id}-q`, children: t("usage.quota.title") }),
-          /* @__PURE__ */ jsx37(Quota, { quota, query: quotaQ, t }),
-          balance ? /* @__PURE__ */ jsxs33("div", { className: "oc-us-balance", "data-usage-balance": true, children: [
-            /* @__PURE__ */ jsxs33("p", { children: [
-              /* @__PURE__ */ jsx37("b", { children: t("usage.balance.title") }),
+        usageServed ? /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-q`, "data-usage-section": "quota", children: [
+          /* @__PURE__ */ jsx38("h3", { id: `${id}-q`, children: t("usage.quota.title") }),
+          /* @__PURE__ */ jsx38(Quota, { quota, query: quotaQ, t }),
+          balance ? /* @__PURE__ */ jsxs34("div", { className: "oc-us-balance", "data-usage-balance": true, children: [
+            /* @__PURE__ */ jsxs34("p", { children: [
+              /* @__PURE__ */ jsx38("b", { children: t("usage.balance.title") }),
               balance.plan ? ` · ${balance.plan}` : "",
-              /* @__PURE__ */ jsx37(DlgTip, { name: t("usage.balance.title"), children: t("usage.balance.note") })
+              /* @__PURE__ */ jsx38(DlgTip, { name: t("usage.balance.title"), children: t("usage.balance.note") })
             ] }),
-            balance.spendable ? /* @__PURE__ */ jsx37("p", { children: t("usage.balance.spendable", balance.spendable) }) : null,
-            [["plan", balance.planBar], ["topup", balance.topupBar]].map(([k, b]) => b ? /* @__PURE__ */ jsxs33("div", { className: "oc-us-bgauge", "data-balance-bar": k, children: [
-              /* @__PURE__ */ jsx37("span", { className: "oc-us-gl", children: t(`usage.balance.${k}`) }),
-              /* @__PURE__ */ jsx37("span", { className: "oc-us-track", role: "img", "aria-label": t(`usage.balance.${k}`), children: /* @__PURE__ */ jsx37("i", { style: { width: `${b.fill * 100}%` }, "data-level": "low" }) }),
-              /* @__PURE__ */ jsxs33("span", { className: "oc-faint oc-us-reset", children: [
+            balance.spendable ? /* @__PURE__ */ jsx38("p", { children: t("usage.balance.spendable", balance.spendable) }) : null,
+            [["plan", balance.planBar], ["topup", balance.topupBar]].map(([k, b]) => b ? /* @__PURE__ */ jsxs34("div", { className: "oc-us-bgauge", "data-balance-bar": k, children: [
+              /* @__PURE__ */ jsx38("span", { className: "oc-us-gl", children: t(`usage.balance.${k}`) }),
+              /* @__PURE__ */ jsx38("span", { className: "oc-us-track", role: "img", "aria-label": t(`usage.balance.${k}`), children: /* @__PURE__ */ jsx38("i", { style: { width: `${b.fill * 100}%` }, "data-level": "low" }) }),
+              /* @__PURE__ */ jsxs34("span", { className: "oc-faint oc-us-reset", children: [
                 b.remaining ?? "",
                 b.total ? ` / ${b.total}` : ""
               ] })
             ] }, k) : null),
-            balance.renews ? /* @__PURE__ */ jsx37("p", { className: "oc-faint", children: balance.renews }) : null
+            balance.renews ? /* @__PURE__ */ jsx38("p", { className: "oc-faint", children: balance.renews }) : null
           ] }) : null
         ] }) : null,
-        /* @__PURE__ */ jsxs33("details", { className: "oc-us-src", "data-usage-section": "sources", children: [
-          /* @__PURE__ */ jsx37("summary", { children: t("usage.sources.title") }),
-          /* @__PURE__ */ jsxs33("ul", { className: "oc-faint", children: [
-            /* @__PURE__ */ jsx37("li", { children: t("usage.sources.recorded") }),
-            /* @__PURE__ */ jsx37("li", { children: t("usage.sources.window", win.kind ? t(`usage.win.${win.kind}`) : "") }),
-            /* @__PURE__ */ jsx37("li", { children: t("usage.sources.cost") }),
-            /* @__PURE__ */ jsx37("li", { children: t("usage.sources.refresh") })
+        /* @__PURE__ */ jsxs34("details", { className: "oc-us-src", "data-usage-section": "sources", children: [
+          /* @__PURE__ */ jsx38("summary", { children: t("usage.sources.title") }),
+          /* @__PURE__ */ jsxs34("ul", { className: "oc-faint", children: [
+            /* @__PURE__ */ jsx38("li", { children: t("usage.sources.recorded") }),
+            /* @__PURE__ */ jsx38("li", { children: t("usage.sources.window", win.kind ? t(`usage.win.${win.kind}`) : "") }),
+            /* @__PURE__ */ jsx38("li", { children: t("usage.sources.cost") }),
+            /* @__PURE__ */ jsx38("li", { children: t("usage.sources.refresh") })
           ] })
         ] })
       ]
@@ -22759,17 +22990,17 @@ var TRACK = "color-mix(in oklab, var(--foreground) 9%, transparent)";
 var USAGE_CSS = `
 /* the window is the shared frame (DialogKit, dialogStyles.js); only what is specific to Resources is here */
 [data-usage-quota]{display:flex;flex-direction:column;gap:12px}
-.oc-us-controls{position:sticky;top:-16px;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-16px -16px 0;padding:12px 16px;background:${CARD};border-bottom:1px solid ${EDGE2}}
+.oc-us-controls{position:sticky;top:-16px;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-16px -16px 0;padding:12px 16px;background:${CARD};border-bottom:1px solid ${EDGE}}
 .oc-us-range{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT4}}
 .oc-us-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch}
 .oc-us-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.oc-us-tile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i v" "l l" "n n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE2};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
+.oc-us-tile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i v" "l l" "n n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
 .oc-us-tico{grid-area:i;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 14%, transparent)}
 .oc-us-tile b{grid-area:v;font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .oc-us-tile > span:not(.oc-us-tico){grid-area:l;font-size:12px;color:${SOFT4}}
 .oc-us-tile small{grid-area:n;font-size:11px}
 /* the split of the tokens: a ring and its three shares */
-.oc-us-split{display:flex;align-items:center;gap:12px;box-sizing:border-box;padding:8px 16px 8px 8px;border:1px solid ${EDGE2};border-radius:8px}
+.oc-us-split{display:flex;align-items:center;gap:12px;box-sizing:border-box;padding:8px 16px 8px 8px;border:1px solid ${EDGE};border-radius:8px}
 .oc-us-donut{flex:0 0 auto;width:88px;height:88px}
 .oc-us-donut circle{fill:none;stroke-width:14}
 .oc-us-donut .p-track{stroke:${TRACK}}
@@ -22786,7 +23017,7 @@ var USAGE_CSS = `
 .s-cache{background:color-mix(in oklab, var(--foreground) 30%, transparent)}
 .oc-us-sec{display:flex;flex-direction:column;gap:8px;min-width:0}
 .oc-us-sec h3{margin:0;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
-.oc-us-sec + .oc-us-sec{padding-top:12px;border-top:1px solid ${EDGE2}}
+.oc-us-sec + .oc-us-sec{padding-top:12px;border-top:1px solid ${EDGE}}
 .oc-us-sec p{margin:0;font-size:12px}
 .oc-us-read{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
 .oc-us-src summary{cursor:pointer;font-size:12px;color:var(--ui-accent);text-decoration:underline;text-underline-offset:2px}
@@ -22794,11 +23025,12 @@ var USAGE_CSS = `
 .oc-us-colfill i,.oc-us-fill i{display:block}
 /* the days: one button per day, a column whose height is the day's total */
 .oc-us-days{display:grid;grid-template-columns:repeat(var(--n,7),minmax(0,1fr));gap:6px;align-items:end;max-width:calc(var(--n,7) * 92px)}
-.oc-us-days[data-n="30"],.oc-us-days[data-n="31"]{gap:2px}
+/* 30 days: a day never gets under 24 px (the size of a target); when the window is too narrow for 30 of them the row scrolls on its own (the page and the window do not) */
+.oc-us-days[data-n="30"],.oc-us-days[data-n="31"]{grid-template-columns:repeat(var(--n),minmax(24px,1fr));gap:2px;max-width:none;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 2px 8px;margin:-2px;scrollbar-width:thin}
 .oc-us-days[data-n="30"] .oc-us-day{padding:4px 0}
 .oc-us-days[data-n="30"] .oc-us-val{display:none}
 .oc-us-day{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:4px 2px;font:inherit;font-size:11px;color:var(--foreground);background:transparent;border:1px solid transparent;border-radius:6px;cursor:pointer}
-.oc-us-day:hover{background:color-mix(in oklab, var(--ui-accent) 8%, transparent);border-color:${EDGE2}}
+.oc-us-day:hover{background:color-mix(in oklab, var(--ui-accent) 8%, transparent);border-color:${EDGE}}
 .oc-us-day[aria-pressed="true"]{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, transparent)}
 .oc-us-day:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
 .oc-us-col{display:flex;align-items:flex-end;width:100%;height:112px;border-radius:6px;background:repeating-linear-gradient(to top, transparent 0 27px, color-mix(in oklab, var(--foreground) 8%, transparent) 27px 28px), ${TRACK};overflow:hidden}
@@ -22828,7 +23060,7 @@ var USAGE_CSS = `
 .oc-us-qhead{font-size:12px}
 .oc-us-quota{flex-direction:row;flex-wrap:wrap;gap:12px}
 .oc-us-qhead{flex:1 1 100%}
-.oc-us-gauge{display:grid;grid-template-columns:56px minmax(0,1fr);grid-template-areas:"g l" "g r";column-gap:12px;row-gap:2px;align-items:center;align-content:center;flex:1 1 220px;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE2};border-radius:8px;font-size:12px}
+.oc-us-gauge{display:grid;grid-template-columns:56px minmax(0,1fr);grid-template-areas:"g l" "g r";column-gap:12px;row-gap:2px;align-items:center;align-content:center;flex:1 1 220px;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;font-size:12px}
 .oc-us-ring{grid-area:g;width:56px;height:56px}
 .oc-us-ring circle{fill:none;stroke-width:5}
 .oc-us-ring .r-track{stroke:${TRACK}}
@@ -22854,27 +23086,28 @@ var USAGE_CSS = `
   .oc-us-tico{display:none}
   .oc-us-tile b{font-size:20px}
   .oc-us-col{height:80px}
-  .oc-us-days{gap:4px;align-items:start}   /* columns aligned on their top: a label on two lines must not lift its column */
+  .oc-us-days{gap:4px;align-items:start}
+  .oc-us-days[data-n="30"],.oc-us-days[data-n="31"]{gap:2px}   /* columns aligned on their top: a label on two lines must not lift its column */
   .oc-us-lab{white-space:normal;text-align:center;line-height:1.2;overflow-wrap:anywhere}   /* at 380 px the day wraps under its number instead of being cut (« 9 M… ») */
 }
 `;
 
 // src/ui/SeatingDialog.jsx
-import { useEffect as useEffect21, useId as useId17, useRef as useRef22, useState as useState18 } from "react";
-import { Fragment as Fragment17, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
+import { useEffect as useEffect22, useId as useId20, useRef as useRef24, useState as useState22 } from "react";
+import { Fragment as Fragment18, jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
 function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   const t = useT();
-  const areaRef = useRef22(null);
-  const id = useId17();
+  const areaRef = useRef24(null);
+  const id = useId20();
   const query = useLlm();
   const { call } = useLlmActions();
-  const [text3, setText] = useState18("");
-  const [pending, setPending] = useState18(false);
-  const [answer, setAnswer] = useState18(null);
-  useEffect21(() => {
+  const [text3, setText] = useState22("");
+  const [pending, setPending] = useState22(false);
+  const [answer, setAnswer] = useState22(null);
+  useEffect22(() => {
     if (open) setTimeout(() => areaRef.current?.focus(), 0);
   }, [open]);
-  useEffect21(() => {
+  useEffect22(() => {
     if (open) setAnswer(null);
   }, [open]);
   const state2 = query.data ?? null;
@@ -22899,7 +23132,7 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   };
   const blocked = pending || st !== "ready";
   const choices = [["relays", t("llm.seating.useRelays")], ["model", t("llm.seating.useModel"), !kept2], ["default", t("llm.seating.useDefault")]];
-  return /* @__PURE__ */ jsxs34(
+  return /* @__PURE__ */ jsxs35(
     Dlg,
     {
       open,
@@ -22916,37 +23149,37 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
           onClose();
         }
       },
-      start: /* @__PURE__ */ jsx38("button", { type: "button", className: "oc-btn oc-ghost", "data-seating-revert": true, ...held(pending || choice === "default"), onClick: hold(pending || choice === "default", () => {
+      start: /* @__PURE__ */ jsx39("button", { type: "button", className: "oc-btn oc-ghost", "data-seating-revert": true, ...held(pending || choice === "default"), onClick: hold(pending || choice === "default", () => {
         setAnswer(null);
         onChoice("default");
       }), children: t("llm.seating.revert") }),
-      actions: /* @__PURE__ */ jsxs34(Fragment17, { children: [
-        /* @__PURE__ */ jsx38("button", { type: "button", className: "oc-btn", "data-seating-close": true, onClick: onClose, children: t("llm.decor.close") }),
-        /* @__PURE__ */ jsxs34("button", { type: "submit", className: "oc-btn oc-primary", "data-seating-run": true, "aria-disabled": blocked ? true : void 0, children: [
-          /* @__PURE__ */ jsx38(DlgIcon, { id: "spark", size: 14 }),
+      actions: /* @__PURE__ */ jsxs35(Fragment18, { children: [
+        /* @__PURE__ */ jsx39("button", { type: "button", className: "oc-btn", "data-seating-close": true, onClick: onClose, children: t("llm.decor.close") }),
+        /* @__PURE__ */ jsxs35("button", { type: "submit", className: "oc-btn oc-primary", "data-seating-run": true, "aria-disabled": blocked ? true : void 0, children: [
+          /* @__PURE__ */ jsx39(DlgIcon, { id: "spark", size: 14 }),
           t("llm.seating.call")
         ] })
       ] }),
       children: [
-        refusal ? /* @__PURE__ */ jsx38(Notice, { tone: "warn", icon: "info", role: "status", "data-seating-refusal": true, children: refusal }) : null,
-        /* @__PURE__ */ jsxs34("section", { className: "oc-dg-sec", "aria-label": t("llm.seating.relays"), children: [
-          /* @__PURE__ */ jsxs34("h3", { children: [
+        refusal ? /* @__PURE__ */ jsx39(Notice, { tone: "warn", icon: "info", role: "status", "data-seating-refusal": true, children: refusal }) : null,
+        /* @__PURE__ */ jsxs35("section", { className: "oc-dg-sec", "aria-label": t("llm.seating.relays"), children: [
+          /* @__PURE__ */ jsxs35("h3", { children: [
             t("llm.seating.relays"),
-            /* @__PURE__ */ jsx38(DlgTip, { name: t("llm.seating.relays"), children: t("llm.seating.relaysHint") })
+            /* @__PURE__ */ jsx39(DlgTip, { name: t("llm.seating.relays"), children: t("llm.seating.relaysHint") })
           ] }),
-          pairs.length ? /* @__PURE__ */ jsx38("ul", { className: "oc-dg-pairs", "data-seating-relays": true, children: pairs.map((p) => /* @__PURE__ */ jsx38("li", { children: /* @__PURE__ */ jsx38("span", { children: t("llm.seating.pair", `${p.a} ↔ ${p.b}`, p.n) }) }, `${p.a}|${p.b}`)) }) : /* @__PURE__ */ jsx38(Notice, { tone: "neutral", "data-seating-none": true, children: t("llm.seating.none") })
+          pairs.length ? /* @__PURE__ */ jsx39("ul", { className: "oc-dg-pairs", "data-seating-relays": true, children: pairs.map((p) => /* @__PURE__ */ jsx39("li", { children: /* @__PURE__ */ jsx39("span", { children: t("llm.seating.pair", `${p.a} ↔ ${p.b}`, p.n) }) }, `${p.a}|${p.b}`)) }) : /* @__PURE__ */ jsx39(Notice, { tone: "neutral", "data-seating-none": true, children: t("llm.seating.none") })
         ] }),
-        /* @__PURE__ */ jsxs34("div", { className: "oc-dg-fl", children: [
-          /* @__PURE__ */ jsxs34("span", { className: "oc-dg-lab", children: [
-            /* @__PURE__ */ jsx38("label", { htmlFor: `${id}-instr`, children: t("llm.seating.instructions") }),
-            /* @__PURE__ */ jsxs34(DlgTip, { name: t("llm.seating.instructions"), children: [
+        /* @__PURE__ */ jsxs35("div", { className: "oc-dg-fl", children: [
+          /* @__PURE__ */ jsxs35("span", { className: "oc-dg-lab", children: [
+            /* @__PURE__ */ jsx39("label", { htmlFor: `${id}-instr`, children: t("llm.seating.instructions") }),
+            /* @__PURE__ */ jsxs35(DlgTip, { name: t("llm.seating.instructions"), children: [
               t("llm.seating.sent"),
               sent ? "" : ` ${t("llm.seating.emptyOk")}`
             ] }),
-            /* @__PURE__ */ jsx38("span", { className: "grow" }),
-            /* @__PURE__ */ jsx38("small", { id: `${id}-n`, children: t("llm.decor.count", text3.length, INSTR_MAX) })
+            /* @__PURE__ */ jsx39("span", { className: "grow" }),
+            /* @__PURE__ */ jsx39("small", { id: `${id}-n`, children: t("llm.decor.count", text3.length, INSTR_MAX) })
           ] }),
-          /* @__PURE__ */ jsx38(
+          /* @__PURE__ */ jsx39(
             "textarea",
             {
               ref: areaRef,
@@ -22961,31 +23194,31 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
               onChange: hold(blocked, (e) => setText(e.target.value))
             }
           ),
-          /* @__PURE__ */ jsxs34("span", { id: `${id}-sent`, hidden: true, "data-seating-sent": true, children: [
+          /* @__PURE__ */ jsxs35("span", { id: `${id}-sent`, hidden: true, "data-seating-sent": true, children: [
             t("llm.seating.sent"),
             sent ? "" : ` ${t("llm.seating.emptyOk")}`
           ] })
         ] }),
-        /* @__PURE__ */ jsxs34("div", { role: "status", "aria-live": "polite", className: "oc-dg-sec", "data-seating-status": pending ? "pending" : answer ? answer.kind : "idle", children: [
-          pending ? /* @__PURE__ */ jsxs34("p", { className: "oc-dg-busy", children: [
-            /* @__PURE__ */ jsx38("span", { className: "oc-dg-spin", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsxs35("div", { role: "status", "aria-live": "polite", className: "oc-dg-sec", "data-seating-status": pending ? "pending" : answer ? answer.kind : "idle", children: [
+          pending ? /* @__PURE__ */ jsxs35("p", { className: "oc-dg-busy", children: [
+            /* @__PURE__ */ jsx39("span", { className: "oc-dg-spin", "aria-hidden": "true" }),
             t("llm.seating.calling")
           ] }) : null,
-          !pending && answer && answer.kind !== "done" ? /* @__PURE__ */ jsx38(Notice, { tone: "bad", icon: "alert", "data-seating-failure": answer.reason, children: t(`llm.reason.${answer.reason}`) }) : null,
-          !pending && fresh && cost === "known" ? /* @__PURE__ */ jsx38("p", { className: "oc-dg-faint", "data-seating-cost": "known", children: t("llm.decor.costKnown", formatUsd(answer.costUsd, t.lang)) }) : null,
-          !pending && fresh && cost === "unknown" ? /* @__PURE__ */ jsx38("p", { className: "oc-dg-faint", "data-seating-cost": "unknown", children: t("llm.decor.costUnknown") }) : null,
-          !pending && !fresh && answer && answer.kind === "failed" && cost === "error" ? /* @__PURE__ */ jsx38("p", { className: "oc-dg-faint", "data-seating-cost": "error", children: t("llm.decor.costError") }) : null
+          !pending && answer && answer.kind !== "done" ? /* @__PURE__ */ jsx39(Notice, { tone: "bad", icon: "alert", "data-seating-failure": answer.reason, children: t(`llm.reason.${answer.reason}`) }) : null,
+          !pending && fresh && cost === "known" ? /* @__PURE__ */ jsx39("p", { className: "oc-dg-faint", "data-seating-cost": "known", children: t("llm.decor.costKnown", formatUsd(answer.costUsd, t.lang)) }) : null,
+          !pending && fresh && cost === "unknown" ? /* @__PURE__ */ jsx39("p", { className: "oc-dg-faint", "data-seating-cost": "unknown", children: t("llm.decor.costUnknown") }) : null,
+          !pending && !fresh && answer && answer.kind === "failed" && cost === "error" ? /* @__PURE__ */ jsx39("p", { className: "oc-dg-faint", "data-seating-cost": "error", children: t("llm.decor.costError") }) : null
         ] }),
-        proposal ? /* @__PURE__ */ jsxs34("section", { className: "oc-dg-sec", "aria-label": t("llm.seating.proposal"), "data-seating-proposal": fresh ? "new" : "kept", children: [
-          /* @__PURE__ */ jsxs34("h3", { children: [
+        proposal ? /* @__PURE__ */ jsxs35("section", { className: "oc-dg-sec", "aria-label": t("llm.seating.proposal"), "data-seating-proposal": fresh ? "new" : "kept", children: [
+          /* @__PURE__ */ jsxs35("h3", { children: [
             fresh ? t("llm.seating.proposal") : t("llm.seating.kept", kept2?.instructions || "…"),
-            fresh ? /* @__PURE__ */ jsx38(DlgTip, { name: t("llm.seating.proposal"), children: t("llm.seating.proposalNote") }) : null
+            fresh ? /* @__PURE__ */ jsx39(DlgTip, { name: t("llm.seating.proposal"), children: t("llm.seating.proposalNote") }) : null
           ] }),
-          proposal.length ? /* @__PURE__ */ jsx38("ol", { className: "oc-dg-pairs", "data-seating-pairs": true, children: proposal.map((p) => /* @__PURE__ */ jsx38("li", { children: /* @__PURE__ */ jsx38("span", { children: t("llm.seating.pairOf", `${p.a} ↔ ${p.b}`, t(`llm.seating.why.${p.why}`)) }) }, `${p.a}|${p.b}`)) }) : /* @__PURE__ */ jsx38(Notice, { tone: "neutral", "data-seating-nopair": true, children: t("llm.seating.none2") })
+          proposal.length ? /* @__PURE__ */ jsx39("ol", { className: "oc-dg-pairs", "data-seating-pairs": true, children: proposal.map((p) => /* @__PURE__ */ jsx39("li", { children: /* @__PURE__ */ jsx39("span", { children: t("llm.seating.pairOf", `${p.a} ↔ ${p.b}`, t(`llm.seating.why.${p.why}`)) }) }, `${p.a}|${p.b}`)) }) : /* @__PURE__ */ jsx39(Notice, { tone: "neutral", "data-seating-nopair": true, children: t("llm.seating.none2") })
         ] }) : null,
-        /* @__PURE__ */ jsxs34("div", { className: "oc-dg-fl", children: [
-          /* @__PURE__ */ jsx38("span", { className: "oc-dg-lab", id: `${id}-ch`, children: t("llm.seating.choice") }),
-          /* @__PURE__ */ jsx38(Seg, { label: t("llm.seating.choice"), items: choices, value: choice, onPick: onChoice, disabled: pending, attr: "data-seat-choice" })
+        /* @__PURE__ */ jsxs35("div", { className: "oc-dg-fl", children: [
+          /* @__PURE__ */ jsx39("span", { className: "oc-dg-lab", id: `${id}-ch`, children: t("llm.seating.choice") }),
+          /* @__PURE__ */ jsx39(Seg, { label: t("llm.seating.choice"), items: choices, value: choice, onPick: onChoice, disabled: pending, attr: "data-seat-choice" })
         ] })
       ]
     }
@@ -22994,15 +23227,15 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
 
 // src/ui/SettingsGear.jsx
 import * as sdk4 from "@hermes/plugin-sdk";
-import { useCallback as useCallback8, useRef as useRef27, useState as useState23 } from "react";
+import { useCallback as useCallback8, useRef as useRef29, useState as useState27 } from "react";
 
 // src/ui/SettingsDialog.jsx
 import * as sdk3 from "@hermes/plugin-sdk";
-import { useEffect as useEffect26, useId as useId21, useRef as useRef26 } from "react";
+import { useEffect as useEffect27, useId as useId24, useRef as useRef28 } from "react";
 
 // src/ui/SettingsForm.jsx
 import { useValue as useValue3 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect25, useId as useId20, useState as useState22 } from "react";
+import { useEffect as useEffect26, useId as useId23, useState as useState26 } from "react";
 
 // src/core/settings.js
 var SETTINGS_TABS = Object.freeze(["general", "game", "replay", "notify", "llm"]);
@@ -23031,7 +23264,7 @@ function ringDash(pct, r) {
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { useEffect as useEffect23, useId as useId19, useMemo as useMemo16, useRef as useRef24, useState as useState20 } from "react";
+import { useEffect as useEffect24, useId as useId22, useMemo as useMemo16, useRef as useRef26, useState as useState24 } from "react";
 
 // src/core/llmSettings.js
 var GRANT_COMMAND = "hermes plugins enable hermes-officecraft";
@@ -23113,8 +23346,8 @@ function pickFromValue(value, choices) {
 }
 
 // src/ui/SettingsKit.jsx
-import { useEffect as useEffect22, useId as useId18, useLayoutEffect as useLayoutEffect7, useRef as useRef23, useState as useState19 } from "react";
-import { jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
+import { useEffect as useEffect23, useId as useId21, useLayoutEffect as useLayoutEffect9, useRef as useRef25, useState as useState23 } from "react";
+import { jsx as jsx40, jsxs as jsxs36 } from "react/jsx-runtime";
 var ICONS2 = {
   gear: "M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z M12 2.5l1.4 2.4 2.7-.6.9 2.6 2.6.9-.6 2.7L21.5 12l-2.5 1.5.6 2.7-2.6.9-.9 2.6-2.7-.6L12 21.5l-1.4-2.4-2.7.6-.9-2.6-2.6-.9.6-2.7L2.5 12 5 10.5l-.6-2.7 2.6-.9.9-2.6 2.7.6Z",
   globe: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M3 12h18 M12 3c2.5 2.5 3.7 5.5 3.7 9S14.500 18.500 12 21c-2.500-2.500-3.700-5.500-3.700-9S9.500 5.500 12 3Z",
@@ -23143,17 +23376,17 @@ var ICONS2 = {
   ext: "M14 4h6v6 M20 4l-9 9 M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"
 };
 function SettingsIcon({ id, size = 18 }) {
-  return /* @__PURE__ */ jsx39("svg", { viewBox: "0 0 24 24", width: size, height: size, "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx39("path", { d: ICONS2[id] ?? ICONS2.spark }) });
+  return /* @__PURE__ */ jsx40("svg", { viewBox: "0 0 24 24", width: size, height: size, "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx40("path", { d: ICONS2[id] ?? ICONS2.spark }) });
 }
 function HelpTip({ name, children }) {
   const t = useT();
-  const [open, setOpen] = useState19(false);
-  const id = useId18();
-  const wrap = useRef23(null);
-  const btn = useRef23(null);
-  const note = useRef23(null);
-  const [up, setUp] = useState19(false);
-  useLayoutEffect7(() => {
+  const [open, setOpen] = useState23(false);
+  const id = useId21();
+  const wrap = useRef25(null);
+  const btn = useRef25(null);
+  const note = useRef25(null);
+  const [up, setUp] = useState23(false);
+  useLayoutEffect9(() => {
     if (!open) {
       setUp(false);
       return;
@@ -23167,7 +23400,7 @@ function HelpTip({ name, children }) {
     if (r.bottom > limit && rowTop + 4 - r.height >= Math.max(scroller?.top ?? 0, 0) + 4) setUp(true);
     else if (r.bottom > limit) el.scrollIntoView?.({ block: "nearest" });
   }, [open]);
-  useEffect22(() => {
+  useEffect23(() => {
     if (!open) return void 0;
     const onDown = (e) => {
       if (wrap.current && !wrap.current.contains(e.target)) setOpen(false);
@@ -23182,34 +23415,34 @@ function HelpTip({ name, children }) {
     setOpen(false);
     btn.current?.focus();
   };
-  return /* @__PURE__ */ jsxs35("span", { ref: wrap, onKeyDown, children: [
-    /* @__PURE__ */ jsx39("button", { ref: btn, type: "button", className: "oc-sx-help", "data-help": true, "aria-expanded": open, "aria-controls": open ? id : void 0, "aria-label": t("settings.helpFor", name), onClick: () => setOpen((v) => !v), children: "?" }),
-    open ? /* @__PURE__ */ jsx39("span", { id, ref: note, className: `oc-sx-tip${up ? " oc-sx-tip-up" : ""}`, role: "note", "data-help-note": true, children }) : null
+  return /* @__PURE__ */ jsxs36("span", { ref: wrap, onKeyDown, children: [
+    /* @__PURE__ */ jsx40("button", { ref: btn, type: "button", className: "oc-sx-help", "data-help": true, "aria-expanded": open, "aria-controls": open ? id : void 0, "aria-label": t("settings.helpFor", name), onClick: () => setOpen((v) => !v), children: "?" }),
+    open ? /* @__PURE__ */ jsx40("span", { id, ref: note, className: `oc-sx-tip${up ? " oc-sx-tip-up" : ""}`, role: "note", "data-help-note": true, children }) : null
   ] });
 }
 function SettingsRow({ id, label, help = null, helpRole = void 0, tip = null, group = false, control }) {
   const hid = `${id}-help`;
-  return /* @__PURE__ */ jsxs35("div", { className: "oc-sx-row", children: [
-    /* @__PURE__ */ jsxs35("div", { className: "oc-sx-lab", children: [
-      /* @__PURE__ */ jsxs35("span", { className: "oc-sx-name", children: [
-        group ? /* @__PURE__ */ jsx39("span", { children: label }) : /* @__PURE__ */ jsx39("label", { htmlFor: id, children: label }),
-        tip ? /* @__PURE__ */ jsx39(HelpTip, { name: label, children: tip }) : null
+  return /* @__PURE__ */ jsxs36("div", { className: "oc-sx-row", children: [
+    /* @__PURE__ */ jsxs36("div", { className: "oc-sx-lab", children: [
+      /* @__PURE__ */ jsxs36("span", { className: "oc-sx-name", children: [
+        group ? /* @__PURE__ */ jsx40("span", { children: label }) : /* @__PURE__ */ jsx40("label", { htmlFor: id, children: label }),
+        tip ? /* @__PURE__ */ jsx40(HelpTip, { name: label, children: tip }) : null
       ] }),
-      help ? /* @__PURE__ */ jsx39("small", { id: hid, role: helpRole, children: help }) : null
+      help ? /* @__PURE__ */ jsx40("small", { id: hid, role: helpRole, children: help }) : null
     ] }),
-    /* @__PURE__ */ jsx39("div", { className: "oc-sx-ctl", children: control({ id, describedBy: help ? hid : void 0 }) })
+    /* @__PURE__ */ jsx40("div", { className: "oc-sx-ctl", children: control({ id, describedBy: help ? hid : void 0 }) })
   ] });
 }
 function SectionTitle({ label, where, tip = null }) {
   const t = useT();
-  return /* @__PURE__ */ jsxs35("h3", { children: [
+  return /* @__PURE__ */ jsxs36("h3", { children: [
     label,
-    /* @__PURE__ */ jsx39("span", { className: "oc-sf-where", "data-where": where, children: t(where === "server" ? "settings.server" : "settings.local") }),
-    tip ? /* @__PURE__ */ jsx39(HelpTip, { name: label, children: tip }) : null
+    /* @__PURE__ */ jsx40("span", { className: "oc-sf-where", "data-where": where, children: t(where === "server" ? "settings.server" : "settings.local") }),
+    tip ? /* @__PURE__ */ jsx40(HelpTip, { name: label, children: tip }) : null
   ] });
 }
 function Switch({ id, checked, onChange, disabled = false, describedBy, labelledBy, ...rest3 }) {
-  return /* @__PURE__ */ jsx39(
+  return /* @__PURE__ */ jsx40(
     "input",
     {
       id,
@@ -23226,15 +23459,15 @@ function Switch({ id, checked, onChange, disabled = false, describedBy, labelled
   );
 }
 function Segmented({ label, value, options, onChange, describedBy }) {
-  const name = useId18();
-  return /* @__PURE__ */ jsx39("span", { className: "oc-sx-seg", role: "radiogroup", "aria-label": label, "aria-describedby": describedBy, children: options.map(([code, text3]) => /* @__PURE__ */ jsxs35("label", { children: [
-    /* @__PURE__ */ jsx39("input", { type: "radio", name, value: code, checked: value === code, onChange: () => onChange(code) }),
-    /* @__PURE__ */ jsx39("span", { children: text3 })
+  const name = useId21();
+  return /* @__PURE__ */ jsx40("span", { className: "oc-sx-seg", role: "radiogroup", "aria-label": label, "aria-describedby": describedBy, children: options.map(([code, text3]) => /* @__PURE__ */ jsxs36("label", { children: [
+    /* @__PURE__ */ jsx40("input", { type: "radio", name, value: code, checked: value === code, onChange: () => onChange(code) }),
+    /* @__PURE__ */ jsx40("span", { children: text3 })
   ] }, code)) });
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { Fragment as Fragment18, jsx as jsx40, jsxs as jsxs36 } from "react/jsx-runtime";
+import { Fragment as Fragment19, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
 var STATE_TONE = { off: "off", ready: "ok", unavailable: "warn", outdated: "warn", cap: "warn", error: "warn" };
 var GAUGE_R = 34;
 function lastLine(state2, feature, t) {
@@ -23246,11 +23479,11 @@ function lastLine(state2, feature, t) {
 }
 function Gauge({ pct, hit, value, of, label, text: text3 }) {
   const { length, offset } = ringDash(pct, GAUGE_R);
-  return /* @__PURE__ */ jsxs36("svg", { className: "oc-sx-gauge", viewBox: "0 0 88 88", role: "meter", "aria-label": label, "aria-valuemin": 0, "aria-valuemax": 100, "aria-valuenow": Math.round(pct * 100), "aria-valuetext": text3, "data-hit": hit ? "true" : "false", children: [
-    /* @__PURE__ */ jsx40("circle", { className: "bg", cx: "44", cy: "44", r: GAUGE_R }),
-    /* @__PURE__ */ jsx40("circle", { className: "fg", cx: "44", cy: "44", r: GAUGE_R, strokeDasharray: length, strokeDashoffset: offset }),
-    /* @__PURE__ */ jsx40("text", { x: "44", y: "40", textAnchor: "middle", dominantBaseline: "middle", children: value }),
-    /* @__PURE__ */ jsx40("text", { className: "u", x: "44", y: "56", textAnchor: "middle", dominantBaseline: "middle", children: of })
+  return /* @__PURE__ */ jsxs37("svg", { className: "oc-sx-gauge", viewBox: "0 0 88 88", role: "meter", "aria-label": label, "aria-valuemin": 0, "aria-valuemax": 100, "aria-valuenow": Math.round(pct * 100), "aria-valuetext": text3, "data-hit": hit ? "true" : "false", children: [
+    /* @__PURE__ */ jsx41("circle", { className: "bg", cx: "44", cy: "44", r: GAUGE_R }),
+    /* @__PURE__ */ jsx41("circle", { className: "fg", cx: "44", cy: "44", r: GAUGE_R, strokeDasharray: length, strokeDashoffset: offset }),
+    /* @__PURE__ */ jsx41("text", { x: "44", y: "40", textAnchor: "middle", dominantBaseline: "middle", children: value }),
+    /* @__PURE__ */ jsx41("text", { className: "u", x: "44", y: "56", textAnchor: "middle", dominantBaseline: "middle", children: of })
   ] });
 }
 function LaneChip({ row, t }) {
@@ -23258,14 +23491,14 @@ function LaneChip({ row, t }) {
   const lane = t(`llm.lane.${row.lane}`);
   const host9 = r.kind !== "model";
   const tip = host9 ? t("llm.chipTipHost", row.lane) : t("llm.chipTip", lane, r.model);
-  return /* @__PURE__ */ jsxs36("span", { className: `oc-lm-lane ${row.lane}${host9 ? " host" : ""}`, title: tip, "data-llm-route": host9 ? "host" : "model", "data-lane": row.lane, children: [
-    /* @__PURE__ */ jsx40("i", { "aria-hidden": "true" }),
+  return /* @__PURE__ */ jsxs37("span", { className: `oc-lm-lane ${row.lane}${host9 ? " host" : ""}`, title: tip, "data-llm-route": host9 ? "host" : "model", "data-lane": row.lane, children: [
+    /* @__PURE__ */ jsx41("i", { "aria-hidden": "true" }),
     t("llm.chip", lane, host9 ? t("llm.chipHost") : shortModel(r.model))
   ] });
 }
 function ModelSelect({ lane, sel, choices, busy, onPick, tipped }) {
   const t = useT();
-  const id = useId19();
+  const id = useId22();
   const groups = [];
   choices.forEach((c, i) => {
     let g = groups.find((x) => x.provider === c.provider);
@@ -23275,23 +23508,23 @@ function ModelSelect({ lane, sel, choices, busy, onPick, tipped }) {
     }
     g.items.push({ ...c, i });
   });
-  return /* @__PURE__ */ jsxs36("div", { className: `oc-lm-mod${sel.disabled ? " dis" : ""}`, "data-llm-lane": lane, children: [
-    /* @__PURE__ */ jsxs36("span", { className: "oc-lm-modh", children: [
-      /* @__PURE__ */ jsx40("label", { htmlFor: `${id}-s`, children: t(`llm.models.${lane}.name`) }),
-      tipped ? /* @__PURE__ */ jsxs36(HelpTip, { name: t("llm.models.help"), children: [
-        /* @__PURE__ */ jsxs36("p", { children: [
-          /* @__PURE__ */ jsx40("b", { children: t("llm.models.strong.short") }),
+  return /* @__PURE__ */ jsxs37("div", { className: `oc-lm-mod${sel.disabled ? " dis" : ""}`, "data-llm-lane": lane, children: [
+    /* @__PURE__ */ jsxs37("span", { className: "oc-lm-modh", children: [
+      /* @__PURE__ */ jsx41("label", { htmlFor: `${id}-s`, children: t(`llm.models.${lane}.name`) }),
+      tipped ? /* @__PURE__ */ jsxs37(HelpTip, { name: t("llm.models.help"), children: [
+        /* @__PURE__ */ jsxs37("p", { children: [
+          /* @__PURE__ */ jsx41("b", { children: t("llm.models.strong.short") }),
           " : ",
           t("llm.models.tipStrong"),
           " ",
-          /* @__PURE__ */ jsx40("b", { children: t("llm.models.light.short") }),
+          /* @__PURE__ */ jsx41("b", { children: t("llm.models.light.short") }),
           " : ",
           t("llm.models.tipLight")
         ] }),
-        /* @__PURE__ */ jsx40("p", { children: t("llm.models.tipOne") })
+        /* @__PURE__ */ jsx41("p", { children: t("llm.models.tipOne") })
       ] }) : null
     ] }),
-    /* @__PURE__ */ jsxs36(
+    /* @__PURE__ */ jsxs37(
       "select",
       {
         id: `${id}-s`,
@@ -23306,43 +23539,43 @@ function ModelSelect({ lane, sel, choices, busy, onPick, tipped }) {
           if (pick !== void 0) onPick(lane, pick);
         }),
         children: [
-          /* @__PURE__ */ jsx40("option", { value: "hermes", children: t("llm.models.hermes") }),
-          sel.stored ? /* @__PURE__ */ jsx40("option", { value: "stored", children: t("llm.models.stored", shortModel(sel.pick.model), sel.pick.provider) }) : null,
-          groups.map((g) => /* @__PURE__ */ jsx40("optgroup", { label: g.name, children: g.items.map((c) => /* @__PURE__ */ jsx40("option", { value: String(c.i), children: c.name }, c.i)) }, g.provider))
+          /* @__PURE__ */ jsx41("option", { value: "hermes", children: t("llm.models.hermes") }),
+          sel.stored ? /* @__PURE__ */ jsx41("option", { value: "stored", children: t("llm.models.stored", shortModel(sel.pick.model), sel.pick.provider) }) : null,
+          groups.map((g) => /* @__PURE__ */ jsx41("optgroup", { label: g.name, children: g.items.map((c) => /* @__PURE__ */ jsx41("option", { value: String(c.i), children: c.name }, c.i)) }, g.provider))
         ]
       }
     ),
-    /* @__PURE__ */ jsx40("small", { id: `${id}-u`, children: t(`llm.models.${lane}.use`) })
+    /* @__PURE__ */ jsx41("small", { id: `${id}-u`, children: t(`llm.models.${lane}.use`) })
   ] });
 }
 function SettingsFormLlm({ actions = null }) {
   const t = useT();
   const query = useLlm();
   const { save, call } = useLlmActions();
-  const [saving, setSaving] = useState20(false);
-  const [error, setError] = useState20(null);
-  const [running, setRunning] = useState20(null);
-  const [outcome, setOutcome] = useState20(null);
-  const [usdText, setUsdText] = useState20("");
-  const [callsText, setCallsText] = useState20("");
-  const [copied, setCopied] = useState20(false);
+  const [saving, setSaving] = useState24(false);
+  const [error, setError] = useState24(null);
+  const [running, setRunning] = useState24(null);
+  const [outcome, setOutcome] = useState24(null);
+  const [usdText, setUsdText] = useState24("");
+  const [callsText, setCallsText] = useState24("");
+  const [copied, setCopied] = useState24(false);
   const state2 = query.data ?? null;
   const modelOpts = useModelOptions(state2?.override === "granted");
   const list = useMemo16(() => modelChoices(modelOpts), [modelOpts]);
-  const errorRef = useRef24(null);
-  const id = useId19();
-  useEffect23(() => {
+  const errorRef = useRef26(null);
+  const id = useId22();
+  useEffect24(() => {
     if (!state2) return;
     setUsdText(String(state2.settings.capUsd));
     setCallsText(String(state2.settings.callCap));
   }, [state2?.settings.capUsd, state2?.settings.callCap]);
-  useEffect23(() => {
+  useEffect24(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
-  const title = /* @__PURE__ */ jsx40(SectionTitle, { label: t("llm.title"), where: "server", tip: t("llm.hint") });
-  if (query.isError) return /* @__PURE__ */ jsxs36(Fragment18, { children: [
+  const title = /* @__PURE__ */ jsx41(SectionTitle, { label: t("llm.title"), where: "server", tip: t("llm.hint") });
+  if (query.isError) return /* @__PURE__ */ jsxs37(Fragment19, { children: [
     title,
-    /* @__PURE__ */ jsx40("p", { className: "oc-sx-warn", "data-llm-unavailable": true, children: t("llm.unavailable") })
+    /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", "data-llm-unavailable": true, children: t("llm.unavailable") })
   ] });
   if (!state2) return title;
   const apply = async (change) => {
@@ -23402,39 +23635,39 @@ function SettingsFormLlm({ actions = null }) {
     const done2 = outcome?.feature === f ? outcome.answer : null;
     const name = t(`llm.f.${f}.name`);
     let action = null;
-    if (f === "decor" && actions?.onDecorate && st === "ready") action = /* @__PURE__ */ jsx40("button", { type: "button", className: "oc-sx-btn", "data-llm-open-decor": true, onClick: actions.onDecorate, children: t("llm.decor.open") });
-    else if (f === "outfits" && actions && st === "ready") action = /* @__PURE__ */ jsx40("button", { type: "button", className: "oc-sx-btn", "data-llm-run-outfits": true, "aria-disabled": running ? true : void 0, onClick: () => {
+    if (f === "decor" && actions?.onDecorate && st === "ready") action = /* @__PURE__ */ jsx41("button", { type: "button", className: "oc-sx-btn", "data-llm-open-decor": true, onClick: actions.onDecorate, children: t("llm.decor.open") });
+    else if (f === "outfits" && actions && st === "ready") action = /* @__PURE__ */ jsx41("button", { type: "button", className: "oc-sx-btn", "data-llm-run-outfits": true, "aria-disabled": running ? true : void 0, onClick: () => {
       if (!running) dress();
     }, children: running ? t("llm.outfits.running") : t("llm.outfits.run") });
     else if (f === "art" && actions && st === "ready") {
-      action = actions.pendingArt?.length ? /* @__PURE__ */ jsx40("button", { type: "button", className: "oc-sx-btn", "data-llm-run-art": true, "aria-disabled": running ? true : void 0, onClick: () => {
+      action = actions.pendingArt?.length ? /* @__PURE__ */ jsx41("button", { type: "button", className: "oc-sx-btn", "data-llm-run-art": true, "aria-disabled": running ? true : void 0, onClick: () => {
         if (!running) paint();
-      }, children: running === "art" ? t("llm.art.running") : t("llm.art.run", actions.pendingArt.length) }) : /* @__PURE__ */ jsx40("small", { "data-llm-art-none": true, children: t("llm.art.none") });
-    } else if (f === "seating" && actions?.onSeating && st === "ready") action = /* @__PURE__ */ jsx40("button", { type: "button", className: "oc-sx-btn", "data-llm-open-seating": true, onClick: actions.onSeating, children: t("llm.seating.open") });
+      }, children: running === "art" ? t("llm.art.running") : t("llm.art.run", actions.pendingArt.length) }) : /* @__PURE__ */ jsx41("small", { "data-llm-art-none": true, children: t("llm.art.none") });
+    } else if (f === "seating" && actions?.onSeating && st === "ready") action = /* @__PURE__ */ jsx41("button", { type: "button", className: "oc-sx-btn", "data-llm-open-seating": true, onClick: actions.onSeating, children: t("llm.seating.open") });
     const status = done2 ? done2.kind === "done" ? f === "art" ? t("llm.art.done", done2.fiche?.posters?.length ?? 0) : t("llm.outfits.done", done2.fiche?.outfits?.length ?? 0) : t(`llm.reason.${done2.reason}`) : "";
     const cost = done2 && costKind(done2) === "known" ? ` ${t("llm.decor.costKnown", formatUsd(done2.costUsd, t.lang))}` : done2 && costKind(done2) === "unknown" ? ` ${t("llm.decor.costUnknown")}` : "";
     const warn = st === "cap" && hit ? t(`llm.capReached.${hit}`) : st === "unavailable" ? t("llm.noModel") : st === "error" && !done2 ? t("llm.lastError") : "";
-    return /* @__PURE__ */ jsxs36("div", { className: "oc-lm-row", role: "group", "aria-label": name, "data-llm-feature": f, "data-state": st, "data-on": row.on ? "true" : "false", children: [
-      /* @__PURE__ */ jsxs36("span", { className: "oc-lm-mc", children: [
-        /* @__PURE__ */ jsxs36("span", { className: "oc-sx-name", children: [
-          /* @__PURE__ */ jsx40("label", { htmlFor: `${id}-${f}`, id: `${id}-${f}-n`, children: name }),
-          /* @__PURE__ */ jsx40("span", { className: "oc-sx-state", "data-tone": STATE_TONE[st], "data-llm-state": true, id: `${id}-${f}-s`, children: t(`llm.state.${st}`) })
+    return /* @__PURE__ */ jsxs37("div", { className: "oc-lm-row", role: "group", "aria-label": name, "data-llm-feature": f, "data-state": st, "data-on": row.on ? "true" : "false", children: [
+      /* @__PURE__ */ jsxs37("span", { className: "oc-lm-mc", children: [
+        /* @__PURE__ */ jsxs37("span", { className: "oc-sx-name", children: [
+          /* @__PURE__ */ jsx41("label", { htmlFor: `${id}-${f}`, id: `${id}-${f}-n`, children: name }),
+          /* @__PURE__ */ jsx41("span", { className: "oc-sx-state", "data-tone": STATE_TONE[st], "data-llm-state": true, id: `${id}-${f}-s`, children: t(`llm.state.${st}`) })
         ] }),
-        /* @__PURE__ */ jsx40("small", { id: `${id}-${f}-d`, "data-llm-sends": true, children: t("llm.sends", t(`llm.f.${f}.sends`)) })
+        /* @__PURE__ */ jsx41("small", { id: `${id}-${f}-d`, "data-llm-sends": true, children: t("llm.sends", t(`llm.f.${f}.sends`)) })
       ] }),
-      /* @__PURE__ */ jsx40("span", { className: "oc-lm-lc", children: /* @__PURE__ */ jsx40(LaneChip, { row, t }) }),
-      /* @__PURE__ */ jsx40("span", { className: "oc-lm-ac", children: action }),
-      /* @__PURE__ */ jsxs36("span", { className: "oc-lm-ctl", children: [
-        /* @__PURE__ */ jsxs36(HelpTip, { name, children: [
-          /* @__PURE__ */ jsx40("p", { children: t(`llm.f.${f}.what`) }),
-          /* @__PURE__ */ jsx40("p", { children: `${t("llm.sends", t(`llm.f.${f}.detail`))}.` }),
-          /* @__PURE__ */ jsxs36("p", { "data-llm-cost": true, children: [
+      /* @__PURE__ */ jsx41("span", { className: "oc-lm-lc", children: /* @__PURE__ */ jsx41(LaneChip, { row, t }) }),
+      /* @__PURE__ */ jsx41("span", { className: "oc-lm-ac", children: action }),
+      /* @__PURE__ */ jsxs37("span", { className: "oc-lm-ctl", children: [
+        /* @__PURE__ */ jsxs37(HelpTip, { name, children: [
+          /* @__PURE__ */ jsx41("p", { children: t(`llm.f.${f}.what`) }),
+          /* @__PURE__ */ jsx41("p", { children: t("llm.sendsLine", t(`llm.f.${f}.detail`)) }),
+          /* @__PURE__ */ jsxs37("p", { "data-llm-cost": true, children: [
             t("llm.cost", t(`llm.f.${f}.cost`)),
             last ? ` ${last}` : ""
           ] }),
-          f === "thoughts" ? /* @__PURE__ */ jsx40("p", { children: t("llm.thoughts.note") }) : null
+          f === "thoughts" ? /* @__PURE__ */ jsx41("p", { children: t("llm.thoughts.note") }) : null
         ] }),
-        /* @__PURE__ */ jsx40(
+        /* @__PURE__ */ jsx41(
           Switch,
           {
             id: `${id}-${f}`,
@@ -23448,21 +23681,21 @@ function SettingsFormLlm({ actions = null }) {
           }
         )
       ] }),
-      /* @__PURE__ */ jsxs36("span", { className: "oc-lm-fx", children: [
-        warn ? /* @__PURE__ */ jsx40("span", { className: "oc-sx-warn", role: "status", "data-llm-cap": st === "cap" ? hit : void 0, "data-llm-error": st === "error" ? "" : void 0, children: warn }) : null,
-        /* @__PURE__ */ jsxs36("span", { role: "status", "aria-live": "polite", "data-llm-outcome": f, children: [
+      /* @__PURE__ */ jsxs37("span", { className: "oc-lm-fx", children: [
+        warn ? /* @__PURE__ */ jsx41("span", { className: "oc-sx-warn", role: "status", "data-llm-cap": st === "cap" ? hit : void 0, "data-llm-error": st === "error" ? "" : void 0, children: warn }) : null,
+        /* @__PURE__ */ jsxs37("span", { role: "status", "aria-live": "polite", "data-llm-outcome": f, children: [
           status,
           cost
         ] })
       ] })
     ] }, f);
   };
-  return /* @__PURE__ */ jsxs36("div", { "data-llm": true, "data-llm-override": view.override, children: [
+  return /* @__PURE__ */ jsxs37("div", { "data-llm": true, "data-llm-override": view.override, children: [
     title,
-    !state2.available ? /* @__PURE__ */ jsx40("p", { className: "oc-sx-warn", role: "status", "data-llm-nomodel": true, children: t("llm.noModel") }) : null,
-    /* @__PURE__ */ jsxs36("div", { className: "oc-lm-top", "data-llm-top": true, "data-grant": view.granted ? "yes" : "no", children: [
-      /* @__PURE__ */ jsxs36("div", { className: "oc-lm-bud", "data-llm-spend": true, "data-mode": spend.mode, children: [
-        /* @__PURE__ */ jsx40(
+    !state2.available ? /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", role: "status", "data-llm-nomodel": true, children: t("llm.noModel") }) : null,
+    /* @__PURE__ */ jsxs37("div", { className: "oc-lm-top", "data-llm-top": true, "data-grant": view.granted ? "yes" : "no", children: [
+      /* @__PURE__ */ jsxs37("div", { className: "oc-lm-bud", "data-llm-spend": true, "data-mode": spend.mode, children: [
+        /* @__PURE__ */ jsx41(
           Gauge,
           {
             pct: inUsd ? spend.usdPct : spend.callsPct,
@@ -23473,22 +23706,22 @@ function SettingsFormLlm({ actions = null }) {
             text: inUsd ? t("llm.gaugeUsd", usdLabel2, capLabel) : t("llm.gaugeCalls", spend.unpriced, spend.callCap)
           }
         ),
-        /* @__PURE__ */ jsxs36("div", { className: "oc-lm-budt", children: [
-          /* @__PURE__ */ jsxs36("span", { className: "oc-sx-name", children: [
+        /* @__PURE__ */ jsxs37("div", { className: "oc-lm-budt", children: [
+          /* @__PURE__ */ jsxs37("span", { className: "oc-sx-name", children: [
             t("llm.month"),
-            /* @__PURE__ */ jsxs36(HelpTip, { name: t("llm.month"), children: [
-              inUsd ? null : /* @__PURE__ */ jsx40("p", { children: t("llm.unknownPrice", spend.unpriced, spend.callCap) }),
-              /* @__PURE__ */ jsx40("p", { children: t("llm.capHint") })
+            /* @__PURE__ */ jsxs37(HelpTip, { name: t("llm.month"), children: [
+              inUsd ? null : /* @__PURE__ */ jsx41("p", { children: t("llm.unknownPrice", spend.unpriced, spend.callCap) }),
+              /* @__PURE__ */ jsx41("p", { children: t("llm.capHint") })
             ] })
           ] }),
-          inUsd ? /* @__PURE__ */ jsx40("small", { "data-llm-usd": true, children: t("llm.spendUsd", usdLabel2, capLabel) }) : /* @__PURE__ */ jsx40("small", { "data-llm-unknown-price": true, children: t("llm.priceUnknown") }),
-          inUsd && spend.unpriced > 0 ? /* @__PURE__ */ jsx40("small", { children: t("llm.spendCalls", spend.unpriced, spend.callCap) }) : null,
-          /* @__PURE__ */ jsxs36("details", { className: "oc-sx-cap", children: [
-            /* @__PURE__ */ jsx40("summary", { children: t("llm.capSummary") }),
-            /* @__PURE__ */ jsxs36("div", { className: "oc-sx-capg", children: [
-              /* @__PURE__ */ jsx40("label", { htmlFor: `${id}-usd`, children: t("llm.capUsd") }),
-              /* @__PURE__ */ jsx40("label", { htmlFor: `${id}-calls`, children: t("llm.capCalls") }),
-              /* @__PURE__ */ jsx40(
+          inUsd ? /* @__PURE__ */ jsx41("small", { "data-llm-usd": true, children: t("llm.spendUsd", usdLabel2, capLabel) }) : /* @__PURE__ */ jsx41("small", { "data-llm-unknown-price": true, children: t("llm.priceUnknown") }),
+          inUsd && spend.unpriced > 0 ? /* @__PURE__ */ jsx41("small", { children: t("llm.spendCalls", spend.unpriced, spend.callCap) }) : null,
+          /* @__PURE__ */ jsxs37("details", { className: "oc-sx-cap", children: [
+            /* @__PURE__ */ jsx41("summary", { children: t("llm.capSummary") }),
+            /* @__PURE__ */ jsxs37("div", { className: "oc-sx-capg", children: [
+              /* @__PURE__ */ jsx41("label", { htmlFor: `${id}-usd`, children: t("llm.capUsd") }),
+              /* @__PURE__ */ jsx41("label", { htmlFor: `${id}-calls`, children: t("llm.capCalls") }),
+              /* @__PURE__ */ jsx41(
                 "input",
                 {
                   id: `${id}-usd`,
@@ -23507,7 +23740,7 @@ function SettingsFormLlm({ actions = null }) {
                   }
                 }
               ),
-              /* @__PURE__ */ jsx40(
+              /* @__PURE__ */ jsx41(
                 "input",
                 {
                   id: `${id}-calls`,
@@ -23530,42 +23763,42 @@ function SettingsFormLlm({ actions = null }) {
           ] })
         ] })
       ] }),
-      view.lists ? /* @__PURE__ */ jsxs36(Fragment18, { children: [
-        /* @__PURE__ */ jsx40(ModelSelect, { lane: "strong", sel: view.selects.strong, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }), tipped: true }),
-        /* @__PURE__ */ jsx40(ModelSelect, { lane: "light", sel: view.selects.light, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }) })
-      ] }) : /* @__PURE__ */ jsx40("p", { className: "oc-sx-warn oc-lm-wide", role: "status", "data-llm-too-old": true, children: t("llm.grant.tooOld") }),
-      view.needsGrant ? /* @__PURE__ */ jsxs36("div", { className: "oc-lm-grant oc-lm-wide", role: "note", "data-llm-grant": true, children: [
-        /* @__PURE__ */ jsx40(SettingsIcon, { id: "lock", size: 16 }),
-        /* @__PURE__ */ jsx40("span", { children: t("llm.grant.lead") }),
-        /* @__PURE__ */ jsxs36("span", { className: "oc-lm-cmd", children: [
-          /* @__PURE__ */ jsx40("code", { "data-llm-command": true, children: view.command }),
-          /* @__PURE__ */ jsx40("button", { type: "button", className: "oc-lm-ib", "data-llm-copy": true, "aria-label": t("llm.grant.copy"), title: t("llm.grant.copyTitle"), onClick: copyCommand, children: /* @__PURE__ */ jsx40(SettingsIcon, { id: "copy", size: 16 }) })
+      view.lists ? /* @__PURE__ */ jsxs37(Fragment19, { children: [
+        /* @__PURE__ */ jsx41(ModelSelect, { lane: "strong", sel: view.selects.strong, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }), tipped: true }),
+        /* @__PURE__ */ jsx41(ModelSelect, { lane: "light", sel: view.selects.light, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }) })
+      ] }) : /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn oc-lm-wide", role: "status", "data-llm-too-old": true, children: t("llm.grant.tooOld") }),
+      view.needsGrant ? /* @__PURE__ */ jsxs37("div", { className: "oc-lm-grant oc-lm-wide", role: "note", "data-llm-grant": true, children: [
+        /* @__PURE__ */ jsx41(SettingsIcon, { id: "lock", size: 16 }),
+        /* @__PURE__ */ jsx41("span", { children: t("llm.grant.lead") }),
+        /* @__PURE__ */ jsxs37("span", { className: "oc-lm-cmd", children: [
+          /* @__PURE__ */ jsx41("code", { "data-llm-command": true, children: view.command }),
+          /* @__PURE__ */ jsx41("button", { type: "button", className: "oc-lm-ib", "data-llm-copy": true, "aria-label": t("llm.grant.copy"), title: t("llm.grant.copyTitle"), onClick: copyCommand, children: /* @__PURE__ */ jsx41(SettingsIcon, { id: "copy", size: 16 }) })
         ] }),
-        /* @__PURE__ */ jsxs36(HelpTip, { name: t("llm.grant.help"), children: [
-          /* @__PURE__ */ jsx40("p", { children: t("llm.grant.tipWhy") }),
-          /* @__PURE__ */ jsx40("p", { children: t("llm.grant.tipFall") })
+        /* @__PURE__ */ jsxs37(HelpTip, { name: t("llm.grant.help"), children: [
+          /* @__PURE__ */ jsx41("p", { children: t("llm.grant.tipWhy") }),
+          /* @__PURE__ */ jsx41("p", { children: t("llm.grant.tipFall") })
         ] }),
-        /* @__PURE__ */ jsx40("span", { className: "oc-lm-copied", role: "status", "aria-live": "polite", children: copied ? t("llm.grant.copied") : "" })
+        /* @__PURE__ */ jsx41("span", { className: "oc-lm-copied", role: "status", "aria-live": "polite", children: copied ? t("llm.grant.copied") : "" })
       ] }) : null,
-      view.granted && view.list.fallback ? /* @__PURE__ */ jsx40("p", { className: "oc-sx-warn oc-lm-wide", role: "status", "data-llm-list-fallback": view.list.fallback, children: t(`llm.models.fallback.${view.list.fallback}`) }) : null,
-      view.granted && list.state === "loading" ? /* @__PURE__ */ jsx40("p", { className: "oc-lm-wide oc-lm-load", role: "status", "data-llm-list-loading": true, children: t("llm.models.loading") }) : null
+      view.granted && view.list.fallback ? /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn oc-lm-wide", role: "status", "data-llm-list-fallback": view.list.fallback, children: t(`llm.models.fallback.${view.list.fallback}`) }) : null,
+      view.granted && list.state === "loading" ? /* @__PURE__ */ jsx41("p", { className: "oc-lm-wide oc-lm-load", role: "status", "data-llm-list-loading": true, children: t("llm.models.loading") }) : null
     ] }),
-    /* @__PURE__ */ jsx40("div", { className: "oc-lm-list", children: ["work", "decor"].map((g) => /* @__PURE__ */ jsxs36("section", { className: "oc-lm-grp", "aria-labelledby": `${id}-g-${g}`, "data-llm-group": g, children: [
-      /* @__PURE__ */ jsxs36("h4", { className: "oc-lm-g", id: `${id}-g-${g}`, children: [
+    /* @__PURE__ */ jsx41("div", { className: "oc-lm-list", children: ["work", "decor"].map((g) => /* @__PURE__ */ jsxs37("section", { className: "oc-lm-grp", "aria-labelledby": `${id}-g-${g}`, "data-llm-group": g, children: [
+      /* @__PURE__ */ jsxs37("h4", { className: "oc-lm-g", id: `${id}-g-${g}`, children: [
         t(`llm.groups.${g}.name`),
-        /* @__PURE__ */ jsx40("span", { className: "n", children: t(`llm.groups.${g}.note`) }),
-        /* @__PURE__ */ jsx40("span", { className: "ln", "aria-hidden": "true" })
+        /* @__PURE__ */ jsx41("span", { className: "n", children: t(`llm.groups.${g}.note`) }),
+        /* @__PURE__ */ jsx41("span", { className: "ln", "aria-hidden": "true" })
       ] }),
       view.groups[g].map(renderRow)
     ] }, g)) }),
-    error ? /* @__PURE__ */ jsx40("p", { ref: errorRef, className: "oc-sx-warn", role: "alert", "data-llm-error-save": true, children: t(error === "capInvalid" ? "llm.capInvalid" : "llm.saveFailed") }) : null
+    error ? /* @__PURE__ */ jsx41("p", { ref: errorRef, className: "oc-sx-warn", role: "alert", "data-llm-error-save": true, children: t(error === "capInvalid" ? "llm.capInvalid" : "llm.saveFailed") }) : null
   ] });
 }
 
 // src/ui/SettingsFormNotify.jsx
 import { host as host3 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect24, useRef as useRef25, useState as useState21 } from "react";
-import { Fragment as Fragment19, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
+import { useEffect as useEffect25, useRef as useRef27, useState as useState25 } from "react";
+import { Fragment as Fragment20, jsx as jsx42, jsxs as jsxs38 } from "react/jsx-runtime";
 var MESSAGING_PATH = "/messaging";
 var selectStyle = {
   font: "inherit",
@@ -23580,21 +23813,21 @@ var selectStyle = {
 var canOpenHermes = () => typeof host3?.navigate === "function";
 var whoOf = (t, target2) => t("notify.targetLabel", target2.platform, target2.label);
 function Chip2({ checked, disabled = false, busy = false, onChange, title, children, ...rest3 }) {
-  return /* @__PURE__ */ jsxs37("label", { className: "oc-nt-chip", title, children: [
-    /* @__PURE__ */ jsx41("input", { type: "checkbox", checked, disabled, ...held(busy), onChange: hold(busy, (event) => onChange(event.target.checked)), ...rest3 }),
-    /* @__PURE__ */ jsx41("span", { children })
+  return /* @__PURE__ */ jsxs38("label", { className: "oc-nt-chip", title, children: [
+    /* @__PURE__ */ jsx42("input", { type: "checkbox", checked, disabled, ...held(busy), onChange: hold(busy, (event) => onChange(event.target.checked)), ...rest3 }),
+    /* @__PURE__ */ jsx42("span", { children })
   ] });
 }
 var GLYPH_ICON = { decision: "pause", silent: "mute", gateway: "bolt", cron: "clock", campaign: "rocket", review: "back", llm_cap: "card", trophy: "cup", quiet: "moon" };
 function Bubble({ text: text3, ...rest3 }) {
-  return /* @__PURE__ */ jsx41("p", { className: "oc-nt-bubble", ...rest3, children: previewPieces(text3).map(([piece, bold, glyph], i) => {
-    if (glyph) return /* @__PURE__ */ jsx41("span", { className: "oc-nt-gl", "data-glyph": glyph, children: /* @__PURE__ */ jsx41(SettingsIcon, { id: GLYPH_ICON[glyph], size: 16 }) }, i);
-    return bold ? /* @__PURE__ */ jsx41("b", { children: piece }, i) : /* @__PURE__ */ jsx41("span", { children: piece }, i);
+  return /* @__PURE__ */ jsx42("p", { className: "oc-nt-bubble", ...rest3, children: previewPieces(text3).map(([piece, bold, glyph], i) => {
+    if (glyph) return /* @__PURE__ */ jsx42("span", { className: "oc-nt-gl", "data-glyph": glyph, children: /* @__PURE__ */ jsx42(SettingsIcon, { id: GLYPH_ICON[glyph], size: 16 }) }, i);
+    return bold ? /* @__PURE__ */ jsx42("b", { children: piece }, i) : /* @__PURE__ */ jsx42("span", { children: piece }, i);
   }) });
 }
 function useNow(until) {
-  const [now, setNow] = useState21(() => Date.now());
-  useEffect24(() => {
+  const [now, setNow] = useState25(() => Date.now());
+  useEffect25(() => {
     setNow(Date.now());
     if (!(until > Date.now())) return void 0;
     const id = setInterval(() => {
@@ -23610,23 +23843,23 @@ function SettingsFormNotify() {
   const t = useT();
   const query = useNotify();
   const save = useSaveNotify();
-  const [state2, setState] = useState21(null);
-  const [saving, setSaving] = useState21(false);
-  const [error, setError] = useState21(null);
-  const [tests, setTests] = useState21({});
-  const [cool, setCool] = useState21(0);
+  const [state2, setState] = useState25(null);
+  const [saving, setSaving] = useState25(false);
+  const [error, setError] = useState25(null);
+  const [tests, setTests] = useState25({});
+  const [cool, setCool] = useState25(0);
   const now = useNow(Math.max(cool, ...Object.values(tests).map((s) => s?.kind === "wait" ? s.until : 0)));
-  useEffect24(() => {
+  useEffect25(() => {
     if (query.data) setState(query.data);
   }, [query.data]);
-  const errorRef = useRef25(null);
-  useEffect24(() => {
+  const errorRef = useRef27(null);
+  useEffect25(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
-  const title = /* @__PURE__ */ jsx41(SectionTitle, { label: t("notify.title"), where: "server" });
-  if (query.isError) return /* @__PURE__ */ jsxs37(Fragment19, { children: [
+  const title = /* @__PURE__ */ jsx42(SectionTitle, { label: t("notify.title"), where: "server" });
+  if (query.isError) return /* @__PURE__ */ jsxs38(Fragment20, { children: [
     title,
-    /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", "data-notify-unavailable": true, children: t("notify.unavailable") })
+    /* @__PURE__ */ jsx42("p", { className: "oc-sx-warn", "data-notify-unavailable": true, children: t("notify.unavailable") })
   ] });
   if (!state2) return title;
   const apply = async (change) => {
@@ -23664,24 +23897,24 @@ function SettingsFormNotify() {
   const testLine = (view) => {
     if (!view.line) return null;
     const { key } = view.line;
-    if (key === "sent") return t("notify.tested.sent", new Date(view.line.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    if (key === "sent") return t("notify.tested.sent", timeText(view.line.at, t.lang));
     if (key === "wait") return t("notify.tested.wait", view.line.seconds);
     return t(`notify.tested.${key}`);
   };
-  return /* @__PURE__ */ jsxs37("div", { "data-notify": true, children: [
-    /* @__PURE__ */ jsx41(SectionTitle, { label: t("notify.title"), where: "server", tip: t("notify.hint", state2.cap) }),
-    /* @__PURE__ */ jsx41("h4", { className: "oc-nt-sub", "data-notify-recipients": true, children: t("notify.recipients") }),
+  return /* @__PURE__ */ jsxs38("div", { "data-notify": true, children: [
+    /* @__PURE__ */ jsx42(SectionTitle, { label: t("notify.title"), where: "server", tip: t("notify.hint", state2.cap) }),
+    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-recipients": true, children: t("notify.recipients") }),
     state2.targets.map((target2, i) => {
       const view = testView(tests[target2.key], now, cool);
       const failed = tests[target2.key]?.kind === "error";
-      return /* @__PURE__ */ jsx41(
+      return /* @__PURE__ */ jsx42(
         SettingsRow,
         {
           id: `officecraft-notify-test-${i}`,
           label: whoOf(t, target2),
           help: testLine(view) || lastLine2(target2),
           helpRole: failed ? "alert" : "status",
-          control: ({ id, describedBy }) => /* @__PURE__ */ jsx41(
+          control: ({ id, describedBy }) => /* @__PURE__ */ jsx42(
             "button",
             {
               id,
@@ -23701,13 +23934,13 @@ function SettingsFormNotify() {
         target2.key
       );
     }),
-    state2.targets.length > 0 ? /* @__PURE__ */ jsx41(
+    state2.targets.length > 0 ? /* @__PURE__ */ jsx42(
       SettingsRow,
       {
         id: "officecraft-notify-all",
         label: t("notify.sameForAll"),
         help: t("notify.sameForAllHint"),
-        control: ({ id, describedBy }) => /* @__PURE__ */ jsxs37(
+        control: ({ id, describedBy }) => /* @__PURE__ */ jsxs38(
           "select",
           {
             id,
@@ -23719,15 +23952,15 @@ function SettingsFormNotify() {
             style: selectStyle,
             onChange: hold(saving, (event) => apply({ routes: sameForAll(event.target.value || null) })),
             children: [
-              !shared && !allEmpty ? /* @__PURE__ */ jsx41("option", { value: "__mixed", disabled: true, children: t("notify.mixed") }) : null,
-              /* @__PURE__ */ jsx41("option", { value: "", children: t("notify.noneChosen") }),
-              state2.targets.map((target2) => /* @__PURE__ */ jsx41("option", { value: target2.key, children: whoOf(t, target2) }, target2.key))
+              !shared && !allEmpty ? /* @__PURE__ */ jsx42("option", { value: "__mixed", disabled: true, children: t("notify.mixed") }) : null,
+              /* @__PURE__ */ jsx42("option", { value: "", children: t("notify.noneChosen") }),
+              state2.targets.map((target2) => /* @__PURE__ */ jsx42("option", { value: target2.key, children: whoOf(t, target2) }, target2.key))
             ]
           }
         )
       }
     ) : null,
-    /* @__PURE__ */ jsx41(
+    /* @__PURE__ */ jsx42(
       SettingsRow,
       {
         id: "officecraft-notify-add",
@@ -23735,23 +23968,23 @@ function SettingsFormNotify() {
         label: state2.targets.length === 0 ? t("notify.noTarget") : state2.targets.length === 1 ? t("notify.oneRecipient") : t("notify.addAppNote"),
         help: state2.targets.length < 2 ? t("notify.addAppNote") : null,
         helpRole: state2.targets.length === 0 ? "status" : void 0,
-        control: () => canOpenHermes() ? /* @__PURE__ */ jsxs37("button", { type: "button", className: "oc-sx-link", "data-notify-add": true, onClick: () => host3.navigate(MESSAGING_PATH), children: [
+        control: () => canOpenHermes() ? /* @__PURE__ */ jsxs38("button", { type: "button", className: "oc-sx-link", "data-notify-add": true, onClick: () => host3.navigate(MESSAGING_PATH), children: [
           t("notify.addApp"),
-          /* @__PURE__ */ jsx41(SettingsIcon, { id: "ext", size: 14 })
+          /* @__PURE__ */ jsx42(SettingsIcon, { id: "ext", size: 14 })
         ] }) : null
       }
     ),
-    /* @__PURE__ */ jsx41("h4", { className: "oc-nt-sub", children: t("notify.types") }),
-    NOTIFY_TYPES.map((type) => /* @__PURE__ */ jsxs37("div", { className: "oc-sx-row oc-nt-type", "data-notify-type": type, "data-on": state2.types[type], children: [
-      /* @__PURE__ */ jsxs37("div", { className: "oc-sx-lab", children: [
-        /* @__PURE__ */ jsx41("span", { className: "oc-sx-name", children: /* @__PURE__ */ jsx41("label", { htmlFor: `officecraft-notify-${type}`, children: typeName(type) }) }),
-        /* @__PURE__ */ jsx41("small", { id: `officecraft-notify-${type}-help`, children: t(`notify.typeHint.${type}`) })
+    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", children: t("notify.types") }),
+    NOTIFY_TYPES.map((type) => /* @__PURE__ */ jsxs38("div", { className: "oc-sx-row oc-nt-type", "data-notify-type": type, "data-on": state2.types[type], children: [
+      /* @__PURE__ */ jsxs38("div", { className: "oc-sx-lab", children: [
+        /* @__PURE__ */ jsx42("span", { className: "oc-sx-name", children: /* @__PURE__ */ jsx42("label", { htmlFor: `officecraft-notify-${type}`, children: typeName(type) }) }),
+        /* @__PURE__ */ jsx42("small", { id: `officecraft-notify-${type}-help`, children: t(`notify.typeHint.${type}`) })
       ] }),
-      /* @__PURE__ */ jsx41("div", { className: "oc-sx-ctl", children: /* @__PURE__ */ jsx41(Switch, { id: `officecraft-notify-${type}`, describedBy: `officecraft-notify-${type}-help`, checked: state2.types[type], ...held(saving), onChange: hold(saving, (checked) => apply({ types: { [type]: checked } })) }) }),
-      state2.targets.length > 0 ? /* @__PURE__ */ jsx41("div", { className: "oc-nt-chips", role: "group", "aria-label": `${typeName(type)}: ${t("notify.recipients")}`, children: state2.targets.map((target2) => {
+      /* @__PURE__ */ jsx42("div", { className: "oc-sx-ctl", children: /* @__PURE__ */ jsx42(Switch, { id: `officecraft-notify-${type}`, describedBy: `officecraft-notify-${type}-help`, checked: state2.types[type], ...held(saving), onChange: hold(saving, (checked) => apply({ types: { [type]: checked } })) }) }),
+      state2.targets.length > 0 ? /* @__PURE__ */ jsx42("div", { className: "oc-nt-chips", role: "group", "aria-label": `${typeName(type)}: ${t("notify.recipients")}`, children: state2.targets.map((target2) => {
         const on = state2.routes[type].includes(target2.key);
         const full = !on && state2.routes[type].length >= state2.max;
-        return /* @__PURE__ */ jsx41(
+        return /* @__PURE__ */ jsx42(
           Chip2,
           {
             checked: on,
@@ -23765,28 +23998,28 @@ function SettingsFormNotify() {
           target2.key
         );
       }) }) : null,
-      noRoute.includes(type) ? /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", role: "status", "data-notify-noroute": type, children: t("notify.noRoute") }) : null
+      noRoute.includes(type) ? /* @__PURE__ */ jsx42("p", { className: "oc-sx-warn", role: "status", "data-notify-noroute": type, children: t("notify.noRoute") }) : null
     ] }, type)),
-    /* @__PURE__ */ jsx41("h4", { className: "oc-nt-sub", "data-notify-quiet-title": true, children: t("notify.quiet.title") }),
-    /* @__PURE__ */ jsx41(
+    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-quiet-title": true, children: t("notify.quiet.title") }),
+    /* @__PURE__ */ jsx42(
       SettingsRow,
       {
         id: "officecraft-notify-quiet",
         label: t("notify.quiet.on"),
         help: t("notify.quiet.onHint"),
-        control: ({ id, describedBy }) => /* @__PURE__ */ jsx41(Switch, { id, describedBy, checked: quiet2.enabled, ...held(saving), onChange: hold(saving, (checked) => apply({ quiet: { enabled: checked } })) })
+        control: ({ id, describedBy }) => /* @__PURE__ */ jsx42(Switch, { id, describedBy, checked: quiet2.enabled, ...held(saving), onChange: hold(saving, (checked) => apply({ quiet: { enabled: checked } })) })
       }
     ),
-    quiet2.enabled ? /* @__PURE__ */ jsxs37(Fragment19, { children: [
-      /* @__PURE__ */ jsx41(
+    quiet2.enabled ? /* @__PURE__ */ jsxs38(Fragment20, { children: [
+      /* @__PURE__ */ jsx42(
         SettingsRow,
         {
           id: "officecraft-notify-range",
           group: true,
           label: t("notify.quiet.range"),
           help: zone ? t("notify.quiet.clock", zone) : null,
-          control: ({ describedBy }) => /* @__PURE__ */ jsxs37(Fragment19, { children: [
-            /* @__PURE__ */ jsx41(
+          control: ({ describedBy }) => /* @__PURE__ */ jsxs38(Fragment20, { children: [
+            /* @__PURE__ */ jsx42(
               "select",
               {
                 id: "officecraft-notify-quiet-start",
@@ -23798,11 +24031,11 @@ function SettingsFormNotify() {
                 ...held(saving),
                 onChange: hold(saving, (event) => apply({ quiet: { from: event.target.value } })),
                 style: selectStyle,
-                children: hourChoices(quiet2.from).map((h) => /* @__PURE__ */ jsx41("option", { value: h, children: h }, h))
+                children: hourChoices(quiet2.from).map((h) => /* @__PURE__ */ jsx42("option", { value: h, children: h }, h))
               }
             ),
-            /* @__PURE__ */ jsx41("span", { className: "oc-sx-arrow", "aria-hidden": "true", children: "→" }),
-            /* @__PURE__ */ jsx41(
+            /* @__PURE__ */ jsx42("span", { className: "oc-sx-arrow", "aria-hidden": "true", children: "→" }),
+            /* @__PURE__ */ jsx42(
               "select",
               {
                 id: "officecraft-notify-quiet-end",
@@ -23814,18 +24047,18 @@ function SettingsFormNotify() {
                 ...held(saving),
                 onChange: hold(saving, (event) => apply({ quiet: { to: event.target.value } })),
                 style: selectStyle,
-                children: hourChoices(quiet2.to).map((h) => /* @__PURE__ */ jsx41("option", { value: h, children: h }, h))
+                children: hourChoices(quiet2.to).map((h) => /* @__PURE__ */ jsx42("option", { value: h, children: h }, h))
               }
             )
           ] })
         }
       ),
-      /* @__PURE__ */ jsxs37("div", { className: "oc-sx-row", children: [
-        /* @__PURE__ */ jsxs37("div", { className: "oc-sx-lab", children: [
-          /* @__PURE__ */ jsx41("span", { className: "oc-sx-name", children: /* @__PURE__ */ jsx41("span", { id: "officecraft-notify-urgent-name", children: t("notify.quiet.urgent") }) }),
-          /* @__PURE__ */ jsx41("small", { children: t("notify.quiet.urgentHint") })
+      /* @__PURE__ */ jsxs38("div", { className: "oc-sx-row", children: [
+        /* @__PURE__ */ jsxs38("div", { className: "oc-sx-lab", children: [
+          /* @__PURE__ */ jsx42("span", { className: "oc-sx-name", children: /* @__PURE__ */ jsx42("span", { id: "officecraft-notify-urgent-name", children: t("notify.quiet.urgent") }) }),
+          /* @__PURE__ */ jsx42("small", { children: t("notify.quiet.urgentHint") })
         ] }),
-        /* @__PURE__ */ jsx41("div", { className: "oc-nt-chips", role: "group", "aria-labelledby": "officecraft-notify-urgent-name", children: NOTIFY_TYPES.map((type) => /* @__PURE__ */ jsx41(
+        /* @__PURE__ */ jsx42("div", { className: "oc-nt-chips", role: "group", "aria-labelledby": "officecraft-notify-urgent-name", children: NOTIFY_TYPES.map((type) => /* @__PURE__ */ jsx42(
           Chip2,
           {
             checked: quiet2.urgent.includes(type),
@@ -23837,21 +24070,21 @@ function SettingsFormNotify() {
           type
         )) })
       ] }),
-      /* @__PURE__ */ jsxs37("p", { className: "oc-nt-sum", role: "status", "data-notify-quiet-sentence": true, children: [
-        /* @__PURE__ */ jsx41(SettingsIcon, { id: "moon", size: 16 }),
-        /* @__PURE__ */ jsx41("span", { children: sentence2 ? t("notify.quiet.summary", sentence2.from, sentence2.to, urgentNames) : t("notify.quiet.empty") })
+      /* @__PURE__ */ jsxs38("p", { className: "oc-nt-sum", role: "status", "data-notify-quiet-sentence": true, children: [
+        /* @__PURE__ */ jsx42(SettingsIcon, { id: "moon", size: 16 }),
+        /* @__PURE__ */ jsx42("span", { children: sentence2 ? t("notify.quiet.summary", sentence2.from, sentence2.to, urgentNames) : t("notify.quiet.empty") })
       ] })
     ] }) : null,
-    /* @__PURE__ */ jsx41("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
-    preview ? /* @__PURE__ */ jsxs37("div", { "data-notify-preview-box": true, children: [
-      /* @__PURE__ */ jsx41(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
-      preview.quietText ? /* @__PURE__ */ jsxs37(Fragment19, { children: [
-        /* @__PURE__ */ jsx41("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
-        /* @__PURE__ */ jsx41(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
+    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
+    preview ? /* @__PURE__ */ jsxs38("div", { "data-notify-preview-box": true, children: [
+      /* @__PURE__ */ jsx42(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
+      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment20, { children: [
+        /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
+        /* @__PURE__ */ jsx42(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
       ] }) : null,
-      /* @__PURE__ */ jsx41("p", { className: "oc-nt-cap", children: t("notify.preview.note") })
-    ] }) : /* @__PURE__ */ jsx41("p", { className: "oc-nt-cap", "data-notify-preview-empty": true, children: t("notify.preview.empty") }),
-    error ? /* @__PURE__ */ jsx41("p", { ref: errorRef, className: "oc-sx-warn", role: "alert", "data-notify-error": true, children: t(error === "unknown_target" ? "notify.unknownTarget" : "notify.saveFailed") }) : null
+      /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.note") })
+    ] }) : /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", "data-notify-preview-empty": true, children: t("notify.preview.empty") }),
+    error ? /* @__PURE__ */ jsx42("p", { ref: errorRef, className: "oc-sx-warn", role: "alert", "data-notify-error": true, children: t(error === "unknown_target" ? "notify.unknownTarget" : "notify.saveFailed") }) : null
   ] });
 }
 
@@ -23865,17 +24098,17 @@ var ringed = (sel) => `${sel}{outline:2px solid transparent;border-color:${RING}
 var SETTINGS_CSS = `
 .oc-sf{container-type:inline-size;color:var(--foreground);font-size:13px;line-height:1.4}
 .oc-sf-in{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:0}
-.oc-sf-nav{display:flex;flex-direction:column;gap:4px;padding:12px 8px;border-right:1px solid ${EDGE2};background:color-mix(in oklab, var(--foreground) 4%, ${CARD})}
+.oc-sf-nav{display:flex;flex-direction:column;gap:4px;padding:12px 8px;border-right:1px solid ${EDGE};background:color-mix(in oklab, var(--foreground) 4%, ${CARD})}
 .oc-sf-tab{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--ui-text-secondary);font:inherit;font-weight:500;text-align:left;white-space:nowrap;cursor:pointer;transition:background-color .12s ease}
 .oc-sf-tab:hover{background:color-mix(in oklab, var(--foreground) 7%, transparent)}
-.oc-sf-tab[aria-selected="true"]{background:${CARD};color:var(--foreground);font-weight:600;border-color:${EDGE2};box-shadow:0 1px 2px color-mix(in oklab, var(--foreground) 12%, transparent)}
+.oc-sf-tab[aria-selected="true"]{background:${CARD};color:var(--foreground);font-weight:600;border-color:${EDGE};box-shadow:0 1px 2px color-mix(in oklab, var(--foreground) 12%, transparent)}
 ${ringed(".oc-sf-tab:focus-visible")}
 .oc-sf-tab svg{flex:0 0 auto}
 .oc-sf-bd{margin-left:auto;display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:color-mix(in oklab, ${VIOLET4} 18%, transparent);color:var(--foreground)}
 .oc-sf-panel{min-width:0;min-height:0;padding:8px 20px 16px}
 .oc-sf-panel:focus-visible{outline:2px solid transparent;box-shadow:inset 0 0 0 2px color-mix(in oklab, ${RING} 60%, transparent)}
 .oc-sf-panel h3{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:12px 0 4px;font-size:15px;font-weight:600}
-.oc-sf-where{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE2};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
+.oc-sf-where{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
 .oc-sx-row{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 0;border-bottom:1px solid ${HAIR}}
 .oc-sx-row:last-child{border-bottom:0}
 .oc-sx-lab{flex:1 1 192px;min-width:0}
@@ -23886,10 +24119,10 @@ ${ringed(".oc-sf-tab:focus-visible")}
 .oc-sx-ctl{flex:0 0 auto;display:flex;align-items:center;gap:8px;max-width:100%}
 .oc-sx-arrow{color:${TEXT3}}
 
-.oc-sx-help{flex:0 0 auto;display:inline-grid;place-items:center;width:24px;height:24px;padding:0;border:1px solid ${EDGE2};border-radius:12px;background:transparent;color:var(--ui-text-secondary);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.oc-sx-help{flex:0 0 auto;display:inline-grid;place-items:center;width:24px;height:24px;padding:0;border:1px solid ${EDGE};border-radius:12px;background:transparent;color:var(--ui-text-secondary);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .oc-sx-help:hover,.oc-sx-help[aria-expanded="true"]{border-color:var(--ui-accent);color:var(--foreground)}
 ${ringed(".oc-sx-help:focus-visible")}
-.oc-sx-tip{position:absolute;z-index:6;left:0;top:calc(100% - 4px);box-sizing:border-box;width:max-content;max-width:min(320px,100%);padding:12px;border:1px solid ${EDGE2};border-radius:10px;background:${CARD};color:var(--ui-text-secondary);font-size:12.5px;font-weight:400;line-height:1.45;box-shadow:0 10px 30px color-mix(in oklab, var(--foreground) 18%, transparent)}
+.oc-sx-tip{position:absolute;z-index:6;left:0;top:calc(100% - 4px);box-sizing:border-box;width:max-content;max-width:min(320px,100%);padding:12px;border:1px solid ${EDGE};border-radius:10px;background:${CARD};color:var(--ui-text-secondary);font-size:12.5px;font-weight:400;line-height:1.45;box-shadow:0 10px 30px color-mix(in oklab, var(--foreground) 18%, transparent)}
 .oc-sx-tip.oc-sx-tip-up{top:auto;bottom:calc(100% - 4px)}
 .oc-sx-tip p{margin:0 0 8px}
 .oc-sx-tip p:last-child{margin:0}
@@ -23916,7 +24149,7 @@ ${ringed(".oc-sx-btn:focus-visible")}
 .oc-sx-link{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:4px 0;text-align:left;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;line-height:16px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 ${ringed(".oc-sx-link:focus-visible")}
 
-.oc-sx-budget{position:relative;display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;align-items:center;margin:8px 0;padding:12px;border:1px solid color-mix(in oklab, ${VIOLET4} 30%, ${EDGE2});border-radius:12px;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET4} 12%, ${CARD}), ${CARD})}
+.oc-sx-budget{position:relative;display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;align-items:center;margin:8px 0;padding:12px;border:1px solid color-mix(in oklab, ${VIOLET4} 30%, ${EDGE});border-radius:12px;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET4} 12%, ${CARD}), ${CARD})}
 .oc-sx-gauge{display:block;width:88px;height:88px}
 .oc-sx-gauge circle{fill:none;stroke-width:9}
 .oc-sx-gauge .bg{stroke:color-mix(in oklab, var(--foreground) 14%, ${CARD})}
@@ -23938,7 +24171,7 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 .oc-sx-capg input{box-sizing:border-box;width:100%;height:32px;padding:0 8px;border:1px solid ${FIELD_EDGE};border-radius:2.5px;background:${CARD};color:var(--foreground);font:inherit}
 .oc-sx-capg small{grid-column:1 / -1;color:${TEXT3};font-size:12px}
 
-.oc-nt-sub{display:flex;align-items:center;gap:8px;margin:20px 0 0;padding-top:12px;border-top:1px solid ${EDGE2};font-size:13px;font-weight:600;color:var(--foreground)}
+.oc-nt-sub{display:flex;align-items:center;gap:8px;margin:20px 0 0;padding-top:12px;border-top:1px solid ${EDGE};font-size:13px;font-weight:600;color:var(--foreground)}
 .oc-nt-sub svg{color:var(--ui-accent)}
 .oc-nt-chips{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:8px;min-width:0}
 .oc-nt-chip{position:relative;display:inline-flex;max-width:100%}
@@ -23951,10 +24184,10 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 .oc-nt-chip input:disabled+span,.oc-nt-chip input[aria-disabled="true"]+span{opacity:.55}
 .oc-nt-chip input:focus-visible+span{outline:2px solid transparent;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
 .oc-nt-type[data-on="false"] .oc-nt-chips{opacity:.8}
-.oc-nt-sum{display:flex;align-items:flex-start;gap:8px;margin:8px 0 0;padding:8px 12px;border:1px solid ${EDGE2};border-radius:8px;background:color-mix(in oklab, ${VIOLET4} 8%, ${CARD});font-size:12.5px;line-height:16px}
+.oc-nt-sum{display:flex;align-items:flex-start;gap:8px;margin:8px 0 0;padding:8px 12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, ${VIOLET4} 8%, ${CARD});font-size:12.5px;line-height:16px}
 .oc-nt-sum svg{flex:0 0 auto;color:${VIOLET4}}
 .oc-nt-sum small{display:block;color:${TEXT3};font-size:12px}
-.oc-nt-bubble{box-sizing:border-box;margin:8px 0 0;padding:12px;max-width:min(480px,100%);border:1px solid ${EDGE2};border-radius:4px 14px 14px 14px;background:color-mix(in oklab, var(--ui-accent) 8%, ${CARD});color:var(--foreground);font:inherit;font-size:13px;line-height:20px;white-space:pre-wrap;overflow-wrap:anywhere}
+.oc-nt-bubble{box-sizing:border-box;margin:8px 0 0;padding:12px;max-width:min(480px,100%);border:1px solid ${EDGE};border-radius:4px 14px 14px 14px;background:color-mix(in oklab, var(--ui-accent) 8%, ${CARD});color:var(--foreground);font:inherit;font-size:13px;line-height:20px;white-space:pre-wrap;overflow-wrap:anywhere}
 .oc-nt-bubble b{font-weight:700}
 .oc-nt-gl{display:inline-block;width:16px;height:16px;margin-right:4px;vertical-align:-3px;color:${VIOLET4}}
 .oc-nt-gl svg{display:block}
@@ -23963,8 +24196,8 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 .oc-nt-cap{margin:12px 0 0;color:${TEXT3};font-size:12px;line-height:16px}
 .oc-nt-test{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .oc-sx-feat{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 0;border-bottom:1px solid ${HAIR}}
-.oc-sx-fi{grid-row:1 / 3;display:grid;place-items:center;width:36px;height:36px;border-radius:9px;color:${VIOLET4};background:color-mix(in oklab, ${VIOLET4} 13%, ${CARD});border:1px solid color-mix(in oklab, ${VIOLET4} 30%, ${EDGE2})}
-.oc-sx-feat[data-state="off"] .oc-sx-fi{color:${TEXT3};background:color-mix(in oklab, var(--foreground) 6%, ${CARD});border-color:${EDGE2}}
+.oc-sx-fi{grid-row:1 / 3;display:grid;place-items:center;width:36px;height:36px;border-radius:9px;color:${VIOLET4};background:color-mix(in oklab, ${VIOLET4} 13%, ${CARD});border:1px solid color-mix(in oklab, ${VIOLET4} 30%, ${EDGE})}
+.oc-sx-feat[data-state="off"] .oc-sx-fi{color:${TEXT3};background:color-mix(in oklab, var(--foreground) 6%, ${CARD});border-color:${EDGE}}
 .oc-sx-feat .oc-sx-name{grid-column:2;flex-wrap:wrap}
 .oc-sx-feat small{grid-column:2;color:${TEXT3};font-size:12px}
 .oc-sx-feat .oc-sx-ctl{grid-row:1 / 3;grid-column:3}
@@ -23975,7 +24208,7 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 /* the LLM tab is the widest and tallest of the window (1040 px, nothing to scroll at 1440 x 900); the other tabs keep the window they had */
 .oc-sd:has([data-llm]){width:min(1040px,calc(100vw - 16px))}
 .oc-sd:has([data-llm]) .oc-sf-in{height:min(760px,calc(100dvh - 160px))}
-.oc-lm-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px 16px;align-items:start;border:1px solid ${EDGE2};border-radius:12px;padding:8px 12px;margin:4px 0 0;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET4} 7%, ${CARD}), ${CARD} 60%)}
+.oc-lm-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px 16px;align-items:start;border:1px solid ${EDGE};border-radius:12px;padding:8px 12px;margin:4px 0 0;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET4} 7%, ${CARD}), ${CARD} 60%)}
 .oc-lm-wide{grid-column:1 / -1;margin:0}
 .oc-lm-load{color:${TEXT3};font-size:12px}
 .oc-lm-bud{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center}
@@ -23992,11 +24225,11 @@ ${ringed(".oc-lm-sel:focus-visible")}
 .oc-lm-mod small{font-size:12px;color:${TEXT3}}
 .oc-lm-mod.dis .oc-lm-modh,.oc-lm-mod.dis small{color:${TEXT3}}
 .oc-lm-mod.dis .oc-lm-sel{opacity:.55;cursor:not-allowed}
-.oc-lm-grant{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 12px;border-radius:8px;border:1px dashed color-mix(in oklab, ${ORANGE8} 55%, ${EDGE2});background:color-mix(in oklab, ${ORANGE8} 6%, ${CARD});font-size:12.5px;font-weight:600}
+.oc-lm-grant{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 12px;border-radius:8px;border:1px dashed color-mix(in oklab, ${ORANGE8} 55%, ${EDGE});background:color-mix(in oklab, ${ORANGE8} 6%, ${CARD});font-size:12.5px;font-weight:600}
 .oc-lm-grant>svg{color:${ORANGE8};flex:0 0 auto}
 .oc-lm-cmd{display:flex;align-items:center;gap:4px;min-width:0}
-.oc-lm-cmd code{font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;padding:4px 8px;border-radius:6px;background:color-mix(in oklab, var(--foreground) 6%, ${CARD});border:1px solid ${EDGE2};overflow-wrap:anywhere;min-width:0}
-.oc-lm-ib{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid ${EDGE2};border-radius:6px;background:${CARD};color:var(--foreground);cursor:pointer}
+.oc-lm-cmd code{font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;padding:4px 8px;border-radius:6px;background:color-mix(in oklab, var(--foreground) 6%, ${CARD});border:1px solid ${EDGE};overflow-wrap:anywhere;min-width:0}
+.oc-lm-ib{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid ${EDGE};border-radius:6px;background:${CARD};color:var(--foreground);cursor:pointer}
 ${ringed(".oc-lm-ib:focus-visible")}
 .oc-lm-copied{flex:1 0 100%;font-size:12px;font-weight:500;color:${TEXT3}}
 .oc-lm-copied:empty{display:none}
@@ -24017,7 +24250,7 @@ ${ringed(".oc-lm-ib:focus-visible")}
 .oc-lm-fx:empty,.oc-lm-fx>*:empty{display:none}
 .oc-lm-fx:not(:has(*:not(:empty))){display:none}
 .oc-lm-row[data-on="false"] .oc-sx-name label,.oc-lm-row[data-on="false"] .oc-lm-lane{color:${TEXT3}}
-.oc-lm-lane{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:12px;border:1px solid ${EDGE2};background:color-mix(in oklab, var(--foreground) 4%, ${CARD});color:var(--ui-text-secondary);font-size:11.5px;font-weight:600;white-space:nowrap}
+.oc-lm-lane{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:12px;border:1px solid ${EDGE};background:color-mix(in oklab, var(--foreground) 4%, ${CARD});color:var(--ui-text-secondary);font-size:11.5px;font-weight:600;white-space:nowrap}
 .oc-lm-lane i{width:12px;height:8px;flex:0 0 auto;opacity:.85;background:linear-gradient(90deg, ${VIOLET4} 0 3px, transparent 3px 4px, ${VIOLET4} 4px 7px, transparent 7px 8px, ${VIOLET4} 8px 11px, transparent 11px)}
 .oc-lm-lane.light i{background:linear-gradient(90deg, ${VIOLET4} 0 3px, transparent 3px)}
 .oc-lm-lane.host{border-style:dashed}
@@ -24026,15 +24259,15 @@ ${ringed(".oc-lm-ib:focus-visible")}
   .oc-lm-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"mc ctl" "lc ac";gap:4px 8px;padding:8px 0}
   .oc-lm-mc{grid-area:mc}.oc-lm-ctl{grid-area:ctl;align-self:start}.oc-lm-lc{grid-area:lc}.oc-lm-ac{grid-area:ac;justify-content:flex-end}
 }
-.oc-sx-state{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE2};font-size:11px;font-weight:600;white-space:nowrap}
-.oc-sx-state[data-tone="ok"]{border-color:color-mix(in oklab, ${GREEN7} 55%, ${EDGE2});background:color-mix(in oklab, ${GREEN7} 14%, transparent)}
-.oc-sx-state[data-tone="warn"]{border-color:color-mix(in oklab, ${ORANGE8} 60%, ${EDGE2});background:color-mix(in oklab, ${ORANGE8} 14%, transparent)}
+.oc-sx-state{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;white-space:nowrap}
+.oc-sx-state[data-tone="ok"]{border-color:color-mix(in oklab, ${GREEN7} 55%, ${EDGE});background:color-mix(in oklab, ${GREEN7} 14%, transparent)}
+.oc-sx-state[data-tone="warn"]{border-color:color-mix(in oklab, ${ORANGE8} 60%, ${EDGE});background:color-mix(in oklab, ${ORANGE8} 14%, transparent)}
 .oc-sx-state[data-tone="off"]{color:var(--ui-text-secondary)}
 
-.oc-sd{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(780px,calc(100vw - 16px));max-height:calc(100dvh - 32px);padding:0;border:1px solid ${EDGE2};border-radius:14px;background:${CARD};color:var(--foreground);overflow:hidden;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 30%, transparent)}
+.oc-sd{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(780px,calc(100vw - 16px));max-height:calc(100dvh - 32px);padding:0;border:1px solid ${EDGE};border-radius:14px;background:${CARD};color:var(--foreground);overflow:hidden;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 30%, transparent)}
 .oc-sd[open]{display:flex;flex-direction:column;animation:oc-sd-in .18s ease both}
 .oc-sd::backdrop{background:color-mix(in oklab, var(--foreground) 40%, transparent)}
-.oc-sd-h{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid ${EDGE2};flex:0 0 auto}
+.oc-sd-h{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid ${EDGE};flex:0 0 auto}
 .oc-sd-h h2{margin:0;font-size:16px;font-weight:600}
 .oc-sd-h svg{color:var(--ui-accent)}
 .oc-sd-x{margin-left:auto;display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--foreground);cursor:pointer}
@@ -24044,20 +24277,20 @@ ${ringed(".oc-sd-x:focus-visible")}
 .oc-sd .oc-sf{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .oc-sd .oc-sf-in{flex:1 1 auto;height:min(560px,calc(100dvh - 160px))}
 .oc-sd .oc-sf-panel{overflow-y:auto;overscroll-behavior:contain}
-.oc-sd-f{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid ${EDGE2};flex:0 0 auto}
+.oc-sd-f{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid ${EDGE};flex:0 0 auto}
 .oc-sd-f .grow{flex:1 1 auto}
 .oc-sd-f .oc-sd-saved{color:${TEXT3};font-size:12px}
 .oc-sd-f .oc-sx-btn{min-height:32px}
 @keyframes oc-sd-in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
 
-.oc-sf-page{box-sizing:border-box;max-width:860px;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};overflow:hidden}
+.oc-sf-page{box-sizing:border-box;max-width:860px;border:1px solid ${EDGE};border-radius:12px;background:${CARD};overflow:hidden}
 .oc-sf-page .oc-sf-in{min-height:360px}
 
 .oc-sd[data-motion="reduced"]{animation:none}
 .oc-sd[data-motion="reduced"] *,.oc-sf[data-motion="reduced"] *{transition:none !important}
 @container (max-width:560px){
   .oc-sf-in{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
-  .oc-sf-nav{flex-direction:row;gap:4px;padding:8px;border-right:0;border-bottom:1px solid ${EDGE2};overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}   /* every tab keeps its label; the strip scrolls (the selected tab is scrolled into view), no label is reduced to an icon */
+  .oc-sf-nav{flex-direction:row;gap:4px;padding:8px;border-right:0;border-bottom:1px solid ${EDGE};overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}   /* every tab keeps its label; the strip scrolls (the selected tab is scrolled into view), no label is reduced to an icon */
   .oc-sf-nav::-webkit-scrollbar{display:none}
   .oc-sf-tab{padding:0 8px;flex:0 0 auto}
   .oc-sf-tab[aria-selected="false"] .oc-sf-bd{display:none}
@@ -24082,7 +24315,7 @@ ${ringed(".oc-sd-x:focus-visible")}
 `;
 
 // src/ui/SettingsForm.jsx
-import { Fragment as Fragment20, jsx as jsx42, jsxs as jsxs38 } from "react/jsx-runtime";
+import { Fragment as Fragment21, jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
 var selectStyle2 = {
   font: "inherit",
   height: "32px",
@@ -24098,8 +24331,8 @@ var TAB_ICON = { general: "globe", game: "game", replay: "moon", notify: "bell",
 var lastTab = SETTINGS_TABS[0];
 function SettingsForm({ llm = null }) {
   const t = useT();
-  const base = useId20();
-  const [tab, setTabState] = useState22(() => tabOf(lastTab));
+  const base = useId23();
+  const [tab, setTabState] = useState26(() => tabOf(lastTab));
   const setTab = (next) => {
     lastTab = next;
     setTabState(next);
@@ -24111,7 +24344,7 @@ function SettingsForm({ llm = null }) {
   const night = useValue3($nightPref);
   const detected = resolveLocale("auto", useAppLocale(), systemLocales());
   const count2 = llmTabBadge(useLlm());
-  useEffect25(() => {
+  useEffect26(() => {
     document.getElementById(`${base}-tab-${tab}`)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
   }, [base, tab]);
   const onKeyDown = (event) => {
@@ -24121,11 +24354,11 @@ function SettingsForm({ llm = null }) {
     setTab(next);
     document.getElementById(`${base}-tab-${next}`)?.focus();
   };
-  return /* @__PURE__ */ jsxs38("div", { className: "oc-sf", "data-settings-form": true, "data-motion": motion, lang: t.lang, children: [
-    /* @__PURE__ */ jsx42("style", { children: FIELD_CSS }),
-    /* @__PURE__ */ jsx42("style", { children: SETTINGS_CSS }),
-    /* @__PURE__ */ jsxs38("div", { className: "oc-sf-in", children: [
-      /* @__PURE__ */ jsx42("div", { className: "oc-sf-nav", role: "tablist", "aria-orientation": "vertical", "aria-label": t("settings.tabs"), onKeyDown, children: SETTINGS_TABS.map((code) => /* @__PURE__ */ jsxs38(
+  return /* @__PURE__ */ jsxs39("div", { className: "oc-sf", "data-settings-form": true, "data-motion": motion, lang: t.lang, children: [
+    /* @__PURE__ */ jsx43("style", { children: FIELD_CSS }),
+    /* @__PURE__ */ jsx43("style", { children: SETTINGS_CSS }),
+    /* @__PURE__ */ jsxs39("div", { className: "oc-sf-in", children: [
+      /* @__PURE__ */ jsx43("div", { className: "oc-sf-nav", role: "tablist", "aria-orientation": "vertical", "aria-label": t("settings.tabs"), onKeyDown, children: SETTINGS_TABS.map((code) => /* @__PURE__ */ jsxs39(
         "button",
         {
           id: `${base}-tab-${code}`,
@@ -24139,37 +24372,37 @@ function SettingsForm({ llm = null }) {
           tabIndex: tab === code ? 0 : -1,
           onClick: () => setTab(code),
           children: [
-            /* @__PURE__ */ jsx42(SettingsIcon, { id: TAB_ICON[code] }),
-            /* @__PURE__ */ jsx42("span", { className: "oc-sf-lb", children: t(`settings.tab.${code}`) }),
-            code === "llm" && count2 ? /* @__PURE__ */ jsx42("span", { className: "oc-sf-bd", "data-llm-count": true, children: `${count2.on}/${count2.of}` }) : null
+            /* @__PURE__ */ jsx43(SettingsIcon, { id: TAB_ICON[code] }),
+            /* @__PURE__ */ jsx43("span", { className: "oc-sf-lb", children: t(`settings.tab.${code}`) }),
+            code === "llm" && count2 ? /* @__PURE__ */ jsx43("span", { className: "oc-sf-bd", "data-llm-count": true, children: `${count2.on}/${count2.of}` }) : null
           ]
         },
         code
       )) }),
-      /* @__PURE__ */ jsxs38("div", { id: `${base}-panel`, className: "oc-sf-panel", role: "tabpanel", tabIndex: 0, "aria-labelledby": `${base}-tab-${tab}`, "data-settings-tab": tab, children: [
-        tab === "general" ? /* @__PURE__ */ jsxs38(Fragment20, { children: [
-          /* @__PURE__ */ jsx42(SectionTitle, { label: t("settings.tab.general"), where: "local" }),
-          /* @__PURE__ */ jsx42(
+      /* @__PURE__ */ jsxs39("div", { id: `${base}-panel`, className: "oc-sf-panel", role: "tabpanel", tabIndex: 0, "aria-labelledby": `${base}-tab-${tab}`, "data-settings-tab": tab, children: [
+        tab === "general" ? /* @__PURE__ */ jsxs39(Fragment21, { children: [
+          /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.general"), where: "local" }),
+          /* @__PURE__ */ jsx43(
             SettingsRow,
             {
               id: "officecraft-language",
               label: t("settings.language"),
               help: t("settings.languageHint"),
               tip: t("settings.languageTip"),
-              control: ({ id, describedBy }) => /* @__PURE__ */ jsxs38("select", { id, className: "oc-fc", "aria-describedby": describedBy, value: pref, onChange: (event) => setLanguagePref(event.target.value), style: selectStyle2, children: [
-                /* @__PURE__ */ jsx42("option", { value: "auto", children: t("settings.auto", ENDONYMS[detected]) }),
-                SUPPORTED_LOCALES.map((code) => /* @__PURE__ */ jsx42("option", { value: code, lang: code, children: ENDONYMS[code] }, code))
+              control: ({ id, describedBy }) => /* @__PURE__ */ jsxs39("select", { id, className: "oc-fc", "aria-describedby": describedBy, value: pref, onChange: (event) => setLanguagePref(event.target.value), style: selectStyle2, children: [
+                /* @__PURE__ */ jsx43("option", { value: "auto", children: t("settings.auto", ENDONYMS[detected]) }),
+                SUPPORTED_LOCALES.map((code) => /* @__PURE__ */ jsx43("option", { value: code, lang: code, children: ENDONYMS[code] }, code))
               ] })
             }
           ),
-          /* @__PURE__ */ jsx42(
+          /* @__PURE__ */ jsx43(
             SettingsRow,
             {
               id: "officecraft-light",
               group: true,
               label: t("settings.light"),
               help: t("settings.lightHint"),
-              control: ({ describedBy }) => /* @__PURE__ */ jsx42(
+              control: ({ describedBy }) => /* @__PURE__ */ jsx43(
                 Segmented,
                 {
                   label: t("settings.light"),
@@ -24181,7 +24414,7 @@ function SettingsForm({ llm = null }) {
               )
             }
           ),
-          /* @__PURE__ */ jsx42(
+          /* @__PURE__ */ jsx43(
             SettingsRow,
             {
               id: "officecraft-motion",
@@ -24189,7 +24422,7 @@ function SettingsForm({ llm = null }) {
               label: t("settings.motion"),
               help: t("settings.motionHint"),
               tip: t("settings.motionTip"),
-              control: ({ describedBy }) => /* @__PURE__ */ jsx42(
+              control: ({ describedBy }) => /* @__PURE__ */ jsx43(
                 Segmented,
                 {
                   label: t("settings.motion"),
@@ -24202,22 +24435,22 @@ function SettingsForm({ llm = null }) {
             }
           )
         ] }) : null,
-        tab === "game" ? /* @__PURE__ */ jsxs38(Fragment20, { children: [
-          /* @__PURE__ */ jsx42(SectionTitle, { label: t("settings.tab.game"), where: "local" }),
-          /* @__PURE__ */ jsx42(
+        tab === "game" ? /* @__PURE__ */ jsxs39(Fragment21, { children: [
+          /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.game"), where: "local" }),
+          /* @__PURE__ */ jsx43(
             SettingsRow,
             {
               id: "officecraft-game",
               label: t("settings.gameOn"),
               help: t("settings.gameHint"),
               tip: t("settings.gameTip"),
-              control: ({ id, describedBy }) => /* @__PURE__ */ jsx42(Switch, { id, describedBy, checked: game, onChange: setGameMode })
+              control: ({ id, describedBy }) => /* @__PURE__ */ jsx43(Switch, { id, describedBy, checked: game, onChange: setGameMode })
             }
           )
         ] }) : null,
-        tab === "replay" ? /* @__PURE__ */ jsxs38(Fragment20, { children: [
-          /* @__PURE__ */ jsx42(SectionTitle, { label: t("settings.tab.replay"), where: "local" }),
-          /* @__PURE__ */ jsx42(
+        tab === "replay" ? /* @__PURE__ */ jsxs39(Fragment21, { children: [
+          /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.replay"), where: "local" }),
+          /* @__PURE__ */ jsx43(
             SettingsRow,
             {
               id: "officecraft-night",
@@ -24225,8 +24458,8 @@ function SettingsForm({ llm = null }) {
               label: t("settings.night"),
               help: t("settings.nightHint"),
               tip: t("settings.nightTip"),
-              control: ({ describedBy }) => /* @__PURE__ */ jsxs38(Fragment20, { children: [
-                /* @__PURE__ */ jsx42(
+              control: ({ describedBy }) => /* @__PURE__ */ jsxs39(Fragment21, { children: [
+                /* @__PURE__ */ jsx43(
                   "select",
                   {
                     id: "officecraft-night-start",
@@ -24237,11 +24470,11 @@ function SettingsForm({ llm = null }) {
                     value: night.from,
                     onChange: (event) => setNightPref({ from: Number(event.target.value), to: night.to }),
                     style: selectStyle2,
-                    children: HOURS.map((h) => /* @__PURE__ */ jsx42("option", { value: h, children: t("settings.nightHour", h) }, h))
+                    children: HOURS.map((h) => /* @__PURE__ */ jsx43("option", { value: h, children: t("settings.nightHour", h) }, h))
                   }
                 ),
-                /* @__PURE__ */ jsx42("span", { className: "oc-sx-arrow", "aria-hidden": "true", children: "→" }),
-                /* @__PURE__ */ jsx42(
+                /* @__PURE__ */ jsx43("span", { className: "oc-sx-arrow", "aria-hidden": "true", children: "→" }),
+                /* @__PURE__ */ jsx43(
                   "select",
                   {
                     id: "officecraft-night-end",
@@ -24252,28 +24485,28 @@ function SettingsForm({ llm = null }) {
                     value: night.to,
                     onChange: (event) => setNightPref({ from: night.from, to: Number(event.target.value) }),
                     style: selectStyle2,
-                    children: HOURS.map((h) => /* @__PURE__ */ jsx42("option", { value: h, children: t("settings.nightHour", h) }, h))
+                    children: HOURS.map((h) => /* @__PURE__ */ jsx43("option", { value: h, children: t("settings.nightHour", h) }, h))
                   }
                 )
               ] })
             }
           )
         ] }) : null,
-        tab === "notify" ? /* @__PURE__ */ jsx42(SettingsFormNotify, {}) : null,
-        tab === "llm" ? /* @__PURE__ */ jsx42(SettingsFormLlm, { actions: llm }) : null
+        tab === "notify" ? /* @__PURE__ */ jsx43(SettingsFormNotify, {}) : null,
+        tab === "llm" ? /* @__PURE__ */ jsx43(SettingsFormLlm, { actions: llm }) : null
       ] })
     ] })
   ] });
 }
 
 // src/ui/SettingsDialog.jsx
-import { jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
+import { jsx as jsx44, jsxs as jsxs40 } from "react/jsx-runtime";
 function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
   const t = useT();
-  const ref = useRef26(null);
-  const id = useId21();
+  const ref = useRef28(null);
+  const id = useId24();
   const motion = sdk3.useValue($motionPref);
-  useEffect26(() => {
+  useEffect27(() => {
     const dlg = ref.current;
     if (!dlg) return;
     if (!dlg.open) {
@@ -24284,7 +24517,7 @@ function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
     }
     dlg.querySelector('[role="tab"][aria-selected="true"]')?.focus();
   }, []);
-  return /* @__PURE__ */ jsxs39(
+  return /* @__PURE__ */ jsxs40(
     "dialog",
     {
       ref,
@@ -24309,24 +24542,24 @@ function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
       },
       onClose,
       children: [
-        /* @__PURE__ */ jsx43("style", { children: SETTINGS_CSS }),
-        /* @__PURE__ */ jsxs39("header", { className: "oc-sd-h", children: [
-          /* @__PURE__ */ jsx43(SettingsIcon, { id: "gear", size: 20 }),
-          /* @__PURE__ */ jsx43("h2", { id: `${id}-t`, children: t("settings.gear") }),
-          /* @__PURE__ */ jsx43("button", { type: "button", className: "oc-sd-x", "data-settings-close": true, "aria-label": t("settings.close"), onClick: onClose, children: /* @__PURE__ */ jsx43(SettingsIcon, { id: "x" }) })
+        /* @__PURE__ */ jsx44("style", { children: SETTINGS_CSS }),
+        /* @__PURE__ */ jsxs40("header", { className: "oc-sd-h", children: [
+          /* @__PURE__ */ jsx44(SettingsIcon, { id: "gear", size: 20 }),
+          /* @__PURE__ */ jsx44("h2", { id: `${id}-t`, children: t("settings.gear") }),
+          /* @__PURE__ */ jsx44("button", { type: "button", className: "oc-sd-x", "data-settings-close": true, "aria-label": t("settings.close"), onClick: onClose, children: /* @__PURE__ */ jsx44(SettingsIcon, { id: "x" }) })
         ] }),
-        /* @__PURE__ */ jsx43("div", { className: "oc-sd-b", children: /* @__PURE__ */ jsx43(SettingsForm, { llm }) }),
-        /* @__PURE__ */ jsxs39("footer", { className: "oc-sd-f", children: [
-          href ? /* @__PURE__ */ jsxs39("button", { type: "button", className: "oc-sx-link", "data-settings-link": true, onClick: () => {
+        /* @__PURE__ */ jsx44("div", { className: "oc-sd-b", children: /* @__PURE__ */ jsx44(SettingsForm, { llm }) }),
+        /* @__PURE__ */ jsxs40("footer", { className: "oc-sd-f", children: [
+          href ? /* @__PURE__ */ jsxs40("button", { type: "button", className: "oc-sx-link", "data-settings-link": true, onClick: () => {
             onClose();
             sdk3.host.navigate(href);
           }, children: [
-            /* @__PURE__ */ jsx43(SettingsIcon, { id: "ext", size: 14 }),
+            /* @__PURE__ */ jsx44(SettingsIcon, { id: "ext", size: 14 }),
             t("settings.openInHermes")
           ] }) : null,
-          /* @__PURE__ */ jsx43("span", { className: "grow" }),
-          /* @__PURE__ */ jsx43("span", { className: "oc-sd-saved", children: t("settings.saved") }),
-          /* @__PURE__ */ jsx43("button", { type: "button", className: "oc-sx-btn", onClick: onClose, children: t("settings.close") })
+          /* @__PURE__ */ jsx44("span", { className: "grow" }),
+          /* @__PURE__ */ jsx44("span", { className: "oc-sd-saved", children: t("settings.saved") }),
+          /* @__PURE__ */ jsx44("button", { type: "button", className: "oc-sx-btn", onClick: onClose, children: t("settings.close") })
         ] })
       ]
     }
@@ -24334,7 +24567,7 @@ function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
 }
 
 // src/ui/SettingsGear.jsx
-import { jsx as jsx44, jsxs as jsxs40 } from "react/jsx-runtime";
+import { jsx as jsx45, jsxs as jsxs41 } from "react/jsx-runtime";
 function gearPath() {
   const pts = [];
   const outer = 9.5;
@@ -24352,8 +24585,8 @@ function gearPath() {
 var GEAR = gearPath();
 function SettingsGear({ sheet, llm = null }) {
   const t = useT();
-  const [open, setOpen] = useState23(false);
-  const btn = useRef27(null);
+  const [open, setOpen] = useState27(false);
+  const btn = useRef29(null);
   const close = useCallback8(() => {
     setOpen(false);
     setTimeout(() => btn.current?.focus(), 0);
@@ -24364,38 +24597,38 @@ function SettingsGear({ sheet, llm = null }) {
   }, []);
   const llmActions = llm ? { ...llm, onDecorate: llm.onDecorate ? hand(llm.onDecorate) : null, onSeating: llm.onSeating ? hand(llm.onSeating) : null } : null;
   const href = typeof sdk4.pluginSettingsHref === "function" ? sdk4.pluginSettingsHref(PLUGIN_ID, "settings") : null;
-  return /* @__PURE__ */ jsxs40("span", { className: "oc-gearwrap", "data-settings": true, children: [
-    /* @__PURE__ */ jsx44("button", { ref: btn, type: "button", className: "oc-gear", "data-gear": true, "aria-haspopup": "dialog", "aria-expanded": open, title: t("settings.gearTip"), "aria-label": t("settings.gear"), onClick: () => setOpen((v) => !v), children: /* @__PURE__ */ jsxs40("svg", { viewBox: "0 0 24 24", width: "18", height: "18", "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinejoin: "round", children: [
-      /* @__PURE__ */ jsx44("path", { d: GEAR }),
-      /* @__PURE__ */ jsx44("circle", { cx: "12", cy: "12", r: "3.2" })
+  return /* @__PURE__ */ jsxs41("span", { className: "oc-gearwrap", "data-settings": true, children: [
+    /* @__PURE__ */ jsx45("button", { ref: btn, type: "button", className: "oc-gear", "data-gear": true, "aria-haspopup": "dialog", "aria-expanded": open, title: t("settings.gearTip"), "aria-label": t("settings.gear"), onClick: () => setOpen((v) => !v), children: /* @__PURE__ */ jsxs41("svg", { viewBox: "0 0 24 24", width: "18", height: "18", "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ jsx45("path", { d: GEAR }),
+      /* @__PURE__ */ jsx45("circle", { cx: "12", cy: "12", r: "3.2" })
     ] }) }),
-    open ? /* @__PURE__ */ jsx44(SettingsDialog, { onClose: close, llm: llmActions, href, sheet }) : null
+    open ? /* @__PURE__ */ jsx45(SettingsDialog, { onClose: close, llm: llmActions, href, sheet }) : null
   ] });
 }
 
 // src/ui/EmptyOffice.jsx
-import { jsx as jsx45, jsxs as jsxs41 } from "react/jsx-runtime";
+import { jsx as jsx46, jsxs as jsxs42 } from "react/jsx-runtime";
 function EmptyOffice({ onRecruit, t }) {
-  return /* @__PURE__ */ jsxs41("section", { className: "ux-void", "data-empty-office": true, "aria-labelledby": "oc-void-h", children: [
-    /* @__PURE__ */ jsx45("span", { className: "ux-void-art", "aria-hidden": "true", children: /* @__PURE__ */ jsx45(PixelIcon, { id: "office", size: 64 }) }),
-    /* @__PURE__ */ jsx45("h2", { id: "oc-void-h", children: t("emptyTitle") }),
-    /* @__PURE__ */ jsx45("p", { className: "lead", children: t("emptyBody") }),
-    /* @__PURE__ */ jsx45("ol", { className: "ux-void-steps", children: [1, 2, 3].map((n) => /* @__PURE__ */ jsxs41("li", { children: [
-      /* @__PURE__ */ jsx45("span", { className: "n", "aria-hidden": "true", children: n }),
-      /* @__PURE__ */ jsx45("span", { children: t(`emptyStep${n}`) })
+  return /* @__PURE__ */ jsxs42("section", { className: "ux-void", "data-empty-office": true, "aria-labelledby": "oc-void-h", children: [
+    /* @__PURE__ */ jsx46("span", { className: "ux-void-art", "aria-hidden": "true", children: /* @__PURE__ */ jsx46(PixelIcon, { id: "office", size: 64 }) }),
+    /* @__PURE__ */ jsx46("h2", { id: "oc-void-h", children: t("emptyTitle") }),
+    /* @__PURE__ */ jsx46("p", { className: "lead", children: t("emptyBody") }),
+    /* @__PURE__ */ jsx46("ol", { className: "ux-void-steps", children: [1, 2, 3].map((n) => /* @__PURE__ */ jsxs42("li", { children: [
+      /* @__PURE__ */ jsx46("span", { className: "n", "aria-hidden": "true", children: n }),
+      /* @__PURE__ */ jsx46("span", { children: t(`emptyStep${n}`) })
     ] }, n)) }),
-    onRecruit ? /* @__PURE__ */ jsxs41("button", { type: "button", className: "ux-b pri", "data-empty-recruit": true, onClick: onRecruit, children: [
-      /* @__PURE__ */ jsx45(Icon, { name: "recruit", size: 14 }),
+    onRecruit ? /* @__PURE__ */ jsxs42("button", { type: "button", className: "ux-b pri", "data-empty-recruit": true, onClick: onRecruit, children: [
+      /* @__PURE__ */ jsx46(Icon, { name: "recruit", size: 14 }),
       t("recruit.open")
     ] }) : null,
-    /* @__PURE__ */ jsx45("p", { className: "hint", children: t("emptyCli") })
+    /* @__PURE__ */ jsx46("p", { className: "hint", children: t("emptyCli") })
   ] });
 }
 
 // src/ui/usePartialStreaks.js
-import { useRef as useRef28 } from "react";
+import { useRef as useRef30 } from "react";
 function usePartialStreaks(data, dataUpdatedAt) {
-  const ref = useRef28({ at: 0, streaks: /* @__PURE__ */ new Map() });
+  const ref = useRef30({ at: 0, streaks: /* @__PURE__ */ new Map() });
   if (data && dataUpdatedAt && dataUpdatedAt !== ref.current.at) ref.current = { at: dataUpdatedAt, streaks: nextStreaks(ref.current.streaks, toPartial(data.partial) ?? []) };
   return ref.current.streaks;
 }
@@ -24425,13 +24658,13 @@ var ORANGE9 = "var(--ui-orange, var(--ui-accent))";
 var GREEN8 = "var(--ui-green, var(--ui-accent))";
 var RED7 = "var(--ui-red, var(--destructive, var(--ui-orange)))";
 var PANEL_CSS = `
-.oc-panel{flex:0 0 340px;width:340px;min-width:0;min-height:0;display:flex;flex-direction:column;box-sizing:border-box;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
+.oc-panel{flex:0 0 340px;width:340px;min-width:0;min-height:0;display:flex;flex-direction:column;box-sizing:border-box;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
 .oc-panel.oc-drawer{position:absolute;top:0;right:0;bottom:0;z-index:40;width:min(360px,100%);flex:none;box-shadow:0 8px 28px color-mix(in oklab, var(--foreground) 28%, transparent);animation:oc-slide .16s ease-out}
 @keyframes oc-slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.oc-panel.oc-drawer{animation:none}}
-.oc-phead{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px 8px 14px;border-bottom:1px solid ${EDGE2}}
+.oc-phead{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px 8px 14px;border-bottom:1px solid ${EDGE}}
 .oc-phead h2{margin:0;font-size:13px;font-weight:600;outline:none}
-.oc-x{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:1px solid ${EDGE2};border-radius:${BTN_RADIUS};background:transparent;color:var(--foreground);cursor:pointer}
+.oc-x{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:1px solid ${EDGE};border-radius:${BTN_RADIUS};background:transparent;color:var(--foreground);cursor:pointer}
 .oc-x:hover{border-color:var(--ui-accent)}
 .oc-pbody:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
 /* the focus ring of Hermes' buttons (border in the ring colour + 3 px halo), radius 4 px, weight 500 */
@@ -24445,7 +24678,7 @@ var PANEL_CSS = `
 .oc-psec h3{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:${SOFT5}}
 .oc-count{display:inline-flex;min-width:16px;justify-content:center;padding:0 5px;border-radius:999px;background:color-mix(in oklab, ${ORANGE9} 20%, transparent);color:${ink6(ORANGE9)};font-size:11px;letter-spacing:0}
 .oc-hint{margin:0;font-size:12px;color:${SOFT5}}
-.oc-dashed{padding:8px 10px;border:1px dashed ${EDGE2};border-radius:8px}
+.oc-dashed{padding:8px 10px;border:1px dashed ${EDGE};border-radius:8px}
 .oc-faint{font-size:11px;color:${SOFT5}}
 .oc-age{display:block}
 .oc-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -24453,28 +24686,28 @@ var PANEL_CSS = `
 .oc-clip2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;font-size:12px;font-weight:600}
 /* five tiles on a 6-column grid, 3 then 2 (no empty cell; the wider second row holds « Cartes ouvertes » / « Tarjetas abiertas ») */
 .oc-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
-.oc-stat{grid-column:span 2;display:flex;flex-direction:column;gap:1px;padding:6px 8px;border:1px solid ${EDGE2};border-radius:8px;min-width:0}
+.oc-stat{grid-column:span 2;display:flex;flex-direction:column;gap:1px;padding:6px 8px;border:1px solid ${EDGE};border-radius:8px;min-width:0}
 .oc-stat:nth-child(n+4){grid-column:span 3}
 .oc-stat b{font-size:1.05rem;font-variant-numeric:tabular-nums}
 .oc-stat b small{font-size:.7em;font-weight:400;opacity:.8}
 .oc-stat span{font-size:11px;color:${SOFT5};white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.oc-stat.hot{border-color:color-mix(in oklab, var(--ui-accent) 60%, ${EDGE2})}
+.oc-stat.hot{border-color:color-mix(in oklab, var(--ui-accent) 60%, ${EDGE})}
 .oc-stat.warn{border-color:${ORANGE9}}
 .oc-stat.warn b{color:${ink6(ORANGE9)}}
 .oc-ihead{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.oc-portrait{flex:0 0 auto;width:56px;height:60px;image-rendering:pixelated;image-rendering:crisp-edges;border-radius:8px;border:1px solid ${EDGE2};background:color-mix(in oklab, var(--ui-accent) 8%, transparent)}
+.oc-portrait{flex:0 0 auto;width:56px;height:60px;image-rendering:pixelated;image-rendering:crisp-edges;border-radius:8px;border:1px solid ${EDGE};background:color-mix(in oklab, var(--ui-accent) 8%, transparent)}
 .oc-iname{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
 .oc-iname b{font-size:14px;overflow-wrap:anywhere}
-.oc-tag{display:inline-block;padding:0 7px;border:1px solid ${EDGE2};border-radius:999px;font-size:11px;font-weight:600;color:var(--foreground)}
+.oc-tag{display:inline-block;padding:0 7px;border:1px solid ${EDGE};border-radius:999px;font-size:11px;font-weight:600;color:var(--foreground)}
 .oc-t-working{border-color:var(--ui-accent);color:${ink6("var(--ui-accent)")}}
 .oc-t-waiting,.oc-warnt{border-color:${ORANGE9};color:${ink6(ORANGE9)}}
-.oc-t-active{border-color:color-mix(in oklab, ${GREEN8} 60%, ${EDGE2})}
+.oc-t-active{border-color:color-mix(in oklab, ${GREEN8} 60%, ${EDGE})}
 .oc-t-stale{border-style:dashed;color:${SOFT5}}
 .oc-kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;margin:0 0 10px;font-size:12px}
 .oc-kv dt{color:${SOFT5};white-space:nowrap}
 .oc-kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
 .oc-chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.oc-skill{padding:0 7px;border:1px solid ${EDGE2};border-radius:999px;font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-skill{padding:0 7px;border:1px solid ${EDGE};border-radius:999px;font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oc-skill small{color:${SOFT5};font-size:11px}
 .oc-modelline{color:${ink6("var(--ui-accent)")}}
 .oc-pin{display:inline-block;flex:0 0 auto;color:${ink6("var(--ui-accent)")};vertical-align:-1px}
@@ -24482,11 +24715,11 @@ var PANEL_CSS = `
 .oc-btn{display:inline-block;padding:5px 12px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid var(--ui-accent);border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-cards{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
-.oc-cards li{display:flex;flex-direction:column;gap:4px;padding:7px 9px;border:1px solid ${EDGE2};border-radius:8px;min-width:0}
+.oc-cards li{display:flex;flex-direction:column;gap:4px;padding:7px 9px;border:1px solid ${EDGE};border-radius:8px;min-width:0}
 .oc-meta{display:flex;flex-wrap:wrap;gap:5px 8px;align-items:center;font-size:11px;color:${SOFT5}}
 .oc-meta .oc-tag{font-size:11px}
 .oc-psec p.oc-faint{margin:6px 0 0}
-.oc-chain{display:flex;flex-direction:column;gap:5px;padding:7px 0;border-top:1px solid ${EDGE2}}
+.oc-chain{display:flex;flex-direction:column;gap:5px;padding:7px 0;border-top:1px solid ${EDGE}}
 .oc-chain:first-of-type{border-top:0;padding-top:0}
 .oc-top2{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:12px}
 .oc-top2 b{text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -24509,18 +24742,18 @@ var PANEL_CSS = `
 .oc-main{position:relative;display:flex;flex:1 1 auto;min-width:0;min-height:0;gap:12px}
 .oc-col{display:flex;flex-direction:column;gap:16px;flex:1 1 auto;min-width:0;min-height:0}
 .oc-hright{margin-left:auto;display:inline-flex;align-items:center;gap:8px;align-self:center}
-.oc-gear{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;color:var(--foreground);background:${CARD};border:1px solid ${EDGE2};border-radius:${BTN_RADIUS};cursor:pointer}
+.oc-gear{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-gear:hover,.oc-gear[aria-expanded="true"]{border-color:var(--ui-accent)}
 .oc-set-link:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
 .oc-set-pop{position:absolute;top:calc(100% + 8px);right:0;z-index:50;box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:min(calc(100vh - 150px),640px);display:flex;flex-direction:column;overflow:hidden;padding:12px 14px;border-radius:12px;background:${CARD};border:1px solid var(--ui-accent);box-shadow:0 8px 28px color-mix(in oklab, var(--foreground) 28%, transparent);color:var(--foreground)}
 .oc-set-body{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
 .oc-set-pop.oc-sheet{top:auto;right:0;left:0;bottom:0;width:auto;max-height:80%;border-radius:12px 12px 0 0}
-.oc-set-link{flex:0 0 auto;display:block;box-sizing:border-box;width:100%;margin-top:10px;padding:10px 0 4px;min-height:28px;font:inherit;font-size:12px;color:var(--ui-accent);background:none;border:0;border-top:1px solid ${EDGE2};cursor:pointer;text-decoration:underline;text-align:left}
-.oc-toggle{margin-left:auto;min-height:24px;padding:3px 10px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE2};border-radius:${BTN_RADIUS};cursor:pointer}
+.oc-set-link{flex:0 0 auto;display:block;box-sizing:border-box;width:100%;margin-top:10px;padding:10px 0 4px;min-height:28px;font:inherit;font-size:12px;color:var(--ui-accent);background:none;border:0;border-top:1px solid ${EDGE};cursor:pointer;text-decoration:underline;text-align:left}
+.oc-toggle{margin-left:auto;min-height:24px;padding:3px 10px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-toggle[aria-expanded="true"]{border-color:var(--ui-accent)}
 /* legend of the halos, a « ? » at the end of the selection bar, its card opening upwards over the scene edge */
 .oc-legend{position:relative;flex:0 0 auto;margin-left:auto}
-.oc-legend-btn{width:24px;height:24px;padding:0;font:inherit;font-size:12px;font-weight:600;line-height:1;color:var(--foreground);background:${CARD};border:1px solid ${EDGE2};border-radius:${BTN_RADIUS};cursor:pointer}
+.oc-legend-btn{width:24px;height:24px;padding:0;font:inherit;font-size:12px;font-weight:600;line-height:1;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-legend-btn:hover,.oc-legend-btn[aria-expanded="true"]{border-color:var(--ui-accent)}
 .oc-legend-pop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:40;box-sizing:border-box;width:max-content;max-width:min(340px,calc(100vw - 24px));padding:8px 10px;border-radius:10px;background:${CARD};border:1px solid var(--ui-accent);box-shadow:0 2px 8px color-mix(in oklab, var(--foreground) 22%, transparent);font-size:11.5px;line-height:1.35;color:var(--foreground)}
 .oc-legend-pop b{display:block;margin-bottom:5px;font-size:11px;font-weight:600;color:${SOFT5}}
@@ -24552,7 +24785,7 @@ var PANEL_CSS = `
 .oc-undo .oc-risk{flex:0 0 auto;margin-left:0}
 /* the card (or approval) an order counts down / travels for keeps a mark while the bar names it */
 .oc-cards li.oc-target{border-color:var(--ui-accent);box-shadow:0 0 0 1px var(--ui-accent)}
-.oc-ordbox{display:flex;flex-direction:column;gap:6px;padding:8px 9px;border:1px solid ${EDGE2};border-left:3px solid ${RED7};border-radius:8px;background:color-mix(in oklab, ${RED7} 5%, transparent)}
+.oc-ordbox{display:flex;flex-direction:column;gap:6px;padding:8px 9px;border:1px solid ${EDGE};border-left:3px solid ${RED7};border-radius:8px;background:color-mix(in oklab, ${RED7} 5%, transparent)}
 .oc-ordbox p{margin:0;font-size:12px;overflow-wrap:anywhere}
 .oc-ordbox .oc-ctitle{font-size:12.5px}
 .oc-ordbox .oc-text{display:block;box-sizing:border-box;width:100%;min-height:72px;max-height:220px;padding:6px 8px;font-family:inherit;color:var(--foreground);background:${CARD};border:1px solid ${FIELD_EDGE};border-radius:${FIELD_RADIUS};resize:vertical}
@@ -24569,21 +24802,21 @@ var PANEL_CSS = `
 .oc-counter.oc-near{color:${ink6(ORANGE9)};font-weight:600}
 .oc-ordnote{margin:0;font-size:11px;color:${ink6(RED7)}}
 /* under the floating bar the refusal (« another order is waiting ») has its own background, so it never runs over the page's hint line */
-.oc-ordbar .oc-ordnote{padding:5px 12px;border:1px solid ${EDGE2};border-radius:8px;background:${CARD}}
+.oc-ordbar .oc-ordnote{padding:5px 12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 /* while the bar floats over the foot of the panel (drawer at 1024 / 380 px), the panel can scroll its last rows above it */
-.oc-main:has(.oc-ordbar) .oc-pbody{padding-bottom:140px}
+.oc-main:has(.oc-ordbar) .oc-pbody{padding-bottom:140px;scroll-padding-bottom:140px}
 .oc-ordbar{position:absolute;left:50%;bottom:12px;z-index:45;transform:translateX(-50%);box-sizing:border-box;width:min(560px,calc(100% - 24px));display:flex;flex-direction:column;gap:4px}
 .oc-undo{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;box-sizing:border-box;padding:9px 12px 12px 14px;border:1px solid var(--ui-accent);border-radius:12px;background:${CARD};color:var(--foreground);font-size:12.5px;box-shadow:0 8px 28px color-mix(in oklab, var(--foreground) 28%, transparent);overflow:hidden}
 .oc-undotx,.oc-outtx{flex:1 1 12rem;min-width:0;overflow-wrap:anywhere}
 .oc-drain{position:absolute;left:0;right:0;bottom:0;height:3px;background:color-mix(in oklab, var(--ui-accent) 18%, transparent)}
 .oc-drain i{display:block;height:100%;background:var(--ui-accent);transform-origin:left center;animation:oc-drain linear forwards}
 @keyframes oc-drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-.oc-spin{flex:0 0 auto;width:10px;height:10px;box-sizing:border-box;border:2px solid ${EDGE2};border-top-color:var(--ui-accent);border-radius:50%;animation:oc-turn .8s linear infinite}
+.oc-spin{flex:0 0 auto;width:10px;height:10px;box-sizing:border-box;border:2px solid ${EDGE};border-top-color:var(--ui-accent);border-radius:50%;animation:oc-turn .8s linear infinite}
 @keyframes oc-turn{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.oc-drain{display:none}.oc-spin{animation:none;border-top-color:var(--ui-accent);border-right-color:var(--ui-accent)}}
 .oc-out-ok{border-color:${GREEN8}}
 .oc-out-ko{border-color:${RED7}}
-.oc-out-cancel{border-color:${EDGE2}}
+.oc-out-cancel{border-color:${EDGE}}
 .oc-outtag{flex:0 0 auto;padding:0 6px;border:1px solid currentColor;border-radius:5px;font-size:11px;letter-spacing:.03em;text-transform:uppercase}
 /* done / failed / cancelled also differ by shape (tick, solid triangle, hollow circle), not only by the word and the colour */
 .oc-outtag{display:inline-flex;align-items:center;gap:5px}
@@ -24593,19 +24826,19 @@ var PANEL_CSS = `
 .oc-out-ok .oc-outtag{color:${ink6(GREEN8)}}
 .oc-out-ko .oc-outtag{color:${ink6(RED7)}}
 .oc-out-cancel .oc-outtag{color:${SOFT5}}
-.oc-res-done{border-color:color-mix(in oklab, ${GREEN8} 60%, ${EDGE2});color:${ink6(GREEN8)}}
-.oc-res-failed,.oc-res-refused{border-color:color-mix(in oklab, ${RED7} 60%, ${EDGE2});color:${ink6(RED7)}}
+.oc-res-done{border-color:color-mix(in oklab, ${GREEN8} 60%, ${EDGE});color:${ink6(GREEN8)}}
+.oc-res-failed,.oc-res-refused{border-color:color-mix(in oklab, ${RED7} 60%, ${EDGE});color:${ink6(RED7)}}
 .oc-ojournal li > span .oc-tag{padding:0 5px;font-size:11px}
 /* the recruitment window (native <dialog>: focus trap and Escape for free). Theme variables only. */
 .oc-recruit{margin-left:0}
-.oc-dlg{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;border:1px solid ${EDGE2};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
+.oc-dlg{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
 .oc-dlg[open]{display:flex;flex-direction:column}
 .oc-dlg::backdrop{background:color-mix(in oklab, var(--foreground) 38%, transparent)}
 .oc-hire{display:flex;flex-direction:column;min-height:0;max-height:calc(100vh - 26px);padding:14px 16px;gap:10px;font-size:12.5px;overflow-y:auto;overscroll-behavior:contain}
 .oc-hhead{display:flex;align-items:center;gap:8px}
 .oc-hhead h2{margin:0;font-size:15px;font-weight:600}
 .oc-hbody{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;min-width:0}
-.oc-hprev{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:10px 8px;border:1px solid ${EDGE2};border-radius:10px;background:color-mix(in oklab, var(--ui-accent) 6%, transparent);align-self:start}
+.oc-hprev{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:10px 8px;border:1px solid ${EDGE};border-radius:10px;background:color-mix(in oklab, var(--ui-accent) 6%, transparent);align-self:start}
 .oc-hprev .oc-portrait{width:84px;height:90px;image-rendering:pixelated}
 .oc-hprevname{font-size:13px;overflow-wrap:anywhere}
 .oc-hprev .oc-faint{font-size:11px;overflow-wrap:anywhere}
@@ -24620,7 +24853,7 @@ var PANEL_CSS = `
 .oc-hire summary:focus-visible,.oc-hire input[type=radio]:focus-visible,.oc-hire input[type=checkbox]:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
 .oc-hire input[aria-invalid=true]{border-color:${RED7}}
 .oc-hire small{font-size:11px;color:${SOFT5};overflow-wrap:anywhere}
-.oc-fs{margin:0;padding:6px 9px 8px;border:1px solid ${EDGE2};border-radius:8px;min-width:0;display:flex;flex-direction:column;gap:5px}
+.oc-fs{margin:0;padding:6px 9px 8px;border:1px solid ${EDGE};border-radius:8px;min-width:0;display:flex;flex-direction:column;gap:5px}
 .oc-fs legend{padding:0 4px;font-size:11.5px;font-weight:600}
 .oc-radio{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
 .oc-radio select{width:auto;flex:1 1 8rem;min-width:0}
@@ -24633,14 +24866,14 @@ var PANEL_CSS = `
 .oc-hrow2{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:6px 0}
 .oc-herr{display:flex;flex-direction:column;gap:2px}
 .oc-herr p{margin:0;font-size:11.5px;color:${ink6(RED7)}}
-.oc-hreq pre{margin:6px 0 0;padding:8px;max-height:150px;overflow:auto;font-size:11px;line-height:1.4;border:1px solid ${EDGE2};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent);white-space:pre-wrap;overflow-wrap:anywhere}
+.oc-hreq pre{margin:6px 0 0;padding:8px;max-height:150px;overflow:auto;font-size:11px;line-height:1.4;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent);white-space:pre-wrap;overflow-wrap:anywhere}
 .oc-hfoot{position:sticky;bottom:-14px;z-index:1;padding:8px 0 2px;background:${CARD};display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .oc-hrisk{flex:1 1 14rem;min-width:0;font-size:11.5px}
-.oc-hermesmsg{padding:6px 8px;border:1px dashed ${EDGE2};border-radius:8px}
+.oc-hermesmsg{padding:6px 8px;border:1px dashed ${EDGE};border-radius:8px}
 /* the decorator's window: ideas to start from, the fiche as labelled swatches */
 .oc-decor{width:min(560px,calc(100vw - 24px))}
 .oc-decor-ex{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.oc-chipbtn{max-width:100%;padding:3px 9px;font:inherit;font-size:11.5px;text-align:left;color:var(--foreground);background:${CARD};border:1px solid ${EDGE2};border-radius:999px;cursor:pointer;overflow-wrap:anywhere}
+.oc-chipbtn{max-width:100%;padding:3px 9px;font:inherit;font-size:11.5px;text-align:left;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:999px;cursor:pointer;overflow-wrap:anywhere}
 .oc-chipbtn:hover:not(:disabled){border-color:var(--ui-accent)}
 .oc-chipbtn:focus-visible{${RING_FOCUS}}
 .oc-chipbtn:disabled{opacity:.5;cursor:default}
@@ -24672,10 +24905,10 @@ var page = {
 var muted = { fontSize: "0.8rem", color: "var(--ui-text-secondary)" };
 
 // src/ui/usePageClock.js
-import { useEffect as useEffect27, useState as useState24 } from "react";
+import { useEffect as useEffect28, useState as useState28 } from "react";
 function usePageClock() {
-  const [tick, setTick] = useState24(0);
-  useEffect27(() => {
+  const [tick, setTick] = useState28(0);
+  useEffect28(() => {
     let timer = null;
     const arm = () => {
       clearTimeout(timer);
@@ -24707,10 +24940,10 @@ function usePageClock() {
 }
 
 // src/ui/OfficePage.jsx
-import { jsx as jsx46, jsxs as jsxs42 } from "react/jsx-runtime";
+import { jsx as jsx47, jsxs as jsxs43 } from "react/jsx-runtime";
 function useWidth(ref) {
-  const [w, setW] = useState25(0);
-  useLayoutEffect8(() => {
+  const [w, setW] = useState29(0);
+  useLayoutEffect10(() => {
     const el = ref.current;
     if (!el || typeof ResizeObserver !== "function") return void 0;
     const ro = new ResizeObserver((entries) => {
@@ -24724,10 +24957,10 @@ function useWidth(ref) {
 }
 function OfficePage({ ctx }) {
   const t = useT();
-  const [replayOn, setReplayOn] = useState25(false);
-  const [replayKind, setReplayKind] = useState25("night");
-  const [cursor, setCursor] = useState25(null);
-  const [factFilter, setFactFilter] = useState25({ board: null, agent: null, group: null, all: false });
+  const [replayOn, setReplayOn] = useState29(false);
+  const [replayKind, setReplayKind] = useState29("night");
+  const [cursor, setCursor] = useState29(null);
+  const [factFilter, setFactFilter] = useState29({ board: null, agent: null, group: null, all: false });
   const roster = useRoster(livePollMs(replayOn, PAGE_POLL_MS));
   const health = useBackendHealth(ctx);
   const reads = health.data?.reads ?? [];
@@ -24742,30 +24975,30 @@ function OfficePage({ ctx }) {
   const lightPref = useValue5($lightPref);
   const motionPref = useValue5($motionPref);
   const gameOn = useValue5($gameMode);
-  const [selected, setSelectedState] = useState25(() => rememberedSelection());
+  const [selected, setSelectedState] = useState29(() => rememberedSelection());
   const setSelected = useCallback9((name) => {
     setSelectedState(rememberSelection(name));
   }, []);
   const wideOpen = useValue5($panelOpen);
-  const [tab, setTabState] = useState25("decisions");
+  const [tab, setTabState] = useState29("decisions");
   const setTab = useCallback9((k) => {
     if (isTab(k)) setTabState(k);
   }, []);
-  const [art, setArt] = useState25(null);
-  const [forced, setForced] = useState25(false);
-  const [folded, setFolded] = useState25(false);
-  const [held2, setHeld] = useState25(null);
-  const [refused2, setRefused] = useState25("");
-  const [officeView, setOfficeView] = useState25(true);
+  const [art, setArt] = useState29(null);
+  const [forced, setForced] = useState29(false);
+  const [folded, setFolded] = useState29(false);
+  const [held2, setHeld] = useState29(null);
+  const [refused2, setRefused] = useState29("");
+  const [officeView, setOfficeView] = useState29(true);
   const drawerOpen = !officeView;
   const setDrawerOpen = useCallback9((v) => setOfficeView((prev) => !(typeof v === "function" ? v(!prev) : v)), []);
-  const [project2, setProject] = useState25(null);
-  const [sortPref, setSortPref] = useState25("project");
+  const [project2, setProject] = useState29(null);
+  const [sortPref, setSortPref] = useState29("project");
   const sort = isSort(sortPref) ? sortPref : "project";
-  const [jfilter, setJfilter] = useState25("all");
-  const [hireOpen, setHireOpen] = useState25(false);
-  const usageBtnRef = useRef29(null);
-  const pageRef = useRef29(null);
+  const [jfilter, setJfilter] = useState29("all");
+  const [hireOpen, setHireOpen] = useState29(false);
+  const usageBtnRef = useRef31(null);
+  const pageRef = useRef31(null);
   const giveFocusBack = useCallback9((...selectors) => {
     setTimeout(() => {
       const root = pageRef.current;
@@ -24776,7 +25009,7 @@ function OfficePage({ ctx }) {
       focusBackTarget([...selectors.map(at), at("[data-more-toggle]")])?.focus();
     }, 0);
   }, []);
-  const [usageOpen, setUsageOpen] = useState25(false);
+  const [usageOpen, setUsageOpen] = useState29(false);
   const closeUsage = useCallback9(() => {
     setUsageOpen(false);
     giveFocusBack("[data-usage-open]");
@@ -24785,13 +25018,13 @@ function OfficePage({ ctx }) {
     setHireOpen(false);
     giveFocusBack("[data-recruit-open]");
   }, [giveFocusBack]);
-  const [campaignOpen, setCampaignOpen] = useState25(false);
+  const [campaignOpen, setCampaignOpen] = useState29(false);
   const closeCampaign = useCallback9(() => {
     setCampaignOpen(false);
     giveFocusBack("[data-campaign-open]");
   }, [giveFocusBack]);
-  const [vitrineOpen, setVitrineOpen] = useState25(false);
-  const vitrineFrom = useRef29(null);
+  const [vitrineOpen, setVitrineOpen] = useState29(false);
+  const vitrineFrom = useRef31(null);
   const openVitrine = useCallback9(() => {
     vitrineFrom.current = document.activeElement;
     setVitrineOpen(true);
@@ -24800,13 +25033,13 @@ function OfficePage({ ctx }) {
     setVitrineOpen(false);
     setTimeout(() => vitrineFrom.current?.focus?.(), 0);
   }, []);
-  const toggleRef = useRef29(null);
-  const headRef = useRef29(null);
+  const toggleRef = useRef31(null);
+  const headRef = useRef31(null);
   const width = useWidth(pageRef);
   const sheet = settingsSheet(width);
   const desks = roster.data?.desks ?? [];
   const bots = useMemo17(() => new Map(desks.map((d) => [d.name, { description: d.description ?? "", cut: d.descriptionCut === true, isDefault: d.isDefault === true }])), [desks]);
-  useEffect28(() => {
+  useEffect29(() => {
     if (!desks.length) return;
     const kept2 = recallSelection(desks.map((d) => d.name));
     if (kept2 !== selected) setSelectedState(kept2);
@@ -24818,7 +25051,7 @@ function OfficePage({ ctx }) {
     return { office: { ...built, agents: withNonEmptySessions(withWorkerModels(built.agents, history.data ?? null), history.data ?? null) }, nowMs: now };
   }, [desks, live.data, history.data, clock3]);
   const replayServed = reads.includes("replay");
-  const replayTo = useRef29(0);
+  const replayTo = useRef31(0);
   const nightPref = useValue5($nightPref);
   const nightWin = useMemo17(() => nightWindow(Date.now(), nightPref), [nightPref, clock3]);
   const nightQuery = useReplay(ctx, { enabled: replayServed, kind: "night", night: nightPref, anchor: nightWin.from, poll: nightWin.ongoing && !replayOn });
@@ -24857,7 +25090,7 @@ function OfficePage({ ctx }) {
     live: { data: live.data ?? null, dataUpdatedAt: live.dataUpdatedAt, errorUpdatedAt: live.errorUpdatedAt }
   });
   const { sober, narrow, panelOpen } = model;
-  useEffect28(() => {
+  useEffect29(() => {
     if (narrow) return;
     if (held2 != null && held2 !== width) {
       setHeld(null);
@@ -24888,13 +25121,13 @@ function OfficePage({ ctx }) {
   const decor = useMemo17(() => ({ ...gameDecor, ...llmShown.style ? { style: llmShown.style } : {}, ...llmShown.posters.length ? { posters: llmShown.posters } : {} }), [gameDecor, llmShown]);
   const workRoles = useMemo17(() => thoughtRoles(sceneAgents), [sceneAgents]);
   useThoughts({ ready: llmShown.thoughtsReady && !replayOn, visible: pageVisible, roles: workRoles, lang: t.lang });
-  const [decorOpen, setDecorOpen] = useState25(false);
-  const decorFrom = useRef29("[data-decor-open]");
+  const [decorOpen, setDecorOpen] = useState29(false);
+  const decorFrom = useRef31("[data-decor-open]");
   const closeDecor = useCallback9(() => {
     setDecorOpen(false);
     giveFocusBack(decorFrom.current);
   }, [giveFocusBack]);
-  const [seatOpen, setSeatOpen] = useState25(false);
+  const [seatOpen, setSeatOpen] = useState29(false);
   const closeSeat = useCallback9(() => {
     setSeatOpen(false);
     giveFocusBack("[data-gear]");
@@ -24911,7 +25144,7 @@ function OfficePage({ ctx }) {
   } : null, [llmOn, liveOffice.agents, decorReady, llmShown]);
   const unlockedKey = game.achievements.filter((a) => a.unlocked).map((a) => a.id).join(",");
   const complete = !sober && history.data?.ok === true && liveOffice.mode === "full";
-  useEffect28(() => {
+  useEffect29(() => {
     if (!complete) return;
     const res = unlockAnnouncement(readSeen(), game);
     writeSeen(res.next);
@@ -24920,7 +25153,7 @@ function OfficePage({ ctx }) {
     else if (res.kind === "many") host6.notify({ kind: "success", message: t("game.toast.many", res.ids.length) });
     else if (res.kind === "new") host6.notify({ kind: "success", message: t("game.toast.new", res.ids.map((id) => t(`game.ach.${id}.name`)).join(", ")) });
   }, [complete, unlockedKey]);
-  const exportRef = useRef29(null);
+  const exportRef = useRef31(null);
   const postcard = useCallback9(() => {
     const buffer = exportRef.current?.();
     if (buffer) savePostcard(buffer, postcardName(Date.now()));
@@ -24929,11 +25162,11 @@ function OfficePage({ ctx }) {
   const night = resolveLight(lightPref, new Date(nowMs)) === "night";
   const picked = office.agents.find((a) => a.name === selected) ?? null;
   const badges = useMemo17(() => badgesOf(office.agents, new Map(office.agents.map((a) => [a.name, modelOf(a)]))), [office]);
-  const seenBadges = useRef29(null);
-  const seenStates = useRef29(null);
-  const seenQuiet = useRef29(null);
-  const [announce, setAnnounce] = useState25("");
-  useEffect28(() => {
+  const seenBadges = useRef31(null);
+  const seenStates = useRef31(null);
+  const seenQuiet = useRef31(null);
+  const [announce, setAnnounce] = useState29("");
+  useEffect29(() => {
     if (replayOn) {
       seenBadges.current = null;
       seenStates.current = null;
@@ -24950,7 +25183,7 @@ function OfficePage({ ctx }) {
     if (said.length) setAnnounce(said.join(". "));
   }, [badges, office.agents, t, replayOn]);
   const queryClient = useQueryClient6();
-  const replayBtnRef = useRef29(null);
+  const replayBtnRef = useRef31(null);
   const busy = isBusy(orders.state);
   const enterReplay = useCallback9((kind = "night", group = null) => {
     if (busy) return;
@@ -24971,7 +25204,7 @@ function OfficePage({ ctx }) {
     setCursor(null);
   }, []);
   const dialogOpen = hireOpen || decorOpen || seatOpen || campaignOpen;
-  useEffect28(() => {
+  useEffect29(() => {
     if (!replayOn) return void 0;
     const onKey = (e) => {
       const settings = Boolean(document.querySelector("[data-settings-panel]"));
@@ -24980,8 +25213,8 @@ function OfficePage({ ctx }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [replayOn, dialogOpen, drawerOpen, narrow, exitReplay]);
-  const focused = useRef29(false);
-  useEffect28(() => {
+  const focused = useRef31(false);
+  useEffect29(() => {
     if (!replayOn) {
       focused.current = false;
       return;
@@ -24991,8 +25224,8 @@ function OfficePage({ ctx }) {
       pageRef.current?.querySelector("[data-replay-cursor]")?.focus({ preventScroll: true });
     }
   }, [replayOn, replayData]);
-  const edge = useRef29(null);
-  useEffect28(() => {
+  const edge = useRef31(null);
+  useEffect29(() => {
     if (!replayData) {
       edge.current = null;
       return;
@@ -25024,7 +25257,7 @@ function OfficePage({ ctx }) {
     if (fx.foldPanel) toggleWide(true);
     if (fx.focusToggle) toggleRef.current?.focus();
   };
-  const skipPending = useRef29(false);
+  const skipPending = useRef31(false);
   const skipToDetails = (e) => {
     e.preventDefault();
     const plan = skipPlan({ panelOpen, narrow });
@@ -25035,7 +25268,7 @@ function OfficePage({ ctx }) {
       else toggleWide(false);
     }
   };
-  useEffect28(() => {
+  useEffect29(() => {
     if (!panelOpen || !skipPending.current) return;
     skipPending.current = false;
     headRef.current?.focus();
@@ -25087,7 +25320,7 @@ function OfficePage({ ctx }) {
     setHireOpen(true);
   };
   const hireList = useMemo17(() => hireProfiles(desks, profiles), [desks, profiles]);
-  useEffect28(() => {
+  useEffect29(() => {
     if (!(narrow && drawerOpen)) return void 0;
     headRef.current?.focus();
     const onKey = (e) => {
@@ -25100,21 +25333,21 @@ function OfficePage({ ctx }) {
   }, [narrow, drawerOpen]);
   let body;
   if (model.body === "loading") {
-    body = /* @__PURE__ */ jsx46("div", { style: muted, role: "status", children: t("loading") });
+    body = /* @__PURE__ */ jsx47("div", { style: muted, role: "status", children: t("loading") });
   } else if (model.body === "unreachable") {
-    body = /* @__PURE__ */ jsx46(EmptyState, { title: t("unreachableTitle"), description: t("unreachableBody") });
+    body = /* @__PURE__ */ jsx47(EmptyState, { title: t("unreachableTitle"), description: t("unreachableBody") });
   } else if (model.body === "empty") {
-    body = /* @__PURE__ */ jsx46(EmptyOffice, { t, onRecruit: roster.data && !replayOn ? () => setHireOpen(true) : null });
+    body = /* @__PURE__ */ jsx47(EmptyOffice, { t, onRecruit: roster.data && !replayOn ? () => setHireOpen(true) : null });
   } else {
     const canOpen = picked ? canOpenSession(picked) : false;
     const why = picked ? canOpen ? t("openSession", picked.label) : t("noSession", picked.label) : "";
-    body = /* @__PURE__ */ jsxs42("div", { className: `ux-main${panelOpen ? "" : " nopanel"}`, children: [
-      narrow && panelOpen ? null : /* @__PURE__ */ jsxs42("div", { className: "ux-stage", "data-replaying": replayOn ? "" : void 0, children: [
-        replayOn ? /* @__PURE__ */ jsxs42("span", { className: "oc-rp-tag", "aria-hidden": "true", "data-replay-tag": true, children: [
-          /* @__PURE__ */ jsx46("span", { className: "oc-rp-dot" }),
+    body = /* @__PURE__ */ jsxs43("div", { className: `ux-main${panelOpen ? "" : " nopanel"}`, children: [
+      narrow && panelOpen ? null : /* @__PURE__ */ jsxs43("div", { className: "ux-stage", "data-replaying": replayOn ? "" : void 0, children: [
+        replayOn ? /* @__PURE__ */ jsxs43("span", { className: "oc-rp-tag", "aria-hidden": "true", "data-replay-tag": true, children: [
+          /* @__PURE__ */ jsx47("span", { className: "oc-rp-dot" }),
           replayData ? t("replay.banner", replayAt) : t("replay.notLoaded")
         ] }) : null,
-        /* @__PURE__ */ jsx46(
+        /* @__PURE__ */ jsx47(
           OfficeScene,
           {
             office,
@@ -25137,7 +25370,7 @@ function OfficePage({ ctx }) {
             listNote: model.listBeside ? { onClose: () => toggleWide(true) } : null
           }
         ),
-        replayOn ? /* @__PURE__ */ jsxs42(
+        replayOn ? /* @__PURE__ */ jsxs43(
           ReplayBar,
           {
             replay: replayData,
@@ -25150,12 +25383,12 @@ function OfficePage({ ctx }) {
             counts: replayCounts ? { working: replayCounts.working, waiting: replayCounts.waiting, silent: replayCounts.stale } : null,
             t,
             children: [
-              replayData && !replayOffice.boards.length ? /* @__PURE__ */ jsx46("p", { className: "oc-rp-msg", "data-replay-no-board": true, children: t("replay.boardsAbsent") }) : null,
-              replayData ? replayData.boards.filter((b) => b.sinceMs != null && b.sinceMs > replayData.fromMs).map((b) => /* @__PURE__ */ jsx46("p", { className: "oc-rp-warn", "data-replay-since": b.slug, children: t("replay.since", b.slug, clockLabel(b.sinceMs, t.lang, { day: replayData.toMs - replayData.fromMs > 20 * 36e5 })) }, b.slug)) : null
+              replayData && !replayOffice.boards.length ? /* @__PURE__ */ jsx47("p", { className: "oc-rp-msg", "data-replay-no-board": true, children: t("replay.boardsAbsent") }) : null,
+              replayData ? replayData.boards.filter((b) => b.sinceMs != null && b.sinceMs > replayData.fromMs).map((b) => /* @__PURE__ */ jsx47("p", { className: "oc-rp-warn", "data-replay-since": b.slug, children: t("replay.since", b.slug, clockLabel(b.sinceMs, t.lang, { day: replayData.toMs - replayData.fromMs > 20 * 36e5 })) }, b.slug)) : null
             ]
           }
         ) : null,
-        /* @__PURE__ */ jsx46(
+        /* @__PURE__ */ jsx47(
           ProjectDock,
           {
             boards: office.boards,
@@ -25173,7 +25406,7 @@ function OfficePage({ ctx }) {
           }
         )
       ] }),
-      panelOpen && replayOn && replayData ? /* @__PURE__ */ jsx46(
+      panelOpen && replayOn && replayData ? /* @__PURE__ */ jsx47(
         ReplayPanel,
         {
           replay: replayData,
@@ -25191,7 +25424,7 @@ function OfficePage({ ctx }) {
           headRef,
           t
         }
-      ) : panelOpen ? /* @__PURE__ */ jsx46(
+      ) : panelOpen ? /* @__PURE__ */ jsx47(
         SidePanel,
         {
           office,
@@ -25226,14 +25459,14 @@ function OfficePage({ ctx }) {
           bots
         }
       ) : null,
-      replayOn ? null : /* @__PURE__ */ jsx46(OrderBar, { orders, onFocusBack: focusAfterOrder, onModelFollowUp: followUpModel })
+      replayOn ? null : /* @__PURE__ */ jsx47(OrderBar, { orders, onFocusBack: focusAfterOrder, onModelFollowUp: followUpModel })
     ] });
   }
   const showBadge = model.showGameBar && !replayOn;
-  return /* @__PURE__ */ jsx46(ProjectColors, { value: projectColors2, children: /* @__PURE__ */ jsxs42("div", { className: "ux", style: page, lang: t.lang, ref: pageRef, "data-motion": motionPref, children: [
-    /* @__PURE__ */ jsx46("style", { children: PANEL_CSS + REPLAY_CSS + USAGE_CSS + PAGE_CSS }),
-    model.body === "office" ? /* @__PURE__ */ jsx46("a", { href: "#oc-panel", className: "oc-skip", "data-skip": true, onClick: skipToDetails, children: t("skipDetails") }) : null,
-    /* @__PURE__ */ jsx46(
+  return /* @__PURE__ */ jsx47(ProjectColors, { value: projectColors2, children: /* @__PURE__ */ jsxs43("div", { className: "ux", style: page, lang: t.lang, ref: pageRef, "data-motion": motionPref, children: [
+    /* @__PURE__ */ jsx47("style", { children: PANEL_CSS + REPLAY_CSS + USAGE_CSS + PAGE_CSS }),
+    model.body === "office" ? /* @__PURE__ */ jsx47("a", { href: "#oc-panel", className: "oc-skip", "data-skip": true, onClick: skipToDetails, children: t("skipDetails") }) : null,
+    /* @__PURE__ */ jsx47(
       PageHeader,
       {
         t,
@@ -25252,47 +25485,47 @@ function OfficePage({ ctx }) {
           setDecorOpen(true);
         } } : null,
         panel: desks.length > 0 && width > 0 ? { ref: toggleRef, open: panelOpen, onClick: togglePanel } : null,
-        gear: /* @__PURE__ */ jsx46(SettingsGear, { sheet, llm: llmActions }),
+        gear: /* @__PURE__ */ jsx47(SettingsGear, { sheet, llm: llmActions }),
         narrow
       }
     ),
-    replayOn ? /* @__PURE__ */ jsxs42("div", { className: "oc-rp-banner", "data-replay-banner": true, children: [
-      /* @__PURE__ */ jsx46("span", { className: "oc-rp-dot", "aria-hidden": "true" }),
-      /* @__PURE__ */ jsx46("b", { "data-replay-at": true, children: replayData ? t("replay.banner", replayAt) : t("replay.notLoaded") }),
-      /* @__PURE__ */ jsx46("span", { className: "oc-rp-note", children: replayData ? t("replay.bannerNote") : t("replay.notLoadedNote") }),
-      /* @__PURE__ */ jsx46("button", { type: "button", className: "oc-rp-exit", "data-replay-exit": true, title: t("replay.exitTip"), onClick: exitReplay, children: t("replay.exit") })
+    replayOn ? /* @__PURE__ */ jsxs43("div", { className: "oc-rp-banner", "data-replay-banner": true, children: [
+      /* @__PURE__ */ jsx47("span", { className: "oc-rp-dot", "aria-hidden": "true" }),
+      /* @__PURE__ */ jsx47("b", { "data-replay-at": true, children: replayData ? t("replay.banner", replayAt) : t("replay.notLoaded") }),
+      /* @__PURE__ */ jsx47("span", { className: "oc-rp-note", children: replayData ? t("replay.bannerNote") : t("replay.notLoadedNote") }),
+      /* @__PURE__ */ jsx47("button", { type: "button", className: "oc-rp-exit", "data-replay-exit": true, title: t("replay.exitTip"), onClick: exitReplay, children: t("replay.exit") })
     ] }) : null,
-    /* @__PURE__ */ jsx46(AlertRail, { alerts, narrow, t, failingNames }),
+    /* @__PURE__ */ jsx47(AlertRail, { alerts, narrow, t, failingNames }),
     body,
-    narrow && model.body === "office" ? /* @__PURE__ */ jsx46(TabBar, { view: officeView ? "office" : tab, onView: goView, decisions: decisionCount, t }) : null,
-    roster.data ? /* @__PURE__ */ jsx46(HireDialog, { open: hireOpen, onClose: closeHire, profiles: hireList, orders, onSeeBot: (name) => {
+    narrow && model.body === "office" ? /* @__PURE__ */ jsx47(TabBar, { view: officeView ? "office" : tab, onView: goView, decisions: decisionCount, t }) : null,
+    roster.data ? /* @__PURE__ */ jsx47(HireDialog, { open: hireOpen, onClose: closeHire, profiles: hireList, orders, onSeeBot: (name) => {
       setHireOpen(false);
       pickAgent(name);
     } }) : null,
-    roster.data && writes.includes("campaign") ? /* @__PURE__ */ jsx46(CampaignDialog, { open: campaignOpen, onClose: closeCampaign, desks, boards: liveOffice.boards, sceneBy: sceneByName, orders, writes, replay: replayOn }) : null,
-    usageOpen ? /* @__PURE__ */ jsx46(UsageDialog, { open: usageOpen, onClose: closeUsage, ctx, usageServed: reads.includes("usage"), replayServed }) : null,
-    showBadge && vitrineOpen ? /* @__PURE__ */ jsx46(Vitrine, { open: vitrineOpen, onClose: closeVitrine, game, office: liveOffice, readMs: live.dataUpdatedAt || nowMs, nowMs, onPostcard: postcard, t }) : null,
-    llmOn ? /* @__PURE__ */ jsx46(DecorDialog, { open: decorOpen, onClose: closeDecor }) : null,
-    llmOn ? /* @__PURE__ */ jsx46(SeatingDialog, { open: seatOpen, onClose: closeSeat, weights, choice: seatChoice, onChoice: setSeatChoice }) : null
+    roster.data && writes.includes("campaign") ? /* @__PURE__ */ jsx47(CampaignDialog, { open: campaignOpen, onClose: closeCampaign, desks, boards: liveOffice.boards, sceneBy: sceneByName, orders, writes, replay: replayOn }) : null,
+    usageOpen ? /* @__PURE__ */ jsx47(UsageDialog, { open: usageOpen, onClose: closeUsage, ctx, usageServed: reads.includes("usage"), replayServed }) : null,
+    showBadge && vitrineOpen ? /* @__PURE__ */ jsx47(Vitrine, { open: vitrineOpen, onClose: closeVitrine, game, office: liveOffice, readMs: live.dataUpdatedAt || nowMs, nowMs, onPostcard: postcard, t }) : null,
+    llmOn ? /* @__PURE__ */ jsx47(DecorDialog, { open: decorOpen, onClose: closeDecor }) : null,
+    llmOn ? /* @__PURE__ */ jsx47(SeatingDialog, { open: seatOpen, onClose: closeSeat, weights, choice: seatChoice, onChoice: setSeatChoice }) : null
   ] }) });
 }
 
 // src/ui/SettingsPage.jsx
-import { jsx as jsx47 } from "react/jsx-runtime";
+import { jsx as jsx48 } from "react/jsx-runtime";
 function SettingsPage() {
-  return /* @__PURE__ */ jsx47("div", { className: "oc-sf-page", children: /* @__PURE__ */ jsx47(SettingsForm, {}) });
+  return /* @__PURE__ */ jsx48("div", { className: "oc-sf-page", children: /* @__PURE__ */ jsx48(SettingsForm, {}) });
 }
 
 // src/ui/StatusChip.jsx
 import { host as host7, Tip as Tip2 } from "@hermes/plugin-sdk";
-import { jsx as jsx48 } from "react/jsx-runtime";
+import { jsx as jsx49 } from "react/jsx-runtime";
 function StatusChip() {
   const t = useT();
   const roster = useRoster(CHIP_POLL_MS);
   const desks = roster.data?.desks ?? [];
   if (!roster.data?.ok || desks.length === 0) return null;
   const counts = summarize(desks);
-  const button = /* @__PURE__ */ jsx48(
+  const button = /* @__PURE__ */ jsx49(
     "button",
     {
       type: "button",
@@ -25313,11 +25546,11 @@ function StatusChip() {
       children: t("chip", counts.working, counts.total)
     }
   );
-  return typeof Tip2 === "function" ? /* @__PURE__ */ jsx48(Tip2, { label: t("chipTip"), children: button }) : button;
+  return typeof Tip2 === "function" ? /* @__PURE__ */ jsx49(Tip2, { label: t("chipTip"), children: button }) : button;
 }
 
 // src/index.jsx
-import { jsx as jsx49 } from "react/jsx-runtime";
+import { jsx as jsx50 } from "react/jsx-runtime";
 var appLocale = () => typeof document !== "undefined" ? document.documentElement.lang : void 0;
 var currentLang = () => resolveLocale($languagePref.get(), appLocale(), systemLocales());
 var index_default = {
@@ -25331,10 +25564,10 @@ var index_default = {
     ctx.i18n?.register?.(messages);
     const register = (item) => item.area ? ctx.register(item) : () => {
     };
-    register({ id: "page", area: ROUTES_AREA, data: { path: ROUTE }, render: () => /* @__PURE__ */ jsx49(OfficePage, { ctx }) });
-    register({ id: "chip", area: STATUSBAR_AREAS?.right, order: 140, render: () => /* @__PURE__ */ jsx49(StatusChip, {}) });
+    register({ id: "page", area: ROUTES_AREA, data: { path: ROUTE }, render: () => /* @__PURE__ */ jsx50(OfficePage, { ctx }) });
+    register({ id: "chip", area: STATUSBAR_AREAS?.right, order: 140, render: () => /* @__PURE__ */ jsx50(StatusChip, {}) });
     if (typeof ctx.registerSettingsPage === "function") {
-      ctx.registerSettingsPage({ id: "settings", title: "Officecraft", icon: "organization", render: () => /* @__PURE__ */ jsx49(SettingsPage, {}) });
+      ctx.registerSettingsPage({ id: "settings", title: "Officecraft", icon: "organization", render: () => /* @__PURE__ */ jsx50(SettingsPage, {}) });
     }
     let disposeLabels = () => {
     };
