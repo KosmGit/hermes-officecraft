@@ -3,7 +3,7 @@ import { Fragment, useCallback, useEffect, useId, useMemo, useReducer, useRef, u
 import {
   HEAD, MAX_BODY, MAX_GOAL, MAX_NAME, MAX_TITLE, MAX_WORK_CARDS, TEMPLATES, addCard, addGuard, addPhase, applyTemplate, codes, createdOf, draftIsEmpty,
   draftIssues, draftNotes, duplicateCard, effective, eligibleParents, guardTitle, initialWindow, isGuard, keepSession, letter, newDraft, patchCard, recallSession, removeCard, removeLastPhase,
-  renamePhase, clearSession, slugState, slugify, summary, templateCards, toggleParent, windowReducer, workCards
+  renamePhase, clearSession, missingParts, slugState, slugify, summary, templateCards, templatePreview, toggleParent, windowReducer, workCards
 } from '../core/campaign.js'
 import { depthOf } from '../core/campaignLayout.js'
 import { numberText } from '../core/format.js'
@@ -75,7 +75,7 @@ function Stepper({ step, t, titleRef }) {
 }
 
 /** The templates panel: four chains written in code, their knobs (how many, which bots from the roster), « Add to the end » or « Replace ». */
-function Templates({ draft, apply, bots, colors, t, onClose }) {
+function Templates({ draft, apply, bots, colors, t, L, onClose }) {
   const id = useId()
   const [tpl, setTpl] = useState('devreview')
   const [mode, setMode] = useState('append')
@@ -91,6 +91,11 @@ function Templates({ draft, apply, bots, colors, t, onClose }) {
   const knobs = { devreview: [['dev', t('campaign.tpl.botDev')], ['review', t('campaign.tpl.botReview')]], audit: [['audit', t('campaign.tpl.botAudit')], ['synth', t('campaign.tpl.botSynth')]], phases: [['work', t('campaign.tpl.botWork')]], chain: [['chain', t('campaign.tpl.botChain')]] }[tpl]
   const params = { n: n[tpl], per, bots: { dev: pick.dev, review: pick.review, audit: [pick.audit], synth: pick.synth, work: [pick.work], chain: [pick.chain] } }
   const room = MAX_WORK_CARDS - workCards(draft).length
+  // on a draft with no card there is nothing to add to or to replace: the template simply is the draft, and the result is said beside the button
+  const empty = workCards(draft).length === 0
+  const how = empty ? 'replace' : mode
+  const made = useMemo(() => templatePreview(draft, tpl, params, how, L), [draft, tpl, n, per, pick, how, L]) // eslint-disable-line react-hooks/exhaustive-deps
+  const result = made.refused ? t(`campaign.refused.${made.refused}`) : made.mode === 'append' ? t('campaign.tpl.resultAdd', made.made, made.work) : t('campaign.tpl.result', made.made, made.phases, made.guards)
   return (
     <section className="oc-cgtpl" aria-label={t('campaign.tpl.title')} data-templates>
       <div className="hd"><b>{t('campaign.tpl.title')}</b><small>{t('campaign.tpl.sub')}</small>
@@ -111,12 +116,14 @@ function Templates({ draft, apply, bots, colors, t, onClose }) {
         {knobs.map(([k, l]) => botSel(k, l))}
       </div>
       <div className="ft">
-        <span className="oc-dg-seg" role="group" aria-label={t('campaign.tpl.apply')}>
-          <button type="button" aria-pressed={mode === 'append'} data-tpl-mode="append" onClick={() => setMode('append')}>{t('campaign.tpl.append')}</button>
-          <button type="button" aria-pressed={mode === 'replace'} data-tpl-mode="replace" onClick={() => setMode('replace')}>{t('campaign.tpl.replace')}</button>
-        </span>
-        <small className="faint" id={`${id}-n`}>{mode === 'append' ? t('campaign.tpl.appendNote') : t('campaign.tpl.replaceNote')}{room < 8 && mode === 'append' ? ` ${t('campaign.tpl.room', Math.max(0, room))}` : ''}</small>
-        <button type="button" className="oc-btn oc-primary" data-tpl-apply aria-describedby={`${id}-n`} onClick={() => apply(tpl, params, mode)}>{t('campaign.tpl.go')}</button>
+        {empty ? null : (
+          <span className="oc-dg-seg" role="group" aria-label={t('campaign.tpl.apply')}>
+            <button type="button" aria-pressed={mode === 'append'} data-tpl-mode="append" onClick={() => setMode('append')}>{t('campaign.tpl.append')}</button>
+            <button type="button" aria-pressed={mode === 'replace'} data-tpl-mode="replace" onClick={() => setMode('replace')}>{t('campaign.tpl.replace')}</button>
+          </span>
+        )}
+        <small className="faint" id={`${id}-n`}>{empty ? null : <>{mode === 'append' ? t('campaign.tpl.appendNote') : t('campaign.tpl.replaceNote')}{room < 8 && mode === 'append' ? ` ${t('campaign.tpl.room', Math.max(0, room))}` : ''}{' '}</>}<b className="oc-tpl-result" data-tpl-result>{result}</b></small>
+        <button type="button" className="oc-btn oc-primary" data-tpl-apply aria-describedby={`${id}-n`} onClick={() => apply(tpl, params, how)}>{t('campaign.tpl.go')}</button>
       </div>
     </section>
   )
@@ -281,6 +288,7 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
   const slugSt = slugState(draft.nb.slug, slugs)
   const target = nb ? draft.nb.slug : draft.board
   const ok = issues.length === 0
+  const missing = useMemo(() => missingParts(issues), [issues])
   const isNoBot = !bots.length
 
   const patch = useCallback((id, p) => set(d => patchCard(d, id, p)), [set])
@@ -385,7 +393,7 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
         ) : null}
       </div>
       {A.ready.campaign && A.cg.open ? <GraphPanel A={A} draft={draft} colors={colors} onClose={A.cg.close} /> : null}
-      {tplOpen && !(A.ready.campaign && A.cg.open) && bots.length ? <Templates draft={draft} apply={apply} bots={bots} colors={colors} t={t} onClose={() => setTplOpen(false)} /> : null}
+      {tplOpen && !(A.ready.campaign && A.cg.open) && bots.length ? <Templates draft={draft} apply={apply} bots={bots} colors={colors} t={t} L={L} onClose={() => setTplOpen(false)} /> : null}
       {refused ? <Notice tone="warn" icon="alert" data-refused>{t(`campaign.refused.${refused}`)}</Notice> : null}
       <div className="oc-cgseg" role="group" aria-label={t('campaign.view')}>
         <span className="oc-dg-seg">
@@ -401,9 +409,9 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
               const guard = rows.find(isGuard)
               return (
                 <li key={k} className="ph" data-phase={k}>
-                  <div className="phh"><span className="pl">{t('campaign.phaseWord', letter(k))}</span>
+                  <div className="phh"><span className="pl" aria-hidden="true">{letter(k)}</span>
                     <input className="phn" value={p.name} maxLength={MAX_NAME} aria-label={t('campaign.phaseName', letter(k))} data-phase-name={k} onChange={e => set(d => renamePhase(d, k, e.target.value))} />
-                    <span className="oc-mono n">{rows.filter(c => !isGuard(c)).length}</span></div>
+                    <span className="oc-mono n">{t('campaign.phaseCards', rows.filter(c => !isGuard(c)).length)}</span></div>
                   {k === 0 ? (
                     <div className="oc-cgguard" data-guard-row="head"><Icon name="lock" size={14} /><span className="tt"><b>{t('campaign.guard.head')}</b><small>{t('campaign.guard.headNote')}</small></span><span className="lockd">{t('campaign.guard.always')}</span></div>
                   ) : guard ? (
@@ -420,7 +428,17 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
                         onDup={id => set(d => duplicateCard(d, id))} onDel={id => set(d => removeCard(d, id))} onDep={dep} t={t} />
                     ))}
                   </ul>
-                  <button type="button" className="ux-b sm ghost" data-add-card={k} aria-disabled={sum.work >= MAX_WORK_CARDS || isNoBot || undefined} onClick={() => { if (sum.work < MAX_WORK_CARDS && !isNoBot) add(k) }}><Icon name="plus" size={14} />{t('campaign.addCard')}</button>
+                  {k === 0 && sum.work === 0 ? (
+                    <div className="oc-cgstart" data-cg-starter>
+                      <p>{t('campaign.starter')}</p>
+                      <div className="acts">
+                        <button type="button" className="ux-b sm" data-cg-starter-tpl aria-expanded={tplOpen && !A.cg.open} onClick={() => { A.cg.setOpen(false); setTplOpen(true) }}><Icon name="layers" size={14} />{t('campaign.tpl.pick')}</button>
+                        <button type="button" className="ux-b sm" data-add-card={k} aria-disabled={isNoBot || undefined} onClick={() => { if (!isNoBot) add(k) }}><Icon name="plus" size={14} />{t('campaign.addCard')}</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button type="button" className="ux-b sm ghost" data-add-card={k} aria-disabled={sum.work >= MAX_WORK_CARDS || isNoBot || undefined} onClick={() => { if (sum.work < MAX_WORK_CARDS && !isNoBot) add(k) }}><Icon name="plus" size={14} />{t('campaign.addCard')}</button>
+                  )}
                 </li>
               )
             })}
@@ -508,23 +526,28 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
   const step = win.step
   const startSlot = step === 'compose' ? (
     <>
+      {/* a check appears once there is something to check (a card), and only the ones that can fail: « behind a guard » is true by construction (effective() adds the guards), so it is not a check */}
       <span className="oc-cgchk" data-checks>
-        <span className={`ck ${g.loop ? 'ko' : 'ok'}`}><Icon name={g.loop ? 'warn' : 'check'} size={14} />{t('campaign.ck.noLoop')}</span>
-        <span className="ck ok"><Icon name="check" size={14} />{t('campaign.ck.guarded')}</span>
-        <span className={`ck ${sum.work > MAX_WORK_CARDS || isNoBot ? 'ko' : 'ok'}`}><Icon name={sum.work > MAX_WORK_CARDS ? 'warn' : 'check'} size={14} />{t('campaign.ck.count', sum.work, MAX_WORK_CARDS)}</span>
+        {sum.work > 0 ? (
+          <>
+            <span className={`ck ${g.loop ? 'ko' : 'ok'}`}><Icon name={g.loop ? 'warn' : 'check'} size={14} />{t('campaign.ck.noLoop')}</span>
+            <span className={`ck ${sum.work > MAX_WORK_CARDS || isNoBot ? 'ko' : 'ok'}`}><Icon name={sum.work > MAX_WORK_CARDS ? 'warn' : 'check'} size={14} />{t('campaign.ck.count', sum.work, MAX_WORK_CARDS)}</span>
+          </>
+        ) : null}
+        {missing.length ? <span className="miss" id={`${uid}-miss`} data-missing>{t('campaign.missing', missing.map(k => t(`campaign.missingPart.${k}`)).join(', '))}</span> : null}
       </span>
       <LeftBar A={A} />
       {!draftIsEmpty(draft) ? (confirmClear
         ? <span className="oc-cgclr" role="group" aria-label={t('campaign.clear.label')}><span>{t('campaign.clear.ask')}</span>
             <button type="button" className="ux-b sm" data-clear-no onClick={() => setConfirmClear(false)}>{t('campaign.clear.keep')}</button>
             <button type="button" className="ux-b sm danger" data-clear-yes onClick={clear}>{t('campaign.clear.go')}</button></span>
-        : <button type="button" className="oc-dg-link" data-clear onClick={() => setConfirmClear(true)}>{t('campaign.clear.button')}</button>) : null}
+        : <><button type="button" className="oc-dg-link" data-clear onClick={() => setConfirmClear(true)}>{t('campaign.clear.button')}</button><span className="oc-dg-kept" data-cg-kept>{t('dlg.draftKept')}</span></>) : null}
     </>
   ) : step === 'review' ? <small className="faint oc-cgnote" data-review-note>{t('campaign.review.note', UNDO_SECONDS)}</small> : null
   const actionSlot = step === 'compose' ? (
     <>
       <button type="button" className="oc-btn" data-cg-close onClick={close}>{t('campaign.close')}</button>
-      <button type="button" className="oc-btn oc-primary" data-cg-review aria-disabled={!ok || undefined} onClick={goReview}>{t('campaign.toReview')}</button>
+      <button type="button" className="oc-btn oc-primary" data-cg-review aria-disabled={!ok || undefined} aria-describedby={missing.length ? `${uid}-miss` : undefined} onClick={goReview}>{t('campaign.toReview')}</button>
     </>
   ) : step === 'review' ? (
     inFlight ? null : (

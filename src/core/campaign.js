@@ -522,6 +522,27 @@ export function applyTemplate(draft, id, params, mode = 'append', L = EN) {
   return { draft: next, refused: null }
 }
 
+/**
+ * What a template would make of the draft, for the line beside its button: { mode, made (cards it writes), work (cards the draft would then
+ * hold), phases, guards }, or { refused } past the limits. On a draft with no card, `append` and `replace` are the same thing: it is read as `replace`.
+ */
+export function templatePreview(draft, id, params, mode = 'append', L = EN) {
+  const m = workCards(draft).length ? mode : 'replace'
+  const r = applyTemplate(draft, id, params, m, L)
+  if (r.refused) return { refused: r.refused }
+  const s = summary(r.draft)
+  return { refused: null, mode: m, made: templateCards(id, params, L).cards.length, work: s.work, phases: r.draft.phases.length, guards: s.guards }
+}
+
+/**
+ * What a draft lacks to be reviewed, in the words the window says them: ['goal', 'project' | 'projectName', 'card'] (the order of the form).
+ * Only what is MISSING: a wrong value (a loop, a title with a control character) is an error, said when « Review » is pressed.
+ */
+export function missingParts(issues) {
+  const has = (...codes) => issues.some(i => codes.includes(i.code))
+  return [has('goal_empty') ? 'goal' : null, has('board_none') ? 'project' : has('nb_name') ? 'projectName' : null, has('no_cards') ? 'card' : null].filter(Boolean)
+}
+
 /* ---------- the answer of POST /campaign ---------- */
 
 export const CAMPAIGN_RESULTS = Object.freeze(['done', 'refused', 'failed'])

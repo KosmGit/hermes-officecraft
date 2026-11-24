@@ -71,3 +71,86 @@ test('the risk of « Recruit » is written next to the button, the diagnostic li
   }
   assert.equal(messages.fr.recruit.cancel, 'Fermer')
 })
+
+/* ---------- campaign ---------- */
+import { applyTemplate, draftIssues, missingParts, newDraft, templatePreview } from '../../src/core/campaign.js'
+import { CAMPAIGN_CSS } from '../../src/ui/campaignStyles.js'
+
+const bots = ['alpha', 'beta']
+const params = { n: 2, per: 2, bots: { dev: 'alpha', review: 'beta', audit: ['alpha'], synth: 'beta', work: ['alpha'], chain: ['alpha'] } }
+
+test('an empty draft says what it lacks, in the order of the form, and nothing else', () => {
+  const empty = newDraft({ phaseName: 'Phase A' })
+  assert.deepEqual(missingParts(draftIssues(empty, { bots, boards: ['website'] })), ['goal', 'project', 'card'])
+  assert.deepEqual(missingParts(draftIssues({ ...empty, boardMode: 'new' }, { bots, boards: [] })), ['goal', 'projectName', 'card'])
+  assert.deepEqual(missingParts(draftIssues({ ...empty, goal: 'Ship it', board: 'website' }, { bots, boards: ['website'] })), ['card'])
+  const full = applyTemplate({ ...empty, goal: 'Ship it', board: 'website' }, 'chain', params, 'replace').draft
+  assert.deepEqual(missingParts(draftIssues(full, { bots, boards: ['website'] })), [], 'a wrong value is an error, not a missing part')
+})
+
+test('the checks of the foot appear from the first card and never include the one that cannot fail', () => {
+  const dlg = src('ui/CampaignDialog.jsx')
+  assert.match(dlg, /\{sum\.work > 0 \? \(\s*<>\s*<span className=\{`ck \$\{g\.loop/)
+  assert.doesNotMatch(dlg, /campaign\.ck\.guarded/, '« behind a guard » is true by construction (effective() adds the guards)')
+  assert.match(dlg, /data-missing/)
+  for (const lang of LANGS) {
+    assert.equal(messages[lang].campaign.ck.guarded, undefined, lang)
+    assert.match(messages[lang].campaign.missing('X'), /X/, lang)
+  }
+  assert.equal(messages.fr.campaign.missing('un objectif, un projet, une carte'), 'Il manque : un objectif, un projet, une carte.')
+})
+
+test('a chain template is a « gabarit » / « template » / « plantilla »; « modèle » stays the model of the LLM', () => {
+  const tpl = { fr: /gabarit/i, en: /template/i, es: /plantilla/i }
+  for (const lang of LANGS) {
+    const c = messages[lang].campaign.tpl
+    for (const k of ['label', 'title', 'go', 'pick']) assert.match(c[k], tpl[lang], `${lang} campaign.tpl.${k}`)
+    assert.match(messages[lang].campaign.starter, tpl[lang], lang)
+  }
+  assert.doesNotMatch(JSON.stringify(Object.values(messages.fr.campaign.tpl).filter(v => typeof v === 'string')), /[Mm]odèle/)
+  assert.match(messages.fr.campaign.f.model, /Modèle/, 'the LLM model keeps its word')
+  assert.equal(messages.fr.campaign.starter, 'Partez d’un gabarit ou ajoutez une première carte.')
+  const dlg = src('ui/CampaignDialog.jsx')
+  assert.match(dlg, /data-cg-starter/)
+  assert.match(dlg, /k === 0 && sum\.work === 0/, 'the starter shows in the first phase of a draft with no card')
+})
+
+test('the window keeps one height on the composing step', () => {
+  assert.match(CAMPAIGN_CSS, /\.oc-dg\.oc-cg-dlg\[data-step="compose"\]\{height:min\(760px,calc\(100dvh - 32px\)\)\}/)
+})
+
+test('a template on an empty draft has no « add / replace » choice and says what it makes', () => {
+  const empty = newDraft({ phaseName: 'Phase A' })
+  const p = templatePreview(empty, 'phases', { ...params, n: 2, per: 2 }, 'append')
+  assert.deepEqual({ mode: p.mode, made: p.made, phases: p.phases, guards: p.guards, work: p.work }, { mode: 'replace', made: 4, phases: 2, guards: 2, work: 4 })
+  assert.equal(messages.fr.campaign.tpl.result(p.made, p.phases, p.guards), 'Crée 4 cartes en 2 phases, 2 verrous.')
+  assert.equal(messages.fr.campaign.tpl.result(1, 1, 1), 'Crée 1 carte en 1 phase, 1 verrou.')
+  assert.equal(messages.en.campaign.tpl.result(4, 2, 2), 'Creates 4 cards in 2 phases, 2 guards.')
+  const filled = applyTemplate(empty, 'chain', params, 'replace').draft
+  const add = templatePreview(filled, 'chain', params, 'append')
+  assert.equal(add.mode, 'append')
+  assert.equal(add.work, 4, 'the draft would then hold 4 cards')
+  assert.deepEqual(templatePreview(filled, 'chain', { ...params, n: 20 }, 'append').refused, null)
+  const dlg = src('ui/CampaignDialog.jsx')
+  assert.match(dlg, /\{empty \? null : \(\s*<span className="oc-dg-seg"/)
+  assert.match(dlg, /data-tpl-result/)
+})
+
+test('the preview names a phase by its letter in the strip, the whole name on hover and for a screen reader', () => {
+  const g = src('ui/CampaignGraph.jsx')
+  assert.match(g, /<span className="lb" aria-hidden="true" title=\{t\('campaign\.phaseLabel'[^}]*\}>\{letter\(b\.p\)\}<\/span>/)
+  assert.match(g, /<span className="ux-vh">\{t\('campaign\.phaseLabel'/)
+  assert.doesNotMatch(CAMPAIGN_CSS, /writing-mode:vertical-rl;transform:rotate\(180deg\);font-size:10\.5px/, 'no vertical label cut to « Ph… »')
+})
+
+test('the texts of the editor say what they are for', () => {
+  assert.equal(messages.fr.campaign.goal, 'Ce que cette campagne doit livrer')
+  assert.equal(messages.fr.campaign.phaseCards(0), '0 carte')
+  assert.equal(messages.fr.campaign.phaseCards(3), '3 cartes')
+  assert.equal(messages.fr.campaign.addPhase, 'Ajouter une phase (avec verrou)')
+  assert.equal(messages.en.campaign.phaseCards(1), '1 card')
+  assert.equal(messages.es.campaign.phaseCards(0), '0 tarjetas')
+  const dlg = src('ui/CampaignDialog.jsx')
+  assert.match(dlg, /<span className="pl" aria-hidden="true">\{letter\(k\)\}<\/span>/, 'the letter of the phase, not « PHASE A » beside « Phase A »')
+  assert.match(dlg, /t\('campaign\.phaseCards', /)
+})

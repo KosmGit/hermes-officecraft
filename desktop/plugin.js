@@ -2754,6 +2754,17 @@ function applyTemplate(draft, id, params, mode = "append", L = EN) {
   next.cards = [...next.cards].sort((a, b) => a.phase - b.phase || isGuard(b) - isGuard(a));
   return { draft: next, refused: null };
 }
+function templatePreview(draft, id, params, mode = "append", L = EN) {
+  const m = workCards(draft).length ? mode : "replace";
+  const r = applyTemplate(draft, id, params, m, L);
+  if (r.refused) return { refused: r.refused };
+  const s = summary(r.draft);
+  return { refused: null, mode: m, made: templateCards(id, params, L).cards.length, work: s.work, phases: r.draft.phases.length, guards: s.guards };
+}
+function missingParts(issues) {
+  const has = (...codes2) => issues.some((i) => codes2.includes(i.code));
+  return [has("goal_empty") ? "goal" : null, has("board_none") ? "project" : has("nb_name") ? "projectName" : null, has("no_cards") ? "card" : null].filter(Boolean);
+}
 var CAMPAIGN_RESULTS = Object.freeze(["done", "refused", "failed"]);
 function readCampaign(body) {
   if (!body || typeof body !== "object" || typeof body.result !== "string") return null;
@@ -4887,8 +4898,8 @@ var en = {
     back: "Back",
     steps: "Steps",
     step: { compose: "Compose", review: "Check", created: "Launch" },
-    goal: "Objective",
-    goalPh: "What the project should achieve",
+    goal: "What this campaign must deliver",
+    goalPh: "E.g. publish the new documentation, reviewed and translated",
     project: "Project",
     projectPick: "Choose a project",
     projectNew: "New project…",
@@ -4907,12 +4918,15 @@ var en = {
     view: "View",
     viewList: "Cards",
     viewGraph: "Preview",
-    phaseWord: (l) => `Phase ${l}`,
     phaseLabel: (l, name) => name && String(name).trim().toLowerCase() !== `phase ${l}`.toLowerCase() ? `Phase ${l} · ${name}` : `Phase ${l}`,
     // the default name is not said twice
     phaseName: (l) => `Name of phase ${l}`,
-    addCard: "Card",
-    addPhase: "Phase, with its guard",
+    addCard: "Add a card",
+    addPhase: "Add a phase (with its guard)",
+    phaseCards: (n) => `${n} ${n === 1 ? "card" : "cards"}`,
+    starter: "Start from a template or add a first card.",
+    missing: (list) => `Missing: ${list}.`,
+    missingPart: { goal: "an objective", project: "a project", projectName: "a project name", card: "a card" },
     removePhase: "Remove last phase",
     after: (list) => `after ${list}`,
     afterN: (n) => `after ${n} ${n === 1 ? "card" : "cards"}`,
@@ -4961,6 +4975,7 @@ var en = {
     tpl: {
       label: "Template",
       title: "Chain templates",
+      pick: "Pick a template",
       sub: "Built into the plugin. No AI model writes anything.",
       devreview: { name: "Dev + review per step", desc: "Each step: a work card, then its review." },
       audit: { name: "Parallel audits, then a summary", desc: "N independent audits, then one summary card." },
@@ -4981,6 +4996,8 @@ var en = {
       replaceNote: "The cards and phases currently in the draft are replaced. The objective and the project stay.",
       room: (n) => `${n === 1 ? "Room for 1 more card." : `Room for ${n} more cards.`}`,
       go: "Use this template",
+      result: (n, p = 1, g = 1) => `Creates ${n} ${n === 1 ? "card" : "cards"} in ${p} ${p === 1 ? "phase" : "phases"}, ${g} ${g === 1 ? "guard" : "guards"}.`,
+      resultAdd: (n, total = 1) => `Adds ${n} ${n === 1 ? "card" : "cards"}: ${total} in all.`,
       step: (n) => `Step ${n}`,
       review: (n) => `Review of step ${n}`,
       auditCard: (n) => `Audit ${n}`,
@@ -4999,7 +5016,7 @@ var en = {
     groupTip: (n, codes2) => `${n} ${n === 1 ? "card" : "cards"} in parallel (${codes2}): click to expand`,
     groupFold: (codes2, n) => `Fold ${codes2} (${n} ${n === 1 ? "card" : "cards"})`,
     state: { blocked: "blocked", done: "launched", todo: "waiting", ready: "ready", archived: "archived" },
-    ck: { noLoop: "No loops", guarded: "Every card is behind a guard", count: (n, max) => `${n}/${max} cards` },
+    ck: { noLoop: "No loops", count: (n, max) => `${n}/${max} cards` },
     clear: { button: "Clear draft", label: "Clear draft", ask: "Discard this draft?", keep: "Keep it", go: "Discard" },
     issue: {
       goal_empty: "The objective is empty.",
@@ -6615,8 +6632,8 @@ var es = {
     back: "Volver",
     steps: "Pasos",
     step: { compose: "Componer", review: "Revisar", created: "Lanzar" },
-    goal: "Objetivo",
-    goalPh: "Lo que el proyecto debe lograr",
+    goal: "Lo que esta campaña debe entregar",
+    goalPh: "P. ej.: publicar la documentación nueva, revisada y traducida",
     project: "Proyecto",
     projectPick: "Elegir un proyecto",
     projectNew: "Proyecto nuevo…",
@@ -6635,12 +6652,15 @@ var es = {
     view: "Vista",
     viewList: "Tarjetas",
     viewGraph: "Vista previa",
-    phaseWord: (l) => `Fase ${l}`,
     phaseLabel: (l, name) => name && String(name).trim().toLowerCase() !== `fase ${l}`.toLowerCase() ? `Fase ${l} · ${name}` : `Fase ${l}`,
     // the default name is not said twice
     phaseName: (l) => `Nombre de la fase ${l}`,
-    addCard: "Tarjeta",
-    addPhase: "Fase, con su barrera",
+    addCard: "Añadir una tarjeta",
+    addPhase: "Añadir una fase (con su barrera)",
+    phaseCards: (n) => `${n} ${n === 1 ? "tarjeta" : "tarjetas"}`,
+    starter: "Parta de una plantilla o añada una primera tarjeta.",
+    missing: (list) => `Falta: ${list}.`,
+    missingPart: { goal: "un objetivo", project: "un proyecto", projectName: "un nombre de proyecto", card: "una tarjeta" },
     removePhase: "Quitar la última fase",
     after: (list) => `después de ${list}`,
     afterN: (n) => `después de ${n} ${n === 1 ? "tarjeta" : "tarjetas"}`,
@@ -6689,6 +6709,7 @@ var es = {
     tpl: {
       label: "Plantilla",
       title: "Plantillas de cadena",
+      pick: "Elegir una plantilla",
       sub: "Vienen con el plugin: ningún modelo de IA redacta nada.",
       devreview: { name: "Desarrollo + revisión por etapa", desc: "Cada etapa: una tarjeta de trabajo y su revisión." },
       audit: { name: "Auditorías en paralelo y una síntesis", desc: "N auditorías independientes, una tarjeta de síntesis." },
@@ -6709,6 +6730,8 @@ var es = {
       replaceNote: "Se reemplazan las tarjetas y fases del borrador; el objetivo y el proyecto se quedan.",
       room: (n) => `${n === 1 ? "Cabe 1 tarjeta más." : `Caben ${n} tarjetas más.`}`,
       go: "Usar esta plantilla",
+      result: (n, p = 1, g = 1) => `Crea ${n} ${n === 1 ? "tarjeta" : "tarjetas"} en ${p} ${p === 1 ? "fase" : "fases"}, ${g} ${g === 1 ? "barrera" : "barreras"}.`,
+      resultAdd: (n, total = 1) => `Añade ${n} ${n === 1 ? "tarjeta" : "tarjetas"}: ${total} en total.`,
       step: (n) => `Etapa ${n}`,
       review: (n) => `Revisión de la etapa ${n}`,
       auditCard: (n) => `Auditoría ${n}`,
@@ -6727,7 +6750,7 @@ var es = {
     groupTip: (n, codes2) => `${n} ${n === 1 ? "tarjeta" : "tarjetas"} en paralelo (${codes2}): clic para desplegar`,
     groupFold: (codes2, n) => `Plegar ${codes2} (${n} ${n === 1 ? "tarjeta" : "tarjetas"})`,
     state: { blocked: "bloqueada", done: "lanzada", todo: "en espera", ready: "lista", archived: "archivada" },
-    ck: { noLoop: "Sin bucle", guarded: "Todo tras una barrera", count: (n, max) => `${n}/${max} tarjetas` },
+    ck: { noLoop: "Sin bucle", count: (n, max) => `${n}/${max} tarjetas` },
     clear: { button: "Descartar el borrador", label: "Descartar el borrador", ask: "¿Descartar este borrador?", keep: "Conservarlo", go: "Descartarlo" },
     issue: {
       goal_empty: "El objetivo está vacío.",
@@ -8344,8 +8367,8 @@ var fr = {
     back: "Retour",
     steps: "Étapes",
     step: { compose: "Composer", review: "Vérifier", created: "Lancer" },
-    goal: "Objectif",
-    goalPh: "Ce que le projet doit atteindre",
+    goal: "Ce que cette campagne doit livrer",
+    goalPh: "Ex. : publier la nouvelle documentation, relue et traduite",
     project: "Projet",
     projectPick: "Choisir un projet",
     projectNew: "Nouveau projet…",
@@ -8364,12 +8387,15 @@ var fr = {
     view: "Vue",
     viewList: "Cartes",
     viewGraph: "Aperçu",
-    phaseWord: (l) => `Phase ${l}`,
     phaseLabel: (l, name) => name && String(name).trim().toLowerCase() !== `phase ${l}`.toLowerCase() ? `Phase ${l} · ${name}` : `Phase ${l}`,
     // the default name is not said twice
     phaseName: (l) => `Nom de la phase ${l}`,
-    addCard: "Carte",
-    addPhase: "Phase, avec son verrou",
+    addCard: "Ajouter une carte",
+    addPhase: "Ajouter une phase (avec verrou)",
+    phaseCards: (n) => `${n} ${n <= 1 ? "carte" : "cartes"}`,
+    starter: "Partez d’un gabarit ou ajoutez une première carte.",
+    missing: (list) => `Il manque : ${list}.`,
+    missingPart: { goal: "un objectif", project: "un projet", projectName: "un nom de projet", card: "une carte" },
     removePhase: "Retirer la dernière phase",
     after: (list) => `après ${list}`,
     afterN: (n) => `après ${n} ${n === 1 ? "carte" : "cartes"}`,
@@ -8416,8 +8442,9 @@ var fr = {
       tip: "Un verrou est une carte bloquée, sans bot : rien de ce qui en dépend ne peut démarrer tant que vous ne l’avez pas levé avec « Lancer ». Le verrou de départ est toujours présent ; un verrou de phase permet de lancer phase par phase (une phase ne se lance qu’une fois la précédente terminée)."
     },
     tpl: {
-      label: "Modèle",
-      title: "Modèles de chaîne",
+      label: "Gabarit",
+      title: "Gabarits de chaîne",
+      pick: "Choisir un gabarit",
       sub: "Prédéfinis dans le plugin : aucune IA n’intervient.",
       devreview: { name: "Dev + revue par étape", desc: "Chaque étape : une carte de travail, puis sa revue." },
       audit: { name: "Audits en parallèle puis synthèse", desc: "N audits indépendants, une carte de synthèse." },
@@ -8437,7 +8464,9 @@ var fr = {
       appendNote: "Les nouvelles cartes démarrent avec les premières, dès que le verrou de départ est levé.",
       replaceNote: "Les cartes et les phases du brouillon sont remplacées ; l’objectif et le projet sont conservés.",
       room: (n) => `${n === 1 ? "Encore 1 carte possible." : `Encore ${n} cartes possibles.`}`,
-      go: "Utiliser ce modèle",
+      go: "Utiliser ce gabarit",
+      result: (n, p = 1, g = 1) => `Crée ${n} ${n <= 1 ? "carte" : "cartes"} en ${p} ${p <= 1 ? "phase" : "phases"}, ${g} ${g <= 1 ? "verrou" : "verrous"}.`,
+      resultAdd: (n, total = 1) => `Ajoute ${n} ${n <= 1 ? "carte" : "cartes"} : ${total} au total.`,
       step: (n) => `Étape ${n}`,
       review: (n) => `Revue de l’étape ${n}`,
       auditCard: (n) => `Audit ${n}`,
@@ -8456,7 +8485,7 @@ var fr = {
     groupTip: (n, codes2) => `${n} ${n === 1 ? "carte" : "cartes"} en parallèle (${codes2}) : cliquer pour déplier`,
     groupFold: (codes2, n) => `Replier ${codes2} (${n} ${n === 1 ? "carte" : "cartes"})`,
     state: { blocked: "fermé", done: "levé", todo: "en attente", ready: "prête", archived: "archivée" },
-    ck: { noLoop: "Sans boucle", guarded: "Tout est sous verrou", count: (n, max) => `${n}/${max} cartes` },
+    ck: { noLoop: "Sans boucle", count: (n, max) => `${n}/${max} cartes` },
     clear: { button: "Effacer le brouillon", label: "Effacer le brouillon", ask: "Effacer ce brouillon ?", keep: "Le garder", go: "L’effacer" },
     issue: {
       goal_empty: "L’objectif est vide.",
@@ -14737,6 +14766,7 @@ ${RINGED(".oc-dg-x:focus-visible")}
 .oc-dg-fs:has(> .oc-dg-fn){flex:1 1 280px;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:4px}
 .oc-dg-fn{margin:0;font-size:12px;line-height:1.4;color:var(--ui-text-secondary)}
 .oc-dg-fm{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:11px;color:${SOFT}}
+.oc-dg-kept{font-size:11px;color:${SOFT}}
 .oc-dg-link.quiet{min-height:20px;font-size:11px;color:${SOFT};text-decoration-style:dotted}
 .oc-dg-link.quiet:hover{color:var(--foreground)}
 .oc-dg .oc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:32px;padding:4px 16px;line-height:1.2;text-align:center}   /* a label on two lines (« Crear el proyecto … y 10 tarjetas » at 380 px) keeps 4 px above and below */
@@ -16703,7 +16733,10 @@ function CampaignGraph({ cards, info, colors, sceneBy, phases, selected = null, 
       return /* @__PURE__ */ jsx8("button", { type: "button", className: "ux-b sm", "data-fold": p.id, "aria-expanded": "true", onClick: () => toggle(p.id, p.id), children: t("campaign.groupFold", codes2, p.members.length) }, p.id);
     }) }) : null,
     g ? /* @__PURE__ */ jsxs7("div", { className: `oc-cgg-in${g.compact ? " cmp" : ""}`, style: { width: W, height: g.H }, children: [
-      g.bands.map((b) => /* @__PURE__ */ jsx8("div", { className: `oc-cgg-band${b.p % 2 ? " alt" : ""}`, style: { top: b.y0, height: b.y1 - b.y0 }, "data-band": b.p, children: /* @__PURE__ */ jsx8("span", { className: "lb", children: t("campaign.phaseLabel", letter(b.p), phases[b.p]?.name || "") }) }, b.p)),
+      g.bands.map((b) => /* @__PURE__ */ jsxs7("div", { className: `oc-cgg-band${b.p % 2 ? " alt" : ""}`, style: { top: b.y0, height: b.y1 - b.y0 }, "data-band": b.p, children: [
+        /* @__PURE__ */ jsx8("span", { className: "lb", "aria-hidden": "true", title: t("campaign.phaseLabel", letter(b.p), phases[b.p]?.name || ""), children: letter(b.p) }),
+        /* @__PURE__ */ jsx8("span", { className: "ux-vh", children: t("campaign.phaseLabel", letter(b.p), phases[b.p]?.name || "") })
+      ] }, b.p)),
       /* @__PURE__ */ jsxs7("svg", { className: "oc-cgg-edges", width: W, height: g.H, viewBox: `0 0 ${W} ${g.H}`, "aria-hidden": "true", focusable: "false", children: [
         /* @__PURE__ */ jsxs7("defs", { children: [
           /* @__PURE__ */ jsx8("marker", { id: `${mid2}-a`, viewBox: "0 0 8 8", refX: "7", refY: "4", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse", children: /* @__PURE__ */ jsx8("path", { d: "M0 0 8 4 0 8z", className: "am" }) }),
@@ -16904,7 +16937,7 @@ var CAMPAIGN_CSS = `
 .oc-cgph{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
 .oc-cgph .ph{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 .oc-cgph .phh{display:flex;align-items:center;gap:8px}
-.oc-cgph .pl{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${T3}}
+.oc-cgph .pl{flex:0 0 auto;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:12px;font-size:12px;font-weight:700;color:${ink2("var(--ui-accent)")};background:color-mix(in oklab, var(--ui-accent) 14%, ${CARD})}
 .oc-cgph .phn{flex:1 1 auto;min-width:0;width:auto!important;font-weight:600!important}
 .oc-cgph .phh .n{flex:0 0 auto;font-size:12px;color:${T3}}
 .oc-cgph > .ph > .ux-b{align-self:flex-start}
@@ -16960,7 +16993,7 @@ var CAMPAIGN_CSS = `
 .oc-cgg-folds{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 0}
 .oc-cgg-band{position:absolute;left:8px;right:8px;border-radius:10px;background:color-mix(in oklab, var(--foreground) 3%, transparent)}
 .oc-cgg-band.alt{background:color-mix(in oklab, var(--foreground) 6%, transparent)}
-.oc-cgg-band .lb{position:absolute;left:4px;top:8px;max-height:calc(100% - 16px);writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;font-weight:700;color:${T2};overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-cgg-band .lb{position:absolute;left:4px;top:8px;display:grid;place-items:center;width:20px;height:20px;border-radius:10px;font-size:11px;font-weight:700;color:${T2};background:color-mix(in oklab, var(--foreground) 8%, transparent);cursor:default}
 .oc-cgg-edges{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 .oc-cgg-edges .ge{fill:none;stroke:${T3};stroke-width:1.4}
 .oc-cgg-edges .ge.g{stroke:${ORANGE2};stroke-dasharray:4 3}
@@ -17058,6 +17091,14 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-cgchk .ck{display:inline-flex;align-items:center;gap:4px}
 .oc-cgchk .ck.ok{color:${ink2(GREEN2)}}
 .oc-cgchk .ck.ko{color:${ink2(RED2)}}
+.oc-cgchk .miss{color:var(--ui-text-secondary)}
+/* the first, empty phase: where to start */
+.oc-cgstart{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px dashed ${EDGE};border-radius:8px}
+.oc-cgstart p{margin:0;font-size:12.5px;line-height:1.4}
+.oc-cgstart .acts{display:flex;flex-wrap:wrap;gap:8px}
+.oc-tpl-result{font-weight:600;color:var(--foreground)}
+/* the composing step keeps one height whatever is open (the templates panel used to move the whole window) */
+.oc-dg.oc-cg-dlg[data-step="compose"]{height:min(760px,calc(100dvh - 32px))}
 .oc-cgclr{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px}
 .oc-cg-dlg .oc-dg-fa .oc-btn[aria-disabled=true]{opacity:.5;cursor:default}
 /* narrow window: one view at a time, the review's summary under the graph */
@@ -17667,7 +17708,7 @@ function Stepper({ step, t, titleRef }) {
     /* @__PURE__ */ jsx11("span", { className: "tl", ref: j === at ? titleRef : void 0, tabIndex: j === at ? -1 : void 0, "data-step-title": j === at ? "" : void 0, children: l })
   ] }, k)) });
 }
-function Templates({ draft, apply, bots, colors, t, onClose }) {
+function Templates({ draft, apply, bots, colors, t, L, onClose }) {
   const id = useId8();
   const [tpl, setTpl] = useState10("devreview");
   const [mode, setMode] = useState10("append");
@@ -17683,6 +17724,10 @@ function Templates({ draft, apply, bots, colors, t, onClose }) {
   const knobs = { devreview: [["dev", t("campaign.tpl.botDev")], ["review", t("campaign.tpl.botReview")]], audit: [["audit", t("campaign.tpl.botAudit")], ["synth", t("campaign.tpl.botSynth")]], phases: [["work", t("campaign.tpl.botWork")]], chain: [["chain", t("campaign.tpl.botChain")]] }[tpl];
   const params = { n: n[tpl], per, bots: { dev: pick.dev, review: pick.review, audit: [pick.audit], synth: pick.synth, work: [pick.work], chain: [pick.chain] } };
   const room = MAX_WORK_CARDS - workCards(draft).length;
+  const empty = workCards(draft).length === 0;
+  const how = empty ? "replace" : mode;
+  const made = useMemo4(() => templatePreview(draft, tpl, params, how, L), [draft, tpl, n, per, pick, how, L]);
+  const result = made.refused ? t(`campaign.refused.${made.refused}`) : made.mode === "append" ? t("campaign.tpl.resultAdd", made.made, made.work) : t("campaign.tpl.result", made.made, made.phases, made.guards);
   return /* @__PURE__ */ jsxs10("section", { className: "oc-cgtpl", "aria-label": t("campaign.tpl.title"), "data-templates": true, children: [
     /* @__PURE__ */ jsxs10("div", { className: "hd", children: [
       /* @__PURE__ */ jsx11("b", { children: t("campaign.tpl.title") }),
@@ -17706,15 +17751,19 @@ function Templates({ draft, apply, bots, colors, t, onClose }) {
       knobs.map(([k, l]) => botSel(k, l))
     ] }),
     /* @__PURE__ */ jsxs10("div", { className: "ft", children: [
-      /* @__PURE__ */ jsxs10("span", { className: "oc-dg-seg", role: "group", "aria-label": t("campaign.tpl.apply"), children: [
+      empty ? null : /* @__PURE__ */ jsxs10("span", { className: "oc-dg-seg", role: "group", "aria-label": t("campaign.tpl.apply"), children: [
         /* @__PURE__ */ jsx11("button", { type: "button", "aria-pressed": mode === "append", "data-tpl-mode": "append", onClick: () => setMode("append"), children: t("campaign.tpl.append") }),
         /* @__PURE__ */ jsx11("button", { type: "button", "aria-pressed": mode === "replace", "data-tpl-mode": "replace", onClick: () => setMode("replace"), children: t("campaign.tpl.replace") })
       ] }),
       /* @__PURE__ */ jsxs10("small", { className: "faint", id: `${id}-n`, children: [
-        mode === "append" ? t("campaign.tpl.appendNote") : t("campaign.tpl.replaceNote"),
-        room < 8 && mode === "append" ? ` ${t("campaign.tpl.room", Math.max(0, room))}` : ""
+        empty ? null : /* @__PURE__ */ jsxs10(Fragment7, { children: [
+          mode === "append" ? t("campaign.tpl.appendNote") : t("campaign.tpl.replaceNote"),
+          room < 8 && mode === "append" ? ` ${t("campaign.tpl.room", Math.max(0, room))}` : "",
+          " "
+        ] }),
+        /* @__PURE__ */ jsx11("b", { className: "oc-tpl-result", "data-tpl-result": true, children: result })
       ] }),
-      /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-btn oc-primary", "data-tpl-apply": true, "aria-describedby": `${id}-n`, onClick: () => apply(tpl, params, mode), children: t("campaign.tpl.go") })
+      /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-btn oc-primary", "data-tpl-apply": true, "aria-describedby": `${id}-n`, onClick: () => apply(tpl, params, how), children: t("campaign.tpl.go") })
     ] })
   ] });
 }
@@ -17904,6 +17953,7 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
   const slugSt = slugState(draft.nb.slug, slugs);
   const target2 = nb ? draft.nb.slug : draft.board;
   const ok = issues.length === 0;
+  const missing = useMemo4(() => missingParts(issues), [issues]);
   const isNoBot = !bots.length;
   const patch = useCallback4((id, p) => set((d) => patchCard(d, id, p)), [set]);
   const add = (phaseIx) => set((d) => addCard(d, phaseIx, d.cards.filter((c) => !isGuard(c) && c.phase === phaseIx).at(-1)?.who || d.cards.filter((c) => !isGuard(c)).at(-1)?.who || firstBot));
@@ -18093,7 +18143,7 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
       ] }) : null
     ] }),
     A.ready.campaign && A.cg.open ? /* @__PURE__ */ jsx11(GraphPanel, { A, draft, colors, onClose: A.cg.close }) : null,
-    tplOpen && !(A.ready.campaign && A.cg.open) && bots.length ? /* @__PURE__ */ jsx11(Templates, { draft, apply, bots, colors, t, onClose: () => setTplOpen(false) }) : null,
+    tplOpen && !(A.ready.campaign && A.cg.open) && bots.length ? /* @__PURE__ */ jsx11(Templates, { draft, apply, bots, colors, t, L, onClose: () => setTplOpen(false) }) : null,
     refused2 ? /* @__PURE__ */ jsx11(Notice, { tone: "warn", icon: "alert", "data-refused": true, children: t(`campaign.refused.${refused2}`) }) : null,
     /* @__PURE__ */ jsx11("div", { className: "oc-cgseg", role: "group", "aria-label": t("campaign.view"), children: /* @__PURE__ */ jsxs10("span", { className: "oc-dg-seg", children: [
       /* @__PURE__ */ jsx11("button", { type: "button", "aria-pressed": view === "list", "data-cgm": "list", onClick: () => setView("list"), children: t("campaign.viewList") }),
@@ -18106,9 +18156,9 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
           const guard = rows.find(isGuard);
           return /* @__PURE__ */ jsxs10("li", { className: "ph", "data-phase": k, children: [
             /* @__PURE__ */ jsxs10("div", { className: "phh", children: [
-              /* @__PURE__ */ jsx11("span", { className: "pl", children: t("campaign.phaseWord", letter(k)) }),
+              /* @__PURE__ */ jsx11("span", { className: "pl", "aria-hidden": "true", children: letter(k) }),
               /* @__PURE__ */ jsx11("input", { className: "phn", value: p.name, maxLength: MAX_NAME, "aria-label": t("campaign.phaseName", letter(k)), "data-phase-name": k, onChange: (e) => set((d) => renamePhase(d, k, e.target.value)) }),
-              /* @__PURE__ */ jsx11("span", { className: "oc-mono n", children: rows.filter((c) => !isGuard(c)).length })
+              /* @__PURE__ */ jsx11("span", { className: "oc-mono n", children: t("campaign.phaseCards", rows.filter((c) => !isGuard(c)).length) })
             ] }),
             k === 0 ? /* @__PURE__ */ jsxs10("div", { className: "oc-cgguard", "data-guard-row": "head", children: [
               /* @__PURE__ */ jsx11(Icon, { name: "lock", size: 14 }),
@@ -18156,7 +18206,24 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
               },
               c.id
             )) }),
-            /* @__PURE__ */ jsxs10("button", { type: "button", className: "ux-b sm ghost", "data-add-card": k, "aria-disabled": sum.work >= MAX_WORK_CARDS || isNoBot || void 0, onClick: () => {
+            k === 0 && sum.work === 0 ? /* @__PURE__ */ jsxs10("div", { className: "oc-cgstart", "data-cg-starter": true, children: [
+              /* @__PURE__ */ jsx11("p", { children: t("campaign.starter") }),
+              /* @__PURE__ */ jsxs10("div", { className: "acts", children: [
+                /* @__PURE__ */ jsxs10("button", { type: "button", className: "ux-b sm", "data-cg-starter-tpl": true, "aria-expanded": tplOpen && !A.cg.open, onClick: () => {
+                  A.cg.setOpen(false);
+                  setTplOpen(true);
+                }, children: [
+                  /* @__PURE__ */ jsx11(Icon, { name: "layers", size: 14 }),
+                  t("campaign.tpl.pick")
+                ] }),
+                /* @__PURE__ */ jsxs10("button", { type: "button", className: "ux-b sm", "data-add-card": k, "aria-disabled": isNoBot || void 0, onClick: () => {
+                  if (!isNoBot) add(k);
+                }, children: [
+                  /* @__PURE__ */ jsx11(Icon, { name: "plus", size: 14 }),
+                  t("campaign.addCard")
+                ] })
+              ] })
+            ] }) : /* @__PURE__ */ jsxs10("button", { type: "button", className: "ux-b sm ghost", "data-add-card": k, "aria-disabled": sum.work >= MAX_WORK_CARDS || isNoBot || void 0, onClick: () => {
               if (sum.work < MAX_WORK_CARDS && !isNoBot) add(k);
             }, children: [
               /* @__PURE__ */ jsx11(Icon, { name: "plus", size: 14 }),
@@ -18327,29 +18394,31 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
   const step = win.step;
   const startSlot = step === "compose" ? /* @__PURE__ */ jsxs10(Fragment7, { children: [
     /* @__PURE__ */ jsxs10("span", { className: "oc-cgchk", "data-checks": true, children: [
-      /* @__PURE__ */ jsxs10("span", { className: `ck ${g.loop ? "ko" : "ok"}`, children: [
-        /* @__PURE__ */ jsx11(Icon, { name: g.loop ? "warn" : "check", size: 14 }),
-        t("campaign.ck.noLoop")
-      ] }),
-      /* @__PURE__ */ jsxs10("span", { className: "ck ok", children: [
-        /* @__PURE__ */ jsx11(Icon, { name: "check", size: 14 }),
-        t("campaign.ck.guarded")
-      ] }),
-      /* @__PURE__ */ jsxs10("span", { className: `ck ${sum.work > MAX_WORK_CARDS || isNoBot ? "ko" : "ok"}`, children: [
-        /* @__PURE__ */ jsx11(Icon, { name: sum.work > MAX_WORK_CARDS ? "warn" : "check", size: 14 }),
-        t("campaign.ck.count", sum.work, MAX_WORK_CARDS)
-      ] })
+      sum.work > 0 ? /* @__PURE__ */ jsxs10(Fragment7, { children: [
+        /* @__PURE__ */ jsxs10("span", { className: `ck ${g.loop ? "ko" : "ok"}`, children: [
+          /* @__PURE__ */ jsx11(Icon, { name: g.loop ? "warn" : "check", size: 14 }),
+          t("campaign.ck.noLoop")
+        ] }),
+        /* @__PURE__ */ jsxs10("span", { className: `ck ${sum.work > MAX_WORK_CARDS || isNoBot ? "ko" : "ok"}`, children: [
+          /* @__PURE__ */ jsx11(Icon, { name: sum.work > MAX_WORK_CARDS ? "warn" : "check", size: 14 }),
+          t("campaign.ck.count", sum.work, MAX_WORK_CARDS)
+        ] })
+      ] }) : null,
+      missing.length ? /* @__PURE__ */ jsx11("span", { className: "miss", id: `${uid}-miss`, "data-missing": true, children: t("campaign.missing", missing.map((k) => t(`campaign.missingPart.${k}`)).join(", ")) }) : null
     ] }),
     /* @__PURE__ */ jsx11(LeftBar, { A }),
     !draftIsEmpty(draft) ? confirmClear ? /* @__PURE__ */ jsxs10("span", { className: "oc-cgclr", role: "group", "aria-label": t("campaign.clear.label"), children: [
       /* @__PURE__ */ jsx11("span", { children: t("campaign.clear.ask") }),
       /* @__PURE__ */ jsx11("button", { type: "button", className: "ux-b sm", "data-clear-no": true, onClick: () => setConfirmClear(false), children: t("campaign.clear.keep") }),
       /* @__PURE__ */ jsx11("button", { type: "button", className: "ux-b sm danger", "data-clear-yes": true, onClick: clear, children: t("campaign.clear.go") })
-    ] }) : /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-dg-link", "data-clear": true, onClick: () => setConfirmClear(true), children: t("campaign.clear.button") }) : null
+    ] }) : /* @__PURE__ */ jsxs10(Fragment7, { children: [
+      /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-dg-link", "data-clear": true, onClick: () => setConfirmClear(true), children: t("campaign.clear.button") }),
+      /* @__PURE__ */ jsx11("span", { className: "oc-dg-kept", "data-cg-kept": true, children: t("dlg.draftKept") })
+    ] }) : null
   ] }) : step === "review" ? /* @__PURE__ */ jsx11("small", { className: "faint oc-cgnote", "data-review-note": true, children: t("campaign.review.note", UNDO_SECONDS) }) : null;
   const actionSlot = step === "compose" ? /* @__PURE__ */ jsxs10(Fragment7, { children: [
     /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-btn", "data-cg-close": true, onClick: close, children: t("campaign.close") }),
-    /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-btn oc-primary", "data-cg-review": true, "aria-disabled": !ok || void 0, onClick: goReview, children: t("campaign.toReview") })
+    /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-btn oc-primary", "data-cg-review": true, "aria-disabled": !ok || void 0, "aria-describedby": missing.length ? `${uid}-miss` : void 0, onClick: goReview, children: t("campaign.toReview") })
   ] }) : step === "review" ? inFlight ? null : /* @__PURE__ */ jsxs10(Fragment7, { children: [
     /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-btn", "data-cg-back": true, onClick: () => dispatch({ type: "back" }), children: t("campaign.back") }),
     /* @__PURE__ */ jsx11("button", { type: "button", className: "oc-btn oc-primary", "data-cg-create": true, "aria-disabled": !ok || isBusy(orders.state) || replay || void 0, onClick: create, children: nb ? t("campaign.createNew", sum.cards, draft.nb.slug) : t("campaign.create", sum.cards, draft.board) })

@@ -63,6 +63,7 @@ ${RINGED('.oc-dg-x:focus-visible')}
 .oc-dg-fs:has(> .oc-dg-fn){flex:1 1 280px;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:4px}
 .oc-dg-fn{margin:0;font-size:12px;line-height:1.4;color:var(--ui-text-secondary)}
 .oc-dg-fm{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:11px;color:${SOFT}}
+.oc-dg-kept{font-size:11px;color:${SOFT}}
 .oc-dg-link.quiet{min-height:20px;font-size:11px;color:${SOFT};text-decoration-style:dotted}
 .oc-dg-link.quiet:hover{color:var(--foreground)}
 .oc-dg .oc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:32px;padding:4px 16px;line-height:1.2;text-align:center}   /* a label on two lines (« Crear el proyecto … y 10 tarjetas » at 380 px) keeps 4 px above and below */

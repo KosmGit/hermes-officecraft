@@ -82,7 +82,7 @@ export const CAMPAIGN_CSS = `
 .oc-cgph{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
 .oc-cgph .ph{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 .oc-cgph .phh{display:flex;align-items:center;gap:8px}
-.oc-cgph .pl{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${T3}}
+.oc-cgph .pl{flex:0 0 auto;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:12px;font-size:12px;font-weight:700;color:${ink('var(--ui-accent)')};background:color-mix(in oklab, var(--ui-accent) 14%, ${CARD})}
 .oc-cgph .phn{flex:1 1 auto;min-width:0;width:auto!important;font-weight:600!important}
 .oc-cgph .phh .n{flex:0 0 auto;font-size:12px;color:${T3}}
 .oc-cgph > .ph > .ux-b{align-self:flex-start}
@@ -138,7 +138,7 @@ export const CAMPAIGN_CSS = `
 .oc-cgg-folds{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 0}
 .oc-cgg-band{position:absolute;left:8px;right:8px;border-radius:10px;background:color-mix(in oklab, var(--foreground) 3%, transparent)}
 .oc-cgg-band.alt{background:color-mix(in oklab, var(--foreground) 6%, transparent)}
-.oc-cgg-band .lb{position:absolute;left:4px;top:8px;max-height:calc(100% - 16px);writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;font-weight:700;color:${T2};overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-cgg-band .lb{position:absolute;left:4px;top:8px;display:grid;place-items:center;width:20px;height:20px;border-radius:10px;font-size:11px;font-weight:700;color:${T2};background:color-mix(in oklab, var(--foreground) 8%, transparent);cursor:default}
 .oc-cgg-edges{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 .oc-cgg-edges .ge{fill:none;stroke:${T3};stroke-width:1.4}
 .oc-cgg-edges .ge.g{stroke:${ORANGE};stroke-dasharray:4 3}
@@ -236,6 +236,14 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 .oc-cgchk .ck{display:inline-flex;align-items:center;gap:4px}
 .oc-cgchk .ck.ok{color:${ink(GREEN)}}
 .oc-cgchk .ck.ko{color:${ink(RED)}}
+.oc-cgchk .miss{color:var(--ui-text-secondary)}
+/* the first, empty phase: where to start */
+.oc-cgstart{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px dashed ${EDGE};border-radius:8px}
+.oc-cgstart p{margin:0;font-size:12.5px;line-height:1.4}
+.oc-cgstart .acts{display:flex;flex-wrap:wrap;gap:8px}
+.oc-tpl-result{font-weight:600;color:var(--foreground)}
+/* the composing step keeps one height whatever is open (the templates panel used to move the whole window) */
+.oc-dg.oc-cg-dlg[data-step="compose"]{height:min(760px,calc(100dvh - 32px))}
 .oc-cgclr{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px}
 .oc-cg-dlg .oc-dg-fa .oc-btn[aria-disabled=true]{opacity:.5;cursor:default}
 /* narrow window: one view at a time, the review's summary under the graph */

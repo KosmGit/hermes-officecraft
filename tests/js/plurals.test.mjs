@@ -14,6 +14,9 @@ const second = (first, ...rest) => c => [first, c, ...rest]
 const KEYS = {
   tipCards: n('alpha, beta'),
   'campaign.afterN': n(),
+  'campaign.phaseCards': n(),
+  'campaign.tpl.result': c => [c, c, c],
+  'campaign.tpl.resultAdd': c => [c, c],
   'campaign.graph.label': n(),
   'campaign.groupAria': second('A, B'),
   'campaign.groupTip': n('A, B'),

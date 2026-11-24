@@ -69,7 +69,9 @@ export function CampaignGraph({ cards, info, colors, sceneBy, phases, selected =
         <div className={`oc-cgg-in${g.compact ? ' cmp' : ''}`} style={{ width: W, height: g.H }}>
           {g.bands.map(b => (
             <div key={b.p} className={`oc-cgg-band${b.p % 2 ? ' alt' : ''}`} style={{ top: b.y0, height: b.y1 - b.y0 }} data-band={b.p}>
-              <span className="lb">{t('campaign.phaseLabel', letter(b.p), phases[b.p]?.name || '')}</span>
+              {/* the strip is 24 px wide: the letter alone fits it, the whole name is on hover and for a screen reader */}
+              <span className="lb" aria-hidden="true" title={t('campaign.phaseLabel', letter(b.p), phases[b.p]?.name || '')}>{letter(b.p)}</span>
+              <span className="ux-vh">{t('campaign.phaseLabel', letter(b.p), phases[b.p]?.name || '')}</span>
             </div>
           ))}
           <svg className="oc-cgg-edges" width={W} height={g.H} viewBox={`0 0 ${W} ${g.H}`} aria-hidden="true" focusable="false">
