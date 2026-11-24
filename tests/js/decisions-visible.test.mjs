@@ -6,6 +6,7 @@ import { test } from 'node:test'
 
 import { taskTag, waitBearers, waitSign } from '../../src/core/hud.js'
 import { buildOffice } from '../../src/core/office.js'
+import { PAGE_CSS } from '../../src/ui/pageStyles.js'
 import { translate } from '../../src/core/translate.js'
 import { messages } from '../../src/i18n/index.js'
 import { labelOf } from '../../src/scene/labels.js'
@@ -220,7 +221,7 @@ test('reason: drawn as text only, with its own unfolding; never a title, a link 
   const tab = src('src/ui/DecisionsTab.jsx')
   assert.match(card, /<Clamped text=\{reason\} className="ux-dc-r"/, 'two lines, unfolded like the title')
   assert.match(card, /<p ref=\{ref\} id=\{id\} className=\{`\$\{className\}\$\{whole \? ' whole' : ''\}`\} title=\{tip\}>\{children\}\{text\}<\/p>/, 'the text is a child of a paragraph')
-  assert.doesNotMatch(card.slice(card.indexOf('{reason ? (')), /tip=|title=/, 'no tooltip on the reason')
+  assert.doesNotMatch(card.slice(card.indexOf('{reason ? ('), card.indexOf('<div className="ux-dc-who">')), /tip=|title=/, 'no tooltip on the reason')
   assert.doesNotMatch(card, /dangerouslySetInnerHTML|innerHTML|<a\s|href=/)
   assert.match(tab, /reason=\{guard \? null : c\.reason \?\? null\}/)
   // the names of the buttons that open it never contain it
@@ -229,4 +230,31 @@ test('reason: drawn as text only, with its own unfolding; never a title, a link 
   // the reason stays on the decision card: no other screen of the page reads it
   const readers = ['src/ui/AgentTab.jsx', 'src/ui/JournalTab.jsx', 'src/ui/OfficeScene.jsx', 'src/ui/ProjectDock.jsx', 'src/ui/ProjectsTab.jsx', 'src/core/notify.js', 'src/core/notifyFormat.js', 'src/core/hud.js', 'src/core/llm.js', 'src/core/llmAssist.js']
   for (const f of readers) assert.doesNotMatch(src(f), /blockReason/, `${f} does not read the reason of a blocked card`)
+})
+
+// ===== the first line of a decision card =====
+
+test('decision card: the age sits on the line of the agent, the « open » icons at the right of the title, the first line only exists when it has something to say', () => {
+  const card = src('src/ui/DecisionCard.jsx')
+  const top = card.slice(card.indexOf('<div className="ux-dc-top">'), card.indexOf('<div className="ux-dc-th">'))
+  assert.doesNotMatch(top, /ux-age|\{open\}/, 'the first line holds neither the age nor the icons')
+  assert.match(card, /\{chip \|\| mark \? \(\n\s+<div className="ux-dc-top">/, 'no project chip and no code: no first line at all')
+  const th = card.slice(card.indexOf('<div className="ux-dc-th">'), card.indexOf('{summary ?'))
+  assert.match(th, /<Clamped text=\{title\}[\s\S]*\{open\}/, 'icons after the title')
+  const who = card.slice(card.indexOf('<div className="ux-dc-who">'), card.lastIndexOf('{children}'))
+  assert.match(who, /className=\{`ux-age\$\{old \? ' old' : ''\}`\} title=\{ageTip\} data-age/, 'the age ends the line of the agent')
+  const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.match(css, /\.ux-dc-th\{display:flex;align-items:flex-start/)
+  assert.match(css, /\.ux-dc-tt\{flex:1 1 auto;min-width:0/, 'the title column gives way to the icons')
+  assert.match(css, /\.ux-age\{[^}]*margin-left:auto/, 'the age is pushed to the end of the line of the agent')
+})
+
+test('decision card: « open in the kanban » is named by the card (code and title), never by an id alone, in the three languages', () => {
+  const orders = src('src/ui/Orders.jsx')
+  assert.match(orders, /t\('ux\.dec\.openKanban', \[item\.code, item\.title\]\.filter\(Boolean\)\.join\(' '\) \|\| item\.id\)/)
+  for (const lang of ['en', 'fr', 'es']) {
+    const name = tr(lang)('ux.dec.openKanban', 'WEB4 Redesign the footer')
+    assert.ok(name.includes('WEB4 Redesign the footer') && /kanban/.test(name), `${lang}: ${name}`)
+    assert.doesNotMatch(name, /\(t_|t_[0-9a-f]{6}/)
+  }
 })

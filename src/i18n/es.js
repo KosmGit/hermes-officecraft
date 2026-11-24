@@ -1648,7 +1648,7 @@ export const es = {
       helpOne: 'Solo una acción a la vez; el estado se verifica tras enviarla.',
       helpAge: 'Naranja: lleva más de 24 h esperando. Las más antiguas primero dentro de cada proyecto.',
       helpApprovalProject: 'Una aprobación va bajo el proyecto de su agente.',
-      openKanban: code => `Abrir ${code} en el kanban (sin riesgo)`,
+      openKanban: card => `Abrir «${card}» en el kanban (sin riesgo)`,
       openSession: name => `Abrir la sesión de ${name} (sin riesgo)`,
       moreChoices: 'Otras respuestas'
     },

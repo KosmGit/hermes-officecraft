@@ -1649,7 +1649,7 @@ export const en = {
       helpOne: 'One action at a time; the result is verified after it is sent.',
       helpAge: 'Orange: waiting for more than 24 h. Oldest first within each project.',
       helpApprovalProject: 'An approval is listed under its agent’s project.',
-      openKanban: code => `Open ${code} in the kanban (no risk)`,
+      openKanban: card => `Open “${card}” in the kanban (no risk)`,
       openSession: name => `Open ${name}'s session (no risk)`,
       moreChoices: 'Other answers'
     },

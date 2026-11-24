@@ -35,31 +35,35 @@ function Clamped({ text, className, tip, more, less, button, children }) {
 }
 
 /**
- * The frame of one decision: the project's stripe, then on one line the project (unless the group header already says it),
- * the code (or « Approval »), the age (orange past 24 h) and the « open » icon; the title; for an approval Hermes' summary and one line of
- * detail; for a blocked card the reason the bot gave when it blocked it (two lines, the same unfolding as the title); the line of the agent
- * (portrait, name, role); then whatever the caller puts below (the orders, a confirmation, the 6 s window). One card = one decision.
+ * The frame of one decision: the project's stripe; on a first line, only when it has something to say, the project (unless the group header
+ * or the project filter already says it) and the code (or « Approval »); the title with the « open » icons at its right; for an approval
+ * Hermes' summary and one line of detail; for a blocked card the reason the bot gave when it blocked it (two lines, the same unfolding as
+ * the title); the line of the agent (portrait, name, role) with the age at its end (orange past 24 h); then whatever the caller puts below
+ * (the orders, a confirmation, the 6 s window). One card = one decision.
  * A title or a reason longer than its two lines is cut with an ellipsis and a button opens it whole.
  * The reason is written by a bot: it is drawn as text (never a link, never markup), and it is neither a `title` nor part of a button's name.
  */
-export function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary, reason = null, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target, unverified, children, t }) {
+export function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false, kind, code, title, summary, reason = null, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target, unverified, children, t }) {
   const style = useProjectStyle(board)
   const old = isOld({ sinceMs }, nowMs)   // the rule of the age is src/core/decisions.js' (one place, tested)
   const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || 'none'}`) : ''
   const who = agent || t('inbox.unassigned')
+  const chip = !grouped && !filtered   // under a project filter every card is that project's: the filter's chip says it once, above the list
+  const mark = kind === 'approval' ? <span className="ux-kind">{t('ux.dec.approval')}</span> : code ? <span className="code ux-mono">{code}</span> : null
   return (
     <li className={`ux-dc${target ? ' target' : ''}`} style={style} data-decision={id} data-kind={kind} data-board={board || undefined} data-unverified={unverified ? '' : undefined} data-target={target ? "" : undefined} {...attrs}>
-      <div className="ux-dc-top">
-        {grouped ? (board ? <span className="ux-vh">{board}</span> : null) : <ProjectChip slug={board} label={t('ux.dec.project')} />}
-        {kind === 'approval' ? <span className="ux-kind">{t('ux.dec.approval')}</span> : code ? <span className="code ux-mono">{code}</span> : null}
-        {sinceMs != null ? (
-          <span className={`ux-age${old ? ' old' : ''}`} title={ageTip} data-age>
-            <Icon name="clock" size={14} />{shortAge(nowMs - sinceMs, t('ux.dec.day'))}
-          </span>
-        ) : null}
+      {chip || mark ? (
+        <div className="ux-dc-top">
+          {chip ? <ProjectChip slug={board} label={t('ux.dec.project')} /> : null}
+          {mark}
+        </div>
+      ) : (grouped || filtered) && board ? <span className="ux-vh">{board}</span> : null}
+      <div className="ux-dc-th">
+        <div className="ux-dc-tt">
+          <Clamped text={title} className="ux-dc-t" tip={title} more={t('ux.dec.more')} less={t('ux.dec.less')} button={{ 'data-dc-more': '' }} />
+        </div>
         {open}
       </div>
-      <Clamped text={title} className="ux-dc-t" tip={title} more={t('ux.dec.more')} less={t('ux.dec.less')} button={{ 'data-dc-more': '' }} />
       {summary ? <p className="ux-dc-s" data-approval-summary>{summary}</p> : null}
       {detail}
       {reason ? (
@@ -71,6 +75,11 @@ export function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, titl
         {sceneAgent ? <Portrait agent={sceneAgent} /> : null}
         <span className="nm">{whoText ?? who}</span>
         {role && !whoText ? <span className="role">· {role}</span> : null}
+        {sinceMs != null ? (
+          <span className={`ux-age${old ? ' old' : ''}`} title={ageTip} data-age>
+            <Icon name="clock" size={14} />{shortAge(nowMs - sinceMs, t('ux.dec.day'))}
+          </span>
+        ) : null}
       </div>
       {children}
     </li>

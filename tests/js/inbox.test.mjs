@@ -163,7 +163,7 @@ test('every card of the decision list names its project: a stripe + a chip (a gr
   const frame = src('src/ui/DecisionCard.jsx')
   assert.match(frame, /useProjectStyle\(board\)/, 'the stripe carries the project colour')
   assert.match(frame, /<ProjectChip slug=\{board\}/, 'the chip is on the card when no group says it')
-  assert.match(frame, /grouped \? \(board \? <span className="ux-vh">\{board\}<\/span> : null\)/, 'a grouped card keeps the name for the screen reader')
+  assert.match(frame, /\(grouped \|\| filtered\) && board \? <span className="ux-vh">\{board\}<\/span> : null/, 'a grouped card keeps the name for the screen reader')
   const tab = src('src/ui/DecisionsTab.jsx')
   assert.match(tab, /<GroupHead slug=\{g\.slug\}/)
   assert.match(tab, /const grouped = sort === 'project' && !project/, 'a filtered list brings the chip back on each card')

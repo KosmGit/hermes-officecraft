@@ -6421,7 +6421,7 @@ var en = {
       helpOne: "One action at a time; the result is verified after it is sent.",
       helpAge: "Orange: waiting for more than 24 h. Oldest first within each project.",
       helpApprovalProject: "An approval is listed under its agent’s project.",
-      openKanban: (code) => `Open ${code} in the kanban (no risk)`,
+      openKanban: (card) => `Open “${card}” in the kanban (no risk)`,
       openSession: (name) => `Open ${name}'s session (no risk)`,
       moreChoices: "Other answers"
     },
@@ -8144,7 +8144,7 @@ var es = {
       helpOne: "Solo una acción a la vez; el estado se verifica tras enviarla.",
       helpAge: "Naranja: lleva más de 24 h esperando. Las más antiguas primero dentro de cada proyecto.",
       helpApprovalProject: "Una aprobación va bajo el proyecto de su agente.",
-      openKanban: (code) => `Abrir ${code} en el kanban (sin riesgo)`,
+      openKanban: (card) => `Abrir «${card}» en el kanban (sin riesgo)`,
       openSession: (name) => `Abrir la sesión de ${name} (sin riesgo)`,
       moreChoices: "Otras respuestas"
     },
@@ -9868,7 +9868,7 @@ var fr = {
       helpOne: "Une seule action à la fois ; le résultat est vérifié après l’envoi.",
       helpAge: "Orange : en attente depuis plus de 24 h. Les plus anciennes d’abord dans chaque projet.",
       helpApprovalProject: "Une approbation est rangée sous le projet de son agent.",
-      openKanban: (code) => `Ouvrir ${code} dans le kanban (sans risque)`,
+      openKanban: (card) => `Ouvrir « ${card} » dans le kanban (sans risque)`,
       openSession: (name) => `Ouvrir la session ${de(name)} (sans risque)`,
       moreChoices: "Autres réponses"
     },
@@ -17455,7 +17455,7 @@ function CardOpen({ item, openKanban: openKanban2, openSession = null, t }) {
   if (!openKanban2 && !openSession) return null;
   return /* @__PURE__ */ jsxs9(Fragment5, { children: [
     openSession ? /* @__PURE__ */ jsx10("button", { type: "button", className: "ux-b sm ico ghost op", "data-order": "openSession", "data-card": item.id, "data-board": item.board, "aria-label": t("ux.dec.openSession", item.assignee), onClick: () => openSession(), children: /* @__PURE__ */ jsx10(Icon, { name: "msg", size: 14 }) }) : null,
-    openKanban2 ? /* @__PURE__ */ jsx10("button", { type: "button", className: "ux-b sm ico ghost op", "data-order": "openKanban", "data-card": item.id, "data-board": item.board, "aria-label": t("ux.dec.openKanban", item.code || item.id), onClick: () => openKanban2(), children: /* @__PURE__ */ jsx10(Icon, { name: "ext", size: 14 }) }) : null
+    openKanban2 ? /* @__PURE__ */ jsx10("button", { type: "button", className: "ux-b sm ico ghost op", "data-order": "openKanban", "data-card": item.id, "data-board": item.board, "aria-label": t("ux.dec.openKanban", [item.code, item.title].filter(Boolean).join(" ") || item.id), onClick: () => openKanban2(), children: /* @__PURE__ */ jsx10(Icon, { name: "ext", size: 14 }) }) : null
   ] });
 }
 function CardOrders({ item, orders, writes, t, onModelFollowUp }) {
@@ -19111,22 +19111,22 @@ function Clamped({ text: text3, className, tip, more, less, button, children }) 
     cut3 || whole ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-lnk ux-dc-more", ...button, "aria-expanded": whole, "aria-controls": id, onClick: () => setWhole((v) => !v), children: whole ? less : more }) : null
   ] });
 }
-function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summary: summary2, reason = null, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
+function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false, kind, code, title, summary: summary2, reason = null, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
   const style = useProjectStyle(board);
   const old = isOld({ sinceMs }, nowMs);
   const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || "none"}`) : "";
   const who = agent || t("inbox.unassigned");
+  const chip = !grouped && !filtered;
+  const mark = kind === "approval" ? /* @__PURE__ */ jsx20("span", { className: "ux-kind", children: t("ux.dec.approval") }) : code ? /* @__PURE__ */ jsx20("span", { className: "code ux-mono", children: code }) : null;
   return /* @__PURE__ */ jsxs17("li", { className: `ux-dc${target2 ? " target" : ""}`, style, "data-decision": id, "data-kind": kind, "data-board": board || void 0, "data-unverified": unverified ? "" : void 0, "data-target": target2 ? "" : void 0, ...attrs, children: [
-    /* @__PURE__ */ jsxs17("div", { className: "ux-dc-top", children: [
-      grouped ? board ? /* @__PURE__ */ jsx20("span", { className: "ux-vh", children: board }) : null : /* @__PURE__ */ jsx20(ProjectChip, { slug: board, label: t("ux.dec.project") }),
-      kind === "approval" ? /* @__PURE__ */ jsx20("span", { className: "ux-kind", children: t("ux.dec.approval") }) : code ? /* @__PURE__ */ jsx20("span", { className: "code ux-mono", children: code }) : null,
-      sinceMs != null ? /* @__PURE__ */ jsxs17("span", { className: `ux-age${old ? " old" : ""}`, title: ageTip, "data-age": true, children: [
-        /* @__PURE__ */ jsx20(Icon, { name: "clock", size: 14 }),
-        shortAge(nowMs - sinceMs, t("ux.dec.day"))
-      ] }) : null,
+    chip || mark ? /* @__PURE__ */ jsxs17("div", { className: "ux-dc-top", children: [
+      chip ? /* @__PURE__ */ jsx20(ProjectChip, { slug: board, label: t("ux.dec.project") }) : null,
+      mark
+    ] }) : (grouped || filtered) && board ? /* @__PURE__ */ jsx20("span", { className: "ux-vh", children: board }) : null,
+    /* @__PURE__ */ jsxs17("div", { className: "ux-dc-th", children: [
+      /* @__PURE__ */ jsx20("div", { className: "ux-dc-tt", children: /* @__PURE__ */ jsx20(Clamped, { text: title, className: "ux-dc-t", tip: title, more: t("ux.dec.more"), less: t("ux.dec.less"), button: { "data-dc-more": "" } }) }),
       open
     ] }),
-    /* @__PURE__ */ jsx20(Clamped, { text: title, className: "ux-dc-t", tip: title, more: t("ux.dec.more"), less: t("ux.dec.less"), button: { "data-dc-more": "" } }),
     summary2 ? /* @__PURE__ */ jsx20("p", { className: "ux-dc-s", "data-approval-summary": true, children: summary2 }) : null,
     detail,
     reason ? /* @__PURE__ */ jsx20(Clamped, { text: reason, className: "ux-dc-r", more: t("ux.dec.reasonMore"), less: t("ux.dec.reasonLess"), button: { "data-dc-more-reason": "" }, children: /* @__PURE__ */ jsxs17("span", { className: "ux-vh", children: [
@@ -19139,6 +19139,10 @@ function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summ
       role && !whoText ? /* @__PURE__ */ jsxs17("span", { className: "role", children: [
         "· ",
         role
+      ] }) : null,
+      sinceMs != null ? /* @__PURE__ */ jsxs17("span", { className: `ux-age${old ? " old" : ""}`, title: ageTip, "data-age": true, children: [
+        /* @__PURE__ */ jsx20(Icon, { name: "clock", size: 14 }),
+        shortAge(nowMs - sinceMs, t("ux.dec.day"))
       ] }) : null
     ] }),
     children
@@ -19176,7 +19180,7 @@ function CommandBlock({ req, choice, read: read2, onRead, t }) {
     !panel.missing && !read2 ? /* @__PURE__ */ jsx21("p", { className: "fine", role: "status", "data-approval-command-scroll": true, children: t("approvals.commandScroll") }) : null
   ] });
 }
-function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFollowUp, t }) {
+function ApprovalRow({ row, orders, nowMs, grouped, filtered = false, sceneAgent, open, onModelFollowUp, t }) {
   const req = row.req;
   const o = orders.state.order;
   const phase = orders.state.phase;
@@ -19216,6 +19220,7 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
       attrs: { "data-approval": req.requestId, "data-session": req.sessionId },
       board: row.board,
       grouped,
+      filtered,
       kind: "approval",
       title: where,
       summary: req.summary || t("approvals.noSummary"),
@@ -21264,9 +21269,11 @@ var PAGE_CSS = `
 .ux-kind{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${ink4(VIOLET)}}
 .ux-age{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;margin-left:auto;font-size:11.5px;color:${T32};white-space:nowrap}
 .ux-age.old{color:${ink4(ORANGE4)};font-weight:600}
-.ux-dc-top .ux-b.op{margin:-4px 0;color:${T32}}
-.ux-dc-top .ux-b.op:last-child{margin-right:-4px}
-.ux-dc-top .ux-b.op:hover{color:var(--foreground)}
+/* the title and the « open » icons at its right (the first line, when there is one, only holds the project and the code) */
+.ux-dc-th{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.ux-dc-tt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:8px}
+.ux-dc-th .ux-b.op{margin:-4px -4px -4px 0;color:${T32}}
+.ux-dc-th .ux-b.op:hover{color:var(--foreground)}
 .ux-dc-t{margin:0;font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-t.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-more{align-self:flex-start;font-size:12px}

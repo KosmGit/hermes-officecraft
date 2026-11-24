@@ -1651,7 +1651,7 @@ export const fr = {
       helpOne: 'Une seule action à la fois ; le résultat est vérifié après l’envoi.',
       helpAge: 'Orange : en attente depuis plus de 24 h. Les plus anciennes d’abord dans chaque projet.',
       helpApprovalProject: 'Une approbation est rangée sous le projet de son agent.',
-      openKanban: code => `Ouvrir ${code} dans le kanban (sans risque)`,
+      openKanban: card => `Ouvrir « ${card} » dans le kanban (sans risque)`,
       openSession: name => `Ouvrir la session ${de(name)} (sans risque)`,
       moreChoices: 'Autres réponses'
     },

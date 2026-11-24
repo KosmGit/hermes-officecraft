@@ -149,7 +149,7 @@ export function CardOpen({ item, openKanban, openSession = null, t }) {
         </button>
       ) : null}
       {openKanban ? (
-        <button type="button" className="ux-b sm ico ghost op" data-order="openKanban" data-card={item.id} data-board={item.board} aria-label={t('ux.dec.openKanban', item.code || item.id)} onClick={() => openKanban()}>
+        <button type="button" className="ux-b sm ico ghost op" data-order="openKanban" data-card={item.id} data-board={item.board} aria-label={t('ux.dec.openKanban', [item.code, item.title].filter(Boolean).join(' ') || item.id)} onClick={() => openKanban()}>
           <Icon name="ext" size={14} />
         </button>
       ) : null}

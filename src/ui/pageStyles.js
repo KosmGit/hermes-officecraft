@@ -188,9 +188,11 @@ export const PAGE_CSS = `
 .ux-kind{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${ink(VIOLET)}}
 .ux-age{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;margin-left:auto;font-size:11.5px;color:${T3};white-space:nowrap}
 .ux-age.old{color:${ink(ORANGE)};font-weight:600}
-.ux-dc-top .ux-b.op{margin:-4px 0;color:${T3}}
-.ux-dc-top .ux-b.op:last-child{margin-right:-4px}
-.ux-dc-top .ux-b.op:hover{color:var(--foreground)}
+/* the title and the « open » icons at its right (the first line, when there is one, only holds the project and the code) */
+.ux-dc-th{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.ux-dc-tt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:8px}
+.ux-dc-th .ux-b.op{margin:-4px -4px -4px 0;color:${T3}}
+.ux-dc-th .ux-b.op:hover{color:var(--foreground)}
 .ux-dc-t{margin:0;font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-t.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-more{align-self:flex-start;font-size:12px}
