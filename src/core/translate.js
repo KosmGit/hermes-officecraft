@@ -3,7 +3,7 @@ import { DEFAULT_LOCALE } from './locale.js'
 function lookup(bundle, key) {
   let node = bundle
   for (const part of key.split('.')) {
-    if (node == null || typeof node !== 'object') return undefined
+    if (node == null || typeof node !== 'object' || !Object.hasOwn(node, part)) return undefined   // own keys only: `role.toString` is not a message
     node = node[part]
   }
   return node

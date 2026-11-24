@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { ROLES, ROLE_IDS, detectRole, outfitOf } from '../../src/scene/wardrobe.js'
+import { ROLES, ROLE_IDS, detectRole, outfitOf, roleOf } from '../../src/scene/wardrobe.js'
 
 const role = (name, description = '', names = []) => detectRole({ name, description, skills: { names } })?.id ?? null
 
@@ -68,4 +68,15 @@ test('names that used to get a wrong role', () => {
   assert.equal(role('team-lead'), 'manager')
   assert.equal(role('excel-wizard'), 'data')
   assert.equal(role('formation'), 'teacher')
+})
+
+test('a role override that names an inherited key is not a role: detection runs and the outfit draws', () => {
+  for (const name of ['toString', 'constructor', '__proto__', 'hasOwnProperty', 'valueOf', 'isPrototypeOf']) {
+    const agent = { name: 'alpha', description: '', skills: [], roleOverride: name }
+    assert.notEqual(roleOf(agent).why.kind, 'manual', name)
+    assert.ok(roleOf(agent).role === null || Object.hasOwn(ROLES, roleOf(agent).role), name)
+    assert.doesNotThrow(() => outfitOf(agent), name)
+  }
+  assert.deepEqual(roleOf({ name: 'alpha', description: '', skills: [], roleOverride: ROLE_IDS[0] }), { role: ROLE_IDS[0], why: { kind: 'manual' } })
+  assert.equal(roleOf({ name: 'alpha', description: '', skills: [], roleOverride: 'none' }).role, null)
 })

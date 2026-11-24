@@ -100,16 +100,18 @@ function Draft({ item, orders, t }) {
 }
 
 /** The same confirmation for the approval rows and the recruitment window (reads `t` itself). `children`: what the caller shows of the target, above the effect. */
-export function OrderConfirm({ orders, children = null }) {
-  return <Confirm orders={orders} t={useT()}>{children}</Confirm>
+export function OrderConfirm({ orders, blocked = false, children = null }) {
+  return <Confirm orders={orders} blocked={blocked} t={useT()}>{children}</Confirm>
 }
 
 /** The explicit confirmation of a final order: names the project and the card (or the agent and the session), says what happens, then Confirm or Back. */
-function Confirm({ orders, t, children = null }) {
+function Confirm({ orders, t, blocked = false, children = null }) {
   const { state, act } = orders
   const o = state.order
   const ref = useRef(null)
-  useEffect(() => { ref.current?.focus() }, [])
+  // `blocked`: what the caller shows above has not been read to its end; Confirm is announced unavailable, does nothing, and
+  // takes the focus only once it can be used (the caller keeps the focus on what is left to read)
+  useEffect(() => { if (!blocked) ref.current?.focus() }, [blocked])
   const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); act('cancel') } }
   const verb = verbLabel(o, t)
   const approval = o.verb === 'approval'
@@ -130,7 +132,7 @@ function Confirm({ orders, t, children = null }) {
       <p className="fine">{t('orders.undoNote', UNDO_SECONDS)}</p>
       <div className="row">
         <button type="button" className="ux-b sm" data-order-back onClick={() => act(backAction(o))}>{t('orders.back')}</button>
-        <button ref={ref} type="button" className="ux-b sm pri" data-order-confirm onClick={() => act('confirm')}>{t('orders.confirm')}</button>
+        <button ref={ref} type="button" className="ux-b sm pri" data-order-confirm aria-disabled={blocked ? true : undefined} onClick={() => { if (!blocked) act('confirm') }}>{t('orders.confirm')}</button>
       </div>
     </div>
   )

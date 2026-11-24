@@ -561,7 +561,10 @@ def migrate_state(state: dict, routes: dict) -> dict:
 # ------------------------------------------------------------------ sending
 def hermes_send(target: str, message: str) -> dict:
     """``send_message_tool`` of Hermes (what ``hermes send`` runs). The result is cut to what we keep."""
-    from tools.send_message_tool import send_message_tool
+    try:
+        from gateway.outbound.send import send_message_tool
+    except ImportError:   # Hermes before the outbound senders moved
+        from tools.send_message_tool import send_message_tool
     res = json.loads(send_message_tool({"action": "send", "target": target, "message": message}))
     return {"success": bool(res.get("success")), "error": "send_failed" if not res.get("success") else None}
 
@@ -652,6 +655,7 @@ class Notifier:
                 res = self.send(known[d["to"]]["target"], render(d, settings, now))
             except Exception as exc:   # noqa: BLE001
                 res = {"success": False, "error": type(exc).__name__}
+                log.warning("hermes-officecraft notification not sent: %s", type(exc).__name__)   # the class only, never the message or the target
             result = {"success": bool(res.get("success")), "count": len(d["facts"]), "at": int(now)}
             state = mark_sent(d, state, now) if result["success"] else mark_failed(d, state, now)
             state["last"] = result

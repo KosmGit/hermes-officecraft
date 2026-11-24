@@ -37,7 +37,7 @@ function resolveLocale(pref, appLocale2, systemLocales2 = []) {
 function lookup(bundle, key) {
   let node = bundle;
   for (const part of key.split(".")) {
-    if (node == null || typeof node !== "object") return void 0;
+    if (node == null || typeof node !== "object" || !Object.hasOwn(node, part)) return void 0;
     node = node[part];
   }
   return node;
@@ -87,6 +87,12 @@ function commandPanel(req, choice) {
   const text3 = str(req?.command);
   return { text: text3, cut: Boolean(text3) && req?.commandCut === true, missing: !text3 };
 }
+var denyOnly = (req) => !str(req?.command) ? "missing" : req?.commandCut === true ? "cut" : null;
+function readToEnd(box2) {
+  const top = Number(box2?.scrollTop), view = Number(box2?.clientHeight), all = Number(box2?.scrollHeight);
+  if (![top, view, all].every(Number.isFinite) || view <= 0) return false;
+  return all - view - top <= 2;
+}
 function choicesOf(raw) {
   if (!raw || typeof raw !== "object") return ["deny"];
   const listed = Array.isArray(raw?.choices) ? raw.choices.filter((c) => CHOICES.includes(c)) : null;
@@ -117,7 +123,8 @@ function normalizeRequest(raw, { sessionId, profile = "", nowMs = 0 } = {}) {
     command: command.text,
     // memory and screen only: see the header
     commandCut: command.cut,
-    choices: choicesOf(raw),
+    choices: command.cut || !command.text ? ["deny"] : choicesOf(raw),
+    // a command that is not whole on screen is never allowed from here
     smartDenied: raw.smart_denied === true,
     firstSeenMs: nowMs
   };
@@ -1328,7 +1335,7 @@ function scoreRole(a) {
 }
 function roleOf(a) {
   const o = a.roleOverride;
-  if (o && (ROLES[o] || o === "none")) return { role: o === "none" ? null : o, why: { kind: "manual" } };
+  if (o && (Object.hasOwn(ROLES, o) || o === "none")) return { role: o === "none" ? null : o, why: { kind: "manual" } };
   const m = a.modelRole;
   if (m && Object.hasOwn(ROLES, m)) return { role: m, why: { kind: "model", at: Number.isFinite(a.modelRoleAt) ? a.modelRoleAt : null } };
   const d = detectRole(a);
@@ -5250,6 +5257,9 @@ var en = {
     commandNote: "Before you confirm an “Allow” answer, this page shows the command as Hermes sends it, with the secrets Hermes recognises already masked. The command is never stored or logged here.",
     commandLabel: "Command",
     commandCut: "Shortened here. The full command is on the approval card in the session.",
+    denyOnlyCut: "This command is too long to show in full here, so it can only be refused. To allow it, use the approval card in the session.",
+    denyOnlyMissing: "Hermes gave no command for this request, so it can only be refused here. To allow it, use the approval card in the session.",
+    commandScroll: "Scroll to the end of the command to confirm.",
     commandMissing: "Hermes sent no command with this request. The exact command is on the approval card in the session.",
     target: "Request from:",
     effect: {
@@ -6949,6 +6959,9 @@ var es = {
     commandNote: "Antes de que confirmes un permiso, esta página muestra el comando tal como lo envía Hermes, con los secretos que Hermes reconoce ya ocultos. El comando nunca se guarda ni se registra aquí.",
     commandLabel: "Comando",
     commandCut: "Se muestra recortado. El comando completo está en la tarjeta de aprobación de la sesión.",
+    denyOnlyCut: "Este comando es demasiado largo para mostrarse entero aquí: solo se puede rechazar. Para permitirlo, usa la tarjeta de aprobación de la sesión.",
+    denyOnlyMissing: "Hermes no ha dado ningún comando para esta solicitud: aquí solo se puede rechazar. Para permitirla, usa la tarjeta de aprobación de la sesión.",
+    commandScroll: "Desplázate hasta el final del comando para confirmar.",
     commandMissing: "Hermes no envió ningún comando con esta solicitud. El comando exacto está en la tarjeta de aprobación de la sesión.",
     target: "Solicitud de:",
     effect: {
@@ -8649,6 +8662,9 @@ var fr = {
     commandNote: "Avant que vous confirmiez une autorisation, cette page affiche la commande telle que Hermes la transmet, les secrets reconnus par Hermes étant déjà masqués. La commande n’est jamais enregistrée ni journalisée ici.",
     commandLabel: "Commande",
     commandCut: "Affichage tronqué. La commande complète figure sur la carte d’approbation de la session.",
+    denyOnlyCut: "Cette commande est trop longue pour s’afficher en entier ici : elle ne peut être que refusée. Pour l’autoriser, passez par la carte d’approbation de la session.",
+    denyOnlyMissing: "Hermes n’a transmis aucune commande pour cette demande : elle ne peut être que refusée ici. Pour l’autoriser, passez par la carte d’approbation de la session.",
+    commandScroll: "Faites défiler la commande jusqu’au bout pour confirmer.",
     commandMissing: "Hermes n’a transmis aucune commande avec cette demande. La commande exacte figure sur la carte d’approbation de la session.",
     target: "Demande de :",
     effect: {
@@ -9783,7 +9799,7 @@ var ENDONYMS = Object.freeze({ en: "English", fr: "Français", es: "Español" })
 
 // src/ui/OfficePage.jsx
 import { EmptyState, host as host6, useQueryClient as useQueryClient6, useValue as useValue5 } from "@hermes/plugin-sdk";
-import { useCallback as useCallback8, useDeferredValue, useEffect as useEffect27, useLayoutEffect as useLayoutEffect7, useMemo as useMemo17, useRef as useRef28, useState as useState25 } from "react";
+import { useCallback as useCallback9, useDeferredValue, useEffect as useEffect27, useLayoutEffect as useLayoutEffect8, useMemo as useMemo17, useRef as useRef29, useState as useState25 } from "react";
 
 // src/core/achievements.js
 var DAY_MS3 = 864e5;
@@ -17062,16 +17078,16 @@ function Draft({ item, orders, t }) {
     ] })
   ] });
 }
-function OrderConfirm({ orders, children = null }) {
-  return /* @__PURE__ */ jsx10(Confirm, { orders, t: useT(), children });
+function OrderConfirm({ orders, blocked = false, children = null }) {
+  return /* @__PURE__ */ jsx10(Confirm, { orders, blocked, t: useT(), children });
 }
-function Confirm({ orders, t, children = null }) {
+function Confirm({ orders, t, blocked = false, children = null }) {
   const { state: state2, act } = orders;
   const o = state2.order;
   const ref = useRef10(null);
   useEffect9(() => {
-    ref.current?.focus();
-  }, []);
+    if (!blocked) ref.current?.focus();
+  }, [blocked]);
   const onKey = (e) => {
     if (e.key === "Escape") {
       e.preventDefault();
@@ -17104,7 +17120,9 @@ function Confirm({ orders, t, children = null }) {
     /* @__PURE__ */ jsx10("p", { className: "fine", children: t("orders.undoNote", UNDO_SECONDS) }),
     /* @__PURE__ */ jsxs9("div", { className: "row", children: [
       /* @__PURE__ */ jsx10("button", { type: "button", className: "ux-b sm", "data-order-back": true, onClick: () => act(backAction(o)), children: t("orders.back") }),
-      /* @__PURE__ */ jsx10("button", { ref, type: "button", className: "ux-b sm pri", "data-order-confirm": true, onClick: () => act("confirm"), children: t("orders.confirm") })
+      /* @__PURE__ */ jsx10("button", { ref, type: "button", className: "ux-b sm pri", "data-order-confirm": true, "aria-disabled": blocked ? true : void 0, onClick: () => {
+        if (!blocked) act("confirm");
+      }, children: t("orders.confirm") })
     ] })
   ] });
 }
@@ -18012,7 +18030,7 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
 }
 
 // src/ui/HireDialog.jsx
-import { useEffect as useEffect14, useId as useId10, useMemo as useMemo10, useRef as useRef15, useState as useState13 } from "react";
+import { useEffect as useEffect14, useId as useId10, useMemo as useMemo10, useRef as useRef16, useState as useState13 } from "react";
 
 // src/ui/RolePicker.jsx
 import { useId as useId8 } from "react";
@@ -18684,7 +18702,7 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
 import { useMemo as useMemo6 } from "react";
 
 // src/ui/Approvals.jsx
-import { useState as useState12 } from "react";
+import { useCallback as useCallback6, useLayoutEffect as useLayoutEffect5, useRef as useRef15, useState as useState12 } from "react";
 
 // src/ui/DecisionCard.jsx
 import { jsx as jsx19, jsxs as jsxs16 } from "react/jsx-runtime";
@@ -18720,14 +18738,33 @@ function DecisionFrame({ id, attrs = {}, board, grouped, kind, code, title, summ
 
 // src/ui/Approvals.jsx
 import { jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
-function CommandBlock({ req, choice, t }) {
+function CommandBlock({ req, choice, read: read2, onRead, t }) {
   const panel = commandPanel(req, choice);
+  const box2 = useRef15(null);
+  const text3 = panel?.text ?? "";
+  const check = useCallback6(() => {
+    if (box2.current && readToEnd(box2.current)) onRead(true);
+  }, [onRead]);
+  useLayoutEffect5(() => {
+    onRead(false);
+    const el = box2.current;
+    if (!el) {
+      onRead(true);
+      return void 0;
+    }
+    check();
+    if (!readToEnd(el)) el.focus();
+    const seen = typeof ResizeObserver === "function" ? new ResizeObserver(check) : null;
+    seen?.observe(el);
+    return () => seen?.disconnect();
+  }, [text3, check, onRead]);
   if (!panel) return null;
   const id = `oc-cmd-${req.requestId}`;
   return /* @__PURE__ */ jsxs17("div", { className: "ux-cmd", "data-approval-command": true, children: [
     /* @__PURE__ */ jsx20("p", { id, className: "lbl", children: t("approvals.commandLabel") }),
-    panel.missing ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-missing": true, children: t("approvals.commandMissing") }) : /* @__PURE__ */ jsx20("pre", { className: "ux-cmd-x ux-mono", tabIndex: 0, role: "group", "aria-labelledby": id, children: panel.text }),
-    panel.cut ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-cut": true, children: t("approvals.commandCut") }) : null
+    panel.missing ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-missing": true, children: t("approvals.commandMissing") }) : /* @__PURE__ */ jsx20("pre", { className: "ux-cmd-x ux-mono", ref: box2, tabIndex: 0, role: "group", "aria-labelledby": id, onScroll: check, children: panel.text }),
+    panel.cut ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-command-cut": true, children: t("approvals.commandCut") }) : null,
+    !panel.missing && !read2 ? /* @__PURE__ */ jsx20("p", { className: "fine", role: "status", "data-approval-command-scroll": true, children: t("approvals.commandScroll") }) : null
   ] });
 }
 function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFollowUp, t }) {
@@ -18737,6 +18774,8 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
   const mine = o?.verb === "approval" && o.sessionId === req.sessionId && o.requestId === req.requestId;
   const busy = isBusy(orders.state);
   const [more, setMore] = useState12(false);
+  const [read2, setRead] = useState12(false);
+  const locked = denyOnly(req);
   const who = req.profile || t("approvals.unknownAgent");
   const where = req.title || t("approvals.untitled");
   const allowed = CHOICES.filter((c) => req.choices.includes(c));
@@ -18789,7 +18828,8 @@ function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onModelFol
           rest3.length ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-b sm ico more", "aria-expanded": more, "aria-label": t("ux.dec.moreChoices"), onClick: () => setMore((v) => !v), children: /* @__PURE__ */ jsx20(Icon, { name: "more", size: 14 }) }) : null
         ] }) : null,
         more && rest3.length && !showConfirm ? /* @__PURE__ */ jsx20("div", { className: "ux-ch-extra", children: rest3.map(button) }) : null,
-        showConfirm ? /* @__PURE__ */ jsx20(OrderConfirm, { orders, children: /* @__PURE__ */ jsx20(CommandBlock, { req, choice: o.choice, t }) }) : null,
+        locked && !showConfirm ? /* @__PURE__ */ jsx20("p", { className: "fine", "data-approval-deny-only": true, children: t(locked === "cut" ? "approvals.denyOnlyCut" : "approvals.denyOnlyMissing") }) : null,
+        showConfirm ? /* @__PURE__ */ jsx20(OrderConfirm, { orders, blocked: !read2, children: /* @__PURE__ */ jsx20(CommandBlock, { req, choice: o.choice, read: read2, onRead: setRead, t }) }) : null,
         showProgress ? /* @__PURE__ */ jsx20(OrderProgress, { orders, onModelFollowUp }) : null
       ]
     }
@@ -19217,7 +19257,8 @@ function SidePanel({
     if (!next) return;
     e.preventDefault();
     onTab(next);
-    requestAnimationFrame(() => e.currentTarget.querySelector(`[data-tab="${next}"]`)?.focus());
+    const list = e.currentTarget;
+    requestAnimationFrame(() => list?.querySelector(`[data-tab="${next}"]`)?.focus());
   };
   let body;
   if (tab === "agent") {
@@ -19291,7 +19332,7 @@ function hireProfiles(desks, sceneProfiles2) {
 }
 function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
   const t = useT();
-  const nameRef = useRef15(null);
+  const nameRef = useRef16(null);
   const id = useId10();
   const [reqOpen, setReqOpen] = useState13(false);
   const [draft, setDraft] = useState13(() => hireDraft(profiles));
@@ -19489,7 +19530,7 @@ var SHEET_AT = 600;
 var settingsSheet = (width) => width > 0 && width <= SHEET_AT;
 
 // src/ui/OfficeScene.jsx
-import { useCallback as useCallback6, useEffect as useEffect15, useLayoutEffect as useLayoutEffect5, useMemo as useMemo11, useRef as useRef16, useState as useState14 } from "react";
+import { useCallback as useCallback7, useEffect as useEffect15, useLayoutEffect as useLayoutEffect6, useMemo as useMemo11, useRef as useRef17, useState as useState14 } from "react";
 
 // src/core/ticker.js
 var FRAME_MS = 260;
@@ -19874,21 +19915,21 @@ function ListDot({ slug }) {
 }
 function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpen, badges = [], motion = "auto", readMs = null, decor = null, grades = null, exportRef = null, seating = null, thoughts = null, project: filter = null, onProject = null, onFit = null, listNote = null }) {
   const t = useT();
-  const boxRef = useRef16(null);
-  const stageRef = useRef16(null);
-  const canvasRef = useRef16(null);
-  const hudRef = useRef16(null);
-  const accentRef = useRef16(null);
-  const baseRef = useRef16({ key: "", base: null });
-  const frameRef = useRef16(0);
-  const paintedRef = useRef16(0);
+  const boxRef = useRef17(null);
+  const stageRef = useRef17(null);
+  const canvasRef = useRef17(null);
+  const hudRef = useRef17(null);
+  const accentRef = useRef17(null);
+  const baseRef = useRef17({ key: "", base: null });
+  const frameRef = useRef17(0);
+  const paintedRef = useRef17(0);
   const [size, setSize] = useState14({ w: 0, h: 0 });
   const [dpr, setDpr] = useState14(() => typeof window === "undefined" ? 1 : window.devicePixelRatio || 1);
   const visible = usePageVisible();
   const reduced = motionReduced(motion, useMedia("(prefers-reduced-motion: reduce)"));
-  const animatedRef = useRef16(0);
+  const animatedRef = useRef17(0);
   const [tip, setTip] = useState14(null);
-  useLayoutEffect5(() => {
+  useLayoutEffect6(() => {
     const el = boxRef.current;
     if (!el || typeof ResizeObserver !== "function") return void 0;
     const ro = new ResizeObserver((entries) => {
@@ -19903,7 +19944,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
   }, []);
   const fresh = useMemo11(() => toSceneModel(office, { nowMs, night, profiles, decor: decor || void 0, seating }), [office, profiles, nowMs, night, decor, seating]);
   const factsKey = useMemo11(() => sceneFacts(fresh), [fresh]);
-  const kept2 = useRef16({ key: null, model: null });
+  const kept2 = useRef17({ key: null, model: null });
   if (kept2.current.key !== factsKey) kept2.current = { key: factsKey, model: fresh };
   const model = kept2.current.model;
   const layout2 = useMemo11(() => layoutScene(model), [model]);
@@ -19913,7 +19954,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
   const S = view.scale;
   const byName2 = useMemo11(() => new Map(office.agents.map((a) => [a.name, a])), [office]);
   const faceBy = useMemo11(() => new Map(model.agents.map((a) => [a.name, a])), [model]);
-  const live = useRef16(null);
+  const live = useRef17(null);
   const dim = useMemo11(() => dimOf(filter, layout2), [filter, layout2]);
   live.current = { layout: layout2, model, selected, asScene, dim };
   useEffect15(() => {
@@ -19921,10 +19962,10 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
   }, [onFit, layout2.W, layout2.H, size.w, size.h, dpr, people, view.mode]);
   const bleed = useMemo11(() => asScene ? bleedOf({ availW: size.w, availH: size.h, W: layout2.W, H: layout2.H, S }) : null, [asScene, size.w, size.h, layout2.W, layout2.H, S]);
   const groundKey = bleed ? JSON.stringify([layout2.X, layout2.Y, layout2.lounge.x0, layout2.W, layout2.H, layout2.origin, !!model.night, bleed]) : "";
-  const groundRef = useRef16(null);
-  const groundBuf = useRef16(null);
-  const artStore = useRef16(null);
-  const groundStore = useRef16(null);
+  const groundRef = useRef17(null);
+  const groundBuf = useRef17(null);
+  const artStore = useRef17(null);
+  const groundStore = useRef17(null);
   const [ground, setGround] = useState14(null);
   const back = useMemo11(() => backingOf({ W: layout2.W, H: layout2.H, S, dpr }), [layout2.W, layout2.H, S, dpr]);
   const gback = useMemo11(() => ground ? backingOf({ W: ground.w, H: ground.h, S, dpr }) : null, [ground, S, dpr]);
@@ -19938,7 +19979,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     }, groundBuf.current ? 120 : 0);
     return () => clearTimeout(id);
   }, [groundKey]);
-  useLayoutEffect5(() => {
+  useLayoutEffect6(() => {
     const cv = groundRef.current;
     const buf = groundBuf.current;
     if (!cv || !ground || !buf || buf.key !== ground.key) return;
@@ -19951,7 +19992,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
       exportRef.current = null;
     };
   }, [exportRef]);
-  const paint = useCallback6((frame, animated = false) => {
+  const paint = useCallback7((frame, animated = false) => {
     const cur = live.current;
     const cv = canvasRef.current;
     if (!cur?.asScene || !cv || document.hidden) return;
@@ -19965,7 +20006,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     if (animated) animatedRef.current += 1;
     cv.dataset.animFrames = String(animatedRef.current);
   }, []);
-  useLayoutEffect5(() => {
+  useLayoutEffect6(() => {
     if (asScene) paint(frameRef.current);
   }, [asScene, paint, layout2, model, selected, S, visible, dim, back.w, back.h]);
   const animate = shouldAnimate({ needs: needsAnimation(model), visible, reducedMotion: reduced }) && asScene;
@@ -19982,9 +20023,9 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
     ticker.start();
     return () => ticker.stop();
   }, [animate, paint]);
-  const geomRef = useRef16({ key: "", sprites: null, frac: null });
-  const leadsRef = useRef16(null);
-  useLayoutEffect5(() => {
+  const geomRef = useRef17({ key: "", sprites: null, frac: null });
+  const leadsRef = useRef17(null);
+  useLayoutEffect6(() => {
     const hud = hudRef.current;
     const stage = stageRef.current;
     if (!asScene || !hud || !stage) return;
@@ -20353,10 +20394,10 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
 import { useId as useId11 } from "react";
 
 // src/ui/PixelIcon.jsx
-import { useEffect as useEffect16, useRef as useRef17 } from "react";
+import { useEffect as useEffect16, useRef as useRef18 } from "react";
 import { jsx as jsx28 } from "react/jsx-runtime";
 function PixelIcon({ id, size = 20, className = "oc-icon", ...rest3 }) {
-  const ref = useRef17(null);
+  const ref = useRef18(null);
   useEffect16(() => {
     const cv = ref.current;
     if (!cv) return;
@@ -20369,7 +20410,7 @@ function PixelIcon({ id, size = 20, className = "oc-icon", ...rest3 }) {
   return /* @__PURE__ */ jsx28("canvas", { ref, className, width: 14, height: 14, style: { width: size, height: size }, "aria-hidden": "true", ...rest3 });
 }
 function PixelMedal({ id, family, tier, unlocked, hidden, size = 56, className = "oc-medal", ...rest3 }) {
-  const ref = useRef17(null);
+  const ref = useRef18(null);
   useEffect16(() => {
     const cv = ref.current;
     if (!cv) return;
@@ -20867,10 +20908,10 @@ var PAGE_CSS = `
 `;
 
 // src/ui/Legend.jsx
-import { useEffect as useEffect17, useId as useId12, useRef as useRef18, useState as useState15 } from "react";
+import { useEffect as useEffect17, useId as useId12, useRef as useRef19, useState as useState15 } from "react";
 import { jsx as jsx30, jsxs as jsxs26 } from "react/jsx-runtime";
 function Swatch({ rgb }) {
-  const ref = useRef18(null);
+  const ref = useRef19(null);
   useEffect17(() => {
     const g = ref.current?.getContext("2d");
     if (!g || !rgb) return;
@@ -20895,7 +20936,7 @@ function Legend() {
   const t = useT();
   const [open, setOpen] = useState15(false);
   const id = useId12();
-  const wrap = useRef18(null);
+  const wrap = useRef19(null);
   const rows = legendRows(HALO, { workingMs: WORKER_LIVE_WINDOW_MS, staleMs: STALE_AFTER_MS, activeMs: RECENT_WINDOW_MS });
   useEffect17(() => {
     if (!open) return void 0;
@@ -20985,7 +21026,8 @@ function TabBar({ view, onView, decisions, t }) {
     if (!next) return;
     e.preventDefault();
     onView(next);
-    requestAnimationFrame(() => e.currentTarget.parentElement?.querySelector(`[data-view="${next}"]`)?.focus());
+    const bar = e.currentTarget.parentElement;
+    requestAnimationFrame(() => bar?.querySelector(`[data-view="${next}"]`)?.focus());
   };
   return /* @__PURE__ */ jsx32("nav", { className: "ux-bar", role: "tablist", "aria-label": t("ux.bar.label"), "data-tabbar": true, children: BAR.map((k) => /* @__PURE__ */ jsxs28("button", { type: "button", role: "tab", "data-view": k, "aria-selected": barOf(view) === k, tabIndex: barOf(view) === k ? 0 : -1, onKeyDown: onKey, onClick: () => onView(k), children: [
     /* @__PURE__ */ jsx32(Icon, { name: ICON4[k], size: 20 }),
@@ -21352,7 +21394,7 @@ var REPLAY_CSS = `
 `;
 
 // src/ui/Collection.jsx
-import { useMemo as useMemo14, useRef as useRef19, useState as useState16 } from "react";
+import { useMemo as useMemo14, useRef as useRef20, useState as useState16 } from "react";
 
 // src/core/vitrine.js
 var RECENT_MS = 2 * 864e5;
@@ -21562,8 +21604,8 @@ function Vitrine({ open, onClose, game, office, readMs, nowMs, onPostcard, t }) 
   const view = useMemo14(() => vitrineView(game, nowMs), [game, nowMs]);
   const [picked, setPicked] = useState16(null);
   const [rov, setRov] = useState16(0);
-  const refs = useRef19([]);
-  const detailRef = useRef19(null);
+  const refs = useRef20([]);
+  const detailRef = useRef20(null);
   const byId = useMemo14(() => new Map(view.shelves.flatMap((f) => f.items).map((a) => [a.id, a])), [view]);
   const selId = picked && byId.has(picked) ? picked : view.first;
   const sel = byId.get(selId) ?? null;
@@ -22041,7 +22083,7 @@ var percentLabel = (p) => p == null || !Number.isFinite(p) ? null : String(Math.
 
 // src/data/usage.js
 import { useQuery as useQuery8 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect18, useRef as useRef20 } from "react";
+import { useEffect as useEffect18, useRef as useRef21 } from "react";
 var USAGE_POLL_MS = 6e4;
 var QUOTA_POLL_MS = 12e4;
 var QUOTA_RETRY_MS = 8e3;
@@ -22120,7 +22162,7 @@ function useQuota({ enabled }) {
   return query;
 }
 function useQuotaRetry(query, hasWindows) {
-  const tried = useRef20(false);
+  const tried = useRef21(false);
   const at = query.dataUpdatedAt;
   useEffect18(() => {
     if (!at || hasWindows || tried.current) return void 0;
@@ -22540,11 +22582,11 @@ var USAGE_CSS = `
 `;
 
 // src/ui/SeatingDialog.jsx
-import { useEffect as useEffect20, useId as useId14, useRef as useRef21, useState as useState18 } from "react";
+import { useEffect as useEffect20, useId as useId14, useRef as useRef22, useState as useState18 } from "react";
 import { Fragment as Fragment17, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
 function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   const t = useT();
-  const areaRef = useRef21(null);
+  const areaRef = useRef22(null);
   const id = useId14();
   const query = useLlm();
   const { call } = useLlmActions();
@@ -22673,11 +22715,11 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
 
 // src/ui/SettingsGear.jsx
 import * as sdk4 from "@hermes/plugin-sdk";
-import { useCallback as useCallback7, useRef as useRef26, useState as useState23 } from "react";
+import { useCallback as useCallback8, useRef as useRef27, useState as useState23 } from "react";
 
 // src/ui/SettingsDialog.jsx
 import * as sdk3 from "@hermes/plugin-sdk";
-import { useEffect as useEffect25, useId as useId18, useRef as useRef25 } from "react";
+import { useEffect as useEffect25, useId as useId18, useRef as useRef26 } from "react";
 
 // src/ui/SettingsForm.jsx
 import { useValue as useValue3 } from "@hermes/plugin-sdk";
@@ -22710,7 +22752,7 @@ function ringDash(pct, r) {
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { useEffect as useEffect22, useId as useId16, useMemo as useMemo16, useRef as useRef23, useState as useState20 } from "react";
+import { useEffect as useEffect22, useId as useId16, useMemo as useMemo16, useRef as useRef24, useState as useState20 } from "react";
 
 // src/core/llmSettings.js
 var GRANT_COMMAND = "hermes plugins enable hermes-officecraft";
@@ -22792,7 +22834,7 @@ function pickFromValue(value, choices) {
 }
 
 // src/ui/SettingsKit.jsx
-import { useEffect as useEffect21, useId as useId15, useLayoutEffect as useLayoutEffect6, useRef as useRef22, useState as useState19 } from "react";
+import { useEffect as useEffect21, useId as useId15, useLayoutEffect as useLayoutEffect7, useRef as useRef23, useState as useState19 } from "react";
 import { jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
 var ICONS2 = {
   gear: "M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z M12 2.5l1.4 2.4 2.7-.6.9 2.6 2.6.9-.6 2.7L21.5 12l-2.5 1.5.6 2.7-2.6.9-.9 2.6-2.7-.6L12 21.5l-1.4-2.4-2.7.6-.9-2.6-2.6-.9.6-2.7L2.5 12 5 10.5l-.6-2.7 2.6-.9.9-2.6 2.7.6Z",
@@ -22828,11 +22870,11 @@ function HelpTip({ name, children }) {
   const t = useT();
   const [open, setOpen] = useState19(false);
   const id = useId15();
-  const wrap = useRef22(null);
-  const btn = useRef22(null);
-  const note = useRef22(null);
+  const wrap = useRef23(null);
+  const btn = useRef23(null);
+  const note = useRef23(null);
   const [up, setUp] = useState19(false);
-  useLayoutEffect6(() => {
+  useLayoutEffect7(() => {
     if (!open) {
       setUp(false);
       return;
@@ -23007,7 +23049,7 @@ function SettingsFormLlm({ actions = null }) {
   const state2 = query.data ?? null;
   const modelOpts = useModelOptions(state2?.override === "granted");
   const list = useMemo16(() => modelChoices(modelOpts), [modelOpts]);
-  const errorRef = useRef23(null);
+  const errorRef = useRef24(null);
   const id = useId16();
   useEffect22(() => {
     if (!state2) return;
@@ -23240,7 +23282,7 @@ function SettingsFormLlm({ actions = null }) {
 
 // src/ui/SettingsFormNotify.jsx
 import { host as host3 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect23, useRef as useRef24, useState as useState21 } from "react";
+import { useEffect as useEffect23, useRef as useRef25, useState as useState21 } from "react";
 import { Fragment as Fragment19, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
 var MESSAGING_PATH = "/messaging";
 var selectStyle = {
@@ -23295,7 +23337,7 @@ function SettingsFormNotify() {
   useEffect23(() => {
     if (query.data) setState(query.data);
   }, [query.data]);
-  const errorRef = useRef24(null);
+  const errorRef = useRef25(null);
   useEffect23(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
@@ -23943,7 +23985,7 @@ function SettingsForm({ llm = null }) {
 import { jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
 function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
   const t = useT();
-  const ref = useRef25(null);
+  const ref = useRef26(null);
   const id = useId18();
   const motion = sdk3.useValue($motionPref);
   useEffect25(() => {
@@ -24026,12 +24068,12 @@ var GEAR = gearPath();
 function SettingsGear({ sheet, llm = null }) {
   const t = useT();
   const [open, setOpen] = useState23(false);
-  const btn = useRef26(null);
-  const close = useCallback7(() => {
+  const btn = useRef27(null);
+  const close = useCallback8(() => {
     setOpen(false);
     setTimeout(() => btn.current?.focus(), 0);
   }, []);
-  const hand = useCallback7((fn) => () => {
+  const hand = useCallback8((fn) => () => {
     setOpen(false);
     fn();
   }, []);
@@ -24066,9 +24108,9 @@ function EmptyOffice({ onRecruit, t }) {
 }
 
 // src/ui/usePartialStreaks.js
-import { useRef as useRef27 } from "react";
+import { useRef as useRef28 } from "react";
 function usePartialStreaks(data, dataUpdatedAt) {
-  const ref = useRef27({ at: 0, streaks: /* @__PURE__ */ new Map() });
+  const ref = useRef28({ at: 0, streaks: /* @__PURE__ */ new Map() });
   if (data && dataUpdatedAt && dataUpdatedAt !== ref.current.at) ref.current = { at: dataUpdatedAt, streaks: nextStreaks(ref.current.streaks, toPartial(data.partial) ?? []) };
   return ref.current.streaks;
 }
@@ -24383,7 +24425,7 @@ function usePageClock() {
 import { jsx as jsx46, jsxs as jsxs42 } from "react/jsx-runtime";
 function useWidth(ref) {
   const [w, setW] = useState25(0);
-  useLayoutEffect7(() => {
+  useLayoutEffect8(() => {
     const el = ref.current;
     if (!el || typeof ResizeObserver !== "function") return void 0;
     const ro = new ResizeObserver((entries) => {
@@ -24416,12 +24458,12 @@ function OfficePage({ ctx }) {
   const motionPref = useValue5($motionPref);
   const gameOn = useValue5($gameMode);
   const [selected, setSelectedState] = useState25(() => rememberedSelection());
-  const setSelected = useCallback8((name) => {
+  const setSelected = useCallback9((name) => {
     setSelectedState(rememberSelection(name));
   }, []);
   const wideOpen = useValue5($panelOpen);
   const [tab, setTabState] = useState25("decisions");
-  const setTab = useCallback8((k) => {
+  const setTab = useCallback9((k) => {
     if (isTab(k)) setTabState(k);
   }, []);
   const [art, setArt] = useState25(null);
@@ -24431,37 +24473,37 @@ function OfficePage({ ctx }) {
   const [refused2, setRefused] = useState25("");
   const [officeView, setOfficeView] = useState25(true);
   const drawerOpen = !officeView;
-  const setDrawerOpen = useCallback8((v) => setOfficeView((prev) => !(typeof v === "function" ? v(!prev) : v)), []);
+  const setDrawerOpen = useCallback9((v) => setOfficeView((prev) => !(typeof v === "function" ? v(!prev) : v)), []);
   const [project2, setProject] = useState25(null);
   const [sortPref, setSortPref] = useState25("project");
   const sort = isSort(sortPref) ? sortPref : "project";
   const [jfilter, setJfilter] = useState25("all");
   const [hireOpen, setHireOpen] = useState25(false);
-  const usageBtnRef = useRef28(null);
+  const usageBtnRef = useRef29(null);
   const [usageOpen, setUsageOpen] = useState25(false);
-  const closeUsage = useCallback8(() => {
+  const closeUsage = useCallback9(() => {
     setUsageOpen(false);
     setTimeout(() => usageBtnRef.current?.focus(), 0);
   }, []);
-  const closeHire = useCallback8(() => setHireOpen(false), []);
+  const closeHire = useCallback9(() => setHireOpen(false), []);
   const [campaignOpen, setCampaignOpen] = useState25(false);
-  const closeCampaign = useCallback8(() => {
+  const closeCampaign = useCallback9(() => {
     setCampaignOpen(false);
     setTimeout(() => document.querySelector("[data-campaign-open]")?.focus(), 0);
   }, []);
   const [vitrineOpen, setVitrineOpen] = useState25(false);
-  const vitrineFrom = useRef28(null);
-  const openVitrine = useCallback8(() => {
+  const vitrineFrom = useRef29(null);
+  const openVitrine = useCallback9(() => {
     vitrineFrom.current = document.activeElement;
     setVitrineOpen(true);
   }, []);
-  const closeVitrine = useCallback8(() => {
+  const closeVitrine = useCallback9(() => {
     setVitrineOpen(false);
     setTimeout(() => vitrineFrom.current?.focus?.(), 0);
   }, []);
-  const pageRef = useRef28(null);
-  const toggleRef = useRef28(null);
-  const headRef = useRef28(null);
+  const pageRef = useRef29(null);
+  const toggleRef = useRef29(null);
+  const headRef = useRef29(null);
   const width = useWidth(pageRef);
   const sheet = settingsSheet(width);
   const desks = roster.data?.desks ?? [];
@@ -24478,7 +24520,7 @@ function OfficePage({ ctx }) {
     return { office: { ...built, agents: withNonEmptySessions(withWorkerModels(built.agents, history.data ?? null), history.data ?? null) }, nowMs: now };
   }, [desks, live.data, history.data, clock3]);
   const replayServed = reads.includes("replay");
-  const replayTo = useRef28(0);
+  const replayTo = useRef29(0);
   const nightPref = useValue5($nightPref);
   const nightWin = useMemo17(() => nightWindow(Date.now(), nightPref), [nightPref, clock3]);
   const nightQuery = useReplay(ctx, { enabled: replayServed, kind: "night", night: nightPref, anchor: nightWin.from, poll: nightWin.ongoing && !replayOn });
@@ -24548,9 +24590,9 @@ function OfficePage({ ctx }) {
   const workRoles = useMemo17(() => thoughtRoles(sceneAgents), [sceneAgents]);
   useThoughts({ ready: llmShown.thoughtsReady && !replayOn, visible: pageVisible, roles: workRoles, lang: t.lang });
   const [decorOpen, setDecorOpen] = useState25(false);
-  const closeDecor = useCallback8(() => setDecorOpen(false), []);
+  const closeDecor = useCallback9(() => setDecorOpen(false), []);
   const [seatOpen, setSeatOpen] = useState25(false);
-  const closeSeat = useCallback8(() => setSeatOpen(false), []);
+  const closeSeat = useCallback9(() => setSeatOpen(false), []);
   const llmActions = useMemo17(() => llmOn ? {
     skip: manualProfiles(liveOffice.agents),
     onDecorate: decorReady ? () => setDecorOpen(true) : null,
@@ -24569,8 +24611,8 @@ function OfficePage({ ctx }) {
     else if (res.kind === "many") host6.notify({ kind: "success", message: t("game.toast.many", res.ids.length) });
     else if (res.kind === "new") host6.notify({ kind: "success", message: t("game.toast.new", res.ids.map((id) => t(`game.ach.${id}.name`)).join(", ")) });
   }, [complete, unlockedKey]);
-  const exportRef = useRef28(null);
-  const postcard = useCallback8(() => {
+  const exportRef = useRef29(null);
+  const postcard = useCallback9(() => {
     const buffer = exportRef.current?.();
     if (buffer) savePostcard(buffer, postcardName(Date.now()));
   }, []);
@@ -24578,9 +24620,9 @@ function OfficePage({ ctx }) {
   const night = resolveLight(lightPref, new Date(nowMs)) === "night";
   const picked = office.agents.find((a) => a.name === selected) ?? null;
   const badges = useMemo17(() => badgesOf(office.agents, new Map(office.agents.map((a) => [a.name, modelOf(a)]))), [office]);
-  const seenBadges = useRef28(null);
-  const seenStates = useRef28(null);
-  const seenQuiet = useRef28(null);
+  const seenBadges = useRef29(null);
+  const seenStates = useRef29(null);
+  const seenQuiet = useRef29(null);
   const [announce, setAnnounce] = useState25("");
   useEffect27(() => {
     if (replayOn) {
@@ -24599,23 +24641,23 @@ function OfficePage({ ctx }) {
     if (said.length) setAnnounce(said.join(". "));
   }, [badges, office.agents, t, replayOn]);
   const queryClient = useQueryClient6();
-  const replayBtnRef = useRef28(null);
+  const replayBtnRef = useRef29(null);
   const busy = isBusy(orders.state);
-  const enterReplay = useCallback8((kind = "night", group = null) => {
+  const enterReplay = useCallback9((kind = "night", group = null) => {
     if (busy) return;
     setReplayKind(kind);
     setCursor(null);
     setFactFilter({ board: null, agent: null, group, all: false });
     setReplayOn(true);
   }, [busy]);
-  const exitReplay = useCallback8(() => {
+  const exitReplay = useCallback9(() => {
     setReplayOn(false);
     setCursor(null);
     queryClient.refetchQueries({ queryKey: LIVE_KEY });
     queryClient.refetchQueries({ queryKey: ROSTER_KEY });
     setTimeout(() => replayBtnRef.current?.focus(), 0);
   }, [queryClient]);
-  const chooseWindow = useCallback8((kind) => {
+  const chooseWindow = useCallback9((kind) => {
     setReplayKind(kind);
     setCursor(null);
   }, []);
@@ -24629,7 +24671,7 @@ function OfficePage({ ctx }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [replayOn, dialogOpen, drawerOpen, narrow, exitReplay]);
-  const focused = useRef28(false);
+  const focused = useRef29(false);
   useEffect27(() => {
     if (!replayOn) {
       focused.current = false;
@@ -24640,7 +24682,7 @@ function OfficePage({ ctx }) {
       pageRef.current?.querySelector("[data-replay-cursor]")?.focus({ preventScroll: true });
     }
   }, [replayOn, replayData]);
-  const edge = useRef28(null);
+  const edge = useRef29(null);
   useEffect27(() => {
     if (!replayData) {
       edge.current = null;
@@ -24673,7 +24715,7 @@ function OfficePage({ ctx }) {
     if (fx.foldPanel) toggleWide(true);
     if (fx.focusToggle) toggleRef.current?.focus();
   };
-  const skipPending = useRef28(false);
+  const skipPending = useRef29(false);
   const skipToDetails = (e) => {
     e.preventDefault();
     const plan = skipPlan({ panelOpen, narrow });

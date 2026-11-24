@@ -93,3 +93,8 @@ test('the path to the auxiliary models is the one Hermes Desktop labels, in the 
     assert.doesNotMatch(readFileSync(new URL(`../../src/i18n/${lang}.js`, import.meta.url), 'utf8'), OLD, `${lang}: the earlier path is gone`)
   }
 })
+
+test('a key that names an inherited property is not a message: the raw key comes back, nothing is called', () => {
+  for (const key of ['role.toString', 'role.valueOf', 'role.constructor', 'role.__proto__', 'constructor', 'toString.call'])
+    for (const code of SUPPORTED_LOCALES) assert.equal(translate(messages, code, key, []), key, `${code} ${key}`)
+})

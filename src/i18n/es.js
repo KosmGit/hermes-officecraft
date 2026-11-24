@@ -567,6 +567,9 @@ export const es = {
     commandNote: 'Antes de que confirmes un permiso, esta página muestra el comando tal como lo envía Hermes, con los secretos que Hermes reconoce ya ocultos. El comando nunca se guarda ni se registra aquí.',
     commandLabel: 'Comando',
     commandCut: 'Se muestra recortado. El comando completo está en la tarjeta de aprobación de la sesión.',
+    denyOnlyCut: 'Este comando es demasiado largo para mostrarse entero aquí: solo se puede rechazar. Para permitirlo, usa la tarjeta de aprobación de la sesión.',
+    denyOnlyMissing: 'Hermes no ha dado ningún comando para esta solicitud: aquí solo se puede rechazar. Para permitirla, usa la tarjeta de aprobación de la sesión.',
+    commandScroll: 'Desplázate hasta el final del comando para confirmar.',
     commandMissing: 'Hermes no envió ningún comando con esta solicitud. El comando exacto está en la tarjeta de aprobación de la sesión.',
     target: 'Solicitud de:',
     effect: {

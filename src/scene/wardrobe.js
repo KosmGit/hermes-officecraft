@@ -161,7 +161,7 @@ function scoreRole(a) {
  */
 export function roleOf(a) {
   const o = a.roleOverride
-  if (o && (ROLES[o] || o === 'none')) return { role: o === 'none' ? null : o, why: { kind: 'manual' } }
+  if (o && (Object.hasOwn(ROLES, o) || o === 'none')) return { role: o === 'none' ? null : o, why: { kind: 'manual' } }
   const m = a.modelRole
   if (m && Object.hasOwn(ROLES, m)) return { role: m, why: { kind: 'model', at: Number.isFinite(a.modelRoleAt) ? a.modelRoleAt : null } }
   const d = detectRole(a)

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
-import { CHOICES, choiceRisk, commandLine, commandPanel } from '../core/approvals.js'
+import { CHOICES, choiceRisk, commandLine, commandPanel, denyOnly, readToEnd } from '../core/approvals.js'
 import { isBusy } from '../core/orders.js'
 import { DecisionFrame } from './DecisionCard.jsx'
 import { Icon } from './icons.jsx'
@@ -17,10 +17,24 @@ import { OrderConfirm, OrderProgress, RiskDot } from './Orders.jsx'
 /**
  * The command Hermes asks about, inside the confirmation of an allowing answer: read from the row of the in-memory store while
  * it is drawn (the order never carries it), as plain text in a block that wraps and scrolls. When it was cut, or when Hermes gave
- * none, a line says where the exact command is.
+ * none, a line says where the exact command is. `onRead(true)` once the end of the command is in view: a command taller than its
+ * frame (blank lines, one very long line) must be scrolled to its last line before the confirmation can be sent.
  */
-function CommandBlock({ req, choice, t }) {
+function CommandBlock({ req, choice, read, onRead, t }) {
   const panel = commandPanel(req, choice)
+  const box = useRef(null)
+  const text = panel?.text ?? ''
+  const check = useCallback(() => { if (box.current && readToEnd(box.current)) onRead(true) }, [onRead])
+  useLayoutEffect(() => {
+    onRead(false)
+    const el = box.current
+    if (!el) { onRead(true); return undefined }   // no frame (no command): nothing to scroll
+    check()
+    if (!readToEnd(el)) el.focus()   // the keyboard scrolls it; the Confirm button takes the focus only when nothing is hidden
+    const seen = typeof ResizeObserver === 'function' ? new ResizeObserver(check) : null   // a wider panel can bring the end into view
+    seen?.observe(el)
+    return () => seen?.disconnect()
+  }, [text, check, onRead])
   if (!panel) return null
   const id = `oc-cmd-${req.requestId}`
   return (
@@ -28,8 +42,9 @@ function CommandBlock({ req, choice, t }) {
       <p id={id} className="lbl">{t('approvals.commandLabel')}</p>
       {panel.missing
         ? <p className="fine" data-approval-command-missing>{t('approvals.commandMissing')}</p>
-        : <pre className="ux-cmd-x ux-mono" tabIndex={0} role="group" aria-labelledby={id}>{panel.text}</pre>}
+        : <pre className="ux-cmd-x ux-mono" ref={box} tabIndex={0} role="group" aria-labelledby={id} onScroll={check}>{panel.text}</pre>}
       {panel.cut ? <p className="fine" data-approval-command-cut>{t('approvals.commandCut')}</p> : null}
+      {!panel.missing && !read ? <p className="fine" role="status" data-approval-command-scroll>{t('approvals.commandScroll')}</p> : null}
     </div>
   )
 }
@@ -41,6 +56,8 @@ export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onM
   const mine = o?.verb === 'approval' && o.sessionId === req.sessionId && o.requestId === req.requestId
   const busy = isBusy(orders.state)
   const [more, setMore] = useState(false)
+  const [read, setRead] = useState(false)   // the end of the command was on screen, in this confirmation
+  const locked = denyOnly(req)
   const who = req.profile || t('approvals.unknownAgent')
   const where = req.title || t('approvals.untitled')
   const allowed = CHOICES.filter(c => req.choices.includes(c))
@@ -96,7 +113,8 @@ export function ApprovalRow({ row, orders, nowMs, grouped, sceneAgent, open, onM
         </div>
       ) : null}
       {more && rest.length && !showConfirm ? <div className="ux-ch-extra">{rest.map(button)}</div> : null}
-      {showConfirm ? <OrderConfirm orders={orders}><CommandBlock req={req} choice={o.choice} t={t} /></OrderConfirm> : null}
+      {locked && !showConfirm ? <p className="fine" data-approval-deny-only>{t(locked === 'cut' ? 'approvals.denyOnlyCut' : 'approvals.denyOnlyMissing')}</p> : null}
+      {showConfirm ? <OrderConfirm orders={orders} blocked={!read}><CommandBlock req={req} choice={o.choice} read={read} onRead={setRead} t={t} /></OrderConfirm> : null}
       {showProgress ? <OrderProgress orders={orders} onModelFollowUp={onModelFollowUp} /> : null}
     </DecisionFrame>
   )

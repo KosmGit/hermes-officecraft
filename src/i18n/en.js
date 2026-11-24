@@ -568,6 +568,9 @@ export const en = {
     commandNote: 'Before you confirm an “Allow” answer, this page shows the command as Hermes sends it, with the secrets Hermes recognises already masked. The command is never stored or logged here.',
     commandLabel: 'Command',
     commandCut: 'Shortened here. The full command is on the approval card in the session.',
+    denyOnlyCut: 'This command is too long to show in full here, so it can only be refused. To allow it, use the approval card in the session.',
+    denyOnlyMissing: 'Hermes gave no command for this request, so it can only be refused here. To allow it, use the approval card in the session.',
+    commandScroll: 'Scroll to the end of the command to confirm.',
     commandMissing: 'Hermes sent no command with this request. The exact command is on the approval card in the session.',
     target: 'Request from:',
     effect: {

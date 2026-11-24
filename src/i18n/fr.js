@@ -570,6 +570,9 @@ export const fr = {
     commandNote: 'Avant que vous confirmiez une autorisation, cette page affiche la commande telle que Hermes la transmet, les secrets reconnus par Hermes étant déjà masqués. La commande n’est jamais enregistrée ni journalisée ici.',
     commandLabel: 'Commande',
     commandCut: 'Affichage tronqué. La commande complète figure sur la carte d’approbation de la session.',
+    denyOnlyCut: 'Cette commande est trop longue pour s’afficher en entier ici : elle ne peut être que refusée. Pour l’autoriser, passez par la carte d’approbation de la session.',
+    denyOnlyMissing: 'Hermes n’a transmis aucune commande pour cette demande : elle ne peut être que refusée ici. Pour l’autoriser, passez par la carte d’approbation de la session.',
+    commandScroll: 'Faites défiler la commande jusqu’au bout pour confirmer.',
     commandMissing: 'Hermes n’a transmis aucune commande avec cette demande. La commande exacte figure sur la carte d’approbation de la session.',
     target: 'Demande de :',
     effect: {

@@ -11,8 +11,12 @@
  * The command exists so that nobody allows a request without having read it: the confirmation of the three allowing answers
  * shows it. It lives in the in-memory store and on screen, nowhere else. It is never put in an order (`approvalTarget`), in
  * the audit journal (`auditBody`), in storage, in a notification, in a tooltip or an accessible name, in an outcome line, nor
- * in any text handed to a model. It is bounded and cleaned for display (`cleanCommand`); when it was cut, or when Hermes gave
- * none, the confirmation says the exact command is on the approval card in the session.
+ * in any text handed to a model. It is bounded and cleaned for display (`cleanCommand`).
+ *
+ * A request whose whole command is not on screen can only be refused here (`denyOnly`): when it was cut, or when Hermes gave
+ * none, the allowing answers are not offered and the card says the exact command is on the approval card in the session.
+ * Hermes applies the same rule to its own cards. A whole command taller than its frame must be scrolled to its end before
+ * the confirmation can be sent (`readToEnd`).
  */
 
 /** The four answers of `approval.respond`, in the order the box offers them (safest first). */
@@ -88,6 +92,19 @@ export function commandPanel(req, choice) {
   return { text, cut: Boolean(text) && req?.commandCut === true, missing: !text }
 }
 
+/** Why a request can only be refused here, or null: the page does not hold its whole command ('missing': none given, 'cut': shortened). */
+export const denyOnly = req => (!str(req?.command) ? 'missing' : req?.commandCut === true ? 'cut' : null)
+
+/**
+ * Whether a scrolling frame shows the end of its text: `{ scrollTop, clientHeight, scrollHeight }` of the element. A frame that
+ * does not overflow is read; one that does is read once its last line is in view (2 px of slack for fractional layouts).
+ */
+export function readToEnd(box) {
+  const top = Number(box?.scrollTop), view = Number(box?.clientHeight), all = Number(box?.scrollHeight)
+  if (![top, view, all].every(Number.isFinite) || view <= 0) return false   // not laid out: nothing was read
+  return all - view - top <= 2
+}
+
 /**
  * The choices a request allows. Hermes lists them in `choices` (or leaves them to `allow_session` / `allow_permanent`:
  * `tui_gateway/server.py::_approval_request_payload`); `deny` is always there, nothing outside the four is ever offered.
@@ -123,7 +140,7 @@ export function normalizeRequest(raw, { sessionId, profile = '', nowMs = 0 } = {
     summary: oneLine(raw.description).slice(0, DESCRIPTION_MAX),
     command: command.text,       // memory and screen only: see the header
     commandCut: command.cut,
-    choices: choicesOf(raw),
+    choices: command.cut || !command.text ? ['deny'] : choicesOf(raw),   // a command that is not whole on screen is never allowed from here
     smartDenied: raw.smart_denied === true,
     firstSeenMs: nowMs
   }

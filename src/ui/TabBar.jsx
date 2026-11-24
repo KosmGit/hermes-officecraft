@@ -13,7 +13,8 @@ export function TabBar({ view, onView, decisions, t }) {
     if (!next) return
     e.preventDefault()
     onView(next)
-    requestAnimationFrame(() => e.currentTarget.parentElement?.querySelector(`[data-view="${next}"]`)?.focus())
+    const bar = e.currentTarget.parentElement   // read now: React clears currentTarget once the handler returns
+    requestAnimationFrame(() => bar?.querySelector(`[data-view="${next}"]`)?.focus())
   }
   return (
     <nav className="ux-bar" role="tablist" aria-label={t('ux.bar.label')} data-tabbar>

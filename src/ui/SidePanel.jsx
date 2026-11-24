@@ -34,7 +34,8 @@ export function SidePanel({
     if (!next) return
     e.preventDefault()
     onTab(next)
-    requestAnimationFrame(() => e.currentTarget.querySelector(`[data-tab="${next}"]`)?.focus())
+    const list = e.currentTarget   // read now: React clears it once the handler returns
+    requestAnimationFrame(() => list?.querySelector(`[data-tab="${next}"]`)?.focus())
   }
   let body
   if (tab === 'agent') {
