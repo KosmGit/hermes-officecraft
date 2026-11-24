@@ -1,6 +1,6 @@
 # Pinned to exact versions, the indirect dependencies too: a new release of any of them must not change what CI installs
 # with no change in the repository. Bump them on purpose, then run `pytest -q tests/python`.
-fastapi==0.162.2
+fastapi==0.165.0
 starlette==1.10.0
 httpx==0.28.1
 pytest==9.2.0
