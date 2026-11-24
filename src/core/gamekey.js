@@ -6,7 +6,7 @@
  * (their status, dates, assignee, title, model override, guard flag), the boards (slug, creation date) and, of the agents, their name,
  * whether they work and what dresses them (description, role). Of the clock it reads the local day (streak, season, closed nights and
  * days), whether it is night, the age in days of the oldest profile and which profiles are still recruits. Two reads that give the
- * same key give the same game: nothing else is looked at (tests/js/gamekey.test.mjs holds it against computeGame itself).
+ * same key give the same game: nothing else is looked at (tests/js/perf-game.test.mjs holds it against computeGame itself).
  */
 import { RULES_V2, dayNo } from './achievements.js'
 import { RULES, gameFacts } from './game.js'

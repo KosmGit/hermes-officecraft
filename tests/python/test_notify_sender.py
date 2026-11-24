@@ -4,10 +4,12 @@ import json
 import logging
 import sys
 import types
+from pathlib import Path
 
 import pytest
 
-from hermes_officecraft import notify as N
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from hermes_officecraft import notify as N  # noqa: E402
 
 
 def _module(name, calls, ok=True):
