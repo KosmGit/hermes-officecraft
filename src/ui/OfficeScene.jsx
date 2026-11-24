@@ -27,7 +27,7 @@ import { useT } from './useT.js'
 // the page hangs its own state dot and label above every head, so the canvas draws no state crystal there (the postcard, which has no HUD, keeps it)
 const HUD_SPRITES = Object.freeze({ art: true, marker: false })
 const ACCENT = { at: -Infinity, rgb: null, el: null, g: null }
-const TIP_LEAVE_MS = 200   // the pointer may cross the gap between a spot and its tooltip to reach it
+const TIP_LEAVE_MS = 350   // the pointer may cross the gap between a spot and its tooltip to reach it
 /** The page left: nothing of its DOM stays referenced from here (the element would keep a detached scene alive). */
 const forgetAccent = () => { ACCENT.el = null; ACCENT.rgb = null; ACCENT.at = -Infinity }
 function readAccent(el) {

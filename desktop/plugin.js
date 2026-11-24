@@ -20201,7 +20201,7 @@ function focusBackTarget(candidates) {
 import { jsx as jsx28, jsxs as jsxs25 } from "react/jsx-runtime";
 var HUD_SPRITES = Object.freeze({ art: true, marker: false });
 var ACCENT = { at: -Infinity, rgb: null, el: null, g: null };
-var TIP_LEAVE_MS = 200;
+var TIP_LEAVE_MS = 350;
 var forgetAccent = () => {
   ACCENT.el = null;
   ACCENT.rgb = null;

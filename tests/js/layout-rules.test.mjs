@@ -121,3 +121,42 @@ test('what was only in a title reaches the keyboard and the finger', () => {
   // the command of an approval is never a title nor a name (the existing test of the approvals holds it for the card itself)
   for (const f of ['DecisionCard.jsx', 'ProjectsTab.jsx', 'Why.jsx']) assert.ok(!/title=\{[^}]*command/i.test(src(f)), `${f}: a command in a title`)
 })
+
+/** The text of a block opened by `head` (an at-rule line), braces balanced. */
+function block(css, head) {
+  const at = css.indexOf(head)
+  if (at < 0) return null
+  let depth = 0
+  for (let i = css.indexOf('{', at); i < css.length; i++) {
+    if (css[i] === '{') depth++
+    else if (css[i] === '}' && --depth === 0) return css.slice(css.indexOf('{', at) + 1, i)
+  }
+  return null
+}
+
+test('header: words from 1500 px of pane, never a clipped gear: the title and the word of the decisions pill give way first', () => {
+  const wide = block(PAGE_CSS, '@container ux (min-width: 1500px)')
+  assert.match(wide, /\.ux-acts \.ux-b \.lb\{display:inline\}/, 'the words of the buttons come back from 1500 px')
+  assert.ok(!/\.lb/.test(block(PAGE_CSS, '@container ux (max-width: 1320px)')), 'they no longer fold at 1320 px: French and Spanish need about 1445 px')
+  assert.ok(has(rule(PAGE_CSS, '.ux-acts .ux-b .lb'), 'display', 'none'), 'icons are the default')
+  // what may not shrink, and what may
+  assert.ok(has(rule(PAGE_CSS, '.ux-acts'), 'flex', '0 0 auto'), 'the actions and the gear keep their width')
+  assert.ok(has(rule(PAGE_CSS, '.ux-brand'), 'flex', '0 1 auto') && has(rule(PAGE_CSS, '.ux-live'), 'flex', '0 1 auto'))
+  assert.ok(has(rule(PAGE_CSS, '.ux-lvp.dec .w'), 'text-overflow', 'ellipsis'))
+  assert.match(src('PageHeader.jsx'), /<span className="w">\{t\('ux\.pill\.decisions'/, 'the word of the decisions pill is its own element (it keeps its accessible name when cut)')
+  for (const sel of ['.ux-top', '.ux-acts', '.ux-live', '.ux-brand']) assert.ok(!/overflow:\s*hidden/.test(rule(PAGE_CSS, sel)), `${sel} does not clip`)
+  // the thresholds were moved, not multiplied
+  assert.ok((PAGE_CSS.match(/@container ux \(/g) ?? []).length <= 7, 'at most the seven container queries the page already had')
+})
+
+test('the project filter dims by edge and weight, not by opacity (the text keeps its contrast)', () => {
+  for (const head of ['.oc-station[data-dim]', '.oc-zone[data-dim]', '.oc-lzone[data-dim]', '.oc-lrow[data-dim]']) {
+    for (const m of SCENE_CSS.matchAll(/([^{}\n]+)\{([^{}]*)\}/g)) {
+      if (m[1].includes(head) && !/\.oc-face/.test(m[1])) assert.ok(!/opacity/.test(m[2]), `${m[1].trim()} dims with opacity`)
+    }
+  }
+  assert.ok(!/\.ux-pjc\.dim\{[^}]*opacity/.test(PAGE_CSS), 'no opacity on a dimmed project card')
+  assert.match(SCENE_CSS, /\.oc-station\[data-dim\][^{]*\.oc-chip\{[^}]*border-style:dashed/)
+  assert.match(SCENE_CSS, /\.oc-lrow\[data-dim\][^{]*\.oc-chip\{[^}]*border-style:dashed/)
+  assert.ok(has(rule(PAGE_CSS, '.ux-pjc.dim'), 'border-style', 'dashed'))
+})
