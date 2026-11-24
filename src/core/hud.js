@@ -186,9 +186,19 @@ export function foldCovering(fulls, dots) {
  * A stable fingerprint of what a scene model DRAWS. A /live read that changes nothing displayed gives the same
  * string, so the page keeps the previous model (no layout, no repaint, no new base). The wall clock shows hours and minutes:
  * the time enters by the minute only. `selected` is left out (the page paints it separately). Pure.
+ *
+ * Of a board the engine reads its slug and creation date (layout, hue), its counts (whiteboard) and the number of cards that wait for
+ * the user (the desk, the island); never its cards: their heartbeats move at every read, their titles and dates are not drawn. Of the
+ * gateway it draws the state and the state of each platform, of the crons which one is on and which one fails. A card that changes
+ * status changes the counts: the fingerprint follows. The silent state of a bot comes from the agent (`state`), already in the model.
  */
 export function sceneFacts(model) {
-  return JSON.stringify(model, (key, value) => (key === 'nowMs' ? Math.floor(value / 60_000) : key === 'selected' ? undefined : value))
+  const { boards, ops, ...rest } = model
+  return JSON.stringify({
+    ...rest,
+    boards: (boards || []).map(b => [b.slug, b.createdMs ?? null, b.total, b.done, b.counts, b.blocked?.length ?? 0]),
+    ops: ops ? { gateway: ops.gateway ? { state: ops.gateway.state, platforms: (ops.gateway.platforms || []).map(p => [p.name, p.state, p.attention]) } : null, crons: (ops.crons || []).map(c => [c.key, c.enabled, c.failing]) } : null
+  }, (key, value) => (key === 'nowMs' ? Math.floor(value / 60_000) : key === 'selected' ? undefined : value))
 }
 
 /**
