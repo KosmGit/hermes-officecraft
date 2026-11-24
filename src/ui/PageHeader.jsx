@@ -4,6 +4,7 @@ import { Icon } from './icons.jsx'
 import { PixelIcon } from './PixelIcon.jsx'
 import { PopCard, usePopover } from './Popover.jsx'
 import { moreMenuTarget } from './targets.js'
+import { WhyButton } from './Why.jsx'
 import { useT } from './useT.js'
 
 /**
@@ -19,7 +20,7 @@ function GameBadge({ game, onOpen, t }) {
   const streak = game.quests?.streakDays ?? 0
   const name = t(`game.levelName.${lvl.name}`)
   return (
-    <button type="button" className="ux-game" data-game data-badge aria-haspopup="dialog" title={t('ux.badge.tip')} aria-label={t('ux.badge.open', [`${name}, ${t('ux.badge.level', lvl.level)}`, t('ux.badge.trophiesTip', got, total), streak > 0 ? `${t('ux.badge.streak')} ${t('ux.badge.days', streak)}` : ''].filter(Boolean).join(', '))} onClick={onOpen}>
+    <button type="button" className="ux-game" data-game data-badge aria-haspopup="dialog" title={t('ux.badge.tip')} aria-label={t('ux.badge.open', [`${name}, ${t('ux.badge.level', lvl.level)}`, t('ux.badge.trophiesTip', got, total), streak > 0 ? t('ux.badge.streakLabel', streak) : ''].filter(Boolean).join(', '))} onClick={onOpen}>
       <span className="ux-gs lvl" data-game data-level={lvl.level} data-level-name={lvl.name} title={t('ux.badge.levelTip', lvl.done, lvl.next)}>
         <PixelIcon id="office" size={20} />
         <span className="ux-g2">
@@ -71,7 +72,7 @@ function MoreMenu({ items, label }) {
         {items.map(it => (
           <button key={it.key} type="button" role={it.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'} aria-checked={it.pressed === undefined ? undefined : it.pressed} tabIndex={-1} data-more={it.key}
             aria-disabled={it.disabled ? true : undefined} onClick={() => { pop.setOpen(false); if (!it.disabled) it.onClick() }}>
-            <Icon name={it.icon} size={14} />{it.label}
+            <Icon name={it.icon} size={14} />{it.label}{it.disabled && it.why ? <small className="why">{it.why}</small> : null}
           </button>
         ))}
       </PopCard>
@@ -81,12 +82,12 @@ function MoreMenu({ items, label }) {
 
 /**
  * The header, one row: the brand, the live state in three buttons (working, decisions, agents: each one takes you to what it counts),
- * the game badge, then the actions: replay, resources, recruit, (decorator), the panel and the settings. Under 1320 px of pane the labels
- * fold into icons (their text stays in aria-label and title); in a narrow pane only the decisions pill, the badge, « more » and the settings stay.
+ * the game badge, then the actions: replay, resources, recruit, (decorator), the panel and the settings. Under 1500 px of pane the labels
+ * are icons (their text stays in aria-label and title); in a narrow pane only the decisions pill, the badge, « more » and the settings stay.
  */
 export function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, replayOn, replay, usage, recruit, campaign, decor, panel, gear, narrow }) {
   const more = []
-  if (replay) more.push({ key: 'replay', icon: 'replay', label: t('replay.open'), pressed: replayOn, disabled: replay.disabled, onClick: replay.onClick })
+  if (replay) more.push({ key: 'replay', icon: 'replay', label: t('replay.open'), pressed: replayOn, disabled: replay.disabled, why: replay.disabled ? t('replay.openBusy') : '', onClick: replay.onClick })
   if (usage) more.push({ key: 'usage', icon: 'usage', label: t('usage.open'), onClick: usage.onClick })
   if (recruit) more.push({ key: 'recruit', icon: 'recruit', label: t('recruit.open'), onClick: recruit.onClick })
   if (campaign) more.push({ key: 'campaign', icon: 'layers', label: t('campaign.open'), onClick: campaign.onClick })
@@ -99,13 +100,13 @@ export function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, repl
       </div>
       {counts.total > 0 ? (
         <div className="ux-live" role="group" aria-label={t('ux.pill.label')}>
-          <button type="button" className="ux-lvp working" data-go="agent" aria-label={`${counts.working} ${t('ux.pill.working', counts.working)}`} title={t('ux.pill.workingTip')} onClick={() => onGo('agent')}>
+          <button type="button" className="ux-lvp working" data-go="agent" aria-label={t('ux.pill.workingLabel', counts.working)} title={t('ux.pill.workingTip')} onClick={() => onGo('agent')}>
             <span className={`ux-pulse${counts.working ? '' : ' off'}`} aria-hidden="true" />
             <b>{counts.working}</b><span className="w">{t('ux.pill.working', counts.working)}</span>
           </button>
           <button type="button" className={`ux-lvp dec${decisionCount ? ' warn' : ''}`} data-go="decisions" title={t('ux.pill.decisionsTip')} onClick={() => onGo('decisions')}>
             <Icon name="warn" size={14} />
-            <b>{decisionCount ?? '—'}</b>{t('ux.pill.decisions', decisionCount ?? 0)}
+            <b>{decisionCount ?? '—'}</b><span className="w">{t('ux.pill.decisions', decisionCount ?? 0)}</span>
           </button>
           <button type="button" className="ux-lvp agents" data-go="agent" onClick={() => onGo('agent')}>
             <b>{counts.total}</b>{t('ux.pill.agents', counts.total)}
@@ -116,9 +117,9 @@ export function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, repl
       {game ? <GameBadge game={game} onOpen={onBadge} t={t} /> : null}
       <div className="ux-acts">
         {replay ? (
-          <button ref={replay.ref} type="button" className="ux-b" data-replay-open aria-pressed={replayOn} aria-disabled={replay.disabled || undefined} title={replay.disabled ? t('replay.openBusy') : t('replay.openTip')} aria-label={t('replay.open')} onClick={replay.onClick}>
+          <WhyButton buttonRef={replay.ref} className="ux-b" data-replay-open aria-pressed={replayOn} reason={replay.disabled ? t('replay.openBusy') : ''} title={replay.disabled ? t('replay.openBusy') : t('replay.openTip')} aria-label={t('replay.open')} onGo={replay.onClick}>
             <Icon name="replay" /><span className="lb">{t('replay.open')}</span>
-          </button>
+          </WhyButton>
         ) : null}
         {usage ? (
           <button ref={usage.ref} type="button" className="ux-b" data-usage-open title={t('usage.openTip')} aria-label={t('usage.open')} onClick={usage.onClick}>

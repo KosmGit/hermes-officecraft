@@ -2,6 +2,7 @@ import { Icon, Ring } from './icons.jsx'
 import { Legend } from './Legend.jsx'
 import { Portrait } from './Portrait.jsx'
 import { useProjectStyle } from './ProjectChip.jsx'
+import { WhyButton } from './Why.jsx'
 
 function ProjectButton({ b, pressed, onPick, t }) {
   const style = useProjectStyle(b.slug)
@@ -41,7 +42,7 @@ export function ProjectDock({ boards, project, onProject, picked, sceneAgent, re
             <b title={picked.label}>{picked.label}</b>
             <span className={`ux-st ux-st-${picked.state}`}><span className="ux-sdot" aria-hidden="true" />{t(`state.${picked.state}`)}</span>
             {narrow ? <button type="button" className="ux-b sm" onClick={onDetails}>{t('ux.dock.details')}</button> : null}
-            <button type="button" className="ux-b sm pri oc-btn-open" aria-disabled={!canOpen} title={why} data-selected-open onClick={onOpen}>{t('openBtn')}</button>
+            <WhyButton className="ux-b sm pri oc-btn-open" reason={canOpen ? '' : why} title={why} data-selected-open onGo={onOpen}>{t('openBtn')}</WhyButton>
           </>
         ) : <span className="hint">{t('ux.dock.hint')}</span>}
         <span className="oc-announce" data-announce aria-live="polite">{announce}</span>

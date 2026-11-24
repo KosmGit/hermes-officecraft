@@ -1,13 +1,14 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
+import { placePopover, scrollCloses } from '../core/popover.js'
+
 /**
  * The one popover of the page (help « ? », alert details, the legend). A button that opens a small card next to it; the card is
  * placed with `position: fixed` from the button's box (the panel and the stage clip what overflows them), flips above when it does not fit
  * below, and closes on Escape (the focus goes back to the button), on a click outside, on scroll and on resize. Nothing animates but a fade.
- * The text is explanation, never a paragraph on the page: this is where the long sentences live.
+ * The text is explanation, never a paragraph on the page: this is where the long sentences live. A card taller than the room it has
+ * is capped and scrolls inside itself (src/core/popover.js); scrolling the card does not close it, scrolling the page does.
  */
-const GAP = 8
-const EDGE = 8
 
 export function usePopover() {
   const [open, setOpen] = useState(false)
@@ -17,13 +18,17 @@ export function usePopover() {
   useLayoutEffect(() => {
     if (!open || !anchor.current || !card.current) { setPos(null); return }
     const a = anchor.current.getBoundingClientRect()
-    const w = card.current.offsetWidth
-    const h = card.current.offsetHeight
-    const left = Math.min(Math.max(EDGE, a.left + a.width / 2 - w / 2), Math.max(EDGE, window.innerWidth - w - EDGE))
-    let top = a.bottom + GAP
-    if (top + h > window.innerHeight - EDGE) top = Math.max(EDGE, a.top - h - GAP)
-    setPos({ left, top })
+    setPos(placePopover({
+      anchor: { top: a.top, bottom: a.bottom, left: a.left, width: a.width },
+      card: { w: card.current.offsetWidth, h: card.current.scrollHeight + 2 },   // the natural height (the CSS cap does not shorten scrollHeight)
+      view: { w: window.innerWidth, h: window.innerHeight }
+    }))
   }, [open])
+  // a card that scrolls is reachable by keyboard (the arrows scroll it once it has the focus)
+  useEffect(() => {
+    const c = card.current
+    if (c && pos && c.scrollHeight > c.clientHeight + 1) c.tabIndex = 0
+  }, [pos])
   useEffect(() => {
     if (!open) return undefined
     const close = () => setOpen(false)
@@ -32,12 +37,13 @@ export function usePopover() {
     document.addEventListener('keydown', onKey, true)
     document.addEventListener('pointerdown', onDown, true)
     window.addEventListener('resize', close)
-    window.addEventListener('scroll', close, true)
+    const onScroll = e => { if (scrollCloses({ insideCard: Boolean(card.current && e.target instanceof Node && card.current.contains(e.target)) })) close() }
+    window.addEventListener('scroll', onScroll, true)
     return () => {
       document.removeEventListener('keydown', onKey, true)
       document.removeEventListener('pointerdown', onDown, true)
       window.removeEventListener('resize', close)
-      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('scroll', onScroll, true)
     }
   }, [open])
   return { open, setOpen, anchor, card, pos }
@@ -54,7 +60,7 @@ export function PopCard({ pop, id, label, children, className = '', role = 'grou
       aria-label={label}
       {...rest}
       className={`ux-pop ${className}`}
-      style={pop.pos ? { left: pop.pos.left, top: pop.pos.top } : { left: 0, top: 0, visibility: 'hidden' }}
+      style={pop.pos ? { left: pop.pos.left, top: pop.pos.top, maxHeight: pop.pos.maxH } : { left: 0, top: 0, visibility: 'hidden' }}
     >
       {children}
     </div>

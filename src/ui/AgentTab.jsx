@@ -10,6 +10,7 @@ import { ProjectChip, useProjectStyle } from './ProjectChip.jsx'
 import { StateIcon } from './StateIcon.jsx'
 import { LM_CSS } from './dialogStyles.js'
 import { DescriptionRow } from './ReviseBox.jsx'
+import { WhyButton } from './Why.jsx'
 
 const FLEX = { display: 'flex', flexWrap: 'wrap', gap: '2px 8px', alignItems: 'center' }
 const QUIET = { display: 'inline-flex', alignItems: 'center', gap: 4, color: 'color-mix(in oklab, var(--ui-orange, var(--ui-accent)) 50%, var(--foreground))' }
@@ -49,7 +50,7 @@ function Roster({ office, sceneBy, project, selected, onPick, t }) {
           <li key={a.name}>
             <button type="button" className="ux-rosterb" data-pick={a.name} aria-current={selected === a.name ? 'true' : undefined} onClick={() => onPick(a.name)}>
               {sceneBy.get(a.name) ? <Portrait agent={sceneBy.get(a.name)} /> : null}
-              <span className="nm">{a.label || a.name}</span>
+              <span className="nm" title={a.label || a.name}>{a.label || a.name}</span>
               <ProjectChip slug={a.home} />
               <StateTag state={a.state} t={t} />
             </button>
@@ -154,7 +155,7 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
       </dl>
       <style>{LM_CSS}</style>
       <div className="ux-ag-act">
-        <button type="button" className="ux-b pri" aria-disabled={!canOpen} title={why} onClick={() => onOpen(i.name)} data-insp-open>{t('insp.open')}</button>
+        <WhyButton className="ux-b pri" reason={canOpen ? '' : why} title={why} onGo={() => onOpen(i.name)} data-insp-open>{t('insp.open')}</WhyButton>
         {openKanban ? <button type="button" className="ux-b" onClick={() => openKanban()}><Icon name="ext" size={14} />{t('ux.prj.kanban')}</button> : null}
       </div>
     </section>

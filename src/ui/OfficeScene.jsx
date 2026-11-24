@@ -27,6 +27,7 @@ import { useT } from './useT.js'
 // the page hangs its own state dot and label above every head, so the canvas draws no state crystal there (the postcard, which has no HUD, keeps it)
 const HUD_SPRITES = Object.freeze({ art: true, marker: false })
 const ACCENT = { at: -Infinity, rgb: null, el: null, g: null }
+const TIP_LEAVE_MS = 200   // the pointer may cross the gap between a spot and its tooltip to reach it
 /** The page left: nothing of its DOM stays referenced from here (the element would keep a detached scene alive). */
 const forgetAccent = () => { ACCENT.el = null; ACCENT.rgb = null; ACCENT.at = -Infinity }
 function readAccent(el) {
@@ -427,14 +428,25 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
     const p = sp.poster
     return posterTip(p, { achName: t(`game.ach.${p.kind}.name`), date: dateText(p.ms, t.lang), tierName: p.tier ? t(`game.tier.${p.tier}`) : '', readClock: clockText(tipCtx.readMs, t.lang) })
   }
+  // the tooltip can be reached with the pointer (it stays while the pointer is on it) and Escape closes it wherever the focus is
+  const leaving = useRef(0)
+  const keepTip = () => { clearTimeout(leaving.current); leaving.current = 0 }
+  useEffect(() => keepTip, [])
+  useEffect(() => {
+    if (!tip) return undefined
+    const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setTip(null) } }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [tip])
   const show = (id, el) => {
     const stage = stageRef.current
     if (!stage || !el) return
+    keepTip()
     const sr = stage.getBoundingClientRect()
     const r = el.getBoundingClientRect()
     setTip({ id, x: r.left + r.width / 2 - sr.left, top: r.top - sr.top, bottom: r.bottom - sr.top })
   }
-  const hide = id => setTip(cur => (cur && cur.id === id ? null : cur))
+  const hide = id => { keepTip(); leaving.current = setTimeout(() => setTip(cur => (cur && cur.id === id ? null : cur)), TIP_LEAVE_MS) }
   const badgeText = b => {
     const bt = badgeTip(b)
     return [say(t, bt.fact), say(t, bt.extra), say(t, bt.source)].filter(Boolean).join(' — ')
@@ -511,7 +523,6 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
         className="oc-stage"
         role="group"
         aria-label={t('sceneLabel')}
-        onKeyDown={e => { if (e.key === 'Escape' && tip) { e.stopPropagation(); setTip(null) } }}
         data-store={`${back.w}x${back.h}`}
         style={{ width: back.cssW, height: back.cssH }}
       >
@@ -569,6 +580,8 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
               role="tooltip"
               className="oc-tip"
               data-tip={tip.id}
+              onMouseEnter={keepTip}
+              onMouseLeave={() => hide(tip.id)}
               style={{
                 left: Math.min(Math.max(tip.x, Math.min(130, layout.W * S / 2)), layout.W * S - Math.min(130, layout.W * S / 2)),
                 top: tip.top > 80 ? tip.top - 6 : tip.bottom + 6,

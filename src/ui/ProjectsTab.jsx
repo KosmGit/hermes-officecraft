@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useId, useMemo, useState } from 'react'
 
+import { percentText } from '../core/format.js'
 import { CARD_STATUSES, boardsKnown, chainsView } from '../core/panel.js'
 import { Icon, Ring } from './icons.jsx'
 import { PixelBadge } from './PixelBadge.jsx'
@@ -18,13 +19,15 @@ function Card({ b, c, project, onProject, openKanban, t }) {
   const todo = TODO.reduce((s, k) => s + n(k), 0)
   const blocked = b.blocked.length
   const chainLabel = t('ux.prj.queue', c.queue.length)
+  const listId = useId()
+  const [listed, setListed] = useState(false)
   return (
     <div className={`ux-pjc${project && !pressed ? ' dim' : ''}`} style={style} data-chain={b.slug}>
       <div className="big">
         <Ring done={b.done} total={b.total} r={21} box={52} stroke={5} />
-        <span className="pc ux-mono" aria-hidden="true">{c.pct}%</span>
+        <span className="pc ux-mono" aria-hidden="true">{percentText(c.pct, t.lang)}</span>
       </div>
-      <h4><span className="sq" aria-hidden="true" /><span className="nm">{b.slug}</span><span className="n ux-mono">{b.done}/{b.total}<span className="ux-vh"> · {c.pct} %</span></span></h4>
+      <h4><span className="sq" aria-hidden="true" /><span className="nm">{b.slug}</span><span className="n ux-mono">{b.done}/{b.total}<span className="ux-vh"> · {percentText(c.pct, t.lang)}</span></span></h4>
       <div className="cn">
         <span><b>{running}</b> {t('ux.prj.running')}</span>
         <span><b>{todo}</b> {t('ux.prj.todo')}</span>
@@ -42,6 +45,22 @@ function Card({ b, c, project, onProject, openKanban, t }) {
           />
         ))}
       </div>
+      {c.queue.length ? (
+        <button type="button" className="ux-lnk ux-pq-toggle" data-queue-toggle aria-expanded={listed} aria-controls={listId} onClick={() => setListed(v => !v)}>{listed ? t('ux.prj.hideCards') : t('ux.prj.showCards')}</button>
+      ) : null}
+      {listed ? (
+        <ol className="ux-pq" id={listId} data-queue aria-label={t('chains.queue', b.slug)}>
+          {c.queue.map(q => (
+            <li key={q.id} data-status={q.status}>
+              <i className={`ux-pip ${q.status}`} aria-hidden="true" />
+              <span className="ux-mono code">{q.code}</span>
+              <span className="st">{statusText(t, q.status)}</span>
+              {q.title && q.title !== q.code ? <span className="tt">{q.title}</span> : null}
+              {q.pin ? <span className="ux-dc-pin ux-mono"><PixelBadge size={9} /><span>{q.pin.model || q.pin.provider}</span></span> : null}
+            </li>
+          ))}
+        </ol>
+      ) : null}
       {c.pinned.slice(-PINNED_SHOWN).reverse().map(q => (
         <div key={q.id} className="pin" data-pinrow={q.id}>
           <span className="ux-mono">{q.code}</span>

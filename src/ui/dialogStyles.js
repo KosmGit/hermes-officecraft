@@ -211,7 +211,7 @@ ${RINGED('.oc-mp-inh:focus-visible')}
 /** The marks, the boxes of the assisted functions: also injected by the Agent tab (the revision), which is not inside a window. */
 export const LM_CSS = `
 /* violet = written by a model; the mark is a quiet button, the field wears a dashed violet edge until it is read */
-.oc-lm-mk{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;border:0;cursor:pointer;flex:0 0 auto;font:600 11px/1 inherit;color:${VIOLET_INK};background:color-mix(in oklab, ${VIOLET} 13%, transparent)}
+.oc-lm-mk{display:inline-flex;align-items:center;gap:4px;min-height:24px;min-width:24px;box-sizing:border-box;padding:0 8px;border-radius:12px;border:0;cursor:pointer;flex:0 0 auto;font:600 11px/1 inherit;color:${VIOLET_INK};background:color-mix(in oklab, ${VIOLET} 13%, transparent)}
 .oc-lm-mk:hover{background:color-mix(in oklab, ${VIOLET} 22%, transparent)}
 ${RINGED('.oc-lm-mk:focus-visible')}
 .oc-lm-f{border-color:color-mix(in oklab, ${VIOLET} 60%, ${EDGE})!important;border-style:dashed!important;background:color-mix(in oklab, ${VIOLET} 4%, ${CARD})}

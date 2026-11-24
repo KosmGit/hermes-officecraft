@@ -49,7 +49,8 @@ export const USAGE_CSS = `
 .oc-us-colfill i,.oc-us-fill i{display:block}
 /* the days: one button per day, a column whose height is the day's total */
 .oc-us-days{display:grid;grid-template-columns:repeat(var(--n,7),minmax(0,1fr));gap:6px;align-items:end;max-width:calc(var(--n,7) * 92px)}
-.oc-us-days[data-n="30"],.oc-us-days[data-n="31"]{gap:2px}
+/* 30 days: a day never gets under 24 px (the size of a target); when the window is too narrow for 30 of them the row scrolls on its own (the page and the window do not) */
+.oc-us-days[data-n="30"],.oc-us-days[data-n="31"]{grid-template-columns:repeat(var(--n),minmax(24px,1fr));gap:2px;max-width:none;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:2px 2px 8px;margin:-2px;scrollbar-width:thin}
 .oc-us-days[data-n="30"] .oc-us-day{padding:4px 0}
 .oc-us-days[data-n="30"] .oc-us-val{display:none}
 .oc-us-day{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:4px 2px;font:inherit;font-size:11px;color:var(--foreground);background:transparent;border:1px solid transparent;border-radius:6px;cursor:pointer}
@@ -109,7 +110,8 @@ export const USAGE_CSS = `
   .oc-us-tico{display:none}
   .oc-us-tile b{font-size:20px}
   .oc-us-col{height:80px}
-  .oc-us-days{gap:4px;align-items:start}   /* columns aligned on their top: a label on two lines must not lift its column */
+  .oc-us-days{gap:4px;align-items:start}
+  .oc-us-days[data-n="30"],.oc-us-days[data-n="31"]{gap:2px}   /* columns aligned on their top: a label on two lines must not lift its column */
   .oc-us-lab{white-space:normal;text-align:center;line-height:1.2;overflow-wrap:anywhere}   /* at 380 px the day wraps under its number instead of being cut (« 9 M… ») */
 }
 `

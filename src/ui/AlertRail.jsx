@@ -1,6 +1,6 @@
-import { useId } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
 
-import { foldAlerts } from '../core/alerts.js'
+import { foldAlerts, railFit } from '../core/alerts.js'
 import { clockText } from '../core/tips.js'
 import { Icon } from './icons.jsx'
 import { PopCard, usePopover } from './Popover.jsx'
@@ -24,12 +24,12 @@ export function alertTexts(a, t, { failingNames = [] } = {}) {
   }
 }
 
-function Chip({ alert, label, children, t, texts }) {
+function Chip({ alert, label, aria, children, t, texts, wkey }) {
   const pop = usePopover()
   const id = useId()
   return (
-    <span className="ux-alw">
-      <button ref={pop.anchor} type="button" className={`ux-al ${alert.tone}`} data-alert={alert.id} aria-expanded={pop.open} aria-controls={pop.open ? id : undefined} onClick={() => pop.setOpen(v => !v)}>
+    <span className="ux-alw" data-alw={wkey}>
+      <button ref={pop.anchor} type="button" className={`ux-al ${alert.tone}`} data-alert={alert.id} aria-expanded={pop.open} aria-controls={pop.open ? id : undefined} aria-label={aria} onClick={() => pop.setOpen(v => !v)}>
         <Icon name={ICON[alert.tone]} size={14} />
         <span>{label}</span>
         <Icon name="chev" size={14} className="chev" />
@@ -60,9 +60,44 @@ export function AlertRail({ alerts, narrow, t, failingNames }) {
       </div>
     )
   }
+  return <WideRail alerts={alerts} texts={texts} t={t} />
+}
+
+/**
+ * The rail of a wide pane: the chips that fit on the line, then « +N » for the others (a chip that is cut or hidden says nothing).
+ * The natural width of each chip is measured once it is drawn and kept, so a folded chip is still counted; the rail's own width follows the pane.
+ */
+function WideRail({ alerts, texts, t }) {
+  const rail = useRef(null)
+  const [avail, setAvail] = useState(0)
+  const [widths, setWidths] = useState({})
+  useLayoutEffect(() => {
+    const el = rail.current
+    if (!el) return undefined
+    const read = () => setAvail(el.clientWidth)
+    read()
+    if (typeof ResizeObserver !== 'function') return undefined
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  const keys = alerts.map((a, i) => `${a.id}|${texts[i].short}`)
+  useLayoutEffect(() => {
+    const seen = {}
+    rail.current?.querySelectorAll('[data-alw]').forEach(w => { if (w.offsetWidth > 0) seen[w.dataset.alw] = Math.ceil(w.getBoundingClientRect().width) })
+    setWidths(prev => (Object.keys(seen).every(k => prev[k] === seen[k]) ? prev : { ...prev, ...seen }))
+  })
+  const shown = railFit(keys.map(k => widths[k] ?? 0), avail)
+  const rest = alerts.slice(shown)
+  const worst = rest.length ? foldAlerts(rest).worst : null
   return (
-    <div className="ux-alerts" role="region" aria-label={t('ux.alert.label')} data-alerts>
-      {alerts.map((a, i) => <Chip key={a.id} alert={a} label={texts[i].short} t={t} texts={texts[i]} />)}
+    <div ref={rail} className="ux-alerts" role="region" aria-label={t('ux.alert.label')} data-alerts data-shown={shown}>
+      {alerts.slice(0, shown).map((a, i) => <Chip key={a.id} alert={a} label={texts[i].short} t={t} texts={texts[i]} wkey={keys[i]} />)}
+      {rest.length ? (
+        <Chip alert={worst} label={t('banner.more', rest.length)} aria={t('ux.alert.rest', rest.length)} t={t} texts={texts[alerts.indexOf(worst)]}>
+          {rest.map(a => { const x = texts[alerts.indexOf(a)]; return <div key={a.id}><h5>{x.short}</h5>{x.detail.map((line, j) => <p key={j}>{line}</p>)}</div> })}
+        </Chip>
+      ) : null}
     </div>
   )
 }

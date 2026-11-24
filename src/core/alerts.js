@@ -32,3 +32,17 @@ export function foldAlerts(alerts) {
   const worst = [...alerts].sort((a, b) => RANK[a.tone] - RANK[b.tone] || ORDER.indexOf(a.id) - ORDER.indexOf(b.id))[0]
   return { worst, more: alerts.length - 1 }
 }
+
+/**
+ * How many chips of the rail fit on one line. `widths` are the chips' natural widths in rail order; the others fold into one « +N » chip
+ * of width `plus`, which must fit too. Always at least one chip (the worst, the rail is sorted by weight), never more than there are.
+ * An unknown width (0: not measured yet) counts as nothing, so the first pass shows everything and the second one folds.
+ */
+export function railFit(widths, avail, { gap = 8, plus = 56 } = {}) {
+  const n = widths.length
+  if (n === 0 || !(avail > 0) || widths.every(w => !(w > 0))) return n
+  const used = k => widths.slice(0, k).reduce((s, w, i) => s + w + (i ? gap : 0), 0)
+  if (used(n) <= avail) return n
+  for (let k = n - 1; k >= 1; k--) if (used(k) + gap + plus <= avail) return k
+  return 1
+}

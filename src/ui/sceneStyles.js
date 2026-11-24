@@ -34,6 +34,7 @@ export const SCENE_CSS = `
 .oc-dot{display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;flex:0 0 auto;color:var(--ui-text-tertiary)}
 .oc-sti{display:block;width:9px;height:9px}
 /* the agent's head, cut from its sprite */
+.oc-station .oc-chip .oc-nm{min-width:0;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oc-face{display:block;flex:0 0 auto;width:14px;height:14px;margin:0 -1px 0 -2px;border-radius:4px;image-rendering:pixelated;image-rendering:crisp-edges;background:color-mix(in oklab, var(--foreground) 24%, transparent)}
 /* time on the running card, a 2 px line at the foot of the label (full after 30 min, then orange: it drags) */
 .oc-bar{position:absolute;left:8px;right:8px;bottom:-1px;height:2px;border-radius:1px;overflow:hidden;background:color-mix(in oklab, var(--ui-accent) 22%, transparent)}
@@ -96,12 +97,18 @@ export const SCENE_CSS = `
 .oc-leads line.s-working{stroke:var(--ui-accent)}
 .oc-leads line.s-waiting{stroke:${ORANGE}}
 .oc-leads line.s-active{stroke:var(--ui-green, var(--ui-accent))}
-/* the project filter dims the scene: the canvas is washed by the engine (src/scene/draw.js); what is written on it fades here,
+/* the project filter dims the scene: the canvas is washed by the engine (src/scene/draw.js); what is written on it keeps its colour
+   (an opacity of .45 / .5 / .62 measured 3.1 / 2.9 / 3.9:1 on the light theme) and recedes by its edge (dashed), its weight and its face;
    a label wakes up on hover, on focus and when selected */
-.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip{opacity:.45}
-.oc-zone[data-dim]:not(:hover):not(:focus-visible){opacity:.5}
-.oc-lzone[data-dim],.oc-lrow[data-dim]:not([aria-pressed="true"]){opacity:.62}
-.oc-lzone[data-dim] .oc-lrow[data-dim]{opacity:1}
+.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-chip{border-style:dashed;border-color:${EDGE};box-shadow:none}
+.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-nm{font-weight:500}
+.oc-station[data-dim]:not(:hover):not(:focus-visible):not([aria-pressed="true"]) .oc-face{filter:grayscale(1);opacity:.7}
+.oc-zone[data-dim]:not(:hover):not(:focus-visible){border-style:dashed;border-color:${EDGE};box-shadow:none}
+.oc-zone[data-dim]:not(:hover):not(:focus-visible) b{font-weight:500}
+.oc-lzone[data-dim] > h2,.oc-lzone[data-dim] > h2 .oc-warn{font-weight:500}
+.oc-lrow[data-dim]:not([aria-pressed="true"]) .oc-chip{border-style:dashed}
+.oc-lrow[data-dim]:not([aria-pressed="true"]) .oc-nm{font-weight:500}
+.oc-lrow[data-dim]:not([aria-pressed="true"]) .oc-face{filter:grayscale(1);opacity:.7}
 .oc-note{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
 .oc-notebtn{display:inline-flex;align-items:center;height:24px;padding:0 8px;border:1px solid var(--ui-stroke-secondary);border-radius:6px;background:${SURFACE};color:var(--foreground);font:inherit;font-size:11px;font-weight:600;cursor:pointer}
 .oc-notebtn:hover{border-color:var(--ui-accent)}
@@ -143,7 +150,7 @@ export const SCENE_CSS = `
 .oc-spot{position:absolute;z-index:0;pointer-events:auto;display:block;margin:0;padding:0;border:0;border-radius:6px;background:transparent;font:inherit;cursor:help}
 .oc-spot:hover{box-shadow:0 0 0 1px color-mix(in oklab, var(--ui-accent) 70%, transparent);background:color-mix(in oklab, var(--ui-accent) 10%, transparent)}
 .oc-spot:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px;background:color-mix(in oklab, var(--ui-accent) 14%, transparent)}
-.oc-tip{position:absolute;z-index:30;pointer-events:none;width:max-content;max-width:min(260px,92%);padding:6px 9px;border-radius:8px;font-size:11.5px;line-height:1.35;color:var(--foreground);background:${SURFACE};border:1px solid var(--ui-accent);box-shadow:${SHADOW}}
+.oc-tip{position:absolute;z-index:30;pointer-events:auto;width:max-content;max-width:min(260px,92%);padding:6px 9px;border-radius:8px;font-size:11.5px;line-height:1.35;color:var(--foreground);background:${SURFACE};border:1px solid var(--ui-accent);box-shadow:${SHADOW}}
 .oc-tip b{display:block;font-weight:600;font-size:11px;margin-bottom:2px;color:${SOFT}}
 .oc-tip small{display:block;margin-top:3px;font-size:11px;color:${SOFT}}
 /* 11 px like every other label text */
