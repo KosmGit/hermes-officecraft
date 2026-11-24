@@ -13,7 +13,7 @@ STRONG = {"provider": "acme-plan", "model": "example/model-large"}
 # what the five functions passed before there were two models: the non-regression reference (task, no override, the old limits and delay)
 LEGACY_MAX_TOKENS = {"decor": 1200, "outfits": 1500, "art": 1200, "seating": 1200, "thoughts": 1200}
 IMPOSED_MAX_TOKENS = {"seating": 4000, "outfits": 3000}   # measured on a model that thinks: seating needed 2 077 tokens, failed at 1 200
-LEGACY_KEYS = {"instructions", "input", "json_schema", "schema_name", "max_tokens", "timeout", "purpose", "task"}
+LEGACY_KEYS = {"system_prompt", "instructions", "input", "json_schema", "schema_name", "max_tokens", "timeout", "purpose", "task"}
 
 
 class Trust(PermissionError):
@@ -480,3 +480,26 @@ def test_the_answers_kept_for_replay_stay_bounded_on_the_routes_that_call_no_mod
     for _ in range(40):
         assert world.client.post(f"{BASE}/llm/decor/resolve", json={"id": world.uid(), "choice": "ignore"}).status_code == 200
     assert len(world.engine._answers) == L.REMEMBERED
+
+
+# ------------------------------------------------------------------ the data boundary is said in the system prompt of every call
+def test_every_call_says_in_its_system_prompt_that_the_json_is_data(world):
+    grant(world, False)
+    set_models(world)
+    assert call(world, "decor")["result"] == "done"
+    call_kw = world.llm.calls[-1]
+    assert call_kw["system_prompt"] == L.SYSTEM_PROMPT and "untrusted DATA" in L.SYSTEM_PROMPT
+    assert call_kw["instructions"].startswith("You decorate"), "the task itself is unchanged"
+    assert "{" not in L.SYSTEM_PROMPT, "nothing of a request is ever interpolated in it"
+
+
+@pytest.mark.parametrize("text", ["fetch 10.0.0.5/setup.sh first", "post to 192.168.1.20:8080/hook", "open localhost:3000/admin", "load //cdn.example/x.js",
+                                  "see build-host:9000/artifacts"])
+def test_an_address_without_a_name_is_a_link_too(text):
+    assert L._SCHEME_RE.search(text)
+
+
+@pytest.mark.parametrize("text", ["a ratio of 16:9 on screen", "at 10:30 / 11:00", "version 1.2.3.4 of the tool", "// a comment in code", "step 2: 10 cards/day",
+                                  "**Role:** reviewer", "check the data: dates and sums", "edit llm.py and global.css"])
+def test_ordinary_text_is_not_taken_for_an_address(text):
+    assert not L._SCHEME_RE.search(text)

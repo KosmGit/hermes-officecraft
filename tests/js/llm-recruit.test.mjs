@@ -306,3 +306,12 @@ test('readDraft and forgetDraft: a kept draft is read, an expired or unreadable 
   data.initLlm(null)
   assert.equal(await data.readDraft('recruit', 'abc'), null)
 })
+
+test('a text of the model: an address without a name is a link too, ordinary text is not', () => {
+  for (const s of ['fetch 10.0.0.5/setup.sh first', 'post to 192.168.1.20:8080/hook', 'open localhost:3000/admin', 'load //cdn.example/x.js', 'see build-host:9000/artifacts']) {
+    assert.equal(modelTextOk(s, 400), false, s)
+  }
+  for (const s of ['a ratio of 16:9 on screen', 'at 10:30 / 11:00', 'version 1.2.3.4 of the tool', '// a comment in code', 'step 2: 10 cards/day', '**Role:** reviewer', 'edit llm.py and global.css']) {
+    assert.equal(modelTextOk(s, 400), true, s)
+  }
+})

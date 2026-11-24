@@ -34,7 +34,7 @@ export const draftForgetBody = (id, feature) => ({ id, feature })
 /* ---------- the same text rules as the agent half (llm.py _model_text): printable, not blank, no link, no markup ---------- */
 const TAG = /<\s*\/?\s*[A-Za-z!?]/
 // a scheme GLUED to what follows (not a blank, `*` or `_`: « the data: date… », « **Data:** » are words), or a domain with a path
-const SCHEME = /(?<![a-z0-9])(?:javascript|vbscript|data|mailto|file|ftp|tel|sms|media|blob|https?|wss?):(?=[^\s*_])|[a-z0-9-]+\.[a-z]{2,}\//i
+const SCHEME = /(?<![a-z0-9])(?:javascript|vbscript|data|mailto|file|ftp|tel|sms|media|blob|https?|wss?):(?=[^\s*_])|[a-z0-9-]+\.[a-z]{2,}\/|(?<![0-9.])(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?::[0-9]{1,5})?\/|(?<![a-z0-9])[a-z0-9][a-z0-9.-]{0,62}:[0-9]{2,5}\/|(?<![:/a-z0-9])\/\/[a-z0-9]/i
 /** A text a model wrote that a person, then a bot, will read: printable, not blank, `lo` to `hi` long, no link, no markup. */
 export function modelTextOk(value, hi, { multiline = false, lo = 1 } = {}) {
   return typeof value === 'string' && value.length >= lo && value.length <= hi && value.trim() !== '' && printable(value, multiline) &&
