@@ -1,4 +1,5 @@
 import { readDescriptionOf, runRevise } from '../core/llmDraft.js'
+import { IDLE, orderReducer } from '../core/orders.js'
 import { readListed, readModel, recruitAuditBody, reviseAuditBody, runModel, runRecruit } from '../core/recruit.js'
 import { safeRequest } from './rpc.js'
 
@@ -105,4 +106,25 @@ export async function audit(ctx, body) {
   } catch {
     return false
   }
+}
+
+/**
+ * The page was left while the order was `sending`: the request has gone all the same, and the effect that re-reads the list and writes the journal
+ * line will never run. Do it here, at the end of the departure's own chain: the same read and the same line as the effect would have made (what
+ * the list shows after the answer, one line per order tried), nothing more. -> { present, audited }, or null for an order that is not a recruitment.
+ */
+export async function settleLeft(ctx, order, action, auditOn, request = safeRequest, wait = pause) {
+  if (!order || (order.verb !== 'recruit' && order.verb !== 'recruitModel' && order.verb !== 'revise')) return null
+  const { answer } = orderReducer({ ...IDLE, phase: 'sending', order }, action)
+  if (!answer) return null
+  return order.verb === 'revise' ? verifyRevise(ctx, order, answer, auditOn, request, wait) : verifyRecruit(ctx, order, answer, auditOn, request, wait)
+}
+
+/**
+ * The whole departure of a recruitment or a revision: send, then hand the answer to the machine while the page is there (its effect re-reads the list
+ * and writes the journal line), or, if the page was left meanwhile, do that re-read and that line here (`settleLeft`). `mounted()`: is the page still there.
+ */
+export async function depart(order, { mounted, dispatch, ctx, auditOn, request = safeRequest, wait = pause }) {
+  const action = order.verb === 'revise' ? await sendRevise(order, request) : await sendRecruit(order, request)
+  return mounted() ? dispatch(action) : settleLeft(ctx, order, action, auditOn, request, wait)
 }

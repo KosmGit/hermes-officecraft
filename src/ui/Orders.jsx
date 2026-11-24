@@ -191,6 +191,7 @@ export function CardOrders({ item, orders, writes, t, onModelFollowUp }) {
 /** The line an outcome says, in the page's language. Only facts read back; the reason is a translated code. */
 function outcomeText(o, t) {
   const verb = verbLabel(o, t)
+  if (o.leftSent) return [t('orders.sentLeft', what(o, t)), t(o.verb === 'revise' ? 'llm.revise.check' : o.verb === 'recruit' || o.verb === 'recruitModel' ? 'recruit.checkList' : 'orders.checkJournal')].join(' ')   // the page was left while the order was on its way
   if (o.cancelled) return o.reason === 'left' ? t('orders.cancelledLeft', what(o, t)) : t(o.reason === 'hidden' ? 'orders.cancelledHidden' : 'orders.cancelled')   // left the page during the 6 s
   if (o.ok) {
     if (o.verb === 'approval') {

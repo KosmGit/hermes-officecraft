@@ -386,6 +386,7 @@ export const en = {
     cancelled: 'Nothing was sent.',
     cancelledHidden: 'The page was hidden, so nothing was sent.',
     cancelledLeft: what => `Not sent: you left the page (${what}).`,
+    sentLeft: what => `Sent, but you left the page before the answer, so the outcome was not read (${what}).`,
     replayed: 'This action had already been handled, so nothing was done twice.',
     notAudited: 'The audit log could not be written.',
     liveStale: 'The project list could not be refreshed yet.',

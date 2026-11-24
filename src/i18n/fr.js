@@ -388,6 +388,7 @@ export const fr = {
     cancelled: 'Rien n’a été envoyé.',
     cancelledHidden: 'La page a été masquée : rien n’a été envoyé.',
     cancelledLeft: what => `Action non envoyée : vous avez quitté la page (${what}).`,
+    sentLeft: what => `Action partie, mais vous avez quitté la page avant la réponse : le résultat n’a pas été lu (${what}).`,
     replayed: 'Cette action avait déjà été traitée : rien n’a été fait en double.',
     notAudited: 'Le journal d’audit n’a pas pu être écrit.',
     liveStale: 'La liste des projets n’a pas pu être actualisée pour l’instant.',

@@ -385,6 +385,7 @@ export const es = {
     cancelled: 'No se envió nada.',
     cancelledHidden: 'La página se ocultó: no se envió nada.',
     cancelledLeft: what => `Acción no enviada: saliste de la página (${what}).`,
+    sentLeft: what => `Acción enviada, pero saliste de la página antes de la respuesta: el resultado no se leyó (${what}).`,
     replayed: 'Esta acción ya se había procesado: no se hizo nada dos veces.',
     notAudited: 'No se pudo escribir el registro de auditoría.',
     liveStale: 'La lista de proyectos aún no se ha podido actualizar.',

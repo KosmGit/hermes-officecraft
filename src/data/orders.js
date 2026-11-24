@@ -6,9 +6,9 @@ import { PLUGIN_ID } from '../constants.js'
 import { approvalTarget } from '../core/approvals.js'
 import { guardTarget, readCampaign, summary, toRequest } from '../core/campaign.js'
 import { JOURNAL_FETCH, classifyError, initialOrderState, orderBody, orderReducer, readAnswer, recruitTarget, reviseTarget, targetOf, toJournal } from '../core/orders.js'
-import { clearLeft, countdownWait, hiddenCancel, leftBehind, leftOutcome, liveRead, peekLeft, rememberLeft, rereadOf, routeOf } from '../core/orderflow.js'
+import { clearLeft, countdownWait, hiddenCancel, leftBehind, leftOutcome, leftSent, liveRead, peekLeft, rememberLeft, rereadOf, routeOf } from '../core/orderflow.js'
 import { isGone, sendApproval } from './approvals.js'
-import { sendRecruit, sendRevise, verifyRecruit, verifyRevise } from './recruit.js'
+import { depart, verifyRecruit, verifyRevise } from './recruit.js'
 import { LIVE_KEY, ROSTER_KEY } from './queries.js'
 
 export const ORDERS_KEY = [PLUGIN_ID, 'orders']
@@ -56,9 +56,12 @@ export function useOrders(ctx, { audit: auditOn = false, replay = false } = {}) 
   // the line « order not sent » is shown from the first render and said once (the memory is cleared as soon as the page is
   // mounted); leaving the page while the 6 s window runs kills the window (nothing is ever sent from it): the order is remembered
   // in the memory of the tab, to be said when the page comes back.
+  const mounted = useRef(true)
   useEffect(() => {
+    mounted.current = true
     clearLeft()
-    return () => { rememberLeft(leftBehind(latest.current.state)) }
+    // an order still counting is lost; one that already left (sending, verifying) is said « sent, outcome not read »
+    return () => { mounted.current = false; rememberLeft(leftBehind(latest.current.state) || leftSent(latest.current.state)) }
   }, [])
 
   // countdown
@@ -86,11 +89,11 @@ export function useOrders(ctx, { audit: auditOn = false, replay = false } = {}) 
     ;(async () => {
       if (routeOf(order) === 'recruit') {
         // a recruitment: through the host (`profiles.create` / `profiles.configure`), the journal line is written after the re-read
-        return dispatch(await sendRecruit(order))
+        return depart(order, { mounted: () => mounted.current, dispatch, ctx, auditOn })
       }
       if (routeOf(order) === 'revise') {
         // `profiles.configure { description }` through the host; the description is read back from `profiles.list` after
-        return dispatch(await sendRevise(order))
+        return depart(order, { mounted: () => mounted.current, dispatch, ctx, auditOn })
       }
       if (routeOf(order) === 'approval') {
         // an approval: through the host (the session's own authority), not through the agent half; the journal line is the page's

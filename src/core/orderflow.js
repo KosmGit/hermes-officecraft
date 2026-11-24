@@ -54,11 +54,27 @@ export function leftBehind(state) {
   return { verb: o.verb, board: o.board, task: o.task, code: o.code, choice: o.choice, agent: o.agent, title: o.title }
 }
 
+/**
+ * Leaving the page while an order is on its way (the request left, the answer is not in or not read yet): the order is NOT cancelled, it was
+ * sent. The re-read and the journal line then happen in the chain of the departure (src/data/orders.js), not in an effect that no longer
+ * exists; what stays for the way back is « sent, outcome not read ». Returns what to remember for such a state, else null.
+ */
+export function leftSent(state) {
+  if (!state || (state.phase !== 'sending' && state.phase !== 'verifying') || !state.order) return null
+  const o = state.order
+  return { verb: o.verb, board: o.board, task: o.task, code: o.code, choice: o.choice, agent: o.agent, title: o.title, sent: true }
+}
+
 let left = null
 export const rememberLeft = info => { left = info || null }
 /** The order cancelled by leaving, without forgetting it (React may render twice; `clearLeft` runs in an effect). */
 export const peekLeft = () => left
 export const clearLeft = () => { left = null }
 
-/** The outcome the bar shows on the way back: cancelled, reason `left`, naming the target; nothing was sent. */
-export const leftOutcome = info => (info ? { cancelled: true, reason: 'left', wasCounting: true, ...info } : null)
+/** The outcome the bar shows on the way back: cancelled, reason `left`, naming the target (nothing was sent); or, for an order that had left, « sent, outcome not read ». */
+export const leftOutcome = info => {
+  if (!info) return null
+  const { sent, ...what } = info
+  // sent: not a cancellation and not a failure either: the outcome is unknown to this page (the journal is written by the departure itself)
+  return sent ? { ok: false, cancelled: false, reason: 'unknown_outcome', leftSent: true, ...what } : { cancelled: true, reason: 'left', wasCounting: true, ...what }
+}
