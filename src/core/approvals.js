@@ -196,7 +196,7 @@ export function approvalsReducer(state, action) {
         for (const key of Object.keys(by)) if (by[key].sessionId === sid) delete by[key]
         return { ...state, byKey: by, unreadable: dropKey(state.unreadable, sid) }
       }
-      return { ...state, unreadable: { ...state.unreadable, [sid]: true } }
+      return { ...state, unreadable: capUnreadable({ ...state.unreadable, [sid]: true }) }
     }
     case 'titles': {
       const titles = {}
@@ -211,6 +211,14 @@ export function approvalsReducer(state, action) {
 const sameTitles = (a, b) => {
   const ka = Object.keys(a)
   return ka.length === Object.keys(b).length && ka.every(k => Object.hasOwn(b, k) && a[k] === b[k])
+}
+
+/** Sessions flagged unreadable at most (a session that vanished without a word is never cleared by a read): the oldest flags go first. */
+export const UNREADABLE_MAX = 50
+function capUnreadable(flags) {
+  const keys = Object.keys(flags)
+  if (keys.length <= UNREADABLE_MAX) return flags
+  return Object.fromEntries(keys.slice(keys.length - UNREADABLE_MAX).map(k => [k, flags[k]]))
 }
 
 /** The same request seen again without its command keeps the one already known (one request id, one command). */

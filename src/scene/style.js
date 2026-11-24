@@ -54,6 +54,9 @@ const lightOf = c => (Math.max(c[0], c[1], c[2]) + Math.min(c[0], c[1], c[2])) /
 const chromaOf = c => (Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2])) / 255
 const fits = (c, [lo, hi, cmax]) => { const l = lightOf(c); return l >= lo - 1e-9 && l <= hi + 1e-9 && chromaOf(c) <= cmax + 1e-9 }
 const tamed = new Map()
+/** How many drawn colours the table holds now (tests). */
+export const tamedSize = () => tamed.size
+const TAMED_MAX = 1024   // the house palette is a few dozen; a fiche chooses its colours freely, so the table must not grow with them
 /** The colour drawn for `hex` on a surface (`rule` = DA key), anchored on the house colour `anchor`. Memoised (called every frame). */
 export function tame(hex, anchor, rule) {
   const key = `${rule}:${hex}:${anchor}`
@@ -68,6 +71,7 @@ export function tame(hex, anchor, rule) {
     for (let k = 1; k <= 64; k++) { if (!fits(mixc(from, want, k / 64), bounds)) break; w = k / 64 }
     c = Object.freeze(mixc(from, want, w).map(Math.round))
   }
+  if (tamed.size >= TAMED_MAX) tamed.clear()
   tamed.set(key, c)
   return c
 }

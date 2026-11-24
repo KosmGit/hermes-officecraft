@@ -27,6 +27,8 @@ import { useT } from './useT.js'
 // the page hangs its own state dot and label above every head, so the canvas draws no state crystal there (the postcard, which has no HUD, keeps it)
 const HUD_SPRITES = Object.freeze({ art: true, marker: false })
 const ACCENT = { at: -Infinity, rgb: null, el: null, g: null }
+/** The page left: nothing of its DOM stays referenced from here (the element would keep a detached scene alive). */
+const forgetAccent = () => { ACCENT.el = null; ACCENT.rgb = null; ACCENT.at = -Infinity }
 function readAccent(el) {
   try {
     const now = performance.now()
@@ -212,6 +214,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
   }, [])
   // the window dragged to a screen of another density changes the ratio without resizing the box: the store must follow
   useEffect(() => watchDpr(window, setDpr), [])
+  useEffect(() => forgetAccent, [])   // the ref is already detached when this runs: forget whatever element was kept
 
   // decor: what the game layer unlocked (src/core/game.js decorOf); null or sober -> the plain office, no game object
   const fresh = useMemo(() => toSceneModel(office, { nowMs, night, profiles, decor: decor || undefined, seating }), [office, profiles, nowMs, night, decor, seating])

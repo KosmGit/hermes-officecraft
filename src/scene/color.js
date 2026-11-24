@@ -1,13 +1,18 @@
 /* Colour helpers. Colours are [r, g, b] arrays; an emissive colour (ignores lighting) carries `.e`. */
 
 const memo = new Map()
+/** How many colours the table holds now (tests). */
+export const colorMemoSize = () => memo.size
+/** Colours kept: the engine's own palette is a few hundred; a decorator's fiche or a hostile one can name any number more. */
+const MEMO_MAX = 2048
 
-/** '#rrggbb' -> frozen [r, g, b] (memoised: shaders call it per pixel). */
+/** '#rrggbb' -> frozen [r, g, b] (memoised: shaders call it per pixel). The arrays are shared and frozen: emptying the table never touches one in use. */
 export function hx(h) {
   let c = memo.get(h)
   if (!c) {
     const n = parseInt(h.slice(1), 16)
     c = Object.freeze([(n >> 16) & 255, (n >> 8) & 255, n & 255])
+    if (memo.size >= MEMO_MAX) memo.clear()
     memo.set(h, c)
   }
   return c
