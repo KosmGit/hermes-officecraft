@@ -21636,10 +21636,11 @@ var PAGE_CSS = `
 .ux-jl time{font-size:11.5px;color:${T32};white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ux-jl .ic{display:inline-flex;color:${T32}}
 .ux-jl .ic.ok{color:${ink4(GREEN3)}}.ux-jl .ic.w{color:${ink4(ORANGE4)}}.ux-jl .ic.ko{color:${ink4(RED3)}}
-/* fixed columns (age, icon, project, text): the text is one line cut with an ellipsis (its whole is the tooltip), so a long project name never pushes it down */
+/* fixed columns (age, icon, project, text), so a long project name never pushes the text down; the text is two lines at most, cut with
+   an ellipsis (its whole is the tooltip): one line left a card title at two letters in a side pane */
 .ux-jl .pj{display:flex;min-width:0}
 .ux-jl .tx{display:flex;align-items:center;gap:8px;min-width:0}
-.ux-jl .tx .t{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ux-jl .tx .t{flex:1 1 auto;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word;line-height:1.35}
 .ux-jl .tx .res{flex:0 0 auto;white-space:nowrap}
 .ux-jl .ux-prj{max-width:100%} /* the chip has its own line in a journal row, so a long name (« customer-support… ») is not cut at 140 px beside free space */
 .ux-jl .res{font-size:11px;font-weight:600}

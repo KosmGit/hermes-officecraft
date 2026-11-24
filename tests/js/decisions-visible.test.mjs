@@ -276,6 +276,16 @@ test('« Cancel the campaign » is the discreet secondary button at the right, �
   }
 })
 
+test('journal: the text column keeps fixed columns but shows up to two lines, so a card title is readable in a narrow side pane', () => {
+  const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.match(css, /\.ux-jl li\{display:grid;grid-template-columns:52px 20px minmax\(0,112px\) minmax\(0,1fr\)/, 'the columns stay fixed')
+  const rule = css.match(/\.ux-jl \.tx \.t\{[^}]*\}/)?.[0] ?? ''
+  assert.match(rule, /-webkit-line-clamp:2/, 'two lines at most (one line left « blocked · Ap… » in a 300 px pane)')
+  assert.match(rule, /overflow:hidden/)
+  assert.doesNotMatch(rule, /white-space:nowrap/)
+  assert.match(src('src/ui/JournalTab.jsx'), /<span className="t" title=\{r\.text\}>/, 'the whole text stays the tooltip')
+})
+
 test('under a project filter the chip is on the sort line (one « ? ») and the cards do not repeat it', () => {
   const tab = src('src/ui/DecisionsTab.jsx')
   assert.equal((tab.match(/<ListHelp t=\{t\} \/>/g) || []).length, 1, 'one « ? »')
