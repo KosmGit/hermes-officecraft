@@ -77,6 +77,8 @@ export const fr = {
     title: 'Détails',
     show: 'Afficher les détails',
     hide: 'Masquer les détails',
+    showTip: 'Ouvrir l’inspecteur, les décisions, les chaînes et le journal à côté du bureau',
+    hideTip: 'Fermer les détails et rendre la place au bureau',
     close: 'Fermer les détails',
     region: 'Panneau de détails',
     needsAgentHalf: 'Voir le message en haut de la page.'
@@ -255,6 +257,7 @@ export const fr = {
     graph: { title: 'Aperçu', final: 'Aperçu final', created: 'Ce qui a été créé', label: n => `Aperçu du graphe : ${n} cartes`, tip: 'De haut en bas, dans l’ordre où les cartes démarreront. La couleur est celle du bot. Une ligne orange en tirets est un verrou. Au-delà de 24 cartes, les cartes en parallèle sont regroupées en pile : cliquez dessus pour la déplier.' },
     groupAria: (codes, n, list = '') => `${codes}, ${n} cartes en parallèle (${list}), appuyer pour déplier`,
     groupTip: (n, codes) => `${n} cartes en parallèle (${codes}) : cliquer pour déplier`,
+    groupFold: (codes, n) => `Replier ${codes} (${n} cartes)`,
     state: { blocked: 'fermé', done: 'levé', todo: 'en attente', ready: 'prête', archived: 'archivée' },
     ck: { noLoop: 'Sans boucle', guarded: 'Tout est sous verrou', count: (n, max) => `${n}/${max} cartes` },
     clear: { button: 'Effacer le brouillon', label: 'Effacer le brouillon', ask: 'Effacer ce brouillon ?', keep: 'Le garder', go: 'L’effacer' },
@@ -844,6 +847,7 @@ export const fr = {
     nightHint: 'Les heures que couvre « Cette nuit ».',
     nightTip: 'Les heures que couvre « Ce qui s’est passé cette nuit », à l’heure de cet ordinateur. 19 h – 7 h par défaut ; une nuit peut passer minuit. La même heure deux fois = une nuit de 24 h.',
     gear: 'Réglages d’Officecraft',
+    gearTip: 'Langue, lumière, jeu, relecture, notifications et fonctions LLM de la page',
     openInHermes: 'Ouvrir dans les paramètres de Hermes'
   },
   notify: {
@@ -885,6 +889,7 @@ export const fr = {
     test: 'Envoyer un test',
     testing: 'Envoi…',
     testFor: who => `Envoyer un test à ${who}`,
+    testingFor: who => `Envoi d'un test à ${who}…`,
     tested: {
       sent: at => `Envoyé à ${at}`,
       wait: s => (s > 60 ? `Attendez ${Math.ceil(s / 60)} min` : `Attendez ${s} s`),

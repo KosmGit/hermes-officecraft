@@ -1,8 +1,9 @@
-import { useId } from 'react'
+import { useEffect, useId } from 'react'
 
 import { Icon } from './icons.jsx'
 import { PixelIcon } from './PixelIcon.jsx'
 import { PopCard, usePopover } from './Popover.jsx'
+import { moreMenuTarget } from './targets.js'
 import { useT } from './useT.js'
 
 /**
@@ -43,18 +44,33 @@ function GameBadge({ game, onOpen, t }) {
   )
 }
 
-/** « More » of a narrow pane: the actions that left the header, in a small menu (a popover of buttons). */
+/**
+ * « More » of a narrow pane: the actions that left the header, in a real menu (role=menu): the focus goes into it when it opens, the
+ * arrows, Home and End move between the items, Escape closes it and gives the focus back to the button, Tab leaves it. An item that
+ * opens a window hands the focus back to this button when the window closes (the item is gone by then, the header's own button is hidden).
+ */
 function MoreMenu({ items, label }) {
   const pop = usePopover()
   const id = useId()
+  const placed = Boolean(pop.pos)
+  const entries = () => [...(pop.card.current?.querySelectorAll('[role^="menuitem"]') ?? [])]
+  // the card stays hidden (so unfocusable) until it is placed: the focus enters once it is
+  useEffect(() => { if (pop.open && placed) entries()[0]?.focus() }, [pop.open, placed])   // eslint-disable-line react-hooks/exhaustive-deps
+  const onKeyDown = e => {
+    const list = entries()
+    const at = list.indexOf(document.activeElement)
+    const to = moreMenuTarget(e.key, at, list.length)
+    if (to != null) { e.preventDefault(); list[to]?.focus() } else if (e.key === 'Tab') { pop.setOpen(false); pop.anchor.current?.focus() }
+  }
   return (
     <span className="ux-menu only-n-wrap">
-      <button ref={pop.anchor} type="button" className="ux-b ico keep only-n" aria-haspopup="true" aria-expanded={pop.open} aria-controls={pop.open ? id : undefined} aria-label={label} onClick={() => pop.setOpen(v => !v)}>
+      <button ref={pop.anchor} type="button" className="ux-b ico keep only-n" data-more-toggle aria-haspopup="menu" aria-expanded={pop.open} aria-controls={pop.open ? id : undefined} aria-label={label} onClick={() => pop.setOpen(v => !v)}>
         <Icon name="more" />
       </button>
-      <PopCard pop={pop} id={id} label={label} className="menu">
+      <PopCard pop={pop} id={id} label={label} className="menu" role="menu" onKeyDown={onKeyDown}>
         {items.map(it => (
-          <button key={it.key} type="button" data-more={it.key} aria-pressed={it.pressed} aria-disabled={it.disabled ? true : undefined} onClick={() => { pop.setOpen(false); if (!it.disabled) it.onClick() }}>
+          <button key={it.key} type="button" role={it.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'} aria-checked={it.pressed === undefined ? undefined : it.pressed} tabIndex={-1} data-more={it.key}
+            aria-disabled={it.disabled ? true : undefined} onClick={() => { pop.setOpen(false); if (!it.disabled) it.onClick() }}>
             <Icon name={it.icon} size={14} />{it.label}
           </button>
         ))}
@@ -82,7 +98,7 @@ export function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, repl
         <h1>{t('title')}</h1>
       </div>
       {counts.total > 0 ? (
-        <div className="ux-live" role="group" aria-label={t('ux.pill.label')} aria-live="polite">
+        <div className="ux-live" role="group" aria-label={t('ux.pill.label')}>
           <button type="button" className="ux-lvp working" data-go="agent" aria-label={`${counts.working} ${t('ux.pill.working', counts.working)}`} title={t('ux.pill.workingTip')} onClick={() => onGo('agent')}>
             <span className={`ux-pulse${counts.working ? '' : ' off'}`} aria-hidden="true" />
             <b>{counts.working}</b><span className="w">{t('ux.pill.working', counts.working)}</span>
@@ -115,7 +131,7 @@ export function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, repl
           </button>
         ) : null}
         {campaign ? (
-          <button type="button" className="ux-b" data-campaign-open title={t('campaign.openTip')} onClick={campaign.onClick}>
+          <button type="button" className="ux-b" data-campaign-open title={t('campaign.openTip')} aria-label={t('campaign.open')} onClick={campaign.onClick}>
             <Icon name="layers" /><span className="lb">{t('campaign.open')}</span>
           </button>
         ) : null}
@@ -126,7 +142,7 @@ export function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, repl
         ) : null}
         {panel ? <span className="sep" aria-hidden="true" /> : null}
         {panel ? (
-          <button ref={panel.ref} type="button" className={`ux-b ico${replayOn ? ' keep' : ''}`} data-panel-toggle aria-expanded={panel.open} aria-controls="oc-panel" title={panel.open ? t('panel.hide') : t('panel.show')} onClick={panel.onClick}>
+          <button ref={panel.ref} type="button" className={`ux-b ico${replayOn ? ' keep' : ''}`} data-panel-toggle aria-expanded={panel.open} aria-controls="oc-panel" title={panel.open ? t('panel.hideTip') : t('panel.showTip')} aria-label={panel.open ? t('panel.hide') : t('panel.show')} onClick={panel.onClick}>
             <Icon name="panel" />
           </button>
         ) : null}

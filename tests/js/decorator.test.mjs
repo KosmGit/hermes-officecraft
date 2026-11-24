@@ -468,7 +468,7 @@ test('nothing calls a model by itself: the routes are posted from gestures only,
   assert.match(dialog, /const revert = async \(\) => \{[^}]*call\('\/llm\/decor\/reset'/s)
   for (const text of [form, dialog]) for (const m of text.matchAll(/useEffect\(\(\) => \{([^]*?)\n  \}, \[/g)) assert.doesNotMatch(m[1], /call\(/, 'an effect never calls a model')
   // a switch is a save, not a call
-  assert.match(form, /onChange=\{checked => apply\(\{ features: \{ \[f\]: checked \} \}\)\}/)   // the Switch of SettingsKit hands over event.target.checked
+  assert.match(form, /onChange=\{hold\(saving, checked => apply\(\{ features: \{ \[f\]: checked \} \}\)\)\}/)   // the Switch of SettingsKit hands over event.target.checked
 })
 
 test('the strings: every function has its name, what it does, what is sent and what it costs, in en, fr and es', () => {

@@ -52,7 +52,7 @@ import { USAGE_CSS } from './usageStyles.js'
 import { SeatingDialog } from './SeatingDialog.jsx'
 import { SettingsGear } from './SettingsGear.jsx'
 import { SidePanel } from './SidePanel.jsx'
-import { skipPlan } from './targets.js'
+import { focusBackTarget, skipPlan } from './targets.js'
 import { EmptyOffice } from './EmptyOffice.jsx'
 import { usePartialStreaks } from './usePartialStreaks.js'
 import { canOpenKanban, canOpenSession, openDeskSession, openKanban } from './openSession.js'
@@ -135,16 +135,25 @@ export function OfficePage({ ctx }) {
   const [jfilter, setJfilter] = useState('all')
   const [hireOpen, setHireOpen] = useState(false)   // the recruitment window
   const usageBtnRef = useRef(null)
+  const pageRef = useRef(null)
+  // where the keyboard goes when a window closes: the button that opened it if it is on screen; in a narrow pane that button is
+  // hidden (or was an item of the « More » menu, gone by now), so the « More » button takes it, never <body>
+  const giveFocusBack = useCallback((...selectors) => {
+    setTimeout(() => {
+      const root = pageRef.current
+      const at = sel => { const el = root?.querySelector(sel); return { el, shown: Boolean(el && el.getClientRects().length) } }
+      focusBackTarget([...selectors.map(at), at('[data-more-toggle]')])?.focus()
+    }, 0)
+  }, [])
   const [usageOpen, setUsageOpen] = useState(false)   // the Resources window (usage, costs, quota)
-  const closeUsage = useCallback(() => { setUsageOpen(false); setTimeout(() => usageBtnRef.current?.focus(), 0) }, [])
-  const closeHire = useCallback(() => setHireOpen(false), [])
+  const closeUsage = useCallback(() => { setUsageOpen(false); giveFocusBack('[data-usage-open]') }, [giveFocusBack])
+  const closeHire = useCallback(() => { setHireOpen(false); giveFocusBack('[data-recruit-open]') }, [giveFocusBack])
   const [campaignOpen, setCampaignOpen] = useState(false)   // the campaign editor
-  const closeCampaign = useCallback(() => { setCampaignOpen(false); setTimeout(() => document.querySelector('[data-campaign-open]')?.focus(), 0) }, [])
+  const closeCampaign = useCallback(() => { setCampaignOpen(false); giveFocusBack('[data-campaign-open]') }, [giveFocusBack])
   const [vitrineOpen, setVitrineOpen] = useState(false)   // the showcase window (level, trophies, postcard), opened by the header's badge
   const vitrineFrom = useRef(null)
   const openVitrine = useCallback(() => { vitrineFrom.current = document.activeElement; setVitrineOpen(true) }, [])
   const closeVitrine = useCallback(() => { setVitrineOpen(false); setTimeout(() => vitrineFrom.current?.focus?.(), 0) }, [])
-  const pageRef = useRef(null)
   const toggleRef = useRef(null)
   const headRef = useRef(null)
   const width = useWidth(pageRef)
@@ -242,12 +251,13 @@ export function OfficePage({ ctx }) {
   const workRoles = useMemo(() => thoughtRoles(sceneAgents), [sceneAgents])
   useThoughts({ ready: llmShown.thoughtsReady && !replayOn, visible: pageVisible, roles: workRoles, lang: t.lang })
   const [decorOpen, setDecorOpen] = useState(false)
-  const closeDecor = useCallback(() => setDecorOpen(false), [])
+  const decorFrom = useRef('[data-decor-open]')   // what opened the Decorator: its own header button, or the gear of the settings
+  const closeDecor = useCallback(() => { setDecorOpen(false); giveFocusBack(decorFrom.current) }, [giveFocusBack])
   const [seatOpen, setSeatOpen] = useState(false)
-  const closeSeat = useCallback(() => setSeatOpen(false), [])
+  const closeSeat = useCallback(() => { setSeatOpen(false); giveFocusBack('[data-gear]') }, [giveFocusBack])   // the Seating is only opened from the settings
   const llmActions = useMemo(() => (llmOn ? {
     skip: manualProfiles(liveOffice.agents),
-    onDecorate: decorReady ? () => setDecorOpen(true) : null,
+    onDecorate: decorReady ? () => { decorFrom.current = '[data-gear]'; setDecorOpen(true) } : null,
     onSeating: llmShown.seatingReady ? () => setSeatOpen(true) : null,
     pendingArt: llmShown.pending, artReady: llmShown.artReady
   } : null), [llmOn, liveOffice.agents, decorReady, llmShown])
@@ -314,8 +324,8 @@ export function OfficePage({ ctx }) {
     setCursor(null)
     queryClient.refetchQueries({ queryKey: LIVE_KEY })
     queryClient.refetchQueries({ queryKey: ROSTER_KEY })
-    setTimeout(() => replayBtnRef.current?.focus(), 0)
-  }, [queryClient])
+    giveFocusBack('[data-replay-open]')
+  }, [queryClient, giveFocusBack])
   const chooseWindow = useCallback(kind => { setReplayKind(kind); setCursor(null) }, [])
   // Escape leaves the replay, unless something nearer is open (the dialogs, the settings, the narrow drawer: they take Escape first)
   const dialogOpen = hireOpen || decorOpen || seatOpen || campaignOpen
@@ -459,7 +469,7 @@ export function OfficePage({ ctx }) {
 
   let body
   if (model.body === 'loading') {
-    body = <div style={s.muted}>{t('loading')}</div>
+    body = <div style={s.muted} role="status">{t('loading')}</div>
   } else if (model.body === 'unreachable') {
     // « unreachable » only when there is no reading at all; a failure after a good read keeps the office
     body = <EmptyState title={t('unreachableTitle')} description={t('unreachableBody')} />
@@ -600,13 +610,13 @@ export function OfficePage({ ctx }) {
           usage={reads.includes('usage') && desks.length > 0 && !replayOn ? { ref: usageBtnRef, onClick: () => setUsageOpen(true) } : null}
           recruit={roster.data && !replayOn ? { onClick: () => setHireOpen(true) } : null}
           campaign={roster.data && !replayOn && writes.includes('campaign') ? { onClick: () => setCampaignOpen(true) } : null}
-          decor={decorReady ? { onClick: () => setDecorOpen(true) } : null}
+          decor={decorReady ? { onClick: () => { decorFrom.current = '[data-decor-open]'; setDecorOpen(true) } } : null}
           panel={desks.length > 0 && width > 0 ? { ref: toggleRef, open: panelOpen, onClick: togglePanel } : null}
           gear={<SettingsGear sheet={sheet} llm={llmActions} />}
           narrow={narrow}
         />
         {replayOn ? (
-          <div className="oc-rp-banner" role="status" data-replay-banner>
+          <div className="oc-rp-banner" data-replay-banner>
             <span className="oc-rp-dot" aria-hidden="true" />
             <b data-replay-at>{replayData ? t('replay.banner', replayAt) : t('replay.notLoaded')}</b>
             <span className="oc-rp-note">{replayData ? t('replay.bannerNote') : t('replay.notLoadedNote')}</span>
@@ -616,7 +626,7 @@ export function OfficePage({ ctx }) {
         <AlertRail alerts={alerts} narrow={narrow} t={t} failingNames={failingNames} />
         {body}
         {narrow && model.body === 'office' ? <TabBar view={officeView ? 'office' : tab} onView={goView} decisions={decisionCount} t={t} /> : null}
-        {roster.data ? <HireDialog open={hireOpen} onClose={closeHire} profiles={hireList} orders={orders} onSeeBot={name => { closeHire(); pickAgent(name) }} /> : null}
+        {roster.data ? <HireDialog open={hireOpen} onClose={closeHire} profiles={hireList} orders={orders} onSeeBot={name => { setHireOpen(false); pickAgent(name) }} /> : null}
         {roster.data && writes.includes('campaign') ? <CampaignDialog open={campaignOpen} onClose={closeCampaign} desks={desks} boards={liveOffice.boards} sceneBy={sceneByName} orders={orders} writes={writes} replay={replayOn} /> : null}
         {usageOpen ? <UsageDialog open={usageOpen} onClose={closeUsage} ctx={ctx} usageServed={reads.includes('usage')} replayServed={replayServed} /> : null}
         {showBadge && vitrineOpen ? <Vitrine open={vitrineOpen} onClose={closeVitrine} game={game} office={liveOffice} readMs={live.dataUpdatedAt || nowMs} nowMs={nowMs} onPostcard={postcard} t={t} /> : null}

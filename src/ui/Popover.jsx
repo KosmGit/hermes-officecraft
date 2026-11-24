@@ -44,14 +44,15 @@ export function usePopover() {
 }
 
 /** The card of a popover (rendered next to its button, positioned by usePopover). */
-export function PopCard({ pop, id, label, children, className = '' }) {
+export function PopCard({ pop, id, label, children, className = '', role = 'group', ...rest }) {
   if (!pop.open) return null
   return (
     <div
       ref={pop.card}
       id={id}
-      role="group"
+      role={role}
       aria-label={label}
+      {...rest}
       className={`ux-pop ${className}`}
       style={pop.pos ? { left: pop.pos.left, top: pop.pos.top } : { left: 0, top: 0, visibility: 'hidden' }}
     >

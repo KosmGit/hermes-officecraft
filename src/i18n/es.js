@@ -74,6 +74,8 @@ export const es = {
     title: 'Detalles',
     show: 'Mostrar detalles',
     hide: 'Ocultar detalles',
+    showTip: 'Abrir el inspector, las decisiones, las cadenas y el diario junto a la oficina',
+    hideTip: 'Cerrar los detalles y devolver el espacio a la oficina',
     close: 'Cerrar detalles',
     region: 'Panel de detalles',
     needsAgentHalf: 'Mira el aviso en la parte superior de la página.'
@@ -252,6 +254,7 @@ export const es = {
     graph: { title: 'Vista previa', final: 'Vista previa final', created: 'Lo que se creó', label: n => `Vista previa del grafo: ${n} tarjetas`, tip: 'De arriba abajo, en el orden en que empezarán las tarjetas. El color es el del bot. Una línea naranja discontinua es una barrera. Pasadas 24 tarjetas, las paralelas se pliegan en una pila: haz clic para desplegarla.' },
     groupAria: (codes, n, list = '') => `${codes}, ${n} tarjetas en paralelo (${list}), pulsa para desplegar`,
     groupTip: (n, codes) => `${n} tarjetas en paralelo (${codes}): clic para desplegar`,
+    groupFold: (codes, n) => `Plegar ${codes} (${n} tarjetas)`,
     state: { blocked: 'bloqueada', done: 'lanzada', todo: 'en espera', ready: 'lista', archived: 'archivada' },
     ck: { noLoop: 'Sin bucle', guarded: 'Todo tras una barrera', count: (n, max) => `${n}/${max} tarjetas` },
     clear: { button: 'Descartar el borrador', label: 'Descartar el borrador', ask: '¿Descartar este borrador?', keep: 'Conservarlo', go: 'Descartarlo' },
@@ -841,6 +844,7 @@ export const es = {
     nightHint: 'Las horas que cubre «Esta noche».',
     nightTip: 'Las horas que cubre «Lo que pasó esta noche», según el reloj de este dispositivo. De 19:00 a 07:00 por defecto; una noche puede cruzar la medianoche. La misma hora dos veces = una noche de 24 horas.',
     gear: 'Ajustes de Officecraft',
+    gearTip: 'Idioma, luz, juego, repetición, notificaciones y funciones LLM de la página',
     openInHermes: 'Abrir en la configuración de Hermes'
   },
   notify: {
@@ -882,6 +886,7 @@ export const es = {
     test: 'Enviar una prueba',
     testing: 'Enviando…',
     testFor: who => `Enviar una prueba a ${who}`,
+    testingFor: who => `Enviando una prueba a ${who}…`,
     tested: {
       sent: at => `Enviado a las ${at}`,
       wait: s => (s > 60 ? `Espera ${Math.ceil(s / 60)} min` : `Espera ${s} s`),

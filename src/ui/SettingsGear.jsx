@@ -41,7 +41,7 @@ export function SettingsGear({ sheet, llm = null }) {
   const href = typeof sdk.pluginSettingsHref === 'function' ? sdk.pluginSettingsHref(PLUGIN_ID, 'settings') : null
   return (
     <span className="oc-gearwrap" data-settings>
-      <button ref={btn} type="button" className="oc-gear" data-gear aria-haspopup="dialog" aria-expanded={open} title={t('settings.gear')} onClick={() => setOpen(v => !v)}>
+      <button ref={btn} type="button" className="oc-gear" data-gear aria-haspopup="dialog" aria-expanded={open} title={t('settings.gearTip')} aria-label={t('settings.gear')} onClick={() => setOpen(v => !v)}>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
           <path d={GEAR} />
           <circle cx="12" cy="12" r="3.2" />

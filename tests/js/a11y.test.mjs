@@ -136,8 +136,8 @@ const dock = ui('ProjectDock.jsx')
 
 test('the legend sits outside every aria-live region of the page, and the live region exists once, off screen', () => {
   const live = ['OfficePage.jsx', 'PageHeader.jsx', 'ProjectDock.jsx', 'AlertRail.jsx', 'DecisionsTab.jsx', 'SidePanel.jsx', 'TabBar.jsx'].map(f => [...ui(f).matchAll(/aria-live="polite"/g)].length).reduce((a, b) => a + b, 0)
-  // header live state (working / decisions / agents) + the dedicated announce region
-  assert.equal(live, 2, 'two polite regions: the header live state and the dedicated announcement')
+  // the dedicated announce region alone: the header's three pills are no live region (an agent state said once, with the agent's name)
+  assert.equal(live, 1, 'one polite region: the dedicated announcement')
   const bar = dock.match(/<div className="ux-dock"[^>]*>/)?.[0] ?? ''
   assert.ok(bar && !/aria-live/.test(bar), `the dock (which holds <Legend />) is not a live region: ${bar}`)
   assert.match(dock, /<span className="oc-announce" data-announce aria-live="polite">\{announce\}<\/span>/)

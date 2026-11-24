@@ -6,6 +6,7 @@ import {
   testState, testView, toggleRoute, typesWithoutRoute
 } from '../core/notify.js'
 import { sendTest, useNotify, useSaveNotify } from '../data/notify.js'
+import { held, hold } from './hold.js'
 import { SectionTitle, SettingsIcon, SettingsRow, Switch } from './SettingsKit.jsx'
 import { CARD, FIELD_EDGE, FIELD_RADIUS } from './tokens.js'
 import { useT } from './useT.js'
@@ -29,10 +30,10 @@ const canOpenHermes = () => typeof host?.navigate === 'function'
 const whoOf = (t, target) => t('notify.targetLabel', target.platform, target.label)
 
 /** A choice among a few words, many at once: a real checkbox per word, drawn as a chip (keyboard, state and label for free). */
-function Chip({ checked, disabled = false, onChange, title, children, ...rest }) {
+function Chip({ checked, disabled = false, busy = false, onChange, title, children, ...rest }) {
   return (
     <label className="oc-nt-chip" title={title}>
-      <input type="checkbox" checked={checked} disabled={disabled} onChange={event => onChange(event.target.checked)} {...rest} />
+      <input type="checkbox" checked={checked} disabled={disabled} {...held(busy)} onChange={hold(busy, event => onChange(event.target.checked))} {...rest} />
       <span>{children}</span>
     </label>
   )
@@ -97,6 +98,7 @@ export function SettingsFormNotify() {
   if (!state) return title
 
   const apply = async change => {
+    if (saving) return   // one save at a time (the controls stay focusable while it is out, see hold.js)
     setSaving(true)
     setError(null)
     const res = await save(changeBody(state, change, t.lang))
@@ -151,7 +153,7 @@ export function SettingsFormNotify() {
           <SettingsRow key={target.key} id={`officecraft-notify-test-${i}`} label={whoOf(t, target)} help={testLine(view) || lastLine(target)} helpRole={failed ? 'alert' : 'status'}
             control={({ id, describedBy }) => (
               <button id={id} type="button" className="oc-sx-btn" data-notify-test={target.key} aria-describedby={describedBy} aria-disabled={view.disabled}
-                aria-label={t('notify.testFor', whoOf(t, target))} onClick={() => { if (!view.disabled) runTest(target.key) }}>
+                aria-label={t(view.busy ? 'notify.testingFor' : 'notify.testFor', whoOf(t, target))} onClick={() => { if (!view.disabled) runTest(target.key) }}>
                 {view.busy ? t('notify.testing') : t('notify.test')}
               </button>
             )} />
@@ -160,8 +162,8 @@ export function SettingsFormNotify() {
       {state.targets.length > 0 ? (
         <SettingsRow id="officecraft-notify-all" label={t('notify.sameForAll')} help={t('notify.sameForAllHint')}
           control={({ id, describedBy }) => (
-            <select id={id} className="oc-fc" data-notify-all aria-describedby={describedBy} value={shared ?? (allEmpty ? '' : '__mixed')} disabled={saving} style={selectStyle}
-              onChange={event => apply({ routes: sameForAll(event.target.value || null) })}>
+            <select id={id} className="oc-fc" data-notify-all aria-describedby={describedBy} value={shared ?? (allEmpty ? '' : '__mixed')} {...held(saving)} style={selectStyle}
+              onChange={hold(saving, event => apply({ routes: sameForAll(event.target.value || null) }))}>
               {!shared && !allEmpty ? <option value="__mixed" disabled>{t('notify.mixed')}</option> : null}
               <option value="">{t('notify.noneChosen')}</option>
               {state.targets.map(target => <option key={target.key} value={target.key}>{whoOf(t, target)}</option>)}
@@ -185,7 +187,7 @@ export function SettingsFormNotify() {
             <small id={`officecraft-notify-${type}-help`}>{t(`notify.typeHint.${type}`)}</small>
           </div>
           <div className="oc-sx-ctl">
-            <Switch id={`officecraft-notify-${type}`} describedBy={`officecraft-notify-${type}-help`} checked={state.types[type]} disabled={saving} onChange={checked => apply({ types: { [type]: checked } })} />
+            <Switch id={`officecraft-notify-${type}`} describedBy={`officecraft-notify-${type}-help`} checked={state.types[type]} {...held(saving)} onChange={hold(saving, checked => apply({ types: { [type]: checked } }))} />
           </div>
           {state.targets.length > 0 ? (
             <div className="oc-nt-chips" role="group" aria-label={`${typeName(type)}: ${t('notify.recipients')}`}>
@@ -193,7 +195,7 @@ export function SettingsFormNotify() {
                 const on = state.routes[type].includes(target.key)
                 const full = !on && state.routes[type].length >= state.max
                 return (
-                  <Chip key={target.key} checked={on} disabled={saving || full} title={full ? t('notify.maxRoutes', state.max) : undefined} data-notify-route={`${type}:${target.key}`}
+                  <Chip key={target.key} checked={on} disabled={full} busy={saving} title={full ? t('notify.maxRoutes', state.max) : undefined} data-notify-route={`${type}:${target.key}`}
                     onChange={() => apply({ routes: { [type]: toggleRoute(state, type, target.key) } })}>
                     {whoOf(t, target)}
                   </Chip>
@@ -207,19 +209,19 @@ export function SettingsFormNotify() {
 
       <h4 className="oc-nt-sub" data-notify-quiet-title>{t('notify.quiet.title')}</h4>
       <SettingsRow id="officecraft-notify-quiet" label={t('notify.quiet.on')} help={t('notify.quiet.onHint')}
-        control={({ id, describedBy }) => <Switch id={id} describedBy={describedBy} checked={quiet.enabled} disabled={saving} onChange={checked => apply({ quiet: { enabled: checked } })} />} />
+        control={({ id, describedBy }) => <Switch id={id} describedBy={describedBy} checked={quiet.enabled} {...held(saving)} onChange={hold(saving, checked => apply({ quiet: { enabled: checked } }))} />} />
       {quiet.enabled ? (
         <>
           <SettingsRow id="officecraft-notify-range" group label={t('notify.quiet.range')} help={zone ? t('notify.quiet.clock', zone) : null}
             control={({ describedBy }) => (
               <>
-                <select id="officecraft-notify-quiet-start" className="oc-fc" data-quiet-start aria-label={t('notify.quiet.start')} aria-describedby={describedBy} value={quiet.from} disabled={saving}
-                  onChange={event => apply({ quiet: { from: event.target.value } })} style={selectStyle}>
+                <select id="officecraft-notify-quiet-start" className="oc-fc" data-quiet-start aria-label={t('notify.quiet.start')} aria-describedby={describedBy} value={quiet.from} {...held(saving)}
+                  onChange={hold(saving, event => apply({ quiet: { from: event.target.value } }))} style={selectStyle}>
                   {hourChoices(quiet.from).map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
                 <span className="oc-sx-arrow" aria-hidden="true">→</span>
-                <select id="officecraft-notify-quiet-end" className="oc-fc" data-quiet-end aria-label={t('notify.quiet.end')} aria-describedby={describedBy} value={quiet.to} disabled={saving}
-                  onChange={event => apply({ quiet: { to: event.target.value } })} style={selectStyle}>
+                <select id="officecraft-notify-quiet-end" className="oc-fc" data-quiet-end aria-label={t('notify.quiet.end')} aria-describedby={describedBy} value={quiet.to} {...held(saving)}
+                  onChange={hold(saving, event => apply({ quiet: { to: event.target.value } }))} style={selectStyle}>
                   {hourChoices(quiet.to).map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
               </>
@@ -231,7 +233,7 @@ export function SettingsFormNotify() {
             </div>
             <div className="oc-nt-chips" role="group" aria-labelledby="officecraft-notify-urgent-name">
               {NOTIFY_TYPES.map(type => (
-                <Chip key={type} checked={quiet.urgent.includes(type)} disabled={saving} data-notify-urgent={type}
+                <Chip key={type} checked={quiet.urgent.includes(type)} busy={saving} data-notify-urgent={type}
                   onChange={checked => apply({ quiet: { urgent: checked ? [...quiet.urgent, type] : quiet.urgent.filter(x => x !== type) } })}>
                   {typeName(type)}
                 </Chip>

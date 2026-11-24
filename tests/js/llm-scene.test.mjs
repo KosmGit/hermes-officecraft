@@ -574,8 +574,8 @@ test('the dialog applies only on a click: the pending style is not part of what 
   assert.doesNotMatch(decorStyle, /decorPending/, 'the office draws `fiches.decor` only')
   const dlg = src('src/ui/DecorDialog.jsx')
   assert.match(dlg, /data-decor-ready/)
-  assert.match(dlg, /data-decor-apply[^>]*onClick=\{\(\) => resolve\('apply'\)\}/)
-  assert.match(dlg, /data-decor-ignore[^>]*onClick=\{\(\) => resolve\('ignore'\)\}/)
+  assert.match(dlg, /data-decor-apply[^>]*onClick=\{hold\(pending, \(\) => resolve\('apply'\)\)\}/)
+  assert.match(dlg, /data-decor-ignore[^>]*onClick=\{hold\(pending, \(\) => resolve\('ignore'\)\)\}/)
   assert.match(dlg, /decorAppliesNow\(a, closedRef\.current\)/)
 })
 }

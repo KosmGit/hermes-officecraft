@@ -6,6 +6,7 @@ import { INSTR_MAX, cleanInstructions, seatingBody, topRelays } from '../core/se
 import { useLlm, useLlmActions } from '../data/llm.js'
 import { Dlg, DlgIcon, DlgTip, Notice, Seg } from './DialogKit.jsx'
 import { escapeCloses } from './dialogKeys.js'
+import { held, hold } from './hold.js'
 import { useT } from './useT.js'
 
 /**
@@ -55,7 +56,7 @@ export function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   return (
     <Dlg open={open} onClose={onClose} title={t('llm.seating.title')} icon="seating" size="m" data-seating-dialog onSubmit={run}
       onKeyDown={e => { if (escapeCloses(e)) { e.preventDefault(); e.stopPropagation(); onClose() } }}
-      start={<button type="button" className="oc-btn oc-ghost" data-seating-revert disabled={pending || choice === 'default'} onClick={() => { setAnswer(null); onChoice('default') }}>{t('llm.seating.revert')}</button>}
+      start={<button type="button" className="oc-btn oc-ghost" data-seating-revert {...held(pending || choice === 'default')} onClick={hold(pending || choice === 'default', () => { setAnswer(null); onChoice('default') })}>{t('llm.seating.revert')}</button>}
       actions={(
         <>
           <button type="button" className="oc-btn" data-seating-close onClick={onClose}>{t('llm.decor.close')}</button>
@@ -71,17 +72,18 @@ export function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
           </ul>
         ) : <Notice tone="neutral" data-seating-none>{t('llm.seating.none')}</Notice>}
       </section>
-      <label className="oc-dg-fl">
+      {/* the <label> holds the name alone: the « ? », its note and the counter are beside it, the counter reaches the field by aria-describedby */}
+      <div className="oc-dg-fl">
         <span className="oc-dg-lab">
-          {t('llm.seating.instructions')}
+          <label htmlFor={`${id}-instr`}>{t('llm.seating.instructions')}</label>
           <DlgTip name={t('llm.seating.instructions')}>{t('llm.seating.sent')}{sent ? '' : ` ${t('llm.seating.emptyOk')}`}</DlgTip>
           <span className="grow" />
-          <small>{t('llm.decor.count', text.length, INSTR_MAX)}</small>
+          <small id={`${id}-n`}>{t('llm.decor.count', text.length, INSTR_MAX)}</small>
         </span>
-        <textarea ref={areaRef} data-seating-instructions rows={2} value={text} maxLength={INSTR_MAX} placeholder={t('llm.seating.placeholder')} disabled={blocked}
-          aria-describedby={`${id}-sent`} onChange={e => setText(e.target.value)} />
+        <textarea ref={areaRef} id={`${id}-instr`} data-seating-instructions rows={2} value={text} maxLength={INSTR_MAX} placeholder={t('llm.seating.placeholder')} {...held(blocked, { text: true })}
+          aria-describedby={`${id}-n ${id}-sent`} onChange={hold(blocked, e => setText(e.target.value))} />
         <span id={`${id}-sent`} hidden data-seating-sent>{t('llm.seating.sent')}{sent ? '' : ` ${t('llm.seating.emptyOk')}`}</span>
-      </label>
+      </div>
       <div role="status" aria-live="polite" className="oc-dg-sec" data-seating-status={pending ? 'pending' : answer ? answer.kind : 'idle'}>
         {pending ? <p className="oc-dg-busy"><span className="oc-dg-spin" aria-hidden="true" />{t('llm.seating.calling')}</p> : null}
         {!pending && answer && answer.kind !== 'done' ? <Notice tone="bad" icon="alert" data-seating-failure={answer.reason}>{t(`llm.reason.${answer.reason}`)}</Notice> : null}

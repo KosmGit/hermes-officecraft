@@ -75,6 +75,8 @@ export const en = {
     title: 'Details',
     show: 'Show details',
     hide: 'Hide details',
+    showTip: 'Open the inspector, the decisions, the chains and the journal next to the office',
+    hideTip: 'Close the details and give the room back to the office',
     close: 'Close details',
     region: 'Details panel',
     needsAgentHalf: 'See the notice at the top of the page.'
@@ -253,6 +255,7 @@ export const en = {
     graph: { title: 'Preview', final: 'Final preview', created: 'What was created', label: n => `Graph preview: ${n} cards`, tip: 'Top to bottom, in the order the cards will start. Each color is a bot. A dashed orange line is a guard. Beyond 24 cards, parallel cards are stacked: click a stack to expand it.' },
     groupAria: (codes, n, list = '') => `${codes}, ${n} cards in parallel (${list}), press to expand`,
     groupTip: (n, codes) => `${n} cards in parallel (${codes}): click to expand`,
+    groupFold: (codes, n) => `Fold ${codes} (${n} cards)`,
     state: { blocked: 'blocked', done: 'launched', todo: 'waiting', ready: 'ready', archived: 'archived' },
     ck: { noLoop: 'No loops', guarded: 'Every card is behind a guard', count: (n, max) => `${n}/${max} cards` },
     clear: { button: 'Clear draft', label: 'Clear draft', ask: 'Discard this draft?', keep: 'Keep it', go: 'Discard' },
@@ -842,6 +845,7 @@ export const en = {
     nightHint: 'The hours “Overnight” covers.',
     nightTip: 'The hours “What happened overnight” covers, on this computer’s clock. 19:00 – 07:00 by default; a night may cross midnight. Setting the same hour twice gives a 24-hour night.',
     gear: 'Officecraft settings',
+    gearTip: 'Language, light, game, replay, notifications and LLM functions of the page',
     openInHermes: 'Open in Hermes settings'
   },
   notify: {
@@ -883,6 +887,7 @@ export const en = {
     test: 'Send a test',
     testing: 'Sending…',
     testFor: who => `Send a test to ${who}`,
+    testingFor: who => `Sending a test to ${who}…`,
     tested: {
       sent: at => `Sent at ${at}`,
       wait: s => (s > 60 ? `Wait ${Math.ceil(s / 60)} min` : `Wait ${s} s`),

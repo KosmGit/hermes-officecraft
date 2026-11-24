@@ -1,6 +1,6 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import { graphOf } from '../core/campaignLayout.js'
+import { foldCards, graphOf } from '../core/campaignLayout.js'
 import { letter } from '../core/campaign.js'
 import { Icon } from './icons.jsx'
 import { Portrait } from './Portrait.jsx'
@@ -39,8 +39,32 @@ export function CampaignGraph({ cards, info, colors, sceneBy, phases, selected =
   const mid = useId()
   const g = useMemo(() => (W ? graphOf(cards, W, { open, keep: new Set(selected ? [selected] : []) }) : null), [cards, W, open, selected])
   const interactive = typeof onSelect === 'function'
+  // the piles the user unfolded: each keeps a button to fold it back (an unfolded pile has no node of its own any more)
+  const unfolded = useMemo(() => foldCards(cards, new Set(), new Set(selected ? [selected] : [])).filter(c => c.kind === 'group' && open.has(c.id)), [cards, open, selected])
+  // the pile that was pressed is gone from the DOM (replaced by its cards, or by its fold button): the focus goes to the first card it
+  // unfolded into, or back to the pile it folded into, once the new graph is drawn
+  const focusNext = useRef(null)
+  const toggle = (id, to) => { focusNext.current = to; onToggle(id) }
+  useLayoutEffect(() => {
+    const to = focusNext.current
+    if (!to) return
+    const el = ref.current?.querySelector(`[data-node="${to.replace(/["\\]/g, '\\$&')}"]`)
+    if (el) { focusNext.current = null; el.focus({ preventScroll: false }) }
+  }, [g])
   return (
     <div className="oc-cgg" ref={ref} role="group" aria-label={label} data-graph>
+      {unfolded.length ? (
+        <div className="oc-cgg-folds">
+          {unfolded.map(p => {
+            const codes = `${info.get(p.members[0].id)?.code}–${info.get(p.members[p.members.length - 1].id)?.code}`
+            return (
+              <button key={p.id} type="button" className="ux-b sm" data-fold={p.id} aria-expanded="true" onClick={() => toggle(p.id, p.id)}>
+                {t('campaign.groupFold', codes, p.members.length)}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
       {g ? (
         <div className={`oc-cgg-in${g.compact ? ' cmp' : ''}`} style={{ width: W, height: g.H }}>
           {g.bands.map(b => (
@@ -88,7 +112,7 @@ export function CampaignGraph({ cards, info, colors, sceneBy, phases, selected =
               const list = sorted.map(([w, n]) => `${w} ${n}`).join(' · ')
               return (
                 <button key={c.id} type="button" className="oc-cgg-node grp" style={{ ...box, '--bc': colors.get(sorted[0]?.[0]) }} data-node={c.id} data-group aria-expanded="false"
-                  aria-label={t('campaign.groupAria', codes, m.length, list)} title={t('campaign.groupTip', m.length, codes)} onClick={() => onToggle(c.id)}>
+                  aria-label={t('campaign.groupAria', codes, m.length, list)} title={t('campaign.groupTip', m.length, codes)} onClick={() => toggle(c.id, m[0].id)}>
                   <i className="st st2" aria-hidden="true" /><i className="st st1" aria-hidden="true" />
                   <span className="top"><b className="cd">{codes}</b><span className="tt">{what}</span><em className="n">×{m.length}</em></span>
                   <span className="seg" aria-hidden="true">{sorted.map(([w, n]) => <i key={w} style={{ flexGrow: n, '--bc': colors.get(w) }} />)}</span>
@@ -101,7 +125,7 @@ export function CampaignGraph({ cards, info, colors, sceneBy, phases, selected =
             const state = status?.get(c.id)
             const Tag = interactive ? 'button' : 'div'
             return (
-              <Tag key={c.id} {...(interactive ? { type: 'button', onClick: () => onSelect(c.id), 'aria-pressed': sel } : {})} className={`oc-cgg-node${sel ? ' on' : ''}${state ? ` s-${state}` : ''}${marked?.has(c.id) ? ' lm' : ''}`}
+              <Tag key={c.id} {...(interactive ? { type: 'button', onClick: () => onSelect(c.id), 'aria-pressed': sel } : { tabIndex: -1 })} className={`oc-cgg-node${sel ? ' on' : ''}${state ? ` s-${state}` : ''}${marked?.has(c.id) ? ' lm' : ''}`}
                 style={{ ...box, '--bc': colors.get(i.who) }} data-node={c.id} title={`${i.code} · ${i.title || t('campaign.untitled')} — ${i.who}${i.pin ? ` · ${t('campaign.pinnedModel', i.pin)}` : ''}`}>
                 <i className="stripe" aria-hidden="true" />
                 {sceneBy?.get(i.who) ? <span className="pt"><Portrait agent={sceneBy.get(i.who)} /></span> : null}

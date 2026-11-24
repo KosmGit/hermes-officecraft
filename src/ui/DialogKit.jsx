@@ -3,6 +3,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
 import { $motionPref } from '../data/prefs.js'
 import { DIALOG_CSS } from './dialogStyles.js'
+import { held, hold } from './hold.js'
 import { useT } from './useT.js'
 
 /**
@@ -127,7 +128,7 @@ export function Seg({ label, items, value, onPick, disabled = false, attr }) {
   return (
     <span className="oc-dg-seg" role="group" aria-label={label}>
       {items.map(([code, text, off, title]) => (
-        <button key={code} type="button" title={title} disabled={disabled || off || undefined} aria-pressed={value === code} {...{ [attr]: code }} onClick={() => onPick(code)}>{text}</button>
+        <button key={code} type="button" title={title} disabled={off || undefined} {...held(disabled)} aria-pressed={value === code} {...{ [attr]: code }} onClick={hold(disabled, () => onPick(code))}>{text}</button>
       ))}
     </span>
   )

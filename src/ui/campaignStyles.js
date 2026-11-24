@@ -31,6 +31,8 @@ export const CAMPAIGN_CSS = `
 .oc-cgsteps .now{color:var(--foreground);font-weight:600}
 .oc-cgsteps .now .n{background:var(--ui-accent);border-color:var(--ui-accent);color:var(--ui-accent-fg, var(--background))}
 .oc-cgsteps .past .n{background:color-mix(in oklab, ${GREEN} 18%, ${CARD});border-color:color-mix(in oklab, ${GREEN} 60%, transparent);color:${ink(GREEN)}}
+.oc-cgsteps .tl{border-radius:4px}
+.oc-cgsteps .tl:focus-visible{${RING_FOCUS}}
 /* head: goal, project, templates, new project */
 .oc-cghead{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,240px) auto;gap:12px;align-items:end}
 .oc-cghead .oc-dg-fl{min-width:0}
@@ -63,7 +65,7 @@ export const CAMPAIGN_CSS = `
 .oc-cgtpl .tc b{font-size:12.5px;font-weight:600}
 .oc-cgtpl .tc small{font-size:11.5px;color:${T3};line-height:1.35}
 .oc-cgtpl .tc:hover{border-color:var(--ui-accent)}
-.oc-cgtpl .tc[aria-checked=true]{border-color:var(--ui-accent);box-shadow:0 0 0 1px var(--ui-accent) inset;background:color-mix(in oklab, var(--ui-accent) 6%, ${CARD})}
+.oc-cgtpl .tc[aria-pressed=true]{border-color:var(--ui-accent);box-shadow:0 0 0 1px var(--ui-accent) inset;background:color-mix(in oklab, var(--ui-accent) 6%, ${CARD})}
 .oc-cgtpl .tc:focus-visible{${RING_FOCUS}}
 .oc-cgmini{display:block;max-width:100%;height:auto;align-self:center}
 .oc-cgmini .ml{stroke:${T3};stroke-width:1.2}
@@ -133,6 +135,7 @@ export const CAMPAIGN_CSS = `
 .oc-cgp .gbar .sm{font-size:12px;color:${T3}}
 .oc-cgg{position:relative;width:100%;min-width:0;border-radius:8px;background:${SUNKEN}}
 .oc-cgg-in{position:relative}
+.oc-cgg-folds{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 0}
 .oc-cgg-band{position:absolute;left:8px;right:8px;border-radius:10px;background:color-mix(in oklab, var(--foreground) 3%, transparent)}
 .oc-cgg-band.alt{background:color-mix(in oklab, var(--foreground) 6%, transparent)}
 .oc-cgg-band .lb{position:absolute;left:4px;top:8px;max-height:calc(100% - 16px);writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;font-weight:700;color:${T2};overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

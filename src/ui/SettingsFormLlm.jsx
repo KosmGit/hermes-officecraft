@@ -6,6 +6,7 @@ import { modelChoices, pickFromValue, settingsView, shortModel } from '../core/l
 import { ringDash } from '../core/settings.js'
 import { artBody } from '../core/wallart.js'
 import { useLlm, useLlmActions } from '../data/llm.js'
+import { held, hold } from './hold.js'
 import { useModelOptions } from './ModelPicker.jsx'
 import { HelpTip, SectionTitle, SettingsIcon, Switch } from './SettingsKit.jsx'
 import { useT } from './useT.js'
@@ -76,8 +77,8 @@ function ModelSelect({ lane, sel, choices, busy, onPick, tipped }) {
           </HelpTip>
         ) : null}
       </span>
-      <select id={`${id}-s`} className="oc-lm-sel oc-fc" data-llm-model={lane} value={sel.selected} disabled={sel.disabled || busy} aria-describedby={`${id}-u`}
-        onChange={e => { const pick = pickFromValue(e.target.value, choices); if (pick !== undefined) onPick(lane, pick) }}>
+      <select id={`${id}-s`} className="oc-lm-sel oc-fc" data-llm-model={lane} value={sel.selected} disabled={sel.disabled} {...held(busy)} aria-describedby={`${id}-u`}
+        onChange={hold(busy, e => { const pick = pickFromValue(e.target.value, choices); if (pick !== undefined) onPick(lane, pick) })}>
         <option value="hermes">{t('llm.models.hermes')}</option>
         {sel.stored ? <option value="stored">{t('llm.models.stored', shortModel(sel.pick.model), sel.pick.provider)}</option> : null}
         {groups.map(g => (
@@ -132,6 +133,7 @@ export function SettingsFormLlm({ actions = null }) {
   if (!state) return title
 
   const apply = async change => {
+    if (saving) return   // one save at a time: a second gesture while one is out is dropped (the controls stay focusable, see hold.js)
     setSaving(true)
     setError(null)
     const res = await save(settingsBody(state, change))
@@ -216,8 +218,8 @@ export function SettingsFormLlm({ actions = null }) {
             <p data-llm-cost>{t('llm.cost', t(`llm.f.${f}.cost`))}{last ? ` ${last}` : ''}</p>
             {f === 'thoughts' ? <p>{t('llm.thoughts.note')}</p> : null}
           </HelpTip>
-          <Switch id={`${id}-${f}`} labelledBy={`${id}-${f}-n`} describedBy={`${id}-${f}-s ${id}-${f}-d`} checked={row.on} disabled={saving || !row.switchable}
-            onChange={checked => apply({ features: { [f]: checked } })} data-llm-switch={f} />
+          <Switch id={`${id}-${f}`} labelledBy={`${id}-${f}-n`} describedBy={`${id}-${f}-s ${id}-${f}-d`} checked={row.on} disabled={!row.switchable} {...held(saving)}
+            onChange={hold(saving, checked => apply({ features: { [f]: checked } }))} data-llm-switch={f} />
         </span>
         <span className="oc-lm-fx">
           {warn ? <span className="oc-sx-warn" role="status" data-llm-cap={st === 'cap' ? hit : undefined} data-llm-error={st === 'error' ? '' : undefined}>{warn}</span> : null}
@@ -252,10 +254,10 @@ export function SettingsFormLlm({ actions = null }) {
               <div className="oc-sx-capg">
                 <label htmlFor={`${id}-usd`}>{t('llm.capUsd')}</label>
                 <label htmlFor={`${id}-calls`}>{t('llm.capCalls')}</label>
-                <input id={`${id}-usd`} className="oc-fc" data-llm-cap-usd inputMode="decimal" value={usdText} disabled={saving}
-                  onChange={e => setUsdText(e.target.value)} onBlur={() => commit('usd', usdText)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit('usd', usdText) } }} />
-                <input id={`${id}-calls`} className="oc-fc" data-llm-cap-calls inputMode="numeric" value={callsText} disabled={saving}
-                  onChange={e => setCallsText(e.target.value)} onBlur={() => commit('calls', callsText)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit('calls', callsText) } }} />
+                <input id={`${id}-usd`} className="oc-fc" data-llm-cap-usd inputMode="decimal" value={usdText} {...held(saving, { text: true })}
+                  onChange={hold(saving, e => setUsdText(e.target.value))} onBlur={() => commit('usd', usdText)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit('usd', usdText) } }} />
+                <input id={`${id}-calls`} className="oc-fc" data-llm-cap-calls inputMode="numeric" value={callsText} {...held(saving, { text: true })}
+                  onChange={hold(saving, e => setCallsText(e.target.value))} onBlur={() => commit('calls', callsText)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit('calls', callsText) } }} />
               </div>
             </details>
           </div>

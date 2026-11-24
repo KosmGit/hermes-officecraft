@@ -482,7 +482,7 @@ function orderReducer(state2, action) {
 var initialOrderState = (outcome = null) => ({ ...IDLE, outcome });
 var targetOf = (verb, item, id) => ({ id, verb, board: item.board, task: item.id, code: item.code || item.id });
 var reviseTarget = (name, description, id) => ({ id, verb: "revise", code: name, board: "", task: "", description: String(description ?? ""), preconfirmed: true });
-var recruitTarget = (draft, id, held = null) => held ? { id, verb: "recruitModel", code: draft.name, board: "", task: "", draft: { name: draft.name }, model: held.model, provider: held.provider, message: held.message } : { id, verb: "recruit", code: draft.name, board: "", task: "", draft: { ...draft, off: [...draft.off || []] } };
+var recruitTarget = (draft, id, held2 = null) => held2 ? { id, verb: "recruitModel", code: draft.name, board: "", task: "", draft: { name: draft.name }, model: held2.model, provider: held2.provider, message: held2.message } : { id, verb: "recruit", code: draft.name, board: "", task: "", draft: { ...draft, off: [...draft.off || []] } };
 var JOURNAL_VERBS = /* @__PURE__ */ new Set(["unblock", "comment", "approval", "recruit", "revise", "campaign", "launch", "cancel_campaign"]);
 var JOURNAL_RESULTS = /* @__PURE__ */ new Set(["done", "refused", "failed"]);
 var cut = (s, n = 64) => String(s ?? "").slice(0, n);
@@ -4797,6 +4797,8 @@ var en = {
     title: "Details",
     show: "Show details",
     hide: "Hide details",
+    showTip: "Open the inspector, the decisions, the chains and the journal next to the office",
+    hideTip: "Close the details and give the room back to the office",
     close: "Close details",
     region: "Details panel",
     needsAgentHalf: "See the notice at the top of the page."
@@ -4976,6 +4978,7 @@ var en = {
     graph: { title: "Preview", final: "Final preview", created: "What was created", label: (n) => `Graph preview: ${n} cards`, tip: "Top to bottom, in the order the cards will start. Each color is a bot. A dashed orange line is a guard. Beyond 24 cards, parallel cards are stacked: click a stack to expand it." },
     groupAria: (codes2, n, list = "") => `${codes2}, ${n} cards in parallel (${list}), press to expand`,
     groupTip: (n, codes2) => `${n} cards in parallel (${codes2}): click to expand`,
+    groupFold: (codes2, n) => `Fold ${codes2} (${n} cards)`,
     state: { blocked: "blocked", done: "launched", todo: "waiting", ready: "ready", archived: "archived" },
     ck: { noLoop: "No loops", guarded: "Every card is behind a guard", count: (n, max) => `${n}/${max} cards` },
     clear: { button: "Clear draft", label: "Clear draft", ask: "Discard this draft?", keep: "Keep it", go: "Discard" },
@@ -5566,6 +5569,7 @@ var en = {
     nightHint: "The hours “Overnight” covers.",
     nightTip: "The hours “What happened overnight” covers, on this computer’s clock. 19:00 – 07:00 by default; a night may cross midnight. Setting the same hour twice gives a 24-hour night.",
     gear: "Officecraft settings",
+    gearTip: "Language, light, game, replay, notifications and LLM functions of the page",
     openInHermes: "Open in Hermes settings"
   },
   notify: {
@@ -5607,6 +5611,7 @@ var en = {
     test: "Send a test",
     testing: "Sending…",
     testFor: (who) => `Send a test to ${who}`,
+    testingFor: (who) => `Sending a test to ${who}…`,
     tested: {
       sent: (at) => `Sent at ${at}`,
       wait: (s) => s > 60 ? `Wait ${Math.ceil(s / 60)} min` : `Wait ${s} s`,
@@ -6500,6 +6505,8 @@ var es = {
     title: "Detalles",
     show: "Mostrar detalles",
     hide: "Ocultar detalles",
+    showTip: "Abrir el inspector, las decisiones, las cadenas y el diario junto a la oficina",
+    hideTip: "Cerrar los detalles y devolver el espacio a la oficina",
     close: "Cerrar detalles",
     region: "Panel de detalles",
     needsAgentHalf: "Mira el aviso en la parte superior de la página."
@@ -6679,6 +6686,7 @@ var es = {
     graph: { title: "Vista previa", final: "Vista previa final", created: "Lo que se creó", label: (n) => `Vista previa del grafo: ${n} tarjetas`, tip: "De arriba abajo, en el orden en que empezarán las tarjetas. El color es el del bot. Una línea naranja discontinua es una barrera. Pasadas 24 tarjetas, las paralelas se pliegan en una pila: haz clic para desplegarla." },
     groupAria: (codes2, n, list = "") => `${codes2}, ${n} tarjetas en paralelo (${list}), pulsa para desplegar`,
     groupTip: (n, codes2) => `${n} tarjetas en paralelo (${codes2}): clic para desplegar`,
+    groupFold: (codes2, n) => `Plegar ${codes2} (${n} tarjetas)`,
     state: { blocked: "bloqueada", done: "lanzada", todo: "en espera", ready: "lista", archived: "archivada" },
     ck: { noLoop: "Sin bucle", guarded: "Todo tras una barrera", count: (n, max) => `${n}/${max} tarjetas` },
     clear: { button: "Descartar el borrador", label: "Descartar el borrador", ask: "¿Descartar este borrador?", keep: "Conservarlo", go: "Descartarlo" },
@@ -7269,6 +7277,7 @@ var es = {
     nightHint: "Las horas que cubre «Esta noche».",
     nightTip: "Las horas que cubre «Lo que pasó esta noche», según el reloj de este dispositivo. De 19:00 a 07:00 por defecto; una noche puede cruzar la medianoche. La misma hora dos veces = una noche de 24 horas.",
     gear: "Ajustes de Officecraft",
+    gearTip: "Idioma, luz, juego, repetición, notificaciones y funciones LLM de la página",
     openInHermes: "Abrir en la configuración de Hermes"
   },
   notify: {
@@ -7310,6 +7319,7 @@ var es = {
     test: "Enviar una prueba",
     testing: "Enviando…",
     testFor: (who) => `Enviar una prueba a ${who}`,
+    testingFor: (who) => `Enviando una prueba a ${who}…`,
     tested: {
       sent: (at) => `Enviado a las ${at}`,
       wait: (s) => s > 60 ? `Espera ${Math.ceil(s / 60)} min` : `Espera ${s} s`,
@@ -8204,6 +8214,8 @@ var fr = {
     title: "Détails",
     show: "Afficher les détails",
     hide: "Masquer les détails",
+    showTip: "Ouvrir l’inspecteur, les décisions, les chaînes et le journal à côté du bureau",
+    hideTip: "Fermer les détails et rendre la place au bureau",
     close: "Fermer les détails",
     region: "Panneau de détails",
     needsAgentHalf: "Voir le message en haut de la page."
@@ -8383,6 +8395,7 @@ var fr = {
     graph: { title: "Aperçu", final: "Aperçu final", created: "Ce qui a été créé", label: (n) => `Aperçu du graphe : ${n} cartes`, tip: "De haut en bas, dans l’ordre où les cartes démarreront. La couleur est celle du bot. Une ligne orange en tirets est un verrou. Au-delà de 24 cartes, les cartes en parallèle sont regroupées en pile : cliquez dessus pour la déplier." },
     groupAria: (codes2, n, list = "") => `${codes2}, ${n} cartes en parallèle (${list}), appuyer pour déplier`,
     groupTip: (n, codes2) => `${n} cartes en parallèle (${codes2}) : cliquer pour déplier`,
+    groupFold: (codes2, n) => `Replier ${codes2} (${n} cartes)`,
     state: { blocked: "fermé", done: "levé", todo: "en attente", ready: "prête", archived: "archivée" },
     ck: { noLoop: "Sans boucle", guarded: "Tout est sous verrou", count: (n, max) => `${n}/${max} cartes` },
     clear: { button: "Effacer le brouillon", label: "Effacer le brouillon", ask: "Effacer ce brouillon ?", keep: "Le garder", go: "L’effacer" },
@@ -8973,6 +8986,7 @@ var fr = {
     nightHint: "Les heures que couvre « Cette nuit ».",
     nightTip: "Les heures que couvre « Ce qui s’est passé cette nuit », à l’heure de cet ordinateur. 19 h – 7 h par défaut ; une nuit peut passer minuit. La même heure deux fois = une nuit de 24 h.",
     gear: "Réglages d’Officecraft",
+    gearTip: "Langue, lumière, jeu, relecture, notifications et fonctions LLM de la page",
     openInHermes: "Ouvrir dans les paramètres de Hermes"
   },
   notify: {
@@ -9014,6 +9028,7 @@ var fr = {
     test: "Envoyer un test",
     testing: "Envoi…",
     testFor: (who) => `Envoyer un test à ${who}`,
+    testingFor: (who) => `Envoi d'un test à ${who}…`,
     tested: {
       sent: (at) => `Envoyé à ${at}`,
       wait: (s) => s > 60 ? `Attendez ${Math.ceil(s / 60)} min` : `Attendez ${s} s`,
@@ -9836,7 +9851,7 @@ var ENDONYMS = Object.freeze({ en: "English", fr: "Français", es: "Español" })
 
 // src/ui/OfficePage.jsx
 import { EmptyState, host as host6, useQueryClient as useQueryClient6, useValue as useValue5 } from "@hermes/plugin-sdk";
-import { useCallback as useCallback9, useDeferredValue, useEffect as useEffect27, useLayoutEffect as useLayoutEffect8, useMemo as useMemo17, useRef as useRef29, useState as useState25 } from "react";
+import { useCallback as useCallback9, useDeferredValue, useEffect as useEffect28, useLayoutEffect as useLayoutEffect8, useMemo as useMemo17, useRef as useRef29, useState as useState25 } from "react";
 
 // src/core/achievements.js
 var DAY_MS3 = 864e5;
@@ -11198,11 +11213,11 @@ function readingCurrent({ paneW, panelShown, art }) {
   const expected = panelShown ? paneW - panelWidthOf(paneW) - MAIN_GAP - STAGE_EDGE : paneW - STAGE_EDGE;
   return Math.abs(art.availW - expected) <= READ_TOL;
 }
-function foldPlan({ folded, refused: refused2 = "", wideOpen, paneW, art, held = null }) {
+function foldPlan({ folded, refused: refused2 = "", wideOpen, paneW, art, held: held2 = null }) {
   if (!wideOpen || !art) return { folded: false, refused: "" };
   if (!readingCurrent({ paneW, panelShown: !folded, art })) return { folded, refused: refused2 };
   const key = foldKey(paneW, art);
-  if (!folded) return held !== paneW && foldStep({ folded, wideOpen, paneW, art }) ? { folded: true, refused: key } : { folded: false, refused: refused2 };
+  if (!folded) return held2 !== paneW && foldStep({ folded, wideOpen, paneW, art }) ? { folded: true, refused: key } : { folded: false, refused: refused2 };
   if (foldStep({ folded, wideOpen, paneW, art }) || key === refused2) return { folded: true, refused: refused2 };
   return { folded: false, refused: refused2 };
 }
@@ -11920,7 +11935,7 @@ function useOrders(ctx, { audit: auditOn = false, replay = false } = {}) {
   const ask = useCallback((order2) => dispatch({ type: "request", order: order2, now: Date.now(), replay: latest2.current.replay }), []);
   const request = useCallback((verb, item) => ask(targetOf(verb, item, newId())), [ask]);
   const requestApproval = useCallback((req, choice) => ask(approvalTarget(req, newId(), choice)), [ask]);
-  const requestRecruit = useCallback((draft, held = null) => ask(recruitTarget(draft, newId(), held)), [ask]);
+  const requestRecruit = useCallback((draft, held2 = null) => ask(recruitTarget(draft, newId(), held2)), [ask]);
   const requestRevise = useCallback((name, description) => ask(reviseTarget(name, description, newId())), [ask]);
   const requestGuard = useCallback((verb, item, extra = {}) => ask({ ...guardTarget(verb, item, newId()), ...extra }), [ask]);
   const requestCampaign = useCallback((draft, names) => {
@@ -12221,15 +12236,16 @@ function usePopover() {
   }, [open]);
   return { open, setOpen, anchor, card, pos };
 }
-function PopCard({ pop, id, label, children, className = "" }) {
+function PopCard({ pop, id, label, children, className = "", role = "group", ...rest3 }) {
   if (!pop.open) return null;
   return /* @__PURE__ */ jsx2(
     "div",
     {
       ref: pop.card,
       id,
-      role: "group",
+      role,
       "aria-label": label,
+      ...rest3,
       className: `ux-pop ${className}`,
       style: pop.pos ? { left: pop.pos.left, top: pop.pos.top } : { left: 0, top: 0, visibility: "hidden" },
       children
@@ -12289,7 +12305,7 @@ function Chip({ alert, label, children, t, texts }) {
   const pop = usePopover();
   const id = useId2();
   return /* @__PURE__ */ jsxs3("span", { className: "ux-alw", children: [
-    /* @__PURE__ */ jsxs3("button", { ref: pop.anchor, type: "button", className: `ux-al ${alert.tone}`, "data-alert": alert.id, "aria-haspopup": "dialog", "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, onClick: () => pop.setOpen((v) => !v), children: [
+    /* @__PURE__ */ jsxs3("button", { ref: pop.anchor, type: "button", className: `ux-al ${alert.tone}`, "data-alert": alert.id, "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, onClick: () => pop.setOpen((v) => !v), children: [
       /* @__PURE__ */ jsx3(Icon, { name: ICON[alert.tone], size: 14 }),
       /* @__PURE__ */ jsx3("span", { children: label }),
       /* @__PURE__ */ jsx3(Icon, { name: "chev", size: 14, className: "chev" })
@@ -14511,9 +14527,9 @@ var EDGE2 = "var(--ui-stroke-secondary)";
 var FIELD_EDGE = "color-mix(in oklab, var(--foreground) 48%, var(--ui-bg-elevated, Canvas))";
 var FIELD_RADIUS = "2.5px";
 var RING = "var(--dt-ring, var(--ring, var(--ui-accent)))";
-var RING_FOCUS = `outline:none;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)`;
+var RING_FOCUS = `outline:2px solid transparent;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)`;
 var BTN_RADIUS = "4px";
-var FIELD_CSS = `.oc-fc:focus-visible{outline:none;border-color:${RING} !important;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`;
+var FIELD_CSS = `.oc-fc:focus-visible{outline:2px solid transparent;border-color:${RING} !important;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`;
 var SUNKEN = "var(--ui-bg-sunken, color-mix(in oklab, var(--foreground) 7%, transparent))";
 var ON_ACCENT = "var(--ui-accent-fg, var(--background, Canvas))";
 var VIOLET = "var(--ui-violet, color-mix(in oklab, color-mix(in oklch, var(--ui-purple, var(--ui-accent)), color-mix(in oklch, var(--ui-blue, var(--ui-accent)) 81%, var(--ui-red, var(--ui-accent)))) 88%, var(--foreground)))";
@@ -14575,7 +14591,7 @@ ${RINGED(".oc-dg-x:focus-visible")}
 .oc-dg .oc-btn.oc-primary{background:var(--ui-accent);color:var(--ui-accent-fg, var(--background));border-color:var(--ui-accent)}
 .oc-dg .oc-btn.oc-primary:hover:not([aria-disabled="true"]):not(:disabled){background:color-mix(in oklab, var(--ui-accent) 88%, var(--foreground))}
 .oc-dg .oc-btn.oc-ghost{border-color:${EDGE2};color:var(--ui-text-secondary)}
-.oc-dg .oc-btn:disabled{opacity:.5;cursor:default}
+.oc-dg .oc-btn:disabled,.oc-dg .oc-btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-dg-link{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;font:inherit;font-size:12px;color:var(--ui-accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 ${RINGED(".oc-dg-link:focus-visible")}
 ${TIP_CSS}
@@ -14609,14 +14625,15 @@ ${TIP_CSS}
 .oc-dg-seg{display:inline-flex;flex-wrap:nowrap;box-sizing:border-box;padding:4px;gap:2px;border:0;box-shadow:inset 0 0 0 1px ${EDGE2};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .oc-dg-seg button,.oc-dg-seg label{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;font-weight:500;color:var(--ui-text-secondary);cursor:pointer;white-space:nowrap}
 .oc-dg-seg button[aria-pressed="true"],.oc-dg-seg label:has(input:checked){background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 0 0 1px ${EDGE2}}
-.oc-dg-seg button:disabled{opacity:.5;cursor:default}
+.oc-dg-seg button:disabled,.oc-dg-seg button[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-dg-seg input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
 ${RINGED(".oc-dg-seg button:focus-visible")}
 .oc-dg-seg label:has(input:focus-visible){${RING_FOCUS}}
 .oc-dg-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;padding:0;list-style:none}
 .oc-dg-pill{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;max-width:100%;min-height:28px;padding:0 12px;border:1px solid ${EDGE2};border-radius:14px;background:${CARD};font:inherit;font-size:12px;color:var(--foreground);text-align:left;cursor:pointer}
-button.oc-dg-pill:hover:not(:disabled){border-color:var(--ui-accent)}
-button.oc-dg-pill:disabled{opacity:.5;cursor:default}
+button.oc-dg-pill:hover:not(:disabled):not([aria-disabled="true"]){border-color:var(--ui-accent)}
+button.oc-dg-pill:disabled,button.oc-dg-pill[aria-disabled="true"]{opacity:.5;cursor:default}
+.oc-dg textarea[aria-disabled="true"]{opacity:.6;cursor:progress}
 ${RINGED(".oc-dg-pill:focus-visible")}
 .oc-dg-pill.on{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD})}
 .oc-dg-pill.off{color:${SOFT};text-decoration:line-through}
@@ -14780,6 +14797,10 @@ var DIALOG_TAIL = `
 `;
 var DIALOG_CSS = DIALOG_HEAD + LM_CSS + DIALOG_TAIL;
 
+// src/ui/hold.js
+var hold = (on, fn) => (...args) => on ? void 0 : fn?.(...args);
+var held = (on, { text: text3 = false } = {}) => on ? { "aria-disabled": true, ...text3 ? { readOnly: true } : {} } : {};
+
 // src/ui/useT.js
 import { useI18n, useValue } from "@hermes/plugin-sdk";
 import { useCallback as useCallback2 } from "react";
@@ -14899,7 +14920,7 @@ function Step({ n, title, summary: summary2 = null, children, ...rest3 }) {
   ] });
 }
 function Seg({ label, items, value, onPick, disabled = false, attr }) {
-  return /* @__PURE__ */ jsx4("span", { className: "oc-dg-seg", role: "group", "aria-label": label, children: items.map(([code, text3, off, title]) => /* @__PURE__ */ jsx4("button", { type: "button", title, disabled: disabled || off || void 0, "aria-pressed": value === code, ...{ [attr]: code }, onClick: () => onPick(code), children: text3 }, code)) });
+  return /* @__PURE__ */ jsx4("span", { className: "oc-dg-seg", role: "group", "aria-label": label, children: items.map(([code, text3, off, title]) => /* @__PURE__ */ jsx4("button", { type: "button", title, disabled: off || void 0, ...held(disabled), "aria-pressed": value === code, ...{ [attr]: code }, onClick: hold(disabled, () => onPick(code)), children: text3 }, code)) });
 }
 function Dlg({
   open = true,
@@ -15097,7 +15118,7 @@ function DecorDialog({ open, onClose }) {
           onClose();
         }
       },
-      start: shown ? /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-btn oc-ghost", "data-decor-revert": true, disabled: pending, onClick: revert, children: t("llm.decor.revert") }) : null,
+      start: shown ? /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-btn oc-ghost", "data-decor-revert": true, ...held(pending), onClick: hold(pending, revert), children: t("llm.decor.revert") }) : null,
       actions: /* @__PURE__ */ jsxs5(Fragment2, { children: [
         /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-btn", "data-decor-close": true, onClick: onClose, children: fresh ? t("llm.decor.keep") : t("llm.decor.close") }),
         /* @__PURE__ */ jsxs5("button", { type: "submit", className: "oc-btn oc-primary", "data-decor-run": true, "aria-disabled": !sent || blocked ? true : void 0, children: [
@@ -15107,33 +15128,34 @@ function DecorDialog({ open, onClose }) {
       ] }),
       children: [
         refusal ? /* @__PURE__ */ jsx5(Notice, { tone: "warn", icon: "info", role: "status", "data-decor-refusal": true, children: refusal }) : null,
-        /* @__PURE__ */ jsxs5("label", { className: "oc-dg-fl", children: [
+        /* @__PURE__ */ jsxs5("div", { className: "oc-dg-fl", children: [
           /* @__PURE__ */ jsxs5("span", { className: "oc-dg-lab", children: [
-            t("llm.decor.describe"),
+            /* @__PURE__ */ jsx5("label", { htmlFor: `${id}-style`, children: t("llm.decor.describe") }),
             /* @__PURE__ */ jsx5(DlgTip, { name: t("llm.decor.describe"), children: t("llm.decor.sent") }),
             /* @__PURE__ */ jsx5("span", { className: "grow" }),
-            /* @__PURE__ */ jsx5("small", { children: t("llm.decor.count", text3.length, STYLE_MAX) })
+            /* @__PURE__ */ jsx5("small", { id: `${id}-n`, children: t("llm.decor.count", text3.length, STYLE_MAX) })
           ] }),
           /* @__PURE__ */ jsx5(
             "textarea",
             {
               ref: areaRef,
+              id: `${id}-style`,
               "data-decor-style": true,
               rows: 2,
               value: text3,
               maxLength: STYLE_MAX,
               placeholder: t("llm.decor.placeholder"),
-              disabled: blocked,
-              "aria-describedby": `${id}-sent`,
-              onChange: (e) => setText(e.target.value)
+              ...held(blocked, { text: true }),
+              "aria-describedby": `${id}-n ${id}-sent`,
+              onChange: hold(blocked, (e) => setText(e.target.value))
             }
           ),
           /* @__PURE__ */ jsx5("span", { id: `${id}-sent`, hidden: true, "data-decor-sent": true, children: t("llm.decor.sent") })
         ] }),
-        /* @__PURE__ */ jsx5("div", { className: "oc-dg-chips", role: "group", "aria-label": t("llm.decor.examples"), children: EXAMPLES.map((k) => /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-dg-pill", "data-decor-example": k, disabled: blocked, onClick: () => {
+        /* @__PURE__ */ jsx5("div", { className: "oc-dg-chips", role: "group", "aria-label": t("llm.decor.examples"), children: EXAMPLES.map((k) => /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-dg-pill", "data-decor-example": k, ...held(blocked), onClick: hold(blocked, () => {
           setText(t(`llm.decor.${k}`));
           areaRef.current?.focus();
-        }, children: t(`llm.decor.${k}`) }, k)) }),
+        }), children: t(`llm.decor.${k}`) }, k)) }),
         /* @__PURE__ */ jsxs5("div", { role: "status", "aria-live": "polite", className: "oc-dg-sec", "data-decor-status": pending ? "pending" : answer ? answer.kind : "idle", children: [
           pending ? /* @__PURE__ */ jsxs5("p", { className: "oc-dg-busy", children: [
             /* @__PURE__ */ jsx5("span", { className: "oc-dg-spin", "aria-hidden": "true" }),
@@ -15153,8 +15175,8 @@ function DecorDialog({ open, onClose }) {
           ] }),
           /* @__PURE__ */ jsx5(Sheet, { style: ready, t }),
           /* @__PURE__ */ jsxs5("span", { className: "oc-row", children: [
-            /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-btn oc-primary", "data-decor-apply": true, disabled: pending, onClick: () => resolve("apply"), children: t("llm.decor.apply") }),
-            /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-btn", "data-decor-ignore": true, disabled: pending, onClick: () => resolve("ignore"), children: t("llm.decor.ignore") })
+            /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-btn oc-primary", "data-decor-apply": true, ...held(pending), onClick: hold(pending, () => resolve("apply")), children: t("llm.decor.apply") }),
+            /* @__PURE__ */ jsx5("button", { type: "button", className: "oc-btn", "data-decor-ignore": true, ...held(pending), onClick: hold(pending, () => resolve("ignore")), children: t("llm.decor.ignore") })
           ] })
         ] }) : null,
         shown ? /* @__PURE__ */ jsxs5("section", { className: "oc-dg-sec", "aria-label": t("llm.decor.preview"), "data-decor-preview": fresh ? "new" : "current", children: [
@@ -16058,10 +16080,10 @@ function useCampaignAssist({ state: state2, open, step, draft, setDraft, bots, b
     boards
   };
 }
-function CardMark({ A, card, field, label }) {
+function CardMark({ A, card, field, label, id }) {
   const t = useT();
   if (!A?.isMarked(card, field)) return null;
-  return /* @__PURE__ */ jsxs6("button", { type: "button", className: "oc-lm-mk", "data-lm-mark": `${card.id}:${field}`, title: t("llm.mark.title"), "aria-label": t("llm.mark.label", label), onClick: () => A.read(card.id, field), children: [
+  return /* @__PURE__ */ jsxs6("button", { type: "button", id, className: "oc-lm-mk", "data-lm-mark": `${card.id}:${field}`, title: t("llm.mark.title"), "aria-label": t("llm.mark.label", label), onClick: () => A.read(card.id, field), children: [
     /* @__PURE__ */ jsx6(DlgIcon, { id: "spark", size: 12 }),
     t("llm.mark.text")
   ] });
@@ -16465,114 +16487,135 @@ function CampaignGraph({ cards, info, colors, sceneBy, phases, selected = null, 
   const mid2 = useId5();
   const g = useMemo2(() => W ? graphOf(cards, W, { open, keep: new Set(selected ? [selected] : []) }) : null, [cards, W, open, selected]);
   const interactive = typeof onSelect === "function";
-  return /* @__PURE__ */ jsx8("div", { className: "oc-cgg", ref, role: "group", "aria-label": label, "data-graph": true, children: g ? /* @__PURE__ */ jsxs7("div", { className: `oc-cgg-in${g.compact ? " cmp" : ""}`, style: { width: W, height: g.H }, children: [
-    g.bands.map((b) => /* @__PURE__ */ jsx8("div", { className: `oc-cgg-band${b.p % 2 ? " alt" : ""}`, style: { top: b.y0, height: b.y1 - b.y0 }, "data-band": b.p, children: /* @__PURE__ */ jsx8("span", { className: "lb", children: t("campaign.phaseLabel", letter(b.p), phases[b.p]?.name || "") }) }, b.p)),
-    /* @__PURE__ */ jsxs7("svg", { className: "oc-cgg-edges", width: W, height: g.H, viewBox: `0 0 ${W} ${g.H}`, "aria-hidden": "true", focusable: "false", children: [
-      /* @__PURE__ */ jsxs7("defs", { children: [
-        /* @__PURE__ */ jsx8("marker", { id: `${mid2}-a`, viewBox: "0 0 8 8", refX: "7", refY: "4", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse", children: /* @__PURE__ */ jsx8("path", { d: "M0 0 8 4 0 8z", className: "am" }) }),
-        /* @__PURE__ */ jsx8("marker", { id: `${mid2}-o`, viewBox: "0 0 8 8", refX: "7", refY: "4", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse", children: /* @__PURE__ */ jsx8("path", { d: "M0 0 8 4 0 8z", className: "am on" }) })
+  const unfolded = useMemo2(() => foldCards(cards, /* @__PURE__ */ new Set(), new Set(selected ? [selected] : [])).filter((c) => c.kind === "group" && open.has(c.id)), [cards, open, selected]);
+  const focusNext = useRef8(null);
+  const toggle = (id, to) => {
+    focusNext.current = to;
+    onToggle(id);
+  };
+  useLayoutEffect3(() => {
+    const to = focusNext.current;
+    if (!to) return;
+    const el = ref.current?.querySelector(`[data-node="${to.replace(/["\\]/g, "\\$&")}"]`);
+    if (el) {
+      focusNext.current = null;
+      el.focus({ preventScroll: false });
+    }
+  }, [g]);
+  return /* @__PURE__ */ jsxs7("div", { className: "oc-cgg", ref, role: "group", "aria-label": label, "data-graph": true, children: [
+    unfolded.length ? /* @__PURE__ */ jsx8("div", { className: "oc-cgg-folds", children: unfolded.map((p) => {
+      const codes2 = `${info.get(p.members[0].id)?.code}–${info.get(p.members[p.members.length - 1].id)?.code}`;
+      return /* @__PURE__ */ jsx8("button", { type: "button", className: "ux-b sm", "data-fold": p.id, "aria-expanded": "true", onClick: () => toggle(p.id, p.id), children: t("campaign.groupFold", codes2, p.members.length) }, p.id);
+    }) }) : null,
+    g ? /* @__PURE__ */ jsxs7("div", { className: `oc-cgg-in${g.compact ? " cmp" : ""}`, style: { width: W, height: g.H }, children: [
+      g.bands.map((b) => /* @__PURE__ */ jsx8("div", { className: `oc-cgg-band${b.p % 2 ? " alt" : ""}`, style: { top: b.y0, height: b.y1 - b.y0 }, "data-band": b.p, children: /* @__PURE__ */ jsx8("span", { className: "lb", children: t("campaign.phaseLabel", letter(b.p), phases[b.p]?.name || "") }) }, b.p)),
+      /* @__PURE__ */ jsxs7("svg", { className: "oc-cgg-edges", width: W, height: g.H, viewBox: `0 0 ${W} ${g.H}`, "aria-hidden": "true", focusable: "false", children: [
+        /* @__PURE__ */ jsxs7("defs", { children: [
+          /* @__PURE__ */ jsx8("marker", { id: `${mid2}-a`, viewBox: "0 0 8 8", refX: "7", refY: "4", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse", children: /* @__PURE__ */ jsx8("path", { d: "M0 0 8 4 0 8z", className: "am" }) }),
+          /* @__PURE__ */ jsx8("marker", { id: `${mid2}-o`, viewBox: "0 0 8 8", refX: "7", refY: "4", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse", children: /* @__PURE__ */ jsx8("path", { d: "M0 0 8 4 0 8z", className: "am on" }) })
+        ] }),
+        g.edges.map((e) => {
+          const on = selected && (e.from === selected || e.to === selected);
+          return /* @__PURE__ */ jsx8("path", { className: `ge${e.guard ? " g" : ""}${on ? " on" : ""}`, d: e.d, markerEnd: `url(#${mid2}-${on ? "o" : "a"})`, "data-edge": `${e.from}>${e.to}` }, `${e.from}>${e.to}`);
+        })
       ] }),
-      g.edges.map((e) => {
-        const on = selected && (e.from === selected || e.to === selected);
-        return /* @__PURE__ */ jsx8("path", { className: `ge${e.guard ? " g" : ""}${on ? " on" : ""}`, d: e.d, markerEnd: `url(#${mid2}-${on ? "o" : "a"})`, "data-edge": `${e.from}>${e.to}` }, `${e.from}>${e.to}`);
-      })
-    ] }),
-    g.cards.map((c) => {
-      const p = g.pos.get(c.id);
-      if (!p) return null;
-      const box2 = { left: p.x, top: p.y, width: p.w, height: p.h };
-      if (c.kind === "guard") {
-        const head = c.phase === 0;
-        const full = head ? t("campaign.guard.headLong") : t("campaign.guard.phaseLong", letter(c.phase), phases[c.phase]?.name || "", letter(c.phase - 1));
-        const short = head ? t("campaign.guard.head") : t("campaign.guard.phase", letter(c.phase));
-        const state3 = status?.get(c.id);
-        return /* @__PURE__ */ jsxs7("div", { className: "oc-cgg-guard", style: { ...box2 }, "data-node": c.id, "data-guard": true, title: full, children: [
-          /* @__PURE__ */ jsx8("i", { className: "bar", "aria-hidden": "true" }),
-          /* @__PURE__ */ jsxs7("span", { className: "pill", children: [
-            /* @__PURE__ */ jsx8(Icon, { name: state3 === "done" ? "check" : "lock", size: 14 }),
-            /* @__PURE__ */ jsx8("b", { children: short }),
-            state3 ? /* @__PURE__ */ jsx8("em", { children: t(`campaign.state.${state3}`) }) : null
-          ] }),
-          /* @__PURE__ */ jsx8("span", { className: "ux-vh", children: full })
-        ] }, c.id);
-      }
-      if (c.kind === "group") {
-        const m = c.members;
-        const bots = /* @__PURE__ */ Object.create(null);
-        for (const x of m) {
-          const w = info.get(x.id)?.who || "";
-          bots[w] = (bots[w] || 0) + 1;
+      g.cards.map((c) => {
+        const p = g.pos.get(c.id);
+        if (!p) return null;
+        const box2 = { left: p.x, top: p.y, width: p.w, height: p.h };
+        if (c.kind === "guard") {
+          const head = c.phase === 0;
+          const full = head ? t("campaign.guard.headLong") : t("campaign.guard.phaseLong", letter(c.phase), phases[c.phase]?.name || "", letter(c.phase - 1));
+          const short = head ? t("campaign.guard.head") : t("campaign.guard.phase", letter(c.phase));
+          const state3 = status?.get(c.id);
+          return /* @__PURE__ */ jsxs7("div", { className: "oc-cgg-guard", style: { ...box2 }, "data-node": c.id, "data-guard": true, title: full, children: [
+            /* @__PURE__ */ jsx8("i", { className: "bar", "aria-hidden": "true" }),
+            /* @__PURE__ */ jsxs7("span", { className: "pill", children: [
+              /* @__PURE__ */ jsx8(Icon, { name: state3 === "done" ? "check" : "lock", size: 14 }),
+              /* @__PURE__ */ jsx8("b", { children: short }),
+              state3 ? /* @__PURE__ */ jsx8("em", { children: t(`campaign.state.${state3}`) }) : null
+            ] }),
+            /* @__PURE__ */ jsx8("span", { className: "ux-vh", children: full })
+          ] }, c.id);
         }
-        const sorted = Object.entries(bots).sort((a, b) => b[1] - a[1]);
-        const codes2 = `${info.get(m[0].id)?.code}–${info.get(m[m.length - 1].id)?.code}`;
-        const words = m.map((x) => String(info.get(x.id)?.title || "").split(" "));
-        let pre = 0;
-        while (words.every((w) => w[pre] && w[pre] === words[0][pre])) pre++;
-        const what2 = pre ? `${words[0].slice(0, pre).join(" ")} …` : t("campaign.parallel");
-        const list = sorted.map(([w, n]) => `${w} ${n}`).join(" · ");
+        if (c.kind === "group") {
+          const m = c.members;
+          const bots = /* @__PURE__ */ Object.create(null);
+          for (const x of m) {
+            const w = info.get(x.id)?.who || "";
+            bots[w] = (bots[w] || 0) + 1;
+          }
+          const sorted = Object.entries(bots).sort((a, b) => b[1] - a[1]);
+          const codes2 = `${info.get(m[0].id)?.code}–${info.get(m[m.length - 1].id)?.code}`;
+          const words = m.map((x) => String(info.get(x.id)?.title || "").split(" "));
+          let pre = 0;
+          while (words.every((w) => w[pre] && w[pre] === words[0][pre])) pre++;
+          const what2 = pre ? `${words[0].slice(0, pre).join(" ")} …` : t("campaign.parallel");
+          const list = sorted.map(([w, n]) => `${w} ${n}`).join(" · ");
+          return /* @__PURE__ */ jsxs7(
+            "button",
+            {
+              type: "button",
+              className: "oc-cgg-node grp",
+              style: { ...box2, "--bc": colors.get(sorted[0]?.[0]) },
+              "data-node": c.id,
+              "data-group": true,
+              "aria-expanded": "false",
+              "aria-label": t("campaign.groupAria", codes2, m.length, list),
+              title: t("campaign.groupTip", m.length, codes2),
+              onClick: () => toggle(c.id, m[0].id),
+              children: [
+                /* @__PURE__ */ jsx8("i", { className: "st st2", "aria-hidden": "true" }),
+                /* @__PURE__ */ jsx8("i", { className: "st st1", "aria-hidden": "true" }),
+                /* @__PURE__ */ jsxs7("span", { className: "top", children: [
+                  /* @__PURE__ */ jsx8("b", { className: "cd", children: codes2 }),
+                  /* @__PURE__ */ jsx8("span", { className: "tt", children: what2 }),
+                  /* @__PURE__ */ jsxs7("em", { className: "n", children: [
+                    "×",
+                    m.length
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsx8("span", { className: "seg", "aria-hidden": "true", children: sorted.map(([w, n]) => /* @__PURE__ */ jsx8("i", { style: { flexGrow: n, "--bc": colors.get(w) } }, w)) }),
+                /* @__PURE__ */ jsx8("span", { className: "ws", children: list })
+              ]
+            },
+            c.id
+          );
+        }
+        const i = info.get(c.id) || {};
+        const sel = selected === c.id;
+        const state2 = status?.get(c.id);
+        const Tag = interactive ? "button" : "div";
         return /* @__PURE__ */ jsxs7(
-          "button",
+          Tag,
           {
-            type: "button",
-            className: "oc-cgg-node grp",
-            style: { ...box2, "--bc": colors.get(sorted[0]?.[0]) },
+            ...interactive ? { type: "button", onClick: () => onSelect(c.id), "aria-pressed": sel } : { tabIndex: -1 },
+            className: `oc-cgg-node${sel ? " on" : ""}${state2 ? ` s-${state2}` : ""}${marked?.has(c.id) ? " lm" : ""}`,
+            style: { ...box2, "--bc": colors.get(i.who) },
             "data-node": c.id,
-            "data-group": true,
-            "aria-expanded": "false",
-            "aria-label": t("campaign.groupAria", codes2, m.length, list),
-            title: t("campaign.groupTip", m.length, codes2),
-            onClick: () => onToggle(c.id),
+            title: `${i.code} · ${i.title || t("campaign.untitled")} — ${i.who}${i.pin ? ` · ${t("campaign.pinnedModel", i.pin)}` : ""}`,
             children: [
-              /* @__PURE__ */ jsx8("i", { className: "st st2", "aria-hidden": "true" }),
-              /* @__PURE__ */ jsx8("i", { className: "st st1", "aria-hidden": "true" }),
-              /* @__PURE__ */ jsxs7("span", { className: "top", children: [
-                /* @__PURE__ */ jsx8("b", { className: "cd", children: codes2 }),
-                /* @__PURE__ */ jsx8("span", { className: "tt", children: what2 }),
-                /* @__PURE__ */ jsxs7("em", { className: "n", children: [
-                  "×",
-                  m.length
+              /* @__PURE__ */ jsx8("i", { className: "stripe", "aria-hidden": "true" }),
+              sceneBy?.get(i.who) ? /* @__PURE__ */ jsx8("span", { className: "pt", children: /* @__PURE__ */ jsx8(Portrait, { agent: sceneBy.get(i.who) }) }) : null,
+              /* @__PURE__ */ jsxs7("span", { className: "tx", children: [
+                /* @__PURE__ */ jsxs7("span", { className: "l1", children: [
+                  /* @__PURE__ */ jsx8("b", { className: "cd", children: i.code }),
+                  /* @__PURE__ */ jsx8("span", { className: "tt", children: i.title || /* @__PURE__ */ jsx8("em", { children: t("campaign.untitled") }) })
+                ] }),
+                g.compact ? null : /* @__PURE__ */ jsxs7("span", { className: "l2", children: [
+                  i.who,
+                  state2 ? ` · ${t(`campaign.state.${state2}`)}` : ""
                 ] })
               ] }),
-              /* @__PURE__ */ jsx8("span", { className: "seg", "aria-hidden": "true", children: sorted.map(([w, n]) => /* @__PURE__ */ jsx8("i", { style: { flexGrow: n, "--bc": colors.get(w) } }, w)) }),
-              /* @__PURE__ */ jsx8("span", { className: "ws", children: list })
+              i.pin ? /* @__PURE__ */ jsx8("span", { className: "pin", "aria-hidden": "true", children: "M" }) : null,
+              marked?.has(c.id) ? /* @__PURE__ */ jsx8("span", { className: "ux-vh", children: t("llm.cgmark.row") }) : null
             ]
           },
           c.id
         );
-      }
-      const i = info.get(c.id) || {};
-      const sel = selected === c.id;
-      const state2 = status?.get(c.id);
-      const Tag = interactive ? "button" : "div";
-      return /* @__PURE__ */ jsxs7(
-        Tag,
-        {
-          ...interactive ? { type: "button", onClick: () => onSelect(c.id), "aria-pressed": sel } : {},
-          className: `oc-cgg-node${sel ? " on" : ""}${state2 ? ` s-${state2}` : ""}${marked?.has(c.id) ? " lm" : ""}`,
-          style: { ...box2, "--bc": colors.get(i.who) },
-          "data-node": c.id,
-          title: `${i.code} · ${i.title || t("campaign.untitled")} — ${i.who}${i.pin ? ` · ${t("campaign.pinnedModel", i.pin)}` : ""}`,
-          children: [
-            /* @__PURE__ */ jsx8("i", { className: "stripe", "aria-hidden": "true" }),
-            sceneBy?.get(i.who) ? /* @__PURE__ */ jsx8("span", { className: "pt", children: /* @__PURE__ */ jsx8(Portrait, { agent: sceneBy.get(i.who) }) }) : null,
-            /* @__PURE__ */ jsxs7("span", { className: "tx", children: [
-              /* @__PURE__ */ jsxs7("span", { className: "l1", children: [
-                /* @__PURE__ */ jsx8("b", { className: "cd", children: i.code }),
-                /* @__PURE__ */ jsx8("span", { className: "tt", children: i.title || /* @__PURE__ */ jsx8("em", { children: t("campaign.untitled") }) })
-              ] }),
-              g.compact ? null : /* @__PURE__ */ jsxs7("span", { className: "l2", children: [
-                i.who,
-                state2 ? ` · ${t(`campaign.state.${state2}`)}` : ""
-              ] })
-            ] }),
-            i.pin ? /* @__PURE__ */ jsx8("span", { className: "pin", "aria-hidden": "true", children: "M" }) : null,
-            marked?.has(c.id) ? /* @__PURE__ */ jsx8("span", { className: "ux-vh", children: t("llm.cgmark.row") }) : null
-          ]
-        },
-        c.id
-      );
-    })
-  ] }) : null });
+      })
+    ] }) : null
+  ] });
 }
 function BotLegend({ list, colors, sceneBy, label, marked = 0 }) {
   const t = useT();
@@ -16615,6 +16658,8 @@ var CAMPAIGN_CSS = `
 .oc-cgsteps .now{color:var(--foreground);font-weight:600}
 .oc-cgsteps .now .n{background:var(--ui-accent);border-color:var(--ui-accent);color:var(--ui-accent-fg, var(--background))}
 .oc-cgsteps .past .n{background:color-mix(in oklab, ${GREEN2} 18%, ${CARD});border-color:color-mix(in oklab, ${GREEN2} 60%, transparent);color:${ink2(GREEN2)}}
+.oc-cgsteps .tl{border-radius:4px}
+.oc-cgsteps .tl:focus-visible{${RING_FOCUS}}
 /* head: goal, project, templates, new project */
 .oc-cghead{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,240px) auto;gap:12px;align-items:end}
 .oc-cghead .oc-dg-fl{min-width:0}
@@ -16647,7 +16692,7 @@ var CAMPAIGN_CSS = `
 .oc-cgtpl .tc b{font-size:12.5px;font-weight:600}
 .oc-cgtpl .tc small{font-size:11.5px;color:${T3};line-height:1.35}
 .oc-cgtpl .tc:hover{border-color:var(--ui-accent)}
-.oc-cgtpl .tc[aria-checked=true]{border-color:var(--ui-accent);box-shadow:0 0 0 1px var(--ui-accent) inset;background:color-mix(in oklab, var(--ui-accent) 6%, ${CARD})}
+.oc-cgtpl .tc[aria-pressed=true]{border-color:var(--ui-accent);box-shadow:0 0 0 1px var(--ui-accent) inset;background:color-mix(in oklab, var(--ui-accent) 6%, ${CARD})}
 .oc-cgtpl .tc:focus-visible{${RING_FOCUS}}
 .oc-cgmini{display:block;max-width:100%;height:auto;align-self:center}
 .oc-cgmini .ml{stroke:${T3};stroke-width:1.2}
@@ -16717,6 +16762,7 @@ var CAMPAIGN_CSS = `
 .oc-cgp .gbar .sm{font-size:12px;color:${T3}}
 .oc-cgg{position:relative;width:100%;min-width:0;border-radius:8px;background:${SUNKEN}}
 .oc-cgg-in{position:relative}
+.oc-cgg-folds{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 8px 0}
 .oc-cgg-band{position:absolute;left:8px;right:8px;border-radius:10px;background:color-mix(in oklab, var(--foreground) 3%, transparent)}
 .oc-cgg-band.alt{background:color-mix(in oklab, var(--foreground) 6%, transparent)}
 .oc-cgg-band .lb{position:absolute;left:4px;top:8px;max-height:calc(100% - 16px);writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;font-weight:700;color:${T2};overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -17275,8 +17321,8 @@ function outcomeText(o, t) {
       const d = o.detail || {};
       const line = o.verb === "recruitModel" ? t(o.present === true ? "recruit.done.model" : "recruit.done.modelUnread", o.code) : t(o.present === true ? "recruit.done.created" : "recruit.done.createdUnread", o.code);
       const failed = d.failed?.length ? t("recruit.failedParts", d.failed.map((k) => t(`recruit.part.${k}`)).join(", ")) : "";
-      const held = d.modelHeld ? t("recruit.modelHeld") : "";
-      return [line, failed, held, o.audited ? "" : t("orders.notAudited")].filter(Boolean).join(" ");
+      const held2 = d.modelHeld ? t("recruit.modelHeld") : "";
+      return [line, failed, held2, o.audited ? "" : t("orders.notAudited")].filter(Boolean).join(" ");
     }
     if (o.verb === "revise") return t(o.present === true ? "llm.revise.done" : "llm.revise.doneUnread", o.code);
     const base = o.verb === "unblock" ? t("orders.done.unblock", target(o), statusText(t, o.after)) : o.verb === "launch" ? t("orders.done.launch", target(o), o.ready ?? "?") : o.verb === "cancel_campaign" ? t("orders.done.cancel", target(o), o.archived ?? "?") : o.verb === "campaign" ? t("orders.done.campaign", o.board, o.detail?.created ?? "?") : t("orders.done.comment", target(o), o.comments ?? "?");
@@ -17412,12 +17458,12 @@ function Mini2({ id, colors, bots }) {
   ] });
 }
 var TplBar = ({ on, children }) => on ? /* @__PURE__ */ jsx11("span", { className: "oc-lm-tb", children }) : /* @__PURE__ */ jsx11(Fragment6, { children });
-function Stepper({ step, t }) {
+function Stepper({ step, t, titleRef }) {
   const list = [["compose", t("campaign.step.compose")], ["review", t("campaign.step.review")], ["created", t("campaign.step.created")]];
   const at = list.findIndex(([k]) => k === step);
   return /* @__PURE__ */ jsx11("ol", { className: "oc-cgsteps", "aria-label": t("campaign.steps"), children: list.map(([k, l], j) => /* @__PURE__ */ jsxs10("li", { className: j < at ? "past" : j === at ? "now" : "", "aria-current": j === at ? "step" : void 0, "data-step": k, children: [
     /* @__PURE__ */ jsx11("span", { className: "n", children: j < at ? /* @__PURE__ */ jsx11(Icon, { name: "check", size: 12 }) : j + 1 }),
-    l
+    /* @__PURE__ */ jsx11("span", { className: "tl", ref: j === at ? titleRef : void 0, tabIndex: j === at ? -1 : void 0, "data-step-title": j === at ? "" : void 0, children: l })
   ] }, k)) });
 }
 function Templates({ draft, apply, bots, colors, t, onClose }) {
@@ -17442,7 +17488,7 @@ function Templates({ draft, apply, bots, colors, t, onClose }) {
       /* @__PURE__ */ jsx11("small", { children: t("campaign.tpl.sub") }),
       /* @__PURE__ */ jsx11("button", { type: "button", className: "ux-b sm ico ghost", "aria-label": t("campaign.close"), onClick: onClose, children: /* @__PURE__ */ jsx11(Icon, { name: "x", size: 14 }) })
     ] }),
-    /* @__PURE__ */ jsx11("div", { className: "grid", role: "radiogroup", "aria-label": t("campaign.tpl.title"), children: TEMPLATES.map((x) => /* @__PURE__ */ jsxs10("button", { type: "button", role: "radio", "aria-checked": tpl === x.id, className: "tc", "data-tpl": x.id, onClick: () => setTpl(x.id), children: [
+    /* @__PURE__ */ jsx11("div", { className: "grid", role: "group", "aria-label": t("campaign.tpl.title"), children: TEMPLATES.map((x) => /* @__PURE__ */ jsxs10("button", { type: "button", "aria-pressed": tpl === x.id, className: "tc", "data-tpl": x.id, onClick: () => setTpl(x.id), children: [
       /* @__PURE__ */ jsx11(Mini2, { id: x.id, colors, bots }),
       /* @__PURE__ */ jsx11("b", { children: t(`campaign.tpl.${x.id}.name`) }),
       /* @__PURE__ */ jsx11("small", { children: t(`campaign.tpl.${x.id}.desc`) })
@@ -17498,27 +17544,27 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
       /* @__PURE__ */ jsx11("button", { type: "button", className: "ux-b sm ico ghost", "data-row-del": c.id, "aria-label": t("campaign.del", code), onClick: () => onDel(c.id), children: /* @__PURE__ */ jsx11(Icon, { name: "trash", size: 14 }) })
     ] }),
     sel ? /* @__PURE__ */ jsxs10("div", { className: "ed", id: `${id}-ed`, role: "group", "aria-label": t("campaign.edit", code), "data-editor": true, children: [
-      /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl", children: [
+      /* @__PURE__ */ jsxs10("div", { className: "oc-dg-fl", children: [
         /* @__PURE__ */ jsxs10("span", { className: "oc-dg-lab", children: [
-          t("campaign.f.title"),
-          /* @__PURE__ */ jsxs10("small", { className: "oc-mono", children: [
+          /* @__PURE__ */ jsx11("label", { htmlFor: `${id}-title`, children: t("campaign.f.title") }),
+          /* @__PURE__ */ jsxs10("small", { className: "oc-mono", id: `${id}-title-n`, children: [
             c.title.length,
             "/",
             MAX_TITLE
           ] }),
-          /* @__PURE__ */ jsx11(CardMark, { A, card: c, field: "title", label: t("campaign.f.title") })
+          /* @__PURE__ */ jsx11(CardMark, { A, card: c, field: "title", label: t("campaign.f.title"), id: `${id}-title-mk` })
         ] }),
-        /* @__PURE__ */ jsx11("input", { "data-f": "title", value: c.title, maxLength: MAX_TITLE, className: A?.isMarked(c, "title") ? "oc-lm-f" : void 0, onChange: (e) => onPatch(c.id, { title: e.target.value }) })
+        /* @__PURE__ */ jsx11("input", { id: `${id}-title`, "data-f": "title", value: c.title, maxLength: MAX_TITLE, "aria-describedby": `${id}-title-n ${id}-title-mk`, className: A?.isMarked(c, "title") ? "oc-lm-f" : void 0, onChange: (e) => onPatch(c.id, { title: e.target.value }) })
       ] }),
       /* @__PURE__ */ jsxs10("div", { className: "two", children: [
-        /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl", children: [
+        /* @__PURE__ */ jsxs10("div", { className: "oc-dg-fl", children: [
           /* @__PURE__ */ jsxs10("span", { className: "oc-dg-lab", children: [
-            t("campaign.f.bot"),
-            /* @__PURE__ */ jsx11(CardMark, { A, card: c, field: "who", label: t("campaign.f.bot") })
+            /* @__PURE__ */ jsx11("label", { htmlFor: `${id}-bot`, children: t("campaign.f.bot") }),
+            /* @__PURE__ */ jsx11(CardMark, { A, card: c, field: "who", label: t("campaign.f.bot"), id: `${id}-bot-mk` })
           ] }),
           /* @__PURE__ */ jsxs10("span", { className: "botsel", children: [
             sceneAgent ? /* @__PURE__ */ jsx11(Portrait, { agent: sceneAgent }) : null,
-            /* @__PURE__ */ jsx11("select", { "data-f": "bot", value: c.who, "aria-label": t("campaign.f.bot"), className: A?.isMarked(c, "who") ? "oc-lm-f" : void 0, onChange: (e) => onPatch(c.id, { who: e.target.value }), children: bots.map((b) => /* @__PURE__ */ jsx11("option", { value: b, children: b }, b)) })
+            /* @__PURE__ */ jsx11("select", { id: `${id}-bot`, "data-f": "bot", value: c.who, "aria-describedby": `${id}-bot-mk`, className: A?.isMarked(c, "who") ? "oc-lm-f" : void 0, onChange: (e) => onPatch(c.id, { who: e.target.value }), children: bots.map((b) => /* @__PURE__ */ jsx11("option", { value: b, children: b }, b)) })
           ] })
         ] }),
         /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl", children: [
@@ -17529,17 +17575,17 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
           ] })
         ] })
       ] }),
-      A?.ready.cardbody && A.body.card === c.id && A.body.phase === "review" ? /* @__PURE__ */ jsx11(BodyProposal, { A, card: c, code }) : /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl", children: [
+      A?.ready.cardbody && A.body.card === c.id && A.body.phase === "review" ? /* @__PURE__ */ jsx11(BodyProposal, { A, card: c, code }) : /* @__PURE__ */ jsxs10("div", { className: "oc-dg-fl", children: [
         /* @__PURE__ */ jsxs10("span", { className: "oc-dg-lab", children: [
-          t("campaign.f.body"),
-          /* @__PURE__ */ jsxs10("small", { className: `oc-mono${blen > MAX_BODY * 0.9 ? " near" : ""}`, children: [
+          /* @__PURE__ */ jsx11("label", { htmlFor: `${id}-body`, children: t("campaign.f.body") }),
+          /* @__PURE__ */ jsxs10("small", { className: `oc-mono${blen > MAX_BODY * 0.9 ? " near" : ""}`, id: `${id}-body-n`, children: [
             blen,
             " / ",
             MAX_BODY.toLocaleString("en").replace(",", " ")
           ] }),
-          /* @__PURE__ */ jsx11(CardMark, { A, card: c, field: "body", label: t("campaign.f.body") })
+          /* @__PURE__ */ jsx11(CardMark, { A, card: c, field: "body", label: t("campaign.f.body"), id: `${id}-body-mk` })
         ] }),
-        /* @__PURE__ */ jsx11("textarea", { "data-f": "body", rows: 3, maxLength: MAX_BODY, value: c.body, placeholder: t("campaign.f.bodyPh"), className: A?.isMarked(c, "body") ? "oc-lm-f" : void 0, onChange: (e) => onPatch(c.id, { body: e.target.value }) })
+        /* @__PURE__ */ jsx11("textarea", { id: `${id}-body`, "data-f": "body", rows: 3, maxLength: MAX_BODY, value: c.body, placeholder: t("campaign.f.bodyPh"), "aria-describedby": `${id}-body-n ${id}-body-mk`, className: A?.isMarked(c, "body") ? "oc-lm-f" : void 0, onChange: (e) => onPatch(c.id, { body: e.target.value }) })
       ] }),
       A?.ready.cardbody ? /* @__PURE__ */ jsx11(BodyAsk, { A, card: c, code }) : null,
       /* @__PURE__ */ jsxs10("fieldset", { className: "oc-dg-fl deps", children: [
@@ -17726,6 +17772,13 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
       if (!draft.goal) goalRef.current?.focus();
     }, 0);
   }, [open]);
+  const stepTitle = useRef11(null);
+  const lastStep = useRef11(win.step);
+  useEffect10(() => {
+    if (lastStep.current === win.step) return;
+    lastStep.current = win.step;
+    if (open) stepTitle.current?.focus();
+  }, [win.step, open]);
   const created = win.created;
   const launched = created?.launched;
   const cancelled = created?.cancelled;
@@ -17764,16 +17817,16 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
   ] });
   const compose = /* @__PURE__ */ jsxs10(Fragment7, { children: [
     /* @__PURE__ */ jsxs10("div", { className: `oc-cghead${nb ? " has-nb" : ""}`, children: [
-      /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl goal", children: [
+      /* @__PURE__ */ jsxs10("div", { className: "oc-dg-fl goal", children: [
         /* @__PURE__ */ jsxs10("span", { className: "oc-dg-lab", children: [
-          t("campaign.goal"),
-          /* @__PURE__ */ jsxs10("small", { className: "oc-mono", children: [
+          /* @__PURE__ */ jsx11("label", { htmlFor: `${uid}-goal`, children: t("campaign.goal") }),
+          /* @__PURE__ */ jsxs10("small", { className: "oc-mono", id: `${uid}-goal-n`, children: [
             draft.goal.length,
             "/",
             MAX_GOAL
           ] })
         ] }),
-        /* @__PURE__ */ jsx11("input", { ref: goalRef, "data-cg": "goal", value: draft.goal, maxLength: MAX_GOAL, placeholder: t("campaign.goalPh"), onChange: (e) => set((d) => ({ ...d, goal: e.target.value })) })
+        /* @__PURE__ */ jsx11("input", { ref: goalRef, id: `${uid}-goal`, "data-cg": "goal", value: draft.goal, maxLength: MAX_GOAL, placeholder: t("campaign.goalPh"), "aria-describedby": `${uid}-goal-n`, onChange: (e) => set((d) => ({ ...d, goal: e.target.value })) })
       ] }),
       /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl tgt", children: [
         /* @__PURE__ */ jsx11("span", { className: "oc-dg-lab", children: t("campaign.project") }),
@@ -17804,16 +17857,16 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
       ] }),
       nb ? /* @__PURE__ */ jsxs10("div", { className: "nb", role: "group", "aria-label": t("campaign.nb.title"), style: { "--pc": nextProjectColor(boards) }, children: [
         /* @__PURE__ */ jsx11("span", { className: "nbi", "aria-hidden": "true", children: /* @__PURE__ */ jsx11("i", {}) }),
-        /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl nbn", children: [
+        /* @__PURE__ */ jsxs10("div", { className: "oc-dg-fl nbn", children: [
           /* @__PURE__ */ jsxs10("span", { className: "oc-dg-lab", children: [
-            t("campaign.nb.name"),
-            /* @__PURE__ */ jsxs10("small", { className: "oc-mono", children: [
+            /* @__PURE__ */ jsx11("label", { htmlFor: `${uid}-nbname`, children: t("campaign.nb.name") }),
+            /* @__PURE__ */ jsxs10("small", { className: "oc-mono", id: `${uid}-nbname-n`, children: [
               draft.nb.name.length,
               "/",
               MAX_NAME
             ] })
           ] }),
-          /* @__PURE__ */ jsx11("input", { "data-nb": "name", value: draft.nb.name, maxLength: MAX_NAME, onChange: (e) => set((d) => ({ ...d, nb: { ...d.nb, name: e.target.value, slug: d.nb.typed ? d.nb.slug : slugify(e.target.value) } })) })
+          /* @__PURE__ */ jsx11("input", { id: `${uid}-nbname`, "data-nb": "name", value: draft.nb.name, maxLength: MAX_NAME, "aria-describedby": `${uid}-nbname-n`, onChange: (e) => set((d) => ({ ...d, nb: { ...d.nb, name: e.target.value, slug: d.nb.typed ? d.nb.slug : slugify(e.target.value) } })) })
         ] }),
         /* @__PURE__ */ jsxs10("label", { className: "oc-dg-fl nbs", children: [
           /* @__PURE__ */ jsx11("span", { className: "oc-dg-lab", children: t("campaign.nb.slug") }),
@@ -18130,7 +18183,7 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
       children: [
         /* @__PURE__ */ jsx11("style", { children: CAMPAIGN_CSS }),
         /* @__PURE__ */ jsxs10("div", { className: "oc-cg", "data-campaign": true, "data-step": step, children: [
-          /* @__PURE__ */ jsx11(Stepper, { step, t }),
+          /* @__PURE__ */ jsx11(Stepper, { step, t, titleRef: stepTitle }),
           /* @__PURE__ */ jsx11(Live, { A }),
           isNoBot ? /* @__PURE__ */ jsx11(Notice, { tone: "warn", icon: "alert", "data-no-bots": true, children: t("campaign.noBots") }) : null,
           step === "compose" ? compose : step === "review" ? review : createdView,
@@ -18298,10 +18351,10 @@ function useRecruitAssist({ open, draft, setDraft, profiles, lang: lang4 }) {
     reset
   };
 }
-function Mark({ assist, field, label }) {
+function Mark({ assist, field, label, id }) {
   const t = useT();
   if (!assist?.marked(field)) return null;
-  return /* @__PURE__ */ jsxs12("button", { type: "button", className: "oc-lm-mk", "data-lm-mark": field, title: t("llm.mark.title"), "aria-label": t("llm.mark.label", label), onClick: () => assist.read(field), children: [
+  return /* @__PURE__ */ jsxs12("button", { type: "button", id, className: "oc-lm-mk", "data-lm-mark": field, title: t("llm.mark.title"), "aria-label": t("llm.mark.label", label), onClick: () => assist.read(field), children: [
     /* @__PURE__ */ jsx13(DlgIcon, { id: "spark", size: 12 }),
     t("llm.mark.text")
   ] });
@@ -19487,9 +19540,7 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
   };
   const marked = (field) => assist.marked(field) ? " oc-lm-f" : "";
   const busy = isBusy(orders.state);
-  const close = () => {
-    if (!busy) onClose();
-  };
+  const close = () => onClose();
   const submit = (e) => {
     e?.preventDefault();
     setTouched(true);
@@ -19551,17 +19602,18 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
           ] }),
           /* @__PURE__ */ jsxs23("div", { className: "oc-dg-steps", children: [
             /* @__PURE__ */ jsxs23(Step, { n: 1, title: t("recruit.step1"), children: [
-              /* @__PURE__ */ jsxs23("label", { className: "oc-dg-fl", children: [
+              /* @__PURE__ */ jsxs23("div", { className: "oc-dg-fl", children: [
                 /* @__PURE__ */ jsxs23("span", { className: "oc-dg-lab", children: [
-                  t("recruit.name"),
+                  /* @__PURE__ */ jsx26("label", { htmlFor: `${id}-name`, children: t("recruit.name") }),
                   /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.name"), children: t("recruit.nameHint", draft.name || "…") }),
-                  nameOk ? /* @__PURE__ */ jsx26("span", { className: "oc-dg-ok", "data-hire-free": true, children: t("recruit.free") }) : null,
-                  /* @__PURE__ */ jsx26(Mark, { assist, field: "name", label: t("recruit.name") })
+                  nameOk ? /* @__PURE__ */ jsx26("span", { className: "oc-dg-ok", id: `${id}-free`, "data-hire-free": true, children: t("recruit.free") }) : null,
+                  /* @__PURE__ */ jsx26(Mark, { assist, field: "name", label: t("recruit.name"), id: `${id}-name-mk` })
                 ] }),
                 /* @__PURE__ */ jsx26(
                   "input",
                   {
                     ref: nameRef,
+                    id: `${id}-name`,
                     "data-h": "name",
                     className: marked("name").trim() || void 0,
                     value: draft.name,
@@ -19570,25 +19622,25 @@ function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
                     spellCheck: false,
                     placeholder: t("recruit.namePh"),
                     "aria-invalid": shown.some((e) => e.startsWith("name_")) || void 0,
-                    "aria-describedby": `${id}-err`,
+                    "aria-describedby": `${id}-err ${id}-free ${id}-name-mk`,
                     onChange: (e) => set({ name: e.target.value })
                   }
                 )
               ] }),
-              /* @__PURE__ */ jsxs23("label", { className: "oc-dg-fl", children: [
+              /* @__PURE__ */ jsxs23("div", { className: "oc-dg-fl", children: [
                 /* @__PURE__ */ jsxs23("span", { className: "oc-dg-lab", children: [
-                  t("recruit.titleField"),
-                  /* @__PURE__ */ jsx26(Mark, { assist, field: "title", label: t("recruit.titleField") })
+                  /* @__PURE__ */ jsx26("label", { htmlFor: `${id}-title`, children: t("recruit.titleField") }),
+                  /* @__PURE__ */ jsx26(Mark, { assist, field: "title", label: t("recruit.titleField"), id: `${id}-title-mk` })
                 ] }),
-                /* @__PURE__ */ jsx26("input", { "data-h": "title", className: marked("title").trim() || void 0, value: draft.title, maxLength: TITLE_MAX, placeholder: t("recruit.titlePh"), onChange: (e) => set({ title: e.target.value }) })
+                /* @__PURE__ */ jsx26("input", { id: `${id}-title`, "data-h": "title", className: marked("title").trim() || void 0, value: draft.title, maxLength: TITLE_MAX, placeholder: t("recruit.titlePh"), "aria-describedby": `${id}-title-mk`, onChange: (e) => set({ title: e.target.value }) })
               ] }),
-              /* @__PURE__ */ jsxs23("label", { className: "oc-dg-fl", children: [
+              /* @__PURE__ */ jsxs23("div", { className: "oc-dg-fl", children: [
                 /* @__PURE__ */ jsxs23("span", { className: "oc-dg-lab", children: [
-                  t("recruit.description"),
+                  /* @__PURE__ */ jsx26("label", { htmlFor: `${id}-desc`, children: t("recruit.description") }),
                   /* @__PURE__ */ jsx26(DlgTip, { name: t("recruit.description"), children: t("recruit.descriptionTip") }),
-                  /* @__PURE__ */ jsx26(Mark, { assist, field: "description", label: t("recruit.description") })
+                  /* @__PURE__ */ jsx26(Mark, { assist, field: "description", label: t("recruit.description"), id: `${id}-desc-mk` })
                 ] }),
-                /* @__PURE__ */ jsx26("textarea", { "data-h": "description", className: marked("description").trim() || void 0, rows: assist.phase === "done" ? 4 : 2, value: draft.description, maxLength: DESCRIPTION_MAX2, placeholder: t("recruit.descriptionPh"), onChange: (e) => set({ description: e.target.value }) })
+                /* @__PURE__ */ jsx26("textarea", { id: `${id}-desc`, "data-h": "description", className: marked("description").trim() || void 0, rows: assist.phase === "done" ? 4 : 2, value: draft.description, maxLength: DESCRIPTION_MAX2, placeholder: t("recruit.descriptionPh"), "aria-describedby": `${id}-desc-mk`, onChange: (e) => set({ description: e.target.value }) })
               ] }),
               /* @__PURE__ */ jsx26(RolePicker, { value: draft.role, onPick: (r) => set({ role: r }), guessed, mark: /* @__PURE__ */ jsx26(Mark, { assist, field: "role", label: t("recruit.roleField") }) })
             ] }),
@@ -19644,7 +19696,7 @@ var SHEET_AT = 600;
 var settingsSheet = (width) => width > 0 && width <= SHEET_AT;
 
 // src/ui/OfficeScene.jsx
-import { useCallback as useCallback7, useEffect as useEffect15, useLayoutEffect as useLayoutEffect6, useMemo as useMemo11, useRef as useRef17, useState as useState14 } from "react";
+import { useCallback as useCallback7, useEffect as useEffect15, useId as useId11, useLayoutEffect as useLayoutEffect6, useMemo as useMemo11, useRef as useRef17, useState as useState14 } from "react";
 
 // src/core/dpr.js
 function watchDpr(win, onChange) {
@@ -19935,6 +19987,17 @@ function skipPlan({ panelOpen, narrow }) {
   return { focusNow: false, open: narrow ? "drawer" : "panel" };
 }
 var spotTip = (sp, office, ctx) => tipOf(sp, office, ctx);
+function moreMenuTarget(key, at, n) {
+  if (!n) return null;
+  if (key === "Home") return 0;
+  if (key === "End") return n - 1;
+  if (key === "ArrowDown") return at < 0 ? 0 : (at + 1) % n;
+  if (key === "ArrowUp") return at < 0 ? n - 1 : (at - 1 + n) % n;
+  return null;
+}
+function focusBackTarget(candidates) {
+  return candidates.find((c) => c && c.el && c.shown)?.el ?? null;
+}
 
 // src/ui/OfficeScene.jsx
 import { jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
@@ -20074,6 +20137,7 @@ function ListDot({ slug }) {
 }
 function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpen, badges = [], motion = "auto", readMs = null, decor = null, grades = null, exportRef = null, seating = null, thoughts = null, project: filter = null, onProject = null, onFit = null, listNote = null }) {
   const t = useT();
+  const thoughtId = useId11();
   const boxRef = useRef17(null);
   const stageRef = useRef17(null);
   const canvasRef = useRef17(null);
@@ -20334,7 +20398,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
   let body = null;
   if (asScene) {
     const at = (x, y) => [x * S, y * S];
-    const stations = anchors(layout2).map((a) => {
+    const stations = anchors(layout2).map((a, i) => {
       const agent = byName2.get(a.name);
       if (!agent) return null;
       const badge = badgeBy.get(a.name) || null;
@@ -20356,7 +20420,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
           title: [[f.tip, grades?.[a.name] ? t("game.gradeTip", t(`game.grade.${grades[a.name].id}`)) : ""].filter(Boolean).join(" · "), outfitTip(a.name)].filter(Boolean).join(" — "),
           "aria-pressed": selected === a.name,
           "aria-label": f.label,
-          "aria-description": thought ? t("llm.thoughts.say", thought) : void 0,
+          "aria-describedby": thought ? `${thoughtId}-${i}` : void 0,
           "data-thinking": thought ? "" : void 0,
           onClick: fire(onSelect, a.name),
           onDoubleClick: fire(onOpen, a.name),
@@ -20378,7 +20442,8 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
             thought ? /* @__PURE__ */ jsxs24("span", { className: "oc-thought", "data-thought": a.name, "aria-hidden": "true", children: [
               /* @__PURE__ */ jsx27("i", { children: t("llm.thoughts.badge") }),
               thought
-            ] }) : null
+            ] }) : null,
+            thought ? /* @__PURE__ */ jsx27("span", { className: "ux-vh", id: `${thoughtId}-${i}`, "data-thought-text": true, children: t("llm.thoughts.say", thought) }) : null
           ]
         },
         a.name
@@ -20552,7 +20617,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
 }
 
 // src/ui/PageHeader.jsx
-import { useId as useId11 } from "react";
+import { useEffect as useEffect17, useId as useId12 } from "react";
 
 // src/ui/PixelIcon.jsx
 import { useEffect as useEffect16, useRef as useRef18 } from "react";
@@ -20632,16 +20697,46 @@ function GameBadge({ game, onOpen, t }) {
 }
 function MoreMenu({ items, label }) {
   const pop = usePopover();
-  const id = useId11();
-  return /* @__PURE__ */ jsxs25("span", { className: "ux-menu only-n-wrap", children: [
-    /* @__PURE__ */ jsx29("button", { ref: pop.anchor, type: "button", className: "ux-b ico keep only-n", "aria-haspopup": "true", "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, "aria-label": label, onClick: () => pop.setOpen((v) => !v), children: /* @__PURE__ */ jsx29(Icon, { name: "more" }) }),
-    /* @__PURE__ */ jsx29(PopCard, { pop, id, label, className: "menu", children: items.map((it) => /* @__PURE__ */ jsxs25("button", { type: "button", "data-more": it.key, "aria-pressed": it.pressed, "aria-disabled": it.disabled ? true : void 0, onClick: () => {
+  const id = useId12();
+  const placed = Boolean(pop.pos);
+  const entries = () => [...pop.card.current?.querySelectorAll('[role^="menuitem"]') ?? []];
+  useEffect17(() => {
+    if (pop.open && placed) entries()[0]?.focus();
+  }, [pop.open, placed]);
+  const onKeyDown = (e) => {
+    const list = entries();
+    const at = list.indexOf(document.activeElement);
+    const to = moreMenuTarget(e.key, at, list.length);
+    if (to != null) {
+      e.preventDefault();
+      list[to]?.focus();
+    } else if (e.key === "Tab") {
       pop.setOpen(false);
-      if (!it.disabled) it.onClick();
-    }, children: [
-      /* @__PURE__ */ jsx29(Icon, { name: it.icon, size: 14 }),
-      it.label
-    ] }, it.key)) })
+      pop.anchor.current?.focus();
+    }
+  };
+  return /* @__PURE__ */ jsxs25("span", { className: "ux-menu only-n-wrap", children: [
+    /* @__PURE__ */ jsx29("button", { ref: pop.anchor, type: "button", className: "ux-b ico keep only-n", "data-more-toggle": true, "aria-haspopup": "menu", "aria-expanded": pop.open, "aria-controls": pop.open ? id : void 0, "aria-label": label, onClick: () => pop.setOpen((v) => !v), children: /* @__PURE__ */ jsx29(Icon, { name: "more" }) }),
+    /* @__PURE__ */ jsx29(PopCard, { pop, id, label, className: "menu", role: "menu", onKeyDown, children: items.map((it) => /* @__PURE__ */ jsxs25(
+      "button",
+      {
+        type: "button",
+        role: it.pressed === void 0 ? "menuitem" : "menuitemcheckbox",
+        "aria-checked": it.pressed === void 0 ? void 0 : it.pressed,
+        tabIndex: -1,
+        "data-more": it.key,
+        "aria-disabled": it.disabled ? true : void 0,
+        onClick: () => {
+          pop.setOpen(false);
+          if (!it.disabled) it.onClick();
+        },
+        children: [
+          /* @__PURE__ */ jsx29(Icon, { name: it.icon, size: 14 }),
+          it.label
+        ]
+      },
+      it.key
+    )) })
   ] });
 }
 function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, replayOn, replay, usage, recruit, campaign, decor, panel, gear, narrow }) {
@@ -20656,7 +20751,7 @@ function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, replayOn, r
       /* @__PURE__ */ jsx29("span", { className: "mk", "aria-hidden": "true", children: /* @__PURE__ */ jsx29(Icon, { name: "house", size: 20 }) }),
       /* @__PURE__ */ jsx29("h1", { children: t("title") })
     ] }),
-    counts.total > 0 ? /* @__PURE__ */ jsxs25("div", { className: "ux-live", role: "group", "aria-label": t("ux.pill.label"), "aria-live": "polite", children: [
+    counts.total > 0 ? /* @__PURE__ */ jsxs25("div", { className: "ux-live", role: "group", "aria-label": t("ux.pill.label"), children: [
       /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-lvp working", "data-go": "agent", "aria-label": `${counts.working} ${t("ux.pill.working", counts.working)}`, title: t("ux.pill.workingTip"), onClick: () => onGo("agent"), children: [
         /* @__PURE__ */ jsx29("span", { className: `ux-pulse${counts.working ? "" : " off"}`, "aria-hidden": "true" }),
         /* @__PURE__ */ jsx29("b", { children: counts.working }),
@@ -20687,13 +20782,13 @@ function PageHeader({ t, counts, decisionCount, game, onBadge, onGo, replayOn, r
         /* @__PURE__ */ jsx29(Icon, { name: "recruit" }),
         /* @__PURE__ */ jsx29("span", { className: "lb", children: t("recruit.open") })
       ] }) : null,
-      campaign ? /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-b", "data-campaign-open": true, title: t("campaign.openTip"), onClick: campaign.onClick, children: [
+      campaign ? /* @__PURE__ */ jsxs25("button", { type: "button", className: "ux-b", "data-campaign-open": true, title: t("campaign.openTip"), "aria-label": t("campaign.open"), onClick: campaign.onClick, children: [
         /* @__PURE__ */ jsx29(Icon, { name: "layers" }),
         /* @__PURE__ */ jsx29("span", { className: "lb", children: t("campaign.open") })
       ] }) : null,
       decor ? /* @__PURE__ */ jsx29("button", { type: "button", className: "ux-b ico", "data-decor-open": true, title: t("llm.decor.openTip"), "aria-label": t("llm.decor.open"), onClick: decor.onClick, children: /* @__PURE__ */ jsx29(Icon, { name: "spark" }) }) : null,
       panel ? /* @__PURE__ */ jsx29("span", { className: "sep", "aria-hidden": "true" }) : null,
-      panel ? /* @__PURE__ */ jsx29("button", { ref: panel.ref, type: "button", className: `ux-b ico${replayOn ? " keep" : ""}`, "data-panel-toggle": true, "aria-expanded": panel.open, "aria-controls": "oc-panel", title: panel.open ? t("panel.hide") : t("panel.show"), onClick: panel.onClick, children: /* @__PURE__ */ jsx29(Icon, { name: "panel" }) }) : null,
+      panel ? /* @__PURE__ */ jsx29("button", { ref: panel.ref, type: "button", className: `ux-b ico${replayOn ? " keep" : ""}`, "data-panel-toggle": true, "aria-expanded": panel.open, "aria-controls": "oc-panel", title: panel.open ? t("panel.hideTip") : t("panel.showTip"), "aria-label": panel.open ? t("panel.hide") : t("panel.show"), onClick: panel.onClick, children: /* @__PURE__ */ jsx29(Icon, { name: "panel" }) }) : null,
       narrow && more.length ? /* @__PURE__ */ jsx29(MoreMenu, { items: more, label: t("ux.more") }) : null,
       gear
     ] })
@@ -21069,11 +21164,11 @@ var PAGE_CSS = `
 `;
 
 // src/ui/Legend.jsx
-import { useEffect as useEffect17, useId as useId12, useRef as useRef19, useState as useState15 } from "react";
+import { useEffect as useEffect18, useId as useId13, useRef as useRef19, useState as useState15 } from "react";
 import { jsx as jsx30, jsxs as jsxs26 } from "react/jsx-runtime";
 function Swatch({ rgb }) {
   const ref = useRef19(null);
-  useEffect17(() => {
+  useEffect18(() => {
     const g = ref.current?.getContext("2d");
     if (!g || !rgb) return;
     const img = g.createImageData(10, 10);
@@ -21096,13 +21191,14 @@ function Swatch({ rgb }) {
 function Legend() {
   const t = useT();
   const [open, setOpen] = useState15(false);
-  const id = useId12();
+  const id = useId13();
   const wrap = useRef19(null);
   const rows = legendRows(HALO, { workingMs: WORKER_LIVE_WINDOW_MS, staleMs: STALE_AFTER_MS, activeMs: RECENT_WINDOW_MS });
-  useEffect17(() => {
+  useEffect18(() => {
     if (!open) return void 0;
     const onKey = (e) => {
       if (e.key === "Escape") {
+        e.preventDefault();
         e.stopPropagation();
         setOpen(false);
         wrap.current?.querySelector("button")?.focus();
@@ -21111,10 +21207,10 @@ function Legend() {
     const onDown = (e) => {
       if (wrap.current && !wrap.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey, true);
     document.addEventListener("pointerdown", onDown);
     return () => {
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onKey, true);
       document.removeEventListener("pointerdown", onDown);
     };
   }, [open]);
@@ -21575,8 +21671,8 @@ function vitrineView(game, nowMs = 0) {
   const all = shelves.flatMap((f) => f.items);
   const almost = all.filter((a) => !a.unlocked && !a.hidden && !a.unavailable && ratio(a) > 0).sort((x, y) => ratio(y) - ratio(x) || order2.indexOf(x.id) - order2.indexOf(y.id)).slice(0, ALMOST_N);
   const recent = new Set(all.filter((a) => a.unlocked && a.dated && a.unlockedMs != null && nowMs - a.unlockedMs >= 0 && nowMs - a.unlockedMs < RECENT_MS).map((a) => a.id));
-  const held = Object.values(game.grades || {});
-  const grades = [...GRADES].reverse().map((g) => ({ id: g.id, n: held.filter((x) => x.id === g.id).length })).filter((g) => g.n > 0);
+  const held2 = Object.values(game.grades || {});
+  const grades = [...GRADES].reverse().map((g) => ({ id: g.id, n: held2.filter((x) => x.id === g.id).length })).filter((g) => g.n > 0);
   const latest2 = all.filter((a) => a.unlocked && a.unlockedMs != null).sort((x, y) => y.unlockedMs - x.unlockedMs)[0];
   const first = (latest2 ?? all.find((a) => a.unlocked) ?? almost[0] ?? all[0])?.id ?? null;
   return {
@@ -21945,7 +22041,7 @@ var VITRINE_CSS = `
 `;
 
 // src/ui/UsageDialog.jsx
-import { useEffect as useEffect19, useId as useId13, useMemo as useMemo15, useState as useState17 } from "react";
+import { useEffect as useEffect20, useId as useId14, useMemo as useMemo15, useState as useState17 } from "react";
 
 // src/core/usage.js
 var USAGE_WINDOWS = Object.freeze(["24h", "7d", "30d"]);
@@ -22244,7 +22340,7 @@ var percentLabel = (p) => p == null || !Number.isFinite(p) ? null : String(Math.
 
 // src/data/usage.js
 import { useQuery as useQuery8 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect18, useRef as useRef21 } from "react";
+import { useEffect as useEffect19, useRef as useRef21 } from "react";
 var USAGE_POLL_MS = 6e4;
 var QUOTA_POLL_MS = 12e4;
 var QUOTA_RETRY_MS = 8e3;
@@ -22336,7 +22432,7 @@ function useQuota({ enabled }) {
 function useQuotaRetry(query, hasWindows) {
   const tried = useRef21(false);
   const at = query.dataUpdatedAt;
-  useEffect18(() => {
+  useEffect19(() => {
     if (!at || hasWindows || tried.current) return void 0;
     tried.current = true;
     const id = setTimeout(() => {
@@ -22464,12 +22560,12 @@ function Quota({ quota, query, t }) {
 }
 function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
   const t = useT();
-  const id = useId13();
+  const id = useId14();
   const [kind, setKind] = useState17("24h");
   const [metric, setMetric] = useState17("fresh");
   const [day, setDay] = useState17(null);
   const [nowMs, setNowMs] = useState17(() => Date.now());
-  useEffect19(() => {
+  useEffect20(() => {
     if (open) setNowMs(Date.now());
   }, [open]);
   const on = Boolean(open && usageServed);
@@ -22754,21 +22850,21 @@ var USAGE_CSS = `
 `;
 
 // src/ui/SeatingDialog.jsx
-import { useEffect as useEffect20, useId as useId14, useRef as useRef22, useState as useState18 } from "react";
+import { useEffect as useEffect21, useId as useId15, useRef as useRef22, useState as useState18 } from "react";
 import { Fragment as Fragment17, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
 function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   const t = useT();
   const areaRef = useRef22(null);
-  const id = useId14();
+  const id = useId15();
   const query = useLlm();
   const { call } = useLlmActions();
   const [text3, setText] = useState18("");
   const [pending, setPending] = useState18(false);
   const [answer, setAnswer] = useState18(null);
-  useEffect20(() => {
+  useEffect21(() => {
     if (open) setTimeout(() => areaRef.current?.focus(), 0);
   }, [open]);
-  useEffect20(() => {
+  useEffect21(() => {
     if (open) setAnswer(null);
   }, [open]);
   const state2 = query.data ?? null;
@@ -22810,10 +22906,10 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
           onClose();
         }
       },
-      start: /* @__PURE__ */ jsx38("button", { type: "button", className: "oc-btn oc-ghost", "data-seating-revert": true, disabled: pending || choice === "default", onClick: () => {
+      start: /* @__PURE__ */ jsx38("button", { type: "button", className: "oc-btn oc-ghost", "data-seating-revert": true, ...held(pending || choice === "default"), onClick: hold(pending || choice === "default", () => {
         setAnswer(null);
         onChoice("default");
-      }, children: t("llm.seating.revert") }),
+      }), children: t("llm.seating.revert") }),
       actions: /* @__PURE__ */ jsxs34(Fragment17, { children: [
         /* @__PURE__ */ jsx38("button", { type: "button", className: "oc-btn", "data-seating-close": true, onClick: onClose, children: t("llm.decor.close") }),
         /* @__PURE__ */ jsxs34("button", { type: "submit", className: "oc-btn oc-primary", "data-seating-run": true, "aria-disabled": blocked ? true : void 0, children: [
@@ -22830,28 +22926,29 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
           ] }),
           pairs.length ? /* @__PURE__ */ jsx38("ul", { className: "oc-dg-pairs", "data-seating-relays": true, children: pairs.map((p) => /* @__PURE__ */ jsx38("li", { children: /* @__PURE__ */ jsx38("span", { children: t("llm.seating.pair", `${p.a} ↔ ${p.b}`, p.n) }) }, `${p.a}|${p.b}`)) }) : /* @__PURE__ */ jsx38(Notice, { tone: "neutral", "data-seating-none": true, children: t("llm.seating.none") })
         ] }),
-        /* @__PURE__ */ jsxs34("label", { className: "oc-dg-fl", children: [
+        /* @__PURE__ */ jsxs34("div", { className: "oc-dg-fl", children: [
           /* @__PURE__ */ jsxs34("span", { className: "oc-dg-lab", children: [
-            t("llm.seating.instructions"),
+            /* @__PURE__ */ jsx38("label", { htmlFor: `${id}-instr`, children: t("llm.seating.instructions") }),
             /* @__PURE__ */ jsxs34(DlgTip, { name: t("llm.seating.instructions"), children: [
               t("llm.seating.sent"),
               sent ? "" : ` ${t("llm.seating.emptyOk")}`
             ] }),
             /* @__PURE__ */ jsx38("span", { className: "grow" }),
-            /* @__PURE__ */ jsx38("small", { children: t("llm.decor.count", text3.length, INSTR_MAX) })
+            /* @__PURE__ */ jsx38("small", { id: `${id}-n`, children: t("llm.decor.count", text3.length, INSTR_MAX) })
           ] }),
           /* @__PURE__ */ jsx38(
             "textarea",
             {
               ref: areaRef,
+              id: `${id}-instr`,
               "data-seating-instructions": true,
               rows: 2,
               value: text3,
               maxLength: INSTR_MAX,
               placeholder: t("llm.seating.placeholder"),
-              disabled: blocked,
-              "aria-describedby": `${id}-sent`,
-              onChange: (e) => setText(e.target.value)
+              ...held(blocked, { text: true }),
+              "aria-describedby": `${id}-n ${id}-sent`,
+              onChange: hold(blocked, (e) => setText(e.target.value))
             }
           ),
           /* @__PURE__ */ jsxs34("span", { id: `${id}-sent`, hidden: true, "data-seating-sent": true, children: [
@@ -22891,11 +22988,11 @@ import { useCallback as useCallback8, useRef as useRef27, useState as useState23
 
 // src/ui/SettingsDialog.jsx
 import * as sdk3 from "@hermes/plugin-sdk";
-import { useEffect as useEffect25, useId as useId18, useRef as useRef26 } from "react";
+import { useEffect as useEffect26, useId as useId19, useRef as useRef26 } from "react";
 
 // src/ui/SettingsForm.jsx
 import { useValue as useValue3 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect24, useId as useId17, useState as useState22 } from "react";
+import { useEffect as useEffect25, useId as useId18, useState as useState22 } from "react";
 
 // src/core/settings.js
 var SETTINGS_TABS = Object.freeze(["general", "game", "replay", "notify", "llm"]);
@@ -22924,7 +23021,7 @@ function ringDash(pct, r) {
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { useEffect as useEffect22, useId as useId16, useMemo as useMemo16, useRef as useRef24, useState as useState20 } from "react";
+import { useEffect as useEffect23, useId as useId17, useMemo as useMemo16, useRef as useRef24, useState as useState20 } from "react";
 
 // src/core/llmSettings.js
 var GRANT_COMMAND = "hermes plugins enable hermes-officecraft";
@@ -23006,7 +23103,7 @@ function pickFromValue(value, choices) {
 }
 
 // src/ui/SettingsKit.jsx
-import { useEffect as useEffect21, useId as useId15, useLayoutEffect as useLayoutEffect7, useRef as useRef23, useState as useState19 } from "react";
+import { useEffect as useEffect22, useId as useId16, useLayoutEffect as useLayoutEffect7, useRef as useRef23, useState as useState19 } from "react";
 import { jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
 var ICONS2 = {
   gear: "M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z M12 2.5l1.4 2.4 2.7-.6.9 2.6 2.6.9-.6 2.7L21.5 12l-2.5 1.5.6 2.7-2.6.9-.9 2.6-2.7-.6L12 21.5l-1.4-2.4-2.7.6-.9-2.6-2.6-.9.6-2.7L2.5 12 5 10.5l-.6-2.7 2.6-.9.9-2.6 2.7.6Z",
@@ -23041,7 +23138,7 @@ function SettingsIcon({ id, size = 18 }) {
 function HelpTip({ name, children }) {
   const t = useT();
   const [open, setOpen] = useState19(false);
-  const id = useId15();
+  const id = useId16();
   const wrap = useRef23(null);
   const btn = useRef23(null);
   const note = useRef23(null);
@@ -23060,7 +23157,7 @@ function HelpTip({ name, children }) {
     if (r.bottom > limit && rowTop + 4 - r.height >= Math.max(scroller?.top ?? 0, 0) + 4) setUp(true);
     else if (r.bottom > limit) el.scrollIntoView?.({ block: "nearest" });
   }, [open]);
-  useEffect21(() => {
+  useEffect22(() => {
     if (!open) return void 0;
     const onDown = (e) => {
       if (wrap.current && !wrap.current.contains(e.target)) setOpen(false);
@@ -23119,7 +23216,7 @@ function Switch({ id, checked, onChange, disabled = false, describedBy, labelled
   );
 }
 function Segmented({ label, value, options, onChange, describedBy }) {
-  const name = useId15();
+  const name = useId16();
   return /* @__PURE__ */ jsx39("span", { className: "oc-sx-seg", role: "radiogroup", "aria-label": label, "aria-describedby": describedBy, children: options.map(([code, text3]) => /* @__PURE__ */ jsxs35("label", { children: [
     /* @__PURE__ */ jsx39("input", { type: "radio", name, value: code, checked: value === code, onChange: () => onChange(code) }),
     /* @__PURE__ */ jsx39("span", { children: text3 })
@@ -23158,7 +23255,7 @@ function LaneChip({ row, t }) {
 }
 function ModelSelect({ lane, sel, choices, busy, onPick, tipped }) {
   const t = useT();
-  const id = useId16();
+  const id = useId17();
   const groups = [];
   choices.forEach((c, i) => {
     let g = groups.find((x) => x.provider === c.provider);
@@ -23191,12 +23288,13 @@ function ModelSelect({ lane, sel, choices, busy, onPick, tipped }) {
         className: "oc-lm-sel oc-fc",
         "data-llm-model": lane,
         value: sel.selected,
-        disabled: sel.disabled || busy,
+        disabled: sel.disabled,
+        ...held(busy),
         "aria-describedby": `${id}-u`,
-        onChange: (e) => {
+        onChange: hold(busy, (e) => {
           const pick = pickFromValue(e.target.value, choices);
           if (pick !== void 0) onPick(lane, pick);
-        },
+        }),
         children: [
           /* @__PURE__ */ jsx40("option", { value: "hermes", children: t("llm.models.hermes") }),
           sel.stored ? /* @__PURE__ */ jsx40("option", { value: "stored", children: t("llm.models.stored", shortModel(sel.pick.model), sel.pick.provider) }) : null,
@@ -23222,13 +23320,13 @@ function SettingsFormLlm({ actions = null }) {
   const modelOpts = useModelOptions(state2?.override === "granted");
   const list = useMemo16(() => modelChoices(modelOpts), [modelOpts]);
   const errorRef = useRef24(null);
-  const id = useId16();
-  useEffect22(() => {
+  const id = useId17();
+  useEffect23(() => {
     if (!state2) return;
     setUsdText(String(state2.settings.capUsd));
     setCallsText(String(state2.settings.callCap));
   }, [state2?.settings.capUsd, state2?.settings.callCap]);
-  useEffect22(() => {
+  useEffect23(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
   const title = /* @__PURE__ */ jsx40(SectionTitle, { label: t("llm.title"), where: "server", tip: t("llm.hint") });
@@ -23238,6 +23336,7 @@ function SettingsFormLlm({ actions = null }) {
   ] });
   if (!state2) return title;
   const apply = async (change) => {
+    if (saving) return;
     setSaving(true);
     setError(null);
     const res = await save(settingsBody(state2, change));
@@ -23332,8 +23431,9 @@ function SettingsFormLlm({ actions = null }) {
             labelledBy: `${id}-${f}-n`,
             describedBy: `${id}-${f}-s ${id}-${f}-d`,
             checked: row.on,
-            disabled: saving || !row.switchable,
-            onChange: (checked) => apply({ features: { [f]: checked } }),
+            disabled: !row.switchable,
+            ...held(saving),
+            onChange: hold(saving, (checked) => apply({ features: { [f]: checked } })),
             "data-llm-switch": f
           }
         )
@@ -23386,8 +23486,8 @@ function SettingsFormLlm({ actions = null }) {
                   "data-llm-cap-usd": true,
                   inputMode: "decimal",
                   value: usdText,
-                  disabled: saving,
-                  onChange: (e) => setUsdText(e.target.value),
+                  ...held(saving, { text: true }),
+                  onChange: hold(saving, (e) => setUsdText(e.target.value)),
                   onBlur: () => commit("usd", usdText),
                   onKeyDown: (e) => {
                     if (e.key === "Enter") {
@@ -23405,8 +23505,8 @@ function SettingsFormLlm({ actions = null }) {
                   "data-llm-cap-calls": true,
                   inputMode: "numeric",
                   value: callsText,
-                  disabled: saving,
-                  onChange: (e) => setCallsText(e.target.value),
+                  ...held(saving, { text: true }),
+                  onChange: hold(saving, (e) => setCallsText(e.target.value)),
                   onBlur: () => commit("calls", callsText),
                   onKeyDown: (e) => {
                     if (e.key === "Enter") {
@@ -23454,7 +23554,7 @@ function SettingsFormLlm({ actions = null }) {
 
 // src/ui/SettingsFormNotify.jsx
 import { host as host3 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect23, useRef as useRef25, useState as useState21 } from "react";
+import { useEffect as useEffect24, useRef as useRef25, useState as useState21 } from "react";
 import { Fragment as Fragment19, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
 var MESSAGING_PATH = "/messaging";
 var selectStyle = {
@@ -23469,9 +23569,9 @@ var selectStyle = {
 };
 var canOpenHermes = () => typeof host3?.navigate === "function";
 var whoOf = (t, target2) => t("notify.targetLabel", target2.platform, target2.label);
-function Chip2({ checked, disabled = false, onChange, title, children, ...rest3 }) {
+function Chip2({ checked, disabled = false, busy = false, onChange, title, children, ...rest3 }) {
   return /* @__PURE__ */ jsxs37("label", { className: "oc-nt-chip", title, children: [
-    /* @__PURE__ */ jsx41("input", { type: "checkbox", checked, disabled, onChange: (event) => onChange(event.target.checked), ...rest3 }),
+    /* @__PURE__ */ jsx41("input", { type: "checkbox", checked, disabled, ...held(busy), onChange: hold(busy, (event) => onChange(event.target.checked)), ...rest3 }),
     /* @__PURE__ */ jsx41("span", { children })
   ] });
 }
@@ -23484,7 +23584,7 @@ function Bubble({ text: text3, ...rest3 }) {
 }
 function useNow(until) {
   const [now, setNow] = useState21(() => Date.now());
-  useEffect23(() => {
+  useEffect24(() => {
     setNow(Date.now());
     if (!(until > Date.now())) return void 0;
     const id = setInterval(() => {
@@ -23506,11 +23606,11 @@ function SettingsFormNotify() {
   const [tests, setTests] = useState21({});
   const [cool, setCool] = useState21(0);
   const now = useNow(Math.max(cool, ...Object.values(tests).map((s) => s?.kind === "wait" ? s.until : 0)));
-  useEffect23(() => {
+  useEffect24(() => {
     if (query.data) setState(query.data);
   }, [query.data]);
   const errorRef = useRef25(null);
-  useEffect23(() => {
+  useEffect24(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
   const title = /* @__PURE__ */ jsx41(SectionTitle, { label: t("notify.title"), where: "server" });
@@ -23520,6 +23620,7 @@ function SettingsFormNotify() {
   ] });
   if (!state2) return title;
   const apply = async (change) => {
+    if (saving) return;
     setSaving(true);
     setError(null);
     const res = await save(changeBody(state2, change, t.lang));
@@ -23579,7 +23680,7 @@ function SettingsFormNotify() {
               "data-notify-test": target2.key,
               "aria-describedby": describedBy,
               "aria-disabled": view.disabled,
-              "aria-label": t("notify.testFor", whoOf(t, target2)),
+              "aria-label": t(view.busy ? "notify.testingFor" : "notify.testFor", whoOf(t, target2)),
               onClick: () => {
                 if (!view.disabled) runTest(target2.key);
               },
@@ -23604,9 +23705,9 @@ function SettingsFormNotify() {
             "data-notify-all": true,
             "aria-describedby": describedBy,
             value: shared ?? (allEmpty ? "" : "__mixed"),
-            disabled: saving,
+            ...held(saving),
             style: selectStyle,
-            onChange: (event) => apply({ routes: sameForAll(event.target.value || null) }),
+            onChange: hold(saving, (event) => apply({ routes: sameForAll(event.target.value || null) })),
             children: [
               !shared && !allEmpty ? /* @__PURE__ */ jsx41("option", { value: "__mixed", disabled: true, children: t("notify.mixed") }) : null,
               /* @__PURE__ */ jsx41("option", { value: "", children: t("notify.noneChosen") }),
@@ -23636,7 +23737,7 @@ function SettingsFormNotify() {
         /* @__PURE__ */ jsx41("span", { className: "oc-sx-name", children: /* @__PURE__ */ jsx41("label", { htmlFor: `officecraft-notify-${type}`, children: typeName(type) }) }),
         /* @__PURE__ */ jsx41("small", { id: `officecraft-notify-${type}-help`, children: t(`notify.typeHint.${type}`) })
       ] }),
-      /* @__PURE__ */ jsx41("div", { className: "oc-sx-ctl", children: /* @__PURE__ */ jsx41(Switch, { id: `officecraft-notify-${type}`, describedBy: `officecraft-notify-${type}-help`, checked: state2.types[type], disabled: saving, onChange: (checked) => apply({ types: { [type]: checked } }) }) }),
+      /* @__PURE__ */ jsx41("div", { className: "oc-sx-ctl", children: /* @__PURE__ */ jsx41(Switch, { id: `officecraft-notify-${type}`, describedBy: `officecraft-notify-${type}-help`, checked: state2.types[type], ...held(saving), onChange: hold(saving, (checked) => apply({ types: { [type]: checked } })) }) }),
       state2.targets.length > 0 ? /* @__PURE__ */ jsx41("div", { className: "oc-nt-chips", role: "group", "aria-label": `${typeName(type)}: ${t("notify.recipients")}`, children: state2.targets.map((target2) => {
         const on = state2.routes[type].includes(target2.key);
         const full = !on && state2.routes[type].length >= state2.max;
@@ -23644,7 +23745,8 @@ function SettingsFormNotify() {
           Chip2,
           {
             checked: on,
-            disabled: saving || full,
+            disabled: full,
+            busy: saving,
             title: full ? t("notify.maxRoutes", state2.max) : void 0,
             "data-notify-route": `${type}:${target2.key}`,
             onChange: () => apply({ routes: { [type]: toggleRoute(state2, type, target2.key) } }),
@@ -23662,7 +23764,7 @@ function SettingsFormNotify() {
         id: "officecraft-notify-quiet",
         label: t("notify.quiet.on"),
         help: t("notify.quiet.onHint"),
-        control: ({ id, describedBy }) => /* @__PURE__ */ jsx41(Switch, { id, describedBy, checked: quiet2.enabled, disabled: saving, onChange: (checked) => apply({ quiet: { enabled: checked } }) })
+        control: ({ id, describedBy }) => /* @__PURE__ */ jsx41(Switch, { id, describedBy, checked: quiet2.enabled, ...held(saving), onChange: hold(saving, (checked) => apply({ quiet: { enabled: checked } })) })
       }
     ),
     quiet2.enabled ? /* @__PURE__ */ jsxs37(Fragment19, { children: [
@@ -23683,8 +23785,8 @@ function SettingsFormNotify() {
                 "aria-label": t("notify.quiet.start"),
                 "aria-describedby": describedBy,
                 value: quiet2.from,
-                disabled: saving,
-                onChange: (event) => apply({ quiet: { from: event.target.value } }),
+                ...held(saving),
+                onChange: hold(saving, (event) => apply({ quiet: { from: event.target.value } })),
                 style: selectStyle,
                 children: hourChoices(quiet2.from).map((h) => /* @__PURE__ */ jsx41("option", { value: h, children: h }, h))
               }
@@ -23699,8 +23801,8 @@ function SettingsFormNotify() {
                 "aria-label": t("notify.quiet.end"),
                 "aria-describedby": describedBy,
                 value: quiet2.to,
-                disabled: saving,
-                onChange: (event) => apply({ quiet: { to: event.target.value } }),
+                ...held(saving),
+                onChange: hold(saving, (event) => apply({ quiet: { to: event.target.value } })),
                 style: selectStyle,
                 children: hourChoices(quiet2.to).map((h) => /* @__PURE__ */ jsx41("option", { value: h, children: h }, h))
               }
@@ -23717,7 +23819,7 @@ function SettingsFormNotify() {
           Chip2,
           {
             checked: quiet2.urgent.includes(type),
-            disabled: saving,
+            busy: saving,
             "data-notify-urgent": type,
             onChange: (checked) => apply({ quiet: { urgent: checked ? [...quiet2.urgent, type] : quiet2.urgent.filter((x) => x !== type) } }),
             children: typeName(type)
@@ -23749,7 +23851,7 @@ var VIOLET4 = "var(--ui-violet, color-mix(in oklab, color-mix(in oklch, var(--ui
 var GREEN7 = "var(--ui-green, var(--ui-accent))";
 var ORANGE8 = "var(--ui-orange, var(--ui-accent))";
 var TEXT3 = "color-mix(in oklab, var(--ui-text-secondary) 60%, var(--ui-text-tertiary))";
-var ringed = (sel) => `${sel}{outline:none;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`;
+var ringed = (sel) => `${sel}{outline:2px solid transparent;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`;
 var SETTINGS_CSS = `
 .oc-sf{container-type:inline-size;color:var(--foreground);font-size:13px;line-height:1.4}
 .oc-sf-in{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:0}
@@ -23761,7 +23863,7 @@ ${ringed(".oc-sf-tab:focus-visible")}
 .oc-sf-tab svg{flex:0 0 auto}
 .oc-sf-bd{margin-left:auto;display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:color-mix(in oklab, ${VIOLET4} 18%, transparent);color:var(--foreground)}
 .oc-sf-panel{min-width:0;min-height:0;padding:8px 20px 16px}
-.oc-sf-panel:focus-visible{outline:none;box-shadow:inset 0 0 0 2px color-mix(in oklab, ${RING} 60%, transparent)}
+.oc-sf-panel:focus-visible{outline:2px solid transparent;box-shadow:inset 0 0 0 2px color-mix(in oklab, ${RING} 60%, transparent)}
 .oc-sf-panel h3{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:12px 0 4px;font-size:15px;font-weight:600}
 .oc-sf-where{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE2};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
 .oc-sx-row{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 0;border-bottom:1px solid ${HAIR}}
@@ -23787,7 +23889,8 @@ ${ringed(".oc-sx-help:focus-visible")}
 .oc-sx-sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--foreground);transition:transform .15s ease}
 .oc-sx-sw:checked{background:var(--ui-accent);border-color:var(--ui-accent)}
 .oc-sx-sw:checked::after{transform:translateX(16px);background:${CARD}}
-.oc-sx-sw:disabled{cursor:progress;opacity:.6}
+.oc-sx-sw:disabled,.oc-sx-sw[aria-disabled="true"]{cursor:progress;opacity:.6}
+.oc-fc[aria-disabled="true"]{cursor:progress;opacity:.6}
 ${ringed(".oc-sx-sw:focus-visible")}
 
 .oc-sx-seg{display:inline-flex;padding:2px;border:1px solid ${FIELD_EDGE};border-radius:8px;background:${CARD}}
@@ -23795,7 +23898,7 @@ ${ringed(".oc-sx-sw:focus-visible")}
 .oc-sx-seg input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
 .oc-sx-seg span{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:6px;color:var(--ui-text-secondary);font-weight:500;white-space:nowrap}
 .oc-sx-seg input:checked+span{background:var(--ui-accent);color:var(--primary-foreground, ${CARD});font-weight:600}
-.oc-sx-seg input:focus-visible+span{box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
+.oc-sx-seg input:focus-visible+span{outline:2px solid transparent;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
 
 .oc-sx-btn{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:0 12px;border:1px solid var(--ui-accent);border-radius:4px;background:${CARD};color:var(--foreground);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 .oc-sx-btn[aria-disabled="true"]{opacity:.55;cursor:default}
@@ -23834,9 +23937,9 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 .oc-nt-chip span::before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor}
 .oc-nt-chip input:checked+span{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 14%, ${CARD});color:var(--foreground);font-weight:600}
 .oc-nt-chip input:checked+span::before{background:var(--ui-accent);border-color:var(--ui-accent)}
-.oc-nt-chip input:disabled{cursor:default}
-.oc-nt-chip input:disabled+span{opacity:.55}
-.oc-nt-chip input:focus-visible+span{box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
+.oc-nt-chip input:disabled,.oc-nt-chip input[aria-disabled="true"]{cursor:default}
+.oc-nt-chip input:disabled+span,.oc-nt-chip input[aria-disabled="true"]+span{opacity:.55}
+.oc-nt-chip input:focus-visible+span{outline:2px solid transparent;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
 .oc-nt-type[data-on="false"] .oc-nt-chips{opacity:.8}
 .oc-nt-sum{display:flex;align-items:flex-start;gap:8px;margin:8px 0 0;padding:8px 12px;border:1px solid ${EDGE2};border-radius:8px;background:color-mix(in oklab, ${VIOLET4} 8%, ${CARD});font-size:12.5px;line-height:16px}
 .oc-nt-sum svg{flex:0 0 auto;color:${VIOLET4}}
@@ -23985,7 +24088,7 @@ var TAB_ICON = { general: "globe", game: "game", replay: "moon", notify: "bell",
 var lastTab = SETTINGS_TABS[0];
 function SettingsForm({ llm = null }) {
   const t = useT();
-  const base = useId17();
+  const base = useId18();
   const [tab, setTabState] = useState22(() => tabOf(lastTab));
   const setTab = (next) => {
     lastTab = next;
@@ -23998,7 +24101,7 @@ function SettingsForm({ llm = null }) {
   const night = useValue3($nightPref);
   const detected = resolveLocale("auto", useAppLocale(), systemLocales());
   const count2 = llmTabBadge(useLlm());
-  useEffect24(() => {
+  useEffect25(() => {
     document.getElementById(`${base}-tab-${tab}`)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
   }, [base, tab]);
   const onKeyDown = (event) => {
@@ -24008,7 +24111,7 @@ function SettingsForm({ llm = null }) {
     setTab(next);
     document.getElementById(`${base}-tab-${next}`)?.focus();
   };
-  return /* @__PURE__ */ jsxs38("div", { className: "oc-sf", "data-settings-form": true, "data-motion": motion, children: [
+  return /* @__PURE__ */ jsxs38("div", { className: "oc-sf", "data-settings-form": true, "data-motion": motion, lang: t.lang, children: [
     /* @__PURE__ */ jsx42("style", { children: FIELD_CSS }),
     /* @__PURE__ */ jsx42("style", { children: SETTINGS_CSS }),
     /* @__PURE__ */ jsxs38("div", { className: "oc-sf-in", children: [
@@ -24158,9 +24261,9 @@ import { jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
 function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
   const t = useT();
   const ref = useRef26(null);
-  const id = useId18();
+  const id = useId19();
   const motion = sdk3.useValue($motionPref);
-  useEffect25(() => {
+  useEffect26(() => {
     const dlg = ref.current;
     if (!dlg) return;
     if (!dlg.open) {
@@ -24252,7 +24355,7 @@ function SettingsGear({ sheet, llm = null }) {
   const llmActions = llm ? { ...llm, onDecorate: llm.onDecorate ? hand(llm.onDecorate) : null, onSeating: llm.onSeating ? hand(llm.onSeating) : null } : null;
   const href = typeof sdk4.pluginSettingsHref === "function" ? sdk4.pluginSettingsHref(PLUGIN_ID, "settings") : null;
   return /* @__PURE__ */ jsxs40("span", { className: "oc-gearwrap", "data-settings": true, children: [
-    /* @__PURE__ */ jsx44("button", { ref: btn, type: "button", className: "oc-gear", "data-gear": true, "aria-haspopup": "dialog", "aria-expanded": open, title: t("settings.gear"), onClick: () => setOpen((v) => !v), children: /* @__PURE__ */ jsxs40("svg", { viewBox: "0 0 24 24", width: "18", height: "18", "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsx44("button", { ref: btn, type: "button", className: "oc-gear", "data-gear": true, "aria-haspopup": "dialog", "aria-expanded": open, title: t("settings.gearTip"), "aria-label": t("settings.gear"), onClick: () => setOpen((v) => !v), children: /* @__PURE__ */ jsxs40("svg", { viewBox: "0 0 24 24", width: "18", height: "18", "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinejoin: "round", children: [
       /* @__PURE__ */ jsx44("path", { d: GEAR }),
       /* @__PURE__ */ jsx44("circle", { cx: "12", cy: "12", r: "3.2" })
     ] }) }),
@@ -24559,10 +24662,10 @@ var page = {
 var muted = { fontSize: "0.8rem", color: "var(--ui-text-secondary)" };
 
 // src/ui/usePageClock.js
-import { useEffect as useEffect26, useState as useState24 } from "react";
+import { useEffect as useEffect27, useState as useState24 } from "react";
 function usePageClock() {
   const [tick, setTick] = useState24(0);
-  useEffect26(() => {
+  useEffect27(() => {
     let timer = null;
     const arm = () => {
       clearTimeout(timer);
@@ -24641,7 +24744,7 @@ function OfficePage({ ctx }) {
   const [art, setArt] = useState25(null);
   const [forced, setForced] = useState25(false);
   const [folded, setFolded] = useState25(false);
-  const [held, setHeld] = useState25(null);
+  const [held2, setHeld] = useState25(null);
   const [refused2, setRefused] = useState25("");
   const [officeView, setOfficeView] = useState25(true);
   const drawerOpen = !officeView;
@@ -24652,17 +24755,31 @@ function OfficePage({ ctx }) {
   const [jfilter, setJfilter] = useState25("all");
   const [hireOpen, setHireOpen] = useState25(false);
   const usageBtnRef = useRef29(null);
+  const pageRef = useRef29(null);
+  const giveFocusBack = useCallback9((...selectors) => {
+    setTimeout(() => {
+      const root = pageRef.current;
+      const at = (sel) => {
+        const el = root?.querySelector(sel);
+        return { el, shown: Boolean(el && el.getClientRects().length) };
+      };
+      focusBackTarget([...selectors.map(at), at("[data-more-toggle]")])?.focus();
+    }, 0);
+  }, []);
   const [usageOpen, setUsageOpen] = useState25(false);
   const closeUsage = useCallback9(() => {
     setUsageOpen(false);
-    setTimeout(() => usageBtnRef.current?.focus(), 0);
-  }, []);
-  const closeHire = useCallback9(() => setHireOpen(false), []);
+    giveFocusBack("[data-usage-open]");
+  }, [giveFocusBack]);
+  const closeHire = useCallback9(() => {
+    setHireOpen(false);
+    giveFocusBack("[data-recruit-open]");
+  }, [giveFocusBack]);
   const [campaignOpen, setCampaignOpen] = useState25(false);
   const closeCampaign = useCallback9(() => {
     setCampaignOpen(false);
-    setTimeout(() => document.querySelector("[data-campaign-open]")?.focus(), 0);
-  }, []);
+    giveFocusBack("[data-campaign-open]");
+  }, [giveFocusBack]);
   const [vitrineOpen, setVitrineOpen] = useState25(false);
   const vitrineFrom = useRef29(null);
   const openVitrine = useCallback9(() => {
@@ -24673,14 +24790,13 @@ function OfficePage({ ctx }) {
     setVitrineOpen(false);
     setTimeout(() => vitrineFrom.current?.focus?.(), 0);
   }, []);
-  const pageRef = useRef29(null);
   const toggleRef = useRef29(null);
   const headRef = useRef29(null);
   const width = useWidth(pageRef);
   const sheet = settingsSheet(width);
   const desks = roster.data?.desks ?? [];
   const bots = useMemo17(() => new Map(desks.map((d) => [d.name, { description: d.description ?? "", cut: d.descriptionCut === true, isDefault: d.isDefault === true }])), [desks]);
-  useEffect27(() => {
+  useEffect28(() => {
     if (!desks.length) return;
     const kept2 = recallSelection(desks.map((d) => d.name));
     if (kept2 !== selected) setSelectedState(kept2);
@@ -24731,19 +24847,19 @@ function OfficePage({ ctx }) {
     live: { data: live.data ?? null, dataUpdatedAt: live.dataUpdatedAt, errorUpdatedAt: live.errorUpdatedAt }
   });
   const { sober, narrow, panelOpen } = model;
-  useEffect27(() => {
+  useEffect28(() => {
     if (narrow) return;
-    if (held != null && held !== width) {
+    if (held2 != null && held2 !== width) {
       setHeld(null);
       return;
     }
-    const next = foldPlan({ folded, refused: refused2, wideOpen, paneW: width, art, held });
+    const next = foldPlan({ folded, refused: refused2, wideOpen, paneW: width, art, held: held2 });
     const release = Boolean(forced && art) && !forcedStep({ forced, paneW: width, art });
     if (release) setForced(false);
     const nextFolded = release ? false : next.folded;
     if (nextFolded !== folded) setFolded(nextFolded);
     if (next.refused !== refused2) setRefused(next.refused);
-  }, [narrow, folded, refused2, wideOpen, width, art, forced, held]);
+  }, [narrow, folded, refused2, wideOpen, width, art, forced, held2]);
   const command = useMemo17(() => commandDefs(orderJournal.data ?? null, JOURNAL_FETCH), [orderJournal.data]);
   const unreadable = !history.data?.ok || partialSources(live.data ?? null, history.data ?? null).length > 0;
   const gameKey = useMemo17(() => gameInputsKey(liveOffice, liveNow, history.data ?? null), [liveOffice, liveNow, history.data]);
@@ -24763,19 +24879,29 @@ function OfficePage({ ctx }) {
   const workRoles = useMemo17(() => thoughtRoles(sceneAgents), [sceneAgents]);
   useThoughts({ ready: llmShown.thoughtsReady && !replayOn, visible: pageVisible, roles: workRoles, lang: t.lang });
   const [decorOpen, setDecorOpen] = useState25(false);
-  const closeDecor = useCallback9(() => setDecorOpen(false), []);
+  const decorFrom = useRef29("[data-decor-open]");
+  const closeDecor = useCallback9(() => {
+    setDecorOpen(false);
+    giveFocusBack(decorFrom.current);
+  }, [giveFocusBack]);
   const [seatOpen, setSeatOpen] = useState25(false);
-  const closeSeat = useCallback9(() => setSeatOpen(false), []);
+  const closeSeat = useCallback9(() => {
+    setSeatOpen(false);
+    giveFocusBack("[data-gear]");
+  }, [giveFocusBack]);
   const llmActions = useMemo17(() => llmOn ? {
     skip: manualProfiles(liveOffice.agents),
-    onDecorate: decorReady ? () => setDecorOpen(true) : null,
+    onDecorate: decorReady ? () => {
+      decorFrom.current = "[data-gear]";
+      setDecorOpen(true);
+    } : null,
     onSeating: llmShown.seatingReady ? () => setSeatOpen(true) : null,
     pendingArt: llmShown.pending,
     artReady: llmShown.artReady
   } : null, [llmOn, liveOffice.agents, decorReady, llmShown]);
   const unlockedKey = game.achievements.filter((a) => a.unlocked).map((a) => a.id).join(",");
   const complete = !sober && history.data?.ok === true && liveOffice.mode === "full";
-  useEffect27(() => {
+  useEffect28(() => {
     if (!complete) return;
     const res = unlockAnnouncement(readSeen(), game);
     writeSeen(res.next);
@@ -24797,7 +24923,7 @@ function OfficePage({ ctx }) {
   const seenStates = useRef29(null);
   const seenQuiet = useRef29(null);
   const [announce, setAnnounce] = useState25("");
-  useEffect27(() => {
+  useEffect28(() => {
     if (replayOn) {
       seenBadges.current = null;
       seenStates.current = null;
@@ -24828,14 +24954,14 @@ function OfficePage({ ctx }) {
     setCursor(null);
     queryClient.refetchQueries({ queryKey: LIVE_KEY });
     queryClient.refetchQueries({ queryKey: ROSTER_KEY });
-    setTimeout(() => replayBtnRef.current?.focus(), 0);
-  }, [queryClient]);
+    giveFocusBack("[data-replay-open]");
+  }, [queryClient, giveFocusBack]);
   const chooseWindow = useCallback9((kind) => {
     setReplayKind(kind);
     setCursor(null);
   }, []);
   const dialogOpen = hireOpen || decorOpen || seatOpen || campaignOpen;
-  useEffect27(() => {
+  useEffect28(() => {
     if (!replayOn) return void 0;
     const onKey = (e) => {
       const settings = Boolean(document.querySelector("[data-settings-panel]"));
@@ -24845,7 +24971,7 @@ function OfficePage({ ctx }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [replayOn, dialogOpen, drawerOpen, narrow, exitReplay]);
   const focused = useRef29(false);
-  useEffect27(() => {
+  useEffect28(() => {
     if (!replayOn) {
       focused.current = false;
       return;
@@ -24856,7 +24982,7 @@ function OfficePage({ ctx }) {
     }
   }, [replayOn, replayData]);
   const edge = useRef29(null);
-  useEffect27(() => {
+  useEffect28(() => {
     if (!replayData) {
       edge.current = null;
       return;
@@ -24899,7 +25025,7 @@ function OfficePage({ ctx }) {
       else toggleWide(false);
     }
   };
-  useEffect27(() => {
+  useEffect28(() => {
     if (!panelOpen || !skipPending.current) return;
     skipPending.current = false;
     headRef.current?.focus();
@@ -24951,7 +25077,7 @@ function OfficePage({ ctx }) {
     setHireOpen(true);
   };
   const hireList = useMemo17(() => hireProfiles(desks, profiles), [desks, profiles]);
-  useEffect27(() => {
+  useEffect28(() => {
     if (!(narrow && drawerOpen)) return void 0;
     headRef.current?.focus();
     const onKey = (e) => {
@@ -24964,7 +25090,7 @@ function OfficePage({ ctx }) {
   }, [narrow, drawerOpen]);
   let body;
   if (model.body === "loading") {
-    body = /* @__PURE__ */ jsx46("div", { style: muted, children: t("loading") });
+    body = /* @__PURE__ */ jsx46("div", { style: muted, role: "status", children: t("loading") });
   } else if (model.body === "unreachable") {
     body = /* @__PURE__ */ jsx46(EmptyState, { title: t("unreachableTitle"), description: t("unreachableBody") });
   } else if (model.body === "empty") {
@@ -25111,13 +25237,16 @@ function OfficePage({ ctx }) {
         usage: reads.includes("usage") && desks.length > 0 && !replayOn ? { ref: usageBtnRef, onClick: () => setUsageOpen(true) } : null,
         recruit: roster.data && !replayOn ? { onClick: () => setHireOpen(true) } : null,
         campaign: roster.data && !replayOn && writes.includes("campaign") ? { onClick: () => setCampaignOpen(true) } : null,
-        decor: decorReady ? { onClick: () => setDecorOpen(true) } : null,
+        decor: decorReady ? { onClick: () => {
+          decorFrom.current = "[data-decor-open]";
+          setDecorOpen(true);
+        } } : null,
         panel: desks.length > 0 && width > 0 ? { ref: toggleRef, open: panelOpen, onClick: togglePanel } : null,
         gear: /* @__PURE__ */ jsx46(SettingsGear, { sheet, llm: llmActions }),
         narrow
       }
     ),
-    replayOn ? /* @__PURE__ */ jsxs42("div", { className: "oc-rp-banner", role: "status", "data-replay-banner": true, children: [
+    replayOn ? /* @__PURE__ */ jsxs42("div", { className: "oc-rp-banner", "data-replay-banner": true, children: [
       /* @__PURE__ */ jsx46("span", { className: "oc-rp-dot", "aria-hidden": "true" }),
       /* @__PURE__ */ jsx46("b", { "data-replay-at": true, children: replayData ? t("replay.banner", replayAt) : t("replay.notLoaded") }),
       /* @__PURE__ */ jsx46("span", { className: "oc-rp-note", children: replayData ? t("replay.bannerNote") : t("replay.notLoadedNote") }),
@@ -25127,7 +25256,7 @@ function OfficePage({ ctx }) {
     body,
     narrow && model.body === "office" ? /* @__PURE__ */ jsx46(TabBar, { view: officeView ? "office" : tab, onView: goView, decisions: decisionCount, t }) : null,
     roster.data ? /* @__PURE__ */ jsx46(HireDialog, { open: hireOpen, onClose: closeHire, profiles: hireList, orders, onSeeBot: (name) => {
-      closeHire();
+      setHireOpen(false);
       pickAgent(name);
     } }) : null,
     roster.data && writes.includes("campaign") ? /* @__PURE__ */ jsx46(CampaignDialog, { open: campaignOpen, onClose: closeCampaign, desks, boards: liveOffice.boards, sceneBy: sceneByName, orders, writes, replay: replayOn }) : null,

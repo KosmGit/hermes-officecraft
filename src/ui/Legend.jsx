@@ -38,11 +38,12 @@ export function Legend() {
   const rows = legendRows(HALO, { workingMs: WORKER_LIVE_WINDOW_MS, staleMs: STALE_AFTER_MS, activeMs: RECENT_WINDOW_MS })
   useEffect(() => {
     if (!open) return undefined
-    const onKey = e => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false); wrap.current?.querySelector('button')?.focus() } }
+    // in the capture phase, ahead of the page's own Escape listener (the replay leaves on Escape): the legend takes the key, and says so
+    const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setOpen(false); wrap.current?.querySelector('button')?.focus() } }
     const onDown = e => { if (wrap.current && !wrap.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('keydown', onKey)
+    document.addEventListener('keydown', onKey, true)
     document.addEventListener('pointerdown', onDown)
-    return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onDown) }
+    return () => { document.removeEventListener('keydown', onKey, true); document.removeEventListener('pointerdown', onDown) }
   }, [open])
   return (
     <span className="oc-legend" ref={wrap} data-legend>

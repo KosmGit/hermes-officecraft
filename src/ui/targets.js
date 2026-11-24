@@ -26,3 +26,25 @@ export function skipPlan({ panelOpen, narrow }) {
 
 /** The tooltip of a scene object (src/core/tips.js). */
 export const spotTip = (sp, office, ctx) => tipOf(sp, office, ctx)
+
+/**
+ * The item the keyboard moves to inside the « More » menu: the arrows wrap, Home and End go to the ends. `at` = the focused item
+ * (-1 when the focus is elsewhere in the menu), `n` = how many items. null for any other key.
+ */
+export function moreMenuTarget(key, at, n) {
+  if (!n) return null
+  if (key === 'Home') return 0
+  if (key === 'End') return n - 1
+  if (key === 'ArrowDown') return at < 0 ? 0 : (at + 1) % n
+  if (key === 'ArrowUp') return at < 0 ? n - 1 : (at - 1 + n) % n
+  return null
+}
+
+/**
+ * Where the focus goes when a window closes: the button that opened it if it is still on screen, else the next one that is (in a
+ * narrow pane the header's own buttons are hidden and the « More » menu item that opened the window is gone). `candidates` are
+ * [{ el, shown }] in order of preference; null when none is on screen.
+ */
+export function focusBackTarget(candidates) {
+  return candidates.find(c => c && c.el && c.shown)?.el ?? null
+}

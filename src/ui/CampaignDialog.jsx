@@ -57,14 +57,16 @@ function Mini({ id, colors, bots }) {
 /** The row of the two starting points. Off = the one button, as it always was (no wrapper): with the assisted function on, the two sit on one line. */
 const TplBar = ({ on, children }) => (on ? <span className="oc-lm-tb">{children}</span> : <Fragment>{children}</Fragment>)
 
-function Stepper({ step, t }) {
+/** The steps. The title of the current one takes the focus when the step changes (`titleRef`): the button that was pressed is gone, and the new step is said once, by the focus. */
+function Stepper({ step, t, titleRef }) {
   const list = [['compose', t('campaign.step.compose')], ['review', t('campaign.step.review')], ['created', t('campaign.step.created')]]
   const at = list.findIndex(([k]) => k === step)
   return (
     <ol className="oc-cgsteps" aria-label={t('campaign.steps')}>
       {list.map(([k, l], j) => (
         <li key={k} className={j < at ? 'past' : j === at ? 'now' : ''} aria-current={j === at ? 'step' : undefined} data-step={k}>
-          <span className="n">{j < at ? <Icon name="check" size={12} /> : j + 1}</span>{l}
+          <span className="n">{j < at ? <Icon name="check" size={12} /> : j + 1}</span>
+          <span className="tl" ref={j === at ? titleRef : undefined} tabIndex={j === at ? -1 : undefined} data-step-title={j === at ? '' : undefined}>{l}</span>
         </li>
       ))}
     </ol>
@@ -92,9 +94,9 @@ function Templates({ draft, apply, bots, colors, t, onClose }) {
     <section className="oc-cgtpl" aria-label={t('campaign.tpl.title')} data-templates>
       <div className="hd"><b>{t('campaign.tpl.title')}</b><small>{t('campaign.tpl.sub')}</small>
         <button type="button" className="ux-b sm ico ghost" aria-label={t('campaign.close')} onClick={onClose}><Icon name="x" size={14} /></button></div>
-      <div className="grid" role="radiogroup" aria-label={t('campaign.tpl.title')}>
+      <div className="grid" role="group" aria-label={t('campaign.tpl.title')}>
         {TEMPLATES.map(x => (
-          <button key={x.id} type="button" role="radio" aria-checked={tpl === x.id} className="tc" data-tpl={x.id} onClick={() => setTpl(x.id)}>
+          <button key={x.id} type="button" aria-pressed={tpl === x.id} className="tc" data-tpl={x.id} onClick={() => setTpl(x.id)}>
             <Mini id={x.id} colors={colors} bots={bots} />
             <b>{t(`campaign.tpl.${x.id}.name`)}</b><small>{t(`campaign.tpl.${x.id}.desc`)}</small>
           </button>
@@ -144,14 +146,15 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
       </div>
       {sel ? (
         <div className="ed" id={`${id}-ed`} role="group" aria-label={t('campaign.edit', code)} data-editor>
-          <label className="oc-dg-fl"><span className="oc-dg-lab">{t('campaign.f.title')}<small className="oc-mono">{c.title.length}/{MAX_TITLE}</small><CardMark A={A} card={c} field="title" label={t('campaign.f.title')} /></span>
-            <input data-f="title" value={c.title} maxLength={MAX_TITLE} className={A?.isMarked(c, 'title') ? 'oc-lm-f' : undefined} onChange={e => onPatch(c.id, { title: e.target.value })} /></label>
+          {/* each <label> holds the name alone: the counter and the model's mark sit beside it and reach the field by aria-describedby */}
+          <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${id}-title`}>{t('campaign.f.title')}</label><small className="oc-mono" id={`${id}-title-n`}>{c.title.length}/{MAX_TITLE}</small><CardMark A={A} card={c} field="title" label={t('campaign.f.title')} id={`${id}-title-mk`} /></span>
+            <input id={`${id}-title`} data-f="title" value={c.title} maxLength={MAX_TITLE} aria-describedby={`${id}-title-n ${id}-title-mk`} className={A?.isMarked(c, 'title') ? 'oc-lm-f' : undefined} onChange={e => onPatch(c.id, { title: e.target.value })} /></div>
           <div className="two">
-            <label className="oc-dg-fl"><span className="oc-dg-lab">{t('campaign.f.bot')}<CardMark A={A} card={c} field="who" label={t('campaign.f.bot')} /></span>
+            <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${id}-bot`}>{t('campaign.f.bot')}</label><CardMark A={A} card={c} field="who" label={t('campaign.f.bot')} id={`${id}-bot-mk`} /></span>
               <span className="botsel">{sceneAgent ? <Portrait agent={sceneAgent} /> : null}
-                <select data-f="bot" value={c.who} aria-label={t('campaign.f.bot')} className={A?.isMarked(c, 'who') ? 'oc-lm-f' : undefined} onChange={e => onPatch(c.id, { who: e.target.value })}>
+                <select id={`${id}-bot`} data-f="bot" value={c.who} aria-describedby={`${id}-bot-mk`} className={A?.isMarked(c, 'who') ? 'oc-lm-f' : undefined} onChange={e => onPatch(c.id, { who: e.target.value })}>
                   {bots.map(b => <option key={b} value={b}>{b}</option>)}
-                </select></span></label>
+                </select></span></div>
             <label className="oc-dg-fl"><span className="oc-dg-lab">{t('campaign.f.runtime')}</span>
               <select data-f="runtime" value={c.maxRuntime || 0} onChange={e => onPatch(c.id, { maxRuntime: Number(e.target.value) })}>
                 {RUNTIMES.map(r => <option key={r} value={r}>{r ? t('campaign.f.hours', r / 3600) : t('campaign.f.runtimeDefault')}</option>)}
@@ -159,8 +162,8 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
               </select></label>
           </div>
           {A?.ready.cardbody && A.body.card === c.id && A.body.phase === 'review' ? <BodyProposal A={A} card={c} code={code} /> : (
-            <label className="oc-dg-fl"><span className="oc-dg-lab">{t('campaign.f.body')}<small className={`oc-mono${blen > MAX_BODY * 0.9 ? ' near' : ''}`}>{blen} / {MAX_BODY.toLocaleString('en').replace(',', ' ')}</small><CardMark A={A} card={c} field="body" label={t('campaign.f.body')} /></span>
-              <textarea data-f="body" rows={3} maxLength={MAX_BODY} value={c.body} placeholder={t('campaign.f.bodyPh')} className={A?.isMarked(c, 'body') ? 'oc-lm-f' : undefined} onChange={e => onPatch(c.id, { body: e.target.value })} /></label>
+            <div className="oc-dg-fl"><span className="oc-dg-lab"><label htmlFor={`${id}-body`}>{t('campaign.f.body')}</label><small className={`oc-mono${blen > MAX_BODY * 0.9 ? ' near' : ''}`} id={`${id}-body-n`}>{blen} / {MAX_BODY.toLocaleString('en').replace(',', ' ')}</small><CardMark A={A} card={c} field="body" label={t('campaign.f.body')} id={`${id}-body-mk`} /></span>
+              <textarea id={`${id}-body`} data-f="body" rows={3} maxLength={MAX_BODY} value={c.body} placeholder={t('campaign.f.bodyPh')} aria-describedby={`${id}-body-n ${id}-body-mk`} className={A?.isMarked(c, 'body') ? 'oc-lm-f' : undefined} onChange={e => onPatch(c.id, { body: e.target.value })} /></div>
           )}
           {A?.ready.cardbody ? <BodyAsk A={A} card={c} code={code} /> : null}
           <fieldset className="oc-dg-fl deps">
@@ -319,6 +322,14 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
   const selectCard = id => { set(d => ({ ...d, sel: id })); if (id) setTimeout(() => document.querySelector(`[data-row-select="${id}"]`)?.scrollIntoView?.({ block: 'nearest' }), 0) }
 
   useEffect(() => { if (open && win.step === 'compose' && !working) setTimeout(() => { if (!draft.goal) goalRef.current?.focus() }, 0) }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  // a step change (Review, Back, the campaign created, a new one): the button that was pressed is unmounted, so the title of the new step takes the focus
+  const stepTitle = useRef(null)
+  const lastStep = useRef(win.step)
+  useEffect(() => {
+    if (lastStep.current === win.step) return
+    lastStep.current = win.step
+    if (open) stepTitle.current?.focus()
+  }, [win.step, open])
 
   const created = win.created
   const launched = created?.launched
@@ -347,8 +358,8 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
   const compose = (
     <>
       <div className={`oc-cghead${nb ? ' has-nb' : ''}`}>
-        <label className="oc-dg-fl goal"><span className="oc-dg-lab">{t('campaign.goal')}<small className="oc-mono">{draft.goal.length}/{MAX_GOAL}</small></span>
-          <input ref={goalRef} data-cg="goal" value={draft.goal} maxLength={MAX_GOAL} placeholder={t('campaign.goalPh')} onChange={e => set(d => ({ ...d, goal: e.target.value }))} /></label>
+        <div className="oc-dg-fl goal"><span className="oc-dg-lab"><label htmlFor={`${uid}-goal`}>{t('campaign.goal')}</label><small className="oc-mono" id={`${uid}-goal-n`}>{draft.goal.length}/{MAX_GOAL}</small></span>
+          <input ref={goalRef} id={`${uid}-goal`} data-cg="goal" value={draft.goal} maxLength={MAX_GOAL} placeholder={t('campaign.goalPh')} aria-describedby={`${uid}-goal-n`} onChange={e => set(d => ({ ...d, goal: e.target.value }))} /></div>
         <label className="oc-dg-fl tgt"><span className="oc-dg-lab">{t('campaign.project')}</span>
           <select data-cg="project" value={nb ? NEW : draft.board} onChange={e => chooseProject(e.target.value)}>
             {!draft.board && !nb ? <option value="">{t('campaign.projectPick')}</option> : null}
@@ -363,8 +374,8 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
         {nb ? (
           <div className="nb" role="group" aria-label={t('campaign.nb.title')} style={{ '--pc': nextProjectColor(boards) }}>
             <span className="nbi" aria-hidden="true"><i /></span>
-            <label className="oc-dg-fl nbn"><span className="oc-dg-lab">{t('campaign.nb.name')}<small className="oc-mono">{draft.nb.name.length}/{MAX_NAME}</small></span>
-              <input data-nb="name" value={draft.nb.name} maxLength={MAX_NAME} onChange={e => set(d => ({ ...d, nb: { ...d.nb, name: e.target.value, slug: d.nb.typed ? d.nb.slug : slugify(e.target.value) } }))} /></label>
+            <div className="oc-dg-fl nbn"><span className="oc-dg-lab"><label htmlFor={`${uid}-nbname`}>{t('campaign.nb.name')}</label><small className="oc-mono" id={`${uid}-nbname-n`}>{draft.nb.name.length}/{MAX_NAME}</small></span>
+              <input id={`${uid}-nbname`} data-nb="name" value={draft.nb.name} maxLength={MAX_NAME} aria-describedby={`${uid}-nbname-n`} onChange={e => set(d => ({ ...d, nb: { ...d.nb, name: e.target.value, slug: d.nb.typed ? d.nb.slug : slugify(e.target.value) } }))} /></div>
             <label className="oc-dg-fl nbs"><span className="oc-dg-lab">{t('campaign.nb.slug')}</span>
               <input data-nb="slug" className="oc-mono" value={draft.nb.slug} maxLength={64} spellCheck={false} autoCapitalize="off" aria-invalid={!slugSt.ok || undefined} aria-describedby={`${uid}-nbh`}
                 onChange={e => set(d => ({ ...d, nb: { ...d.nb, slug: e.target.value, typed: true } }))} /></label>
@@ -537,7 +548,7 @@ export function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, 
       alert={alertSlot} start={startSlot} actions={confirming ? null : actionSlot}>
       <style>{CAMPAIGN_CSS}</style>
       <div className="oc-cg" data-campaign data-step={step}>
-        <Stepper step={step} t={t} />
+        <Stepper step={step} t={t} titleRef={stepTitle} />
         <Live A={A} />
         {isNoBot ? <Notice tone="warn" icon="alert" data-no-bots>{t('campaign.noBots')}</Notice> : null}
         {step === 'compose' ? compose : step === 'review' ? review : createdView}

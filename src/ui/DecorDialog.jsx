@@ -6,6 +6,7 @@ import { useLlm, useLlmActions } from '../data/llm.js'
 import { drawnColors, hexOf, normalizeStyle } from '../scene/index.js'
 import { Dlg, DlgIcon, DlgTip, Notice } from './DialogKit.jsx'
 import { escapeCloses } from './dialogKeys.js'
+import { held, hold } from './hold.js'
 import { useT } from './useT.js'
 
 const EXAMPLES = ['ex1', 'ex2', 'ex3']
@@ -107,7 +108,7 @@ export function DecorDialog({ open, onClose }) {
   return (
     <Dlg open={open} onClose={onClose} title={t('llm.decor.title')} icon="decor" size="m" data-decor-dialog onSubmit={run}
       onKeyDown={e => { if (escapeCloses(e)) { e.preventDefault(); e.stopPropagation(); onClose() } }}
-      start={shown ? <button type="button" className="oc-btn oc-ghost" data-decor-revert disabled={pending} onClick={revert}>{t('llm.decor.revert')}</button> : null}
+      start={shown ? <button type="button" className="oc-btn oc-ghost" data-decor-revert {...held(pending)} onClick={hold(pending, revert)}>{t('llm.decor.revert')}</button> : null}
       actions={(
         <>
           <button type="button" className="oc-btn" data-decor-close onClick={onClose}>{fresh ? t('llm.decor.keep') : t('llm.decor.close')}</button>
@@ -115,20 +116,21 @@ export function DecorDialog({ open, onClose }) {
         </>
       )}>
       {refusal ? <Notice tone="warn" icon="info" role="status" data-decor-refusal>{refusal}</Notice> : null}
-      <label className="oc-dg-fl">
+      {/* the <label> holds the name alone: the « ? », its note and the counter are beside it, the counter reaches the field by aria-describedby */}
+      <div className="oc-dg-fl">
         <span className="oc-dg-lab">
-          {t('llm.decor.describe')}
+          <label htmlFor={`${id}-style`}>{t('llm.decor.describe')}</label>
           <DlgTip name={t('llm.decor.describe')}>{t('llm.decor.sent')}</DlgTip>
           <span className="grow" />
-          <small>{t('llm.decor.count', text.length, STYLE_MAX)}</small>
+          <small id={`${id}-n`}>{t('llm.decor.count', text.length, STYLE_MAX)}</small>
         </span>
-        <textarea ref={areaRef} data-decor-style rows={2} value={text} maxLength={STYLE_MAX} placeholder={t('llm.decor.placeholder')} disabled={blocked}
-          aria-describedby={`${id}-sent`} onChange={e => setText(e.target.value)} />
+        <textarea ref={areaRef} id={`${id}-style`} data-decor-style rows={2} value={text} maxLength={STYLE_MAX} placeholder={t('llm.decor.placeholder')} {...held(blocked, { text: true })}
+          aria-describedby={`${id}-n ${id}-sent`} onChange={hold(blocked, e => setText(e.target.value))} />
         <span id={`${id}-sent`} hidden data-decor-sent>{t('llm.decor.sent')}</span>
-      </label>
+      </div>
       <div className="oc-dg-chips" role="group" aria-label={t('llm.decor.examples')}>
         {EXAMPLES.map(k => (
-          <button key={k} type="button" className="oc-dg-pill" data-decor-example={k} disabled={blocked} onClick={() => { setText(t(`llm.decor.${k}`)); areaRef.current?.focus() }}>
+          <button key={k} type="button" className="oc-dg-pill" data-decor-example={k} {...held(blocked)} onClick={hold(blocked, () => { setText(t(`llm.decor.${k}`)); areaRef.current?.focus() })}>
             {t(`llm.decor.${k}`)}
           </button>
         ))}
@@ -147,8 +149,8 @@ export function DecorDialog({ open, onClose }) {
           <h3>{t('llm.decor.ready')}<DlgTip name={t('llm.decor.ready')}>{t('llm.decor.readyNote', waiting?.style || '')}</DlgTip></h3>
           <Sheet style={ready} t={t} />
           <span className="oc-row">
-            <button type="button" className="oc-btn oc-primary" data-decor-apply disabled={pending} onClick={() => resolve('apply')}>{t('llm.decor.apply')}</button>
-            <button type="button" className="oc-btn" data-decor-ignore disabled={pending} onClick={() => resolve('ignore')}>{t('llm.decor.ignore')}</button>
+            <button type="button" className="oc-btn oc-primary" data-decor-apply {...held(pending)} onClick={hold(pending, () => resolve('apply'))}>{t('llm.decor.apply')}</button>
+            <button type="button" className="oc-btn" data-decor-ignore {...held(pending)} onClick={hold(pending, () => resolve('ignore'))}>{t('llm.decor.ignore')}</button>
           </span>
         </section>
       ) : null}

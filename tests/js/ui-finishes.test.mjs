@@ -243,7 +243,7 @@ test('buttons: radius 4 px, weight 500 (text buttons), the host focus ring', () 
     assert.equal(decl(PANEL_CSS, sel, 'border-radius'), '4px', `${sel} radius`)
     const ring = focusRule(PANEL_CSS, sel)
     assert.ok(ring.includes('box-shadow:0 0 0 3px'), `${sel}: focus ring is the host's (3 px halo): ${ring}`)
-    assert.doesNotMatch(ring, /outline:2px solid/, `${sel}: no accent outline`)
+    assert.doesNotMatch(ring, /outline:2px solid (?!transparent)/, `${sel}: no accent outline (the outline is the transparent one of forced-colors mode)`)
   }
   for (const sel of ['.oc-btn', '.oc-toggle']) assert.equal(decl(PANEL_CSS, sel, 'font-weight'), '500', `${sel} weight`)
   // the « Open » button of the dock keeps its class (and its host ring); the dock's buttons are styled by pageStyles.js, not by inline styles

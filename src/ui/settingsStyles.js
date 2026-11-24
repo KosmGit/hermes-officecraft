@@ -11,7 +11,7 @@ const VIOLET = 'var(--ui-violet, color-mix(in oklab, color-mix(in oklch, var(--u
 const GREEN = 'var(--ui-green, var(--ui-accent))'
 const ORANGE = 'var(--ui-orange, var(--ui-accent))'
 const TEXT3 = 'color-mix(in oklab, var(--ui-text-secondary) 60%, var(--ui-text-tertiary))'   // the tertiary alone measured 3.54:1 on the dialog (light theme); same mix as the other sheets
-const ringed = sel => `${sel}{outline:none;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`
+const ringed = sel => `${sel}{outline:2px solid transparent;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`
 
 export const SETTINGS_CSS = `
 .oc-sf{container-type:inline-size;color:var(--foreground);font-size:13px;line-height:1.4}
@@ -24,7 +24,7 @@ ${ringed('.oc-sf-tab:focus-visible')}
 .oc-sf-tab svg{flex:0 0 auto}
 .oc-sf-bd{margin-left:auto;display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:color-mix(in oklab, ${VIOLET} 18%, transparent);color:var(--foreground)}
 .oc-sf-panel{min-width:0;min-height:0;padding:8px 20px 16px}
-.oc-sf-panel:focus-visible{outline:none;box-shadow:inset 0 0 0 2px color-mix(in oklab, ${RING} 60%, transparent)}
+.oc-sf-panel:focus-visible{outline:2px solid transparent;box-shadow:inset 0 0 0 2px color-mix(in oklab, ${RING} 60%, transparent)}
 .oc-sf-panel h3{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:12px 0 4px;font-size:15px;font-weight:600}
 .oc-sf-where{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
 .oc-sx-row{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 0;border-bottom:1px solid ${HAIR}}
@@ -50,7 +50,8 @@ ${ringed('.oc-sx-help:focus-visible')}
 .oc-sx-sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--foreground);transition:transform .15s ease}
 .oc-sx-sw:checked{background:var(--ui-accent);border-color:var(--ui-accent)}
 .oc-sx-sw:checked::after{transform:translateX(16px);background:${CARD}}
-.oc-sx-sw:disabled{cursor:progress;opacity:.6}
+.oc-sx-sw:disabled,.oc-sx-sw[aria-disabled="true"]{cursor:progress;opacity:.6}
+.oc-fc[aria-disabled="true"]{cursor:progress;opacity:.6}
 ${ringed('.oc-sx-sw:focus-visible')}
 
 .oc-sx-seg{display:inline-flex;padding:2px;border:1px solid ${FIELD_EDGE};border-radius:8px;background:${CARD}}
@@ -58,7 +59,7 @@ ${ringed('.oc-sx-sw:focus-visible')}
 .oc-sx-seg input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
 .oc-sx-seg span{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:6px;color:var(--ui-text-secondary);font-weight:500;white-space:nowrap}
 .oc-sx-seg input:checked+span{background:var(--ui-accent);color:var(--primary-foreground, ${CARD});font-weight:600}
-.oc-sx-seg input:focus-visible+span{box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
+.oc-sx-seg input:focus-visible+span{outline:2px solid transparent;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
 
 .oc-sx-btn{display:inline-flex;align-items:center;gap:4px;min-height:28px;padding:0 12px;border:1px solid var(--ui-accent);border-radius:4px;background:${CARD};color:var(--foreground);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 .oc-sx-btn[aria-disabled="true"]{opacity:.55;cursor:default}
@@ -97,9 +98,9 @@ ${ringed('.oc-sx-cap summary:focus-visible')}
 .oc-nt-chip span::before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor}
 .oc-nt-chip input:checked+span{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 14%, ${CARD});color:var(--foreground);font-weight:600}
 .oc-nt-chip input:checked+span::before{background:var(--ui-accent);border-color:var(--ui-accent)}
-.oc-nt-chip input:disabled{cursor:default}
-.oc-nt-chip input:disabled+span{opacity:.55}
-.oc-nt-chip input:focus-visible+span{box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
+.oc-nt-chip input:disabled,.oc-nt-chip input[aria-disabled="true"]{cursor:default}
+.oc-nt-chip input:disabled+span,.oc-nt-chip input[aria-disabled="true"]+span{opacity:.55}
+.oc-nt-chip input:focus-visible+span{outline:2px solid transparent;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}
 .oc-nt-type[data-on="false"] .oc-nt-chips{opacity:.8}
 .oc-nt-sum{display:flex;align-items:flex-start;gap:8px;margin:8px 0 0;padding:8px 12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, ${VIOLET} 8%, ${CARD});font-size:12.5px;line-height:16px}
 .oc-nt-sum svg{flex:0 0 auto;color:${VIOLET}}

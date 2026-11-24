@@ -93,11 +93,11 @@ export function useRecruitAssist({ open, draft, setDraft, profiles, lang }) {
 }
 
 /** « to review »: the mark of a field the model wrote; a click reads it, an edit of the field lifts it. Never blocks anything. */
-export function Mark({ assist, field, label }) {
+export function Mark({ assist, field, label, id }) {
   const t = useT()
   if (!assist?.marked(field)) return null
   return (
-    <button type="button" className="oc-lm-mk" data-lm-mark={field} title={t('llm.mark.title')} aria-label={t('llm.mark.label', label)} onClick={() => assist.read(field)}>
+    <button type="button" id={id} className="oc-lm-mk" data-lm-mark={field} title={t('llm.mark.title')} aria-label={t('llm.mark.label', label)} onClick={() => assist.read(field)}>
       <DlgIcon id="spark" size={12} />{t('llm.mark.text')}
     </button>
   )

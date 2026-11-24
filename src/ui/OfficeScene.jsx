@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { motionReduced } from '../core/daylight.js'
 import { watchDpr } from '../core/dpr.js'
@@ -183,6 +183,7 @@ function ListDot({ slug }) {
  */
 export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpen, badges = [], motion = 'auto', readMs = null, decor = null, grades = null, exportRef = null, seating = null, thoughts = null, project: filter = null, onProject = null, onFit = null, listNote = null }) {
   const t = useT()
+  const thoughtId = useId()   // the hidden text of an agent's thought, reached by aria-describedby
   const boxRef = useRef(null)
   const stageRef = useRef(null)
   const canvasRef = useRef(null)
@@ -451,7 +452,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
   let body = null
   if (asScene) {
     const at = (x, y) => [x * S, y * S]
-    const stations = anchors(layout).map(a => {
+    const stations = anchors(layout).map((a, i) => {
       const agent = byName.get(a.name)
       if (!agent) return null
       const badge = badgeBy.get(a.name) || null
@@ -473,7 +474,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
           title={[[f.tip, grades?.[a.name] ? t('game.gradeTip', t(`game.grade.${grades[a.name].id}`)) : ''].filter(Boolean).join(' · '), outfitTip(a.name)].filter(Boolean).join(' — ')}
           aria-pressed={selected === a.name}
           aria-label={f.label}
-          aria-description={thought ? t('llm.thoughts.say', thought) : undefined}
+          aria-describedby={thought ? `${thoughtId}-${i}` : undefined}
           data-thinking={thought ? '' : undefined}
           onClick={fire(onSelect, a.name)}
           onDoubleClick={fire(onOpen, a.name)}
@@ -495,6 +496,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
             {bar ? <span className="oc-bar" data-late={bar.late ? '' : undefined} aria-hidden="true"><i style={{ width: `${Math.round(bar.f * 100)}%` }} /></span> : null}
           </span>
           {thought ? <span className="oc-thought" data-thought={a.name} aria-hidden="true"><i>{t('llm.thoughts.badge')}</i>{thought}</span> : null}
+          {thought ? <span className="ux-vh" id={`${thoughtId}-${i}`} data-thought-text>{t('llm.thoughts.say', thought)}</span> : null}
         </button>
       )
     })

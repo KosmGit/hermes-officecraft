@@ -16,16 +16,17 @@ export const FIELD_EDGE = 'color-mix(in oklab, var(--foreground) 48%, var(--ui-b
 /** The radius of Hermes' form controls (control.ts: rounded-[2.5px]). */
 export const FIELD_RADIUS = '2.5px'
 
-/** The focus ring of Hermes' controls (`focus-visible:border-ring ring-[3px] ring-ring/50`). */
+/** The focus ring of Hermes' controls (`focus-visible:border-ring ring-[3px] ring-ring/50`). The transparent outline is invisible on
+ *  its own and is what remains in forced-colors mode, which drops box-shadow and border colours (`outline:none` left no ring at all). */
 export const RING = 'var(--dt-ring, var(--ring, var(--ui-accent)))'
-export const RING_FOCUS = `outline:none;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)`
+export const RING_FOCUS = `outline:2px solid transparent;border-color:${RING};box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)`
 
 /** Radius and weight of Hermes' buttons (icon buttons: 4 px radius; text: 500). */
 export const BTN_RADIUS = '4px'
 export const BTN_WEIGHT = 500
 
 /** The focus ring of a field that only has an inline style (the settings selects): injected once by SettingsForm, on the page and on Hermes' settings page. */
-export const FIELD_CSS = `.oc-fc:focus-visible{outline:none;border-color:${RING} !important;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`   // !important: the select's border is an inline style
+export const FIELD_CSS = `.oc-fc:focus-visible{outline:2px solid transparent;border-color:${RING} !important;box-shadow:0 0 0 3px color-mix(in oklab, ${RING} 50%, transparent)}`   // !important: the select's border is an inline style
 
 /** A sunken well and the text colour over a plain accent fill. The host has no `--ui-bg-sunken` / `--ui-accent-fg` everywhere: both fall back on the text colour mixed in, never on a literal colour. */
 export const SUNKEN = 'var(--ui-bg-sunken, color-mix(in oklab, var(--foreground) 7%, transparent))'

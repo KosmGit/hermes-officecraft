@@ -212,11 +212,11 @@ export function useCampaignAssist({ state, open, step, draft, setDraft, bots, bo
 }
 
 /** « to review »: the mark of a field the model wrote; a click reads it, an edit of the field lifts it (the value is compared). Never blocks anything. */
-export function CardMark({ A, card, field, label }) {
+export function CardMark({ A, card, field, label, id }) {
   const t = useT()
   if (!A?.isMarked(card, field)) return null
   return (
-    <button type="button" className="oc-lm-mk" data-lm-mark={`${card.id}:${field}`} title={t('llm.mark.title')} aria-label={t('llm.mark.label', label)} onClick={() => A.read(card.id, field)}>
+    <button type="button" id={id} className="oc-lm-mk" data-lm-mark={`${card.id}:${field}`} title={t('llm.mark.title')} aria-label={t('llm.mark.label', label)} onClick={() => A.read(card.id, field)}>
       <DlgIcon id="spark" size={12} />{t('llm.mark.text')}
     </button>
   )

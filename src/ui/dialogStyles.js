@@ -63,7 +63,7 @@ ${RINGED('.oc-dg-x:focus-visible')}
 .oc-dg .oc-btn.oc-primary{background:var(--ui-accent);color:var(--ui-accent-fg, var(--background));border-color:var(--ui-accent)}
 .oc-dg .oc-btn.oc-primary:hover:not([aria-disabled="true"]):not(:disabled){background:color-mix(in oklab, var(--ui-accent) 88%, var(--foreground))}
 .oc-dg .oc-btn.oc-ghost{border-color:${EDGE};color:var(--ui-text-secondary)}
-.oc-dg .oc-btn:disabled{opacity:.5;cursor:default}
+.oc-dg .oc-btn:disabled,.oc-dg .oc-btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-dg-link{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;font:inherit;font-size:12px;color:var(--ui-accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 ${RINGED('.oc-dg-link:focus-visible')}
 ${TIP_CSS}
@@ -97,14 +97,15 @@ ${TIP_CSS}
 .oc-dg-seg{display:inline-flex;flex-wrap:nowrap;box-sizing:border-box;padding:4px;gap:2px;border:0;box-shadow:inset 0 0 0 1px ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .oc-dg-seg button,.oc-dg-seg label{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;font-weight:500;color:var(--ui-text-secondary);cursor:pointer;white-space:nowrap}
 .oc-dg-seg button[aria-pressed="true"],.oc-dg-seg label:has(input:checked){background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 0 0 1px ${EDGE}}
-.oc-dg-seg button:disabled{opacity:.5;cursor:default}
+.oc-dg-seg button:disabled,.oc-dg-seg button[aria-disabled="true"]{opacity:.5;cursor:default}
 .oc-dg-seg input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
 ${RINGED('.oc-dg-seg button:focus-visible')}
 .oc-dg-seg label:has(input:focus-visible){${RING_FOCUS}}
 .oc-dg-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;padding:0;list-style:none}
 .oc-dg-pill{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;max-width:100%;min-height:28px;padding:0 12px;border:1px solid ${EDGE};border-radius:14px;background:${CARD};font:inherit;font-size:12px;color:var(--foreground);text-align:left;cursor:pointer}
-button.oc-dg-pill:hover:not(:disabled){border-color:var(--ui-accent)}
-button.oc-dg-pill:disabled{opacity:.5;cursor:default}
+button.oc-dg-pill:hover:not(:disabled):not([aria-disabled="true"]){border-color:var(--ui-accent)}
+button.oc-dg-pill:disabled,button.oc-dg-pill[aria-disabled="true"]{opacity:.5;cursor:default}
+.oc-dg textarea[aria-disabled="true"]{opacity:.6;cursor:progress}
 ${RINGED('.oc-dg-pill:focus-visible')}
 .oc-dg-pill.on{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD})}
 .oc-dg-pill.off{color:${SOFT};text-decoration:line-through}

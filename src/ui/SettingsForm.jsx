@@ -61,7 +61,7 @@ export function SettingsForm({ llm = null }) {
   }
 
   return (
-    <div className="oc-sf" data-settings-form data-motion={motion}>
+    <div className="oc-sf" data-settings-form data-motion={motion} lang={t.lang}>
       <style>{FIELD_CSS}</style>
       <style>{SETTINGS_CSS}</style>
       <div className="oc-sf-in">

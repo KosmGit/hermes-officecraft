@@ -67,7 +67,8 @@ export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null })
   const set = patch => { setTouched(true); assist.lift(patch); setDraft(d => ({ ...d, ...patch })) }
   const marked = field => (assist.marked(field) ? ' oc-lm-f' : '')
   const busy = isBusy(orders.state)
-  const close = () => { if (!busy) onClose() }
+  // X, Cancel and Escape always close: another order in progress is no reason to trap the window (the draft is kept; only « Recruit » waits, and says why)
+  const close = () => onClose()
   const submit = e => {
     e?.preventDefault()
     setTouched(true)
@@ -120,25 +121,26 @@ export function HireDialog({ open, onClose, profiles, orders, onSeeBot = null })
             </div>
             <div className="oc-dg-steps">
               <Step n={1} title={t('recruit.step1')}>
-                <label className="oc-dg-fl">
+                {/* the <label> holds the name alone; the « ? », its note, the « free » mark and the model's mark sit beside it and reach the field by aria-describedby */}
+                <div className="oc-dg-fl">
                   <span className="oc-dg-lab">
-                    {t('recruit.name')}
+                    <label htmlFor={`${id}-name`}>{t('recruit.name')}</label>
                     <DlgTip name={t('recruit.name')}>{t('recruit.nameHint', draft.name || '…')}</DlgTip>
-                    {nameOk ? <span className="oc-dg-ok" data-hire-free>{t('recruit.free')}</span> : null}
-                    <Mark assist={assist} field="name" label={t('recruit.name')} />
+                    {nameOk ? <span className="oc-dg-ok" id={`${id}-free`} data-hire-free>{t('recruit.free')}</span> : null}
+                    <Mark assist={assist} field="name" label={t('recruit.name')} id={`${id}-name-mk`} />
                   </span>
-                  <input ref={nameRef} data-h="name" className={marked('name').trim() || undefined} value={draft.name} maxLength={64} autoComplete="off" spellCheck={false} placeholder={t('recruit.namePh')}
-                    aria-invalid={shown.some(e => e.startsWith('name_')) || undefined} aria-describedby={`${id}-err`}
+                  <input ref={nameRef} id={`${id}-name`} data-h="name" className={marked('name').trim() || undefined} value={draft.name} maxLength={64} autoComplete="off" spellCheck={false} placeholder={t('recruit.namePh')}
+                    aria-invalid={shown.some(e => e.startsWith('name_')) || undefined} aria-describedby={`${id}-err ${id}-free ${id}-name-mk`}
                     onChange={e => set({ name: e.target.value })} />
-                </label>
-                <label className="oc-dg-fl">
-                  <span className="oc-dg-lab">{t('recruit.titleField')}<Mark assist={assist} field="title" label={t('recruit.titleField')} /></span>
-                  <input data-h="title" className={marked('title').trim() || undefined} value={draft.title} maxLength={TITLE_MAX} placeholder={t('recruit.titlePh')} onChange={e => set({ title: e.target.value })} />
-                </label>
-                <label className="oc-dg-fl">
-                  <span className="oc-dg-lab">{t('recruit.description')}<DlgTip name={t('recruit.description')}>{t('recruit.descriptionTip')}</DlgTip><Mark assist={assist} field="description" label={t('recruit.description')} /></span>
-                  <textarea data-h="description" className={marked('description').trim() || undefined} rows={assist.phase === 'done' ? 4 : 2} value={draft.description} maxLength={DESCRIPTION_MAX} placeholder={t('recruit.descriptionPh')} onChange={e => set({ description: e.target.value })} />
-                </label>
+                </div>
+                <div className="oc-dg-fl">
+                  <span className="oc-dg-lab"><label htmlFor={`${id}-title`}>{t('recruit.titleField')}</label><Mark assist={assist} field="title" label={t('recruit.titleField')} id={`${id}-title-mk`} /></span>
+                  <input id={`${id}-title`} data-h="title" className={marked('title').trim() || undefined} value={draft.title} maxLength={TITLE_MAX} placeholder={t('recruit.titlePh')} aria-describedby={`${id}-title-mk`} onChange={e => set({ title: e.target.value })} />
+                </div>
+                <div className="oc-dg-fl">
+                  <span className="oc-dg-lab"><label htmlFor={`${id}-desc`}>{t('recruit.description')}</label><DlgTip name={t('recruit.description')}>{t('recruit.descriptionTip')}</DlgTip><Mark assist={assist} field="description" label={t('recruit.description')} id={`${id}-desc-mk`} /></span>
+                  <textarea id={`${id}-desc`} data-h="description" className={marked('description').trim() || undefined} rows={assist.phase === 'done' ? 4 : 2} value={draft.description} maxLength={DESCRIPTION_MAX} placeholder={t('recruit.descriptionPh')} aria-describedby={`${id}-desc-mk`} onChange={e => set({ description: e.target.value })} />
+                </div>
                 <RolePicker value={draft.role} onPick={r => set({ role: r })} guessed={guessed} mark={<Mark assist={assist} field="role" label={t('recruit.roleField')} />} />
               </Step>
               <Step n={2} title={<>{t('recruit.step2')} <Mark assist={assist} field="start" label={t('recruit.step2')} /></>} summary={draft.start === 'clone' && src ? t('recruit.skillsSum', own.length, baseSkills) : null}>

@@ -29,7 +29,7 @@ function Chip({ alert, label, children, t, texts }) {
   const id = useId()
   return (
     <span className="ux-alw">
-      <button ref={pop.anchor} type="button" className={`ux-al ${alert.tone}`} data-alert={alert.id} aria-haspopup="dialog" aria-expanded={pop.open} aria-controls={pop.open ? id : undefined} onClick={() => pop.setOpen(v => !v)}>
+      <button ref={pop.anchor} type="button" className={`ux-al ${alert.tone}`} data-alert={alert.id} aria-expanded={pop.open} aria-controls={pop.open ? id : undefined} onClick={() => pop.setOpen(v => !v)}>
         <Icon name={ICON[alert.tone]} size={14} />
         <span>{label}</span>
         <Icon name="chev" size={14} className="chev" />
