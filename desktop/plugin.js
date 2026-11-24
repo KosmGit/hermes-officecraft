@@ -21265,7 +21265,7 @@ var PAGE_CSS = `
 .ux-rosterb .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
 /* a long name is cut with an ellipsis (the whole name is the button's name): the project chip gives way first, then the name; the state word is kept whole */
 .ux-rosterb .nm{flex:0 1 auto;min-width:8ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:12.5px}
-.ux-rosterb .ux-prj{flex:0 100 auto;min-width:28px;overflow:hidden}
+.ux-rosterb .ux-prj{flex:0 100 auto;min-width:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-rosterb .ux-st{flex:0 0 auto;white-space:nowrap}
 .ux-rosterb .ux-st{margin-left:auto;font-size:11.5px}
 /* projects tab */
