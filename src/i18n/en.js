@@ -1054,7 +1054,7 @@ export const en = {
     title: 'Resources',
     window: 'Period',
     metricLabel: 'Count',
-    win: { '24h': 'Last 24 h', '7d': '7 days', '30d': '30 days' },
+    win: { '24h': '24 h', '7d': '7 days', '30d': '30 days' },
     metric: { fresh: 'Input + output', all: 'With cache' },
     metricTip: { fresh: 'Tokens read (input) and written (output) by the models', all: 'Adds the tokens the provider served from its cache (read and written)' },
     unserved: 'Usage needs an up-to-date Officecraft agent half. Update the plugin, then restart the gateway.',
@@ -1064,7 +1064,13 @@ export const en = {
     partial: s => `Some sources did not answer (${s}): their numbers are missing, not zero.`,
     none: 'No session with a recorded call in this period.',
     noneAbsent: n => `No usage recorded for this period (${n} agent${n === 1 ? '' : 's'} with no usage database).`,
-    tile: { tokens: { fresh: 'tokens, input + output', all: 'tokens, with cache' }, calls: 'model calls', sessions: 'sessions' },
+    tile: {
+      tokens: { fresh: 'tokens, input + output', all: 'tokens, with cache' }, calls: 'model calls', sessions: 'sessions',
+      cost: 'estimated cost',
+      costValue: usd => `$${usd}`,
+      costRoutes: n => `+ ${n} ${n === 1 ? 'route without a price' : 'routes without a price'}`,
+      costNoDetail: n => `${n} ${n === 1 ? 'agent without a breakdown' : 'agents without a breakdown'}`
+    },
     incomplete: 'a lower bound: some counts were not recorded',
     split: 'Token breakdown',
     part: { input: 'input', output: 'output', cache: 'cache' },
@@ -1091,7 +1097,7 @@ export const en = {
       error: 'The days could not be read.',
       note: 'Hermes does not timestamp tokens per call, so a session counts toward the day it started.'
     },
-    agents: { title: 'By agent', calls: (c, s) => `calls ${c} · sessions ${s}`, none: 'No agents.' },
+    agents: { title: 'By agent', calls: (c, s) => `${c == null ? 'calls not recorded' : `${c} ${isOne(c) ? 'call' : 'calls'}`} · ${s == null ? 'sessions not recorded' : `${s} ${isOne(s) ? 'session' : 'sessions'}`}`, none: 'No agents.' },
     cost: {
       none: 'no cost data',
       unpriced: 'price unknown',
@@ -1128,7 +1134,8 @@ export const en = {
       resetPast: 'reset time has passed; the reading will update',
       noReset: 'reset time unknown',
       none: list => `Hermes reports no quota for ${list} yet (the first reading of a session can be empty). Nothing is shown, rather than 0%.`,
-      noRoute: 'No route to report a quota for.',
+      noRoute: 'No provider used in this period exposes a quota.',
+      needsUsage: 'The quota is read for the providers that were used: the usage has to be read first.',
       some: list => `No quota reported for: ${list}.`,
       readAt: at => `Read at ${at}`,
       note: at => `The account’s quota, not an agent’s. Read from Hermes at ${at}, refreshed at most every 2 minutes.`

@@ -140,6 +140,21 @@ export function costOf(lines) {
 }
 
 /**
+ * What the period cost, from the breakdown lines of every agent (`costOf` on all of them): { kind, usd, pricedUsd, routes, noDetail, source }.
+ * `kind` as `costOf` says it: `priced` (one amount, every line priced), `mixed` (the priced part only: `routes` = distinct routes with no price),
+ * `unpriced` (nothing priced: no amount at all, never 0), `none` (no line). `noDetail` = agents with sessions and no breakdown: their cost is
+ * unknown too, so the total is then a lower bound (`partial`) even when every line read is priced.
+ */
+export function costTotal(usage) {
+  const profiles = (usage?.profiles ?? []).filter(p => rowState(p) === 'ok')
+  const lines = profiles.flatMap(p => p.models ?? [])
+  const c = costOf(lines)
+  const unknown = new Set(lines.filter(l => !(l.priced && l.usd != null)).map(l => `${l.provider}\u0000${l.model}`))
+  const noDetail = profiles.filter(p => p.models == null).length
+  return { ...c, routes: unknown.size, noDetail, partial: c.kind === 'mixed' || (c.kind === 'priced' && noDetail > 0) }
+}
+
+/**
  * The agents of a `/usage` answer, biggest first: [{ profile, state, sessions, calls, parts, cost }] and the totals over the counted ones.
  * `totals` is null when no agent has a record (never a sum of nothing shown as 0).
  */

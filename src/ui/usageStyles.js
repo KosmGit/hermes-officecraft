@@ -10,19 +10,32 @@ const ORANGE = 'var(--ui-orange, var(--ui-accent))'
 const GREEN = 'var(--ui-green, var(--ui-accent))'
 const RED = 'var(--ui-red, var(--destructive, var(--ui-orange)))'
 const TRACK = 'color-mix(in oklab, var(--foreground) 9%, transparent)'
+const LINE = 'color-mix(in oklab, var(--foreground) 18%, transparent)'
 
 export const USAGE_CSS = `
 /* the window is the shared frame (DialogKit, dialogStyles.js); only what is specific to Resources is here */
 [data-usage-quota]{display:flex;flex-direction:column;gap:12px}
-.oc-us-controls{position:sticky;top:-16px;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-16px -16px 0;padding:12px 16px;background:${CARD};border-bottom:1px solid ${EDGE}}
+.oc-us-controls{position:sticky;top:-16px;z-index:2;display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;margin:-16px -16px 0;padding:12px 16px;background:${CARD};border-bottom:1px solid ${EDGE}}
+.oc-us-cl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.oc-us-ct{font-size:11px;font-weight:600;line-height:16px;color:${SOFT}}
+/* what the three colours of the bars are, under the controls */
+.oc-us-key{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:4px 16px;margin:0;padding:0;list-style:none;font-size:11px;line-height:16px;color:${SOFT}}
+.oc-us-key li{display:inline-flex;align-items:center;gap:4px}
+.oc-us-key i{display:inline-block;width:10px;height:10px;border-radius:2px}
 .oc-us-range{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT}}
 .oc-us-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch}
-.oc-us-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.oc-us-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .oc-us-tile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i v" "l l" "n n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
 .oc-us-tico{grid-area:i;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 14%, transparent)}
 .oc-us-tile b{grid-area:v;font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .oc-us-tile > span:not(.oc-us-tico){grid-area:l;font-size:12px;color:${SOFT}}
 .oc-us-tile small{grid-area:n;font-size:11px}
+.oc-us-tile.cost{border-color:color-mix(in oklab, var(--ui-accent) 40%, ${EDGE});background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD})}
+/* the skeleton: the final order of the sections, blocks that say nothing */
+.oc-us-tile.sk{min-height:72px;border-color:transparent;background:${TRACK}}
+.oc-us-sk.chart{height:112px;border-radius:6px;background:${TRACK}}
+.oc-us-sk.rows{display:flex;flex-direction:column;gap:12px}
+.oc-us-sk.rows i{display:block;height:12px;border-radius:3px;background:${TRACK}}
 /* the split of the tokens: a ring and its three shares */
 .oc-us-split{display:flex;align-items:center;gap:12px;box-sizing:border-box;padding:8px 16px 8px 8px;border:1px solid ${EDGE};border-radius:8px}
 .oc-us-donut{flex:0 0 auto;width:88px;height:88px}
@@ -57,7 +70,13 @@ export const USAGE_CSS = `
 .oc-us-day:hover{background:color-mix(in oklab, var(--ui-accent) 8%, transparent);border-color:${EDGE}}
 .oc-us-day[aria-pressed="true"]{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, transparent)}
 .oc-us-day:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
-.oc-us-col{display:flex;align-items:flex-end;width:100%;height:112px;border-radius:6px;background:repeating-linear-gradient(to top, transparent 0 27px, color-mix(in oklab, var(--foreground) 8%, transparent) 27px 28px), ${TRACK};overflow:hidden}
+/* the chart: a column of values on the left, a grid on two lines (the highest day, its half) that the figures name */
+.oc-us-chart{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;align-items:start}
+.oc-us-yaxis{position:relative;box-sizing:border-box;height:112px;margin-top:5px;min-width:32px;font-size:11px;line-height:16px;color:${SOFT};font-variant-numeric:tabular-nums;text-align:right}
+.oc-us-yaxis span{position:absolute;right:0;transform:translateY(-50%);white-space:nowrap}
+.oc-us-yaxis .top{top:0}
+.oc-us-yaxis .mid{top:50%}
+.oc-us-col{display:flex;align-items:flex-end;width:100%;height:112px;border-radius:6px;background:linear-gradient(to bottom, ${LINE} 0 1px, transparent 1px calc(50% - 1px), ${LINE} calc(50% - 1px) 50%, transparent 50%), ${TRACK};overflow:hidden}
 .oc-us-colfill{display:flex;flex-direction:column;width:100%;border-radius:3px 3px 0 0;overflow:hidden}
 .oc-us-colfill i{min-height:1px}
 .oc-us-gap{display:block;width:100%;height:0;border-bottom:2px dotted ${SOFT}}
@@ -105,7 +124,7 @@ export const USAGE_CSS = `
 @media (max-width:520px){
   .oc-us-rows li{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n v" "b b" "s s";align-items:baseline}
   .oc-us-controls{top:-12px;margin:-12px -12px 0;padding:8px 12px}
-  .oc-us-tiles{gap:4px}
+  .oc-us-tiles{gap:4px;grid-template-columns:repeat(2,minmax(0,1fr))}
   .oc-us-tile{padding:8px;grid-template-columns:minmax(0,1fr);grid-template-areas:"v" "l" "n"}
   .oc-us-tico{display:none}
   .oc-us-tile b{font-size:20px}

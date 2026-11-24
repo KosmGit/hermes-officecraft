@@ -154,3 +154,79 @@ test('the texts of the editor say what they are for', () => {
   assert.match(dlg, /<span className="pl" aria-hidden="true">\{letter\(k\)\}<\/span>/, 'the letter of the phase, not « PHASE A » beside « Phase A »')
   assert.match(dlg, /t\('campaign\.phaseCards', /)
 })
+
+/* ---------- resources ---------- */
+import { costTotal, quotaOf } from '../../src/core/usage.js'
+import { USAGE_CSS } from '../../src/ui/usageStyles.js'
+
+const line = (model, priced, usd, provider = 'example') => ({ model, provider, task: '', apiCalls: 1, tokens: null, priced, usd: priced ? usd : null, costKind: priced ? 'estimated' : 'unpriced', costSource: 'x' })
+const agent = (profile, models) => ({ profile, sessions: 2, apiCalls: 4, tokens: { input: 10, output: 5, cacheRead: null, cacheWrite: null, reasoning: null }, reason: null, models })
+
+test('the cost of the period is an amount only from priced routes, and says when it is partial', () => {
+  const all = costTotal({ profiles: [agent('alpha', [line('m1', true, 1.5), line('m2', true, 0.25)]), agent('beta', [line('m1', true, 2)])] })
+  assert.deepEqual({ kind: all.kind, usd: all.usd, routes: all.routes, partial: all.partial }, { kind: 'priced', usd: 3.75, routes: 0, partial: false })
+  const some = costTotal({ profiles: [agent('alpha', [line('m1', true, 1.5), line('local', false)]), agent('beta', [line('local', false)])] })
+  assert.deepEqual({ kind: some.kind, usd: some.usd, priced: some.pricedUsd, routes: some.routes, partial: some.partial }, { kind: 'mixed', usd: null, priced: 1.5, routes: 1, partial: true }, 'one route without a price, counted once however many agents use it')
+  const none = costTotal({ profiles: [agent('alpha', [line('local', false)])] })
+  assert.deepEqual({ kind: none.kind, usd: none.usd, priced: none.pricedUsd }, { kind: 'unpriced', usd: null, priced: null }, 'never a 0 for an amount nobody knows')
+  assert.equal(costTotal({ profiles: [] }).kind, 'none')
+  const blind = costTotal({ profiles: [agent('alpha', [line('m1', true, 1)]), agent('beta', null)] })
+  assert.deepEqual({ kind: blind.kind, noDetail: blind.noDetail, partial: blind.partial }, { kind: 'priced', noDetail: 1, partial: true }, 'an agent with sessions and no breakdown makes the total a lower bound')
+  assert.equal(costTotal({ profiles: [{ ...agent('gone', null), sessions: null, reason: 'missing' }] }).noDetail, 0, 'an agent with no record is not counted as one without detail')
+})
+
+test('the cost is the first tile, without a 0 for an unknown amount', () => {
+  const dlg = src('ui/UsageDialog.jsx')
+  assert.ok(dlg.indexOf('<CostTile cost={cost}') < dlg.indexOf('<Tile id="tokens"'), 'the first question: what did it cost')
+  assert.match(dlg, /cost\.kind === 'priced' \|\| cost\.kind === 'mixed' \? t\('usage\.tile\.costValue'/, 'an amount only for a priced total')
+  for (const lang of LANGS) {
+    const tile = messages[lang].usage.tile
+    assert.match(tile.costRoutes(2), /\+ 2/, lang)
+    assert.doesNotMatch(tile.costRoutes(1), /\broutes\b|\brutas\b/i, `${lang}: one route, singular`)
+  }
+  assert.equal(messages.fr.usage.tile.costRoutes(2), '+ 2 routes sans prix')
+  assert.equal(messages.fr.usage.tile.cost, 'coût estimé')
+})
+
+test('while nothing is read the sections stand in their final order and the quota concludes nothing', () => {
+  const dlg = src('ui/UsageDialog.jsx')
+  assert.match(dlg, /<Skeleton id=\{id\} t=\{t\} \/>/)
+  const sk = dlg.slice(dlg.indexOf('function Skeleton'), dlg.indexOf('function Days'))
+  const order = ['usage.days.title', 'usage.agents.title', 'usage.models.title'].map(k => sk.indexOf(k))
+  assert.ok(order.every((n, i) => n > 0 && (i === 0 || n > order[i - 1])), 'days, agents, models: the order of the loaded window')
+  assert.match(dlg, /if \(!query\.data \|\| usage !== 'ok'\) return <p className="oc-hint" data-usage-quota="loading">/, 'no « none » before the usage is read')
+  assert.equal(messages.fr.usage.quota.noRoute, 'Aucun fournisseur utilisé sur la période n’expose de quota.')
+  // the quota of a period that used a provider with no window says so, and an empty usage still answers « none »
+  assert.deepEqual(quotaOf({ providers: [] }, []), { groups: [], missing: [] })
+})
+
+test('the chart of the days names its highest value and puts its grid on values', () => {
+  const dlg = src('ui/UsageDialog.jsx')
+  assert.match(dlg, /data-usage-max>\{tokenLabel\(peak, t\.lang\)\}/)
+  assert.match(dlg, /tokenLabel\(peak \/ 2, t\.lang\)/)
+  assert.doesNotMatch(USAGE_CSS, /repeating-linear-gradient\(to top, transparent 0 27px/, 'no grid line that measures nothing')
+  assert.match(USAGE_CSS, /\.oc-us-col\{[^}]*linear-gradient\(to bottom/)
+})
+
+test('the controls are labelled, a legend names the three colours, and a period reads the same in Resources and in the replay', () => {
+  const dlg = src('ui/UsageDialog.jsx')
+  assert.match(dlg, /data-usage-label="window">\{t\('usage\.window'\)\}/)
+  assert.match(dlg, /data-usage-label="metric">\{t\('usage\.metricLabel'\)\}/)
+  assert.match(dlg, /data-usage-key/)
+  for (const lang of LANGS) {
+    assert.equal(messages[lang].usage.win['24h'], messages[lang].replay.windowShort['24h'], `${lang}: « 24 h » is written once`)
+    assert.equal(messages[lang].usage.win['7d'], messages[lang].replay.windowShort['7d'], lang)
+  }
+  assert.equal(messages.fr.usage.agents.calls('12', '3'), '12 appels · 3 sessions')
+  assert.equal(messages.fr.usage.agents.calls('1', '1'), '1 appel · 1 session')
+  assert.equal(messages.en.usage.agents.calls('12', '3'), '12 calls · 3 sessions')
+  assert.equal(messages.es.usage.agents.calls('1', '2'), '1 llamada · 2 sesiones')
+  assert.match(messages.fr.usage.agents.calls(null, '2'), /non enregistrés/, 'a count Hermes did not record is said so, never written 0')
+})
+
+test('a window that only reads has no « Close » in its foot: the cross, Escape and the backdrop close it', () => {
+  const dlg = src('ui/UsageDialog.jsx')
+  assert.doesNotMatch(dlg, /actions=\{/, 'Resources has no action')
+  assert.match(dlg, /backdrop/)
+  assert.doesNotMatch(src('ui/Collection.jsx'), /actions=\{/, 'nor has the showcase')
+})

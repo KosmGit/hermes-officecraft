@@ -64,6 +64,7 @@ const KEYS = {
   'usage.days.bar': second('Mon 3'),
   'usage.days.detail': second('Mon 3'),
   'usage.models.calls': n(),
+  'usage.agents.calls': c => [c, c],
   'usage.models.aux': n(),
   'llm.spendCalls': n(1),
   'llm.gaugeCalls': c => [c, c],
@@ -121,7 +122,7 @@ test('the plural stays the plural from two', () => {
 
 test('a formatted count (text) and a number branch the same way', () => {
   for (const lang of Object.keys(PLURAL)) {
-    for (const key of ['usage.exact', 'usage.models.calls', 'replay.night.usageLine']) {
+    for (const key of ['usage.exact', 'usage.models.calls', 'usage.agents.calls', 'replay.night.usageLine']) {
       assert.equal(at(lang, key, KEYS[key]('1')), at(lang, key, KEYS[key](1)), `${lang}.${key}`)
       assert.notEqual(at(lang, key, KEYS[key]('1 234')), at(lang, key, KEYS[key]('1')), `${lang}.${key} 1 234`)
     }

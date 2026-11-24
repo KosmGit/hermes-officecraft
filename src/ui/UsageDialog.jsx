@@ -3,7 +3,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import { percentText } from '../core/format.js'
 import { clockLabel, DEFAULT_NIGHT } from '../core/replay.js'
 import {
-  USAGE_METRICS, USAGE_WINDOWS, agentRows, daysFor, boardRows, boardsAvailable, dailySeries, exactLabel, modelRows, peakOf, percentLabel, quotaOf, rangeLabel, share, splitShares, tokenLabel, usageWindow, usdLabel
+  USAGE_METRICS, USAGE_WINDOWS, agentRows, costTotal, daysFor, boardRows, boardsAvailable, dailySeries, exactLabel, modelRows, peakOf, percentLabel, quotaOf, rangeLabel, share, splitShares, tokenLabel, usageWindow, usdLabel
 } from '../core/usage.js'
 import { useReplay } from '../data/replay.js'
 import { useQuota, useQuotaRetry, useUsage, useUsageDays } from '../data/usage.js'
@@ -75,13 +75,43 @@ function Donut({ parts, total, t }) {
   )
 }
 
+/** The period's cost as a tile: an amount only from priced routes, said partial when some are not; no price at all is « price unknown », never 0. */
+function CostTile({ cost, t }) {
+  const note = cost.kind === 'none' ? null : [cost.routes ? t('usage.tile.costRoutes', cost.routes) : null, cost.noDetail ? t('usage.tile.costNoDetail', cost.noDetail) : null].filter(Boolean).join(' · ') || null
+  const value = cost.kind === 'priced' || cost.kind === 'mixed' ? t('usage.tile.costValue', usdLabel(cost.kind === 'priced' ? cost.usd : cost.pricedUsd, t.lang)) : null
+  return (
+    <div className="oc-us-tile cost" data-usage-tile="cost" data-cost-kind={cost.kind} data-partial={cost.partial ? '' : undefined} data-value={value ?? ''}>
+      <span className="oc-us-tico"><DlgIcon id="coin" size={16} /></span>
+      <b title={t('usage.cost.estTip', cost.source || '—')}>{value ?? t(cost.kind === 'none' ? 'usage.absent' : 'usage.cost.unpriced')}</b>
+      <span>{t('usage.tile.cost')}</span>
+      {note ? <small className="oc-faint" data-cost-note>{note}</small> : null}
+    </div>
+  )
+}
+
+/** The skeleton of the sections while nothing is read: the headings are the real ones, in their final order; the blocks say nothing. */
+function Skeleton({ id, t }) {
+  return (
+    <>
+      <div className="oc-us-top" data-usage-skeleton aria-hidden="true"><div className="oc-us-tiles">{[0, 1, 2, 3].map(k => <div key={k} className="oc-us-tile sk" />)}</div></div>
+      <section className="oc-us-sec" aria-labelledby={`${id}-d`} data-usage-section="days"><h3 id={`${id}-d`}>{t('usage.days.title')}</h3><div className="oc-us-sk chart" aria-hidden="true" /></section>
+      <section className="oc-us-sec" aria-labelledby={`${id}-a`} data-usage-section="agents"><h3 id={`${id}-a`}>{t('usage.agents.title')}</h3><div className="oc-us-sk rows" aria-hidden="true"><i /><i /><i /></div></section>
+      <section className="oc-us-sec" aria-labelledby={`${id}-m`} data-usage-section="models"><h3 id={`${id}-m`}>{t('usage.models.title')}</h3><div className="oc-us-sk rows" aria-hidden="true"><i /><i /></div></section>
+    </>
+  )
+}
+
 function Days({ series, metric, t, selected, onSelect }) {
   const totals = series.map(d => d.parts?.total ?? null)
   const peak = peakOf(totals)
+  const plotted = series.some(d => d.state === 'ok')
   const label = ms => new Date(ms).toLocaleDateString(t.lang, { weekday: 'short', day: 'numeric' })
   const sel = selected != null ? series[selected] : null
   return (
     <div data-usage-days>
+      <div className="oc-us-chart">
+      {/* the grid sits on two values, the highest day and its half, and says them: a line with no figure measures nothing */}
+      {plotted ? <div className="oc-us-yaxis" aria-hidden="true" data-usage-axis><span className="top" data-usage-max>{tokenLabel(peak, t.lang)}</span><span className="mid">{tokenLabel(peak / 2, t.lang)}</span></div> : <span />}
       <div className="oc-us-days" role="group" aria-label={t('usage.days.title')} data-n={series.length} style={{ "--n": series.length }}>
         {series.map((d, i) => {
           const sparse = series.length > 10   // 30 days: the bars carry their value in the label of the button, the axis names every 5th day
@@ -107,10 +137,11 @@ function Days({ series, metric, t, selected, onSelect }) {
           )
         })}
       </div>
+      </div>
       <p className="oc-faint oc-us-daynote" role="status" data-usage-day-note>
         {sel
           ? (sel.state === 'ok'
-            ? `${t('usage.days.detail', label(sel.fromMs), exactLabel(sel.parts.total, t.lang))} · ${t('usage.agents.calls', exactLabel(sel.calls, t.lang) ?? t('usage.absent'), exactLabel(sel.sessions, t.lang) ?? t('usage.absent'))}`
+            ? `${t('usage.days.detail', label(sel.fromMs), exactLabel(sel.parts.total, t.lang))} · ${t('usage.agents.calls', exactLabel(sel.calls, t.lang), exactLabel(sel.sessions, t.lang))}`
             : sel.state === 'none' ? t('usage.days.none', label(sel.fromMs)) : t('usage.days.failed', label(sel.fromMs)))
           : ''}
       </p>
@@ -118,10 +149,12 @@ function Days({ series, metric, t, selected, onSelect }) {
   )
 }
 
-function Quota({ quota, query, t }) {
+function Quota({ quota, query, t, usage }) {
   const nowMs = Date.now()
   if (query.isError && !query.data) return <p className="oc-hint oc-dashed" data-usage-quota="error">{t('usage.quota.error')}</p>
-  if (!query.data) return <p className="oc-hint" data-usage-quota="loading">{t('usage.loading')}</p>
+  // the quota is asked of the providers the usage went through: until the usage is read there is no conclusion to draw (not even « none »)
+  if (usage === 'error') return <p className="oc-hint oc-dashed" data-usage-quota="waiting">{t('usage.quota.needsUsage')}</p>
+  if (!query.data || usage !== 'ok') return <p className="oc-hint" data-usage-quota="loading">{t('usage.loading')}</p>
   if (!query.data.options) return <p className="oc-hint oc-dashed" data-usage-quota="error">{t('usage.quota.error')}</p>
   const read = clockLabel(query.data.atMs, t.lang, { day: false })
   return (
@@ -188,25 +221,31 @@ export function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
   const windows = USAGE_WINDOWS.map(k => [k, t(`usage.win.${WIN_KEY[k]}`)])
   const metrics = USAGE_METRICS.map(m => [m, t(`usage.metric.${m}`), false, t(`usage.metricTip.${m}`)])
   const hasSplit = tot?.parts && (tot.parts.input || tot.parts.output || tot.parts.cache)
+  const cost = useMemo(() => (data ? costTotal(data) : null), [data])
 
   return (
     <Dlg open={open} onClose={onClose} title={t('usage.title')} icon="usage" size="l" still backdrop focus="[data-usage-close]" closeProps={{ 'data-usage-close': '' }} data-usage-dialog
       onKeyDown={e => { if (escapeCloses(e)) { e.preventDefault(); e.stopPropagation(); onClose() } }}
       start={data ? <span className="oc-us-range"><span data-usage-range>{range}</span><DlgTip name={t('usage.window')}>{t('usage.range', range)}</DlgTip></span> : null}
-      actions={<button type="button" className="oc-btn" onClick={onClose}>{t('dlg.close')}</button>}>
+      >
       <div className="oc-us-controls">
-        <Seg label={t('usage.window')} items={windows} value={kind} attr="data-usage-window" onPick={k => { setKind(k); setDay(null) }} />
-        <Seg label={t('usage.metricLabel')} items={metrics} value={metric} attr="data-usage-metric" onPick={setMetric} />
+        <div className="oc-us-cl"><span className="oc-us-ct" data-usage-label="window">{t('usage.window')}</span><Seg label={t('usage.window')} items={windows} value={kind} attr="data-usage-window" onPick={k => { setKind(k); setDay(null) }} /></div>
+        <div className="oc-us-cl"><span className="oc-us-ct" data-usage-label="metric">{t('usage.metricLabel')}</span><Seg label={t('usage.metricLabel')} items={metrics} value={metric} attr="data-usage-metric" onPick={setMetric} /></div>
+        <ul className="oc-us-key" aria-label={t('usage.split')} data-usage-key>
+          {['in', 'out', ...(metric === 'all' ? ['cache'] : [])].map(k => <li key={k}><i className={`s-${k}`} aria-hidden="true" />{t(`usage.part.${k === 'in' ? 'input' : k === 'out' ? 'output' : 'cache'}`)}</li>)}
+        </ul>
       </div>
       {!usageServed ? <Notice tone="neutral" icon="info" data-usage-state="unserved">{t('usage.unserved')}</Notice> : null}
       {usageServed && !data && usage.isError ? <Notice tone="bad" icon="alert" data-usage-state="error">{t('usage.error')}</Notice> : null}
-      {usageServed && !data && !usage.isError ? <p className="oc-dg-busy" data-usage-state="loading"><span className="oc-dg-spin" aria-hidden="true" />{t('usage.loading')}</p> : null}
+      {usageServed && !data && !usage.isError ? <p className="oc-dg-busy" role="status" data-usage-state="loading"><span className="oc-dg-spin" aria-hidden="true" />{t('usage.loading')}</p> : null}
+      {usageServed && !data && !usage.isError ? <Skeleton id={id} t={t} /> : null}
       {data ? (
         <>
           {partial.length ? <Notice tone="warn" icon="alert" role="status" data-usage-partial>{t('usage.partial', partial.map(p => p.source).join(', '))}</Notice> : null}
           {!tot ? <Notice tone="neutral" icon="info" data-usage-none>{agents.absent ? t('usage.noneAbsent', agents.absent) : t('usage.none')}</Notice> : (
             <div className="oc-us-top">
               <div className="oc-us-tiles" role="group" aria-label={t('usage.title')}>
+                {cost ? <CostTile cost={cost} t={t} /> : null}
                 <Tile id="tokens" icon="tokens" value={tokenLabel(tot.parts?.total ?? null, t.lang)} exact={nf(tot.parts?.total ?? null)} label={t(`usage.tile.tokens.${metric}`)} note={tot.incomplete ? t('usage.incomplete') : null} t={t} />
                 <Tile id="calls" icon="calls" value={nf(tot.calls)} exact={tot.calls != null ? String(tot.calls) : null} label={t('usage.tile.calls')} t={t} />
                 <Tile id="sessions" icon="sessions" value={nf(tot.sessions)} exact={tot.sessions != null ? String(tot.sessions) : null} label={t('usage.tile.sessions')} t={t} />
@@ -232,7 +271,7 @@ export function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
                       {r.state === 'ok' ? (tokenLabel(r.parts?.total ?? null, t.lang) ?? t('usage.absent')) : r.state === 'none' ? t('usage.noSession') : t(`usage.reason.${r.reason ?? 'missing'}`)}
                     </span>
                     <span className="oc-faint oc-us-sub">
-                      {r.state === 'ok' ? <>{t('usage.agents.calls', nf(r.calls) ?? t('usage.absent'), nf(r.sessions) ?? t('usage.absent'))} · <Cost cost={r.cost} t={t} /></> : null}
+                      {r.state === 'ok' ? <>{t('usage.agents.calls', nf(r.calls), nf(r.sessions))} · <Cost cost={r.cost} t={t} /></> : null}
                     </span>
                   </li>
                 ))}
@@ -286,7 +325,7 @@ export function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
       {usageServed ? (
         <section className="oc-us-sec" aria-labelledby={`${id}-q`} data-usage-section="quota">
           <h3 id={`${id}-q`}>{t('usage.quota.title')}</h3>
-          <Quota quota={quota} query={quotaQ} t={t} />
+          <Quota quota={quota} query={quotaQ} t={t} usage={data ? 'ok' : usage.isError ? 'error' : 'loading'} />
           {balance ? (
             <div className="oc-us-balance" data-usage-balance>
               <p><b>{t('usage.balance.title')}</b>{balance.plan ? ` · ${balance.plan}` : ''}<DlgTip name={t('usage.balance.title')}>{t('usage.balance.note')}</DlgTip></p>

@@ -1053,7 +1053,7 @@ export const es = {
     title: 'Recursos',
     window: 'Periodo',
     metricLabel: 'Recuento',
-    win: { '24h': 'Últimas 24 h', '7d': '7 días', '30d': '30 días' },
+    win: { '24h': '24 h', '7d': '7 días', '30d': '30 días' },
     metric: { fresh: 'Entrada + salida', all: 'Con caché' },
     metricTip: { fresh: 'Tokens leídos (entrada) y escritos (salida) por los modelos', all: 'Añade los tokens servidos por la caché del proveedor (leídos y escritos)' },
     unserved: 'El uso necesita la parte Agente de Officecraft, actualizada y reiniciada con el gateway.',
@@ -1063,7 +1063,13 @@ export const es = {
     partial: s => `Algunas fuentes no respondieron (${s}): sus cifras faltan, no son cero.`,
     none: 'Ninguna sesión con una llamada registrada en este periodo.',
     noneAbsent: n => `Ningún uso registrado en este periodo (${n} agente${n === 1 ? '' : 's'} sin datos de uso).`,
-    tile: { tokens: { fresh: 'tokens, entrada + salida', all: 'tokens, con caché' }, calls: 'llamadas al modelo', sessions: 'sesiones' },
+    tile: {
+      tokens: { fresh: 'tokens, entrada + salida', all: 'tokens, con caché' }, calls: 'llamadas al modelo', sessions: 'sesiones',
+      cost: 'coste estimado',
+      costValue: usd => `${usd} $`,
+      costRoutes: n => `+ ${n} ${n === 1 ? 'ruta sin precio' : 'rutas sin precio'}`,
+      costNoDetail: n => `${n} ${n === 1 ? 'agente sin desglose' : 'agentes sin desglose'}`
+    },
     incomplete: 'un mínimo: algunos recuentos no se registraron',
     split: 'Desglose de tokens',
     part: { input: 'entrada', output: 'salida', cache: 'caché' },
@@ -1090,7 +1096,7 @@ export const es = {
       error: 'No se pudieron leer los días.',
       note: 'Hermes no fecha los tokens llamada a llamada: una sesión cuenta el día en que empezó.'
     },
-    agents: { title: 'Por agente', calls: (c, s) => `llamadas ${c} · sesiones ${s}`, none: 'Ningún agente.' },
+    agents: { title: 'Por agente', calls: (c, s) => `${c == null ? 'llamadas no registradas' : `${c} ${isOne(c) ? 'llamada' : 'llamadas'}`} · ${s == null ? 'sesiones no registradas' : `${s} ${isOne(s) ? 'sesión' : 'sesiones'}`}`, none: 'Ningún agente.' },
     cost: {
       none: 'sin dato de coste',
       unpriced: 'precio desconocido',
@@ -1127,7 +1133,8 @@ export const es = {
       resetPast: 'hora de reinicio pasada, la lectura se actualizará',
       noReset: 'hora de reinicio desconocida',
       none: list => `Hermes aún no informa de cuota para ${list} (la primera lectura de una sesión puede estar vacía). No se muestra nada: mejor eso que un 0 % falso.`,
-      noRoute: 'Ninguna ruta de la que informar una cuota.',
+      noRoute: 'Ningún proveedor usado en el periodo expone una cuota.',
+      needsUsage: 'La cuota se lee para los proveedores usados: primero hay que leer el consumo.',
       some: list => `Sin cuota informada para: ${list}.`,
       readAt: at => `Leído a las ${at}`,
       note: at => `La cuota de la cuenta, no la de un agente. Leída de Hermes a las ${at}, actualizada cada 2 minutos como máximo.`

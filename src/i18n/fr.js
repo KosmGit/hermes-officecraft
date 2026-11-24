@@ -1056,7 +1056,7 @@ export const fr = {
     title: 'Ressources',
     window: 'Période',
     metricLabel: 'Décompte',
-    win: { '24h': '24 dernières h', '7d': '7 jours', '30d': '30 jours' },
+    win: { '24h': '24 h', '7d': '7 jours', '30d': '30 jours' },
     metric: { fresh: 'Entrée + sortie', all: 'Avec le cache' },
     metricTip: { fresh: 'Jetons lus (entrée) et écrits (sortie) par les modèles', all: 'Ajoute les jetons servis par le cache du fournisseur (lus et écrits)' },
     unserved: 'Les données de consommation nécessitent la partie agent d’Officecraft, à jour et redémarrée avec le gateway.',
@@ -1066,7 +1066,13 @@ export const fr = {
     partial: s => `Certaines sources n’ont pas répondu (${s}) : leurs chiffres manquent, ce qui ne veut pas dire zéro.`,
     none: 'Aucune session avec un appel enregistré sur cette période.',
     noneAbsent: n => `Aucune consommation enregistrée sur cette période (${n} agent${n === 1 ? '' : 's'} sans données de consommation).`,
-    tile: { tokens: { fresh: 'jetons, entrée + sortie', all: 'jetons, avec le cache' }, calls: 'appels au modèle', sessions: 'sessions' },
+    tile: {
+      tokens: { fresh: 'jetons, entrée + sortie', all: 'jetons, avec le cache' }, calls: 'appels au modèle', sessions: 'sessions',
+      cost: 'coût estimé',
+      costValue: usd => `${usd} $`,
+      costRoutes: n => `+ ${n} ${n === 1 ? 'route sans prix' : 'routes sans prix'}`,
+      costNoDetail: n => `${n} ${n === 1 ? 'agent sans ventilation' : 'agents sans ventilation'}`
+    },
     incomplete: 'un minimum : certains décomptes n’ont pas été enregistrés',
     split: 'Répartition des jetons',
     part: { input: 'entrée', output: 'sortie', cache: 'cache' },
@@ -1093,7 +1099,7 @@ export const fr = {
       error: 'Les jours n’ont pas pu être lus.',
       note: 'Hermes ne date pas les jetons appel par appel : une session compte le jour où elle a démarré.'
     },
-    agents: { title: 'Par agent', calls: (c, s) => `appels ${c} · sessions ${s}`, none: 'Aucun agent.' },
+    agents: { title: 'Par agent', calls: (c, s) => `${c == null ? 'appels non enregistrés' : `${c} ${isOne(c) ? 'appel' : 'appels'}`} · ${s == null ? 'sessions non enregistrées' : `${s} ${isOne(s) ? 'session' : 'sessions'}`}`, none: 'Aucun agent.' },
     cost: {
       none: 'pas de donnée de coût',
       unpriced: 'prix inconnu',
@@ -1130,7 +1136,8 @@ export const fr = {
       resetPast: 'heure de réinitialisation passée, la lecture va se mettre à jour',
       noReset: 'heure de réinitialisation inconnue',
       none: list => `Hermes n’indique pas encore de quota pour ${list} (la première lecture d’une session peut être vide). Rien n’est affiché plutôt que 0 %.`,
-      noRoute: 'Aucune route pour laquelle afficher un quota.',
+      noRoute: 'Aucun fournisseur utilisé sur la période n’expose de quota.',
+      needsUsage: 'Le quota se lit pour les fournisseurs utilisés : la consommation doit d’abord être lue.',
       some: list => `Pas de quota indiqué pour : ${list}.`,
       readAt: at => `Lu à ${at}`,
       note: at => `Le quota du compte, pas celui d’un agent. Lu auprès de Hermes à ${at}, actualisé toutes les 2 minutes au plus.`

@@ -5838,7 +5838,7 @@ var en = {
     title: "Resources",
     window: "Period",
     metricLabel: "Count",
-    win: { "24h": "Last 24 h", "7d": "7 days", "30d": "30 days" },
+    win: { "24h": "24 h", "7d": "7 days", "30d": "30 days" },
     metric: { fresh: "Input + output", all: "With cache" },
     metricTip: { fresh: "Tokens read (input) and written (output) by the models", all: "Adds the tokens the provider served from its cache (read and written)" },
     unserved: "Usage needs an up-to-date Officecraft agent half. Update the plugin, then restart the gateway.",
@@ -5848,7 +5848,15 @@ var en = {
     partial: (s) => `Some sources did not answer (${s}): their numbers are missing, not zero.`,
     none: "No session with a recorded call in this period.",
     noneAbsent: (n) => `No usage recorded for this period (${n} agent${n === 1 ? "" : "s"} with no usage database).`,
-    tile: { tokens: { fresh: "tokens, input + output", all: "tokens, with cache" }, calls: "model calls", sessions: "sessions" },
+    tile: {
+      tokens: { fresh: "tokens, input + output", all: "tokens, with cache" },
+      calls: "model calls",
+      sessions: "sessions",
+      cost: "estimated cost",
+      costValue: (usd) => `$${usd}`,
+      costRoutes: (n) => `+ ${n} ${n === 1 ? "route without a price" : "routes without a price"}`,
+      costNoDetail: (n) => `${n} ${n === 1 ? "agent without a breakdown" : "agents without a breakdown"}`
+    },
     incomplete: "a lower bound: some counts were not recorded",
     split: "Token breakdown",
     part: { input: "input", output: "output", cache: "cache" },
@@ -5875,7 +5883,7 @@ var en = {
       error: "The days could not be read.",
       note: "Hermes does not timestamp tokens per call, so a session counts toward the day it started."
     },
-    agents: { title: "By agent", calls: (c, s) => `calls ${c} · sessions ${s}`, none: "No agents." },
+    agents: { title: "By agent", calls: (c, s) => `${c == null ? "calls not recorded" : `${c} ${isOne(c) ? "call" : "calls"}`} · ${s == null ? "sessions not recorded" : `${s} ${isOne(s) ? "session" : "sessions"}`}`, none: "No agents." },
     cost: {
       none: "no cost data",
       unpriced: "price unknown",
@@ -5912,7 +5920,8 @@ var en = {
       resetPast: "reset time has passed; the reading will update",
       noReset: "reset time unknown",
       none: (list) => `Hermes reports no quota for ${list} yet (the first reading of a session can be empty). Nothing is shown, rather than 0%.`,
-      noRoute: "No route to report a quota for.",
+      noRoute: "No provider used in this period exposes a quota.",
+      needsUsage: "The quota is read for the providers that were used: the usage has to be read first.",
       some: (list) => `No quota reported for: ${list}.`,
       readAt: (at) => `Read at ${at}`,
       note: (at) => `The account’s quota, not an agent’s. Read from Hermes at ${at}, refreshed at most every 2 minutes.`
@@ -7572,7 +7581,7 @@ var es = {
     title: "Recursos",
     window: "Periodo",
     metricLabel: "Recuento",
-    win: { "24h": "Últimas 24 h", "7d": "7 días", "30d": "30 días" },
+    win: { "24h": "24 h", "7d": "7 días", "30d": "30 días" },
     metric: { fresh: "Entrada + salida", all: "Con caché" },
     metricTip: { fresh: "Tokens leídos (entrada) y escritos (salida) por los modelos", all: "Añade los tokens servidos por la caché del proveedor (leídos y escritos)" },
     unserved: "El uso necesita la parte Agente de Officecraft, actualizada y reiniciada con el gateway.",
@@ -7582,7 +7591,15 @@ var es = {
     partial: (s) => `Algunas fuentes no respondieron (${s}): sus cifras faltan, no son cero.`,
     none: "Ninguna sesión con una llamada registrada en este periodo.",
     noneAbsent: (n) => `Ningún uso registrado en este periodo (${n} agente${n === 1 ? "" : "s"} sin datos de uso).`,
-    tile: { tokens: { fresh: "tokens, entrada + salida", all: "tokens, con caché" }, calls: "llamadas al modelo", sessions: "sesiones" },
+    tile: {
+      tokens: { fresh: "tokens, entrada + salida", all: "tokens, con caché" },
+      calls: "llamadas al modelo",
+      sessions: "sesiones",
+      cost: "coste estimado",
+      costValue: (usd) => `${usd} $`,
+      costRoutes: (n) => `+ ${n} ${n === 1 ? "ruta sin precio" : "rutas sin precio"}`,
+      costNoDetail: (n) => `${n} ${n === 1 ? "agente sin desglose" : "agentes sin desglose"}`
+    },
     incomplete: "un mínimo: algunos recuentos no se registraron",
     split: "Desglose de tokens",
     part: { input: "entrada", output: "salida", cache: "caché" },
@@ -7609,7 +7626,7 @@ var es = {
       error: "No se pudieron leer los días.",
       note: "Hermes no fecha los tokens llamada a llamada: una sesión cuenta el día en que empezó."
     },
-    agents: { title: "Por agente", calls: (c, s) => `llamadas ${c} · sesiones ${s}`, none: "Ningún agente." },
+    agents: { title: "Por agente", calls: (c, s) => `${c == null ? "llamadas no registradas" : `${c} ${isOne(c) ? "llamada" : "llamadas"}`} · ${s == null ? "sesiones no registradas" : `${s} ${isOne(s) ? "sesión" : "sesiones"}`}`, none: "Ningún agente." },
     cost: {
       none: "sin dato de coste",
       unpriced: "precio desconocido",
@@ -7646,7 +7663,8 @@ var es = {
       resetPast: "hora de reinicio pasada, la lectura se actualizará",
       noReset: "hora de reinicio desconocida",
       none: (list) => `Hermes aún no informa de cuota para ${list} (la primera lectura de una sesión puede estar vacía). No se muestra nada: mejor eso que un 0 % falso.`,
-      noRoute: "Ninguna ruta de la que informar una cuota.",
+      noRoute: "Ningún proveedor usado en el periodo expone una cuota.",
+      needsUsage: "La cuota se lee para los proveedores usados: primero hay que leer el consumo.",
       some: (list) => `Sin cuota informada para: ${list}.`,
       readAt: (at) => `Leído a las ${at}`,
       note: (at) => `La cuota de la cuenta, no la de un agente. Leída de Hermes a las ${at}, actualizada cada 2 minutos como máximo.`
@@ -9307,7 +9325,7 @@ var fr = {
     title: "Ressources",
     window: "Période",
     metricLabel: "Décompte",
-    win: { "24h": "24 dernières h", "7d": "7 jours", "30d": "30 jours" },
+    win: { "24h": "24 h", "7d": "7 jours", "30d": "30 jours" },
     metric: { fresh: "Entrée + sortie", all: "Avec le cache" },
     metricTip: { fresh: "Jetons lus (entrée) et écrits (sortie) par les modèles", all: "Ajoute les jetons servis par le cache du fournisseur (lus et écrits)" },
     unserved: "Les données de consommation nécessitent la partie agent d’Officecraft, à jour et redémarrée avec le gateway.",
@@ -9317,7 +9335,15 @@ var fr = {
     partial: (s) => `Certaines sources n’ont pas répondu (${s}) : leurs chiffres manquent, ce qui ne veut pas dire zéro.`,
     none: "Aucune session avec un appel enregistré sur cette période.",
     noneAbsent: (n) => `Aucune consommation enregistrée sur cette période (${n} agent${n === 1 ? "" : "s"} sans données de consommation).`,
-    tile: { tokens: { fresh: "jetons, entrée + sortie", all: "jetons, avec le cache" }, calls: "appels au modèle", sessions: "sessions" },
+    tile: {
+      tokens: { fresh: "jetons, entrée + sortie", all: "jetons, avec le cache" },
+      calls: "appels au modèle",
+      sessions: "sessions",
+      cost: "coût estimé",
+      costValue: (usd) => `${usd} $`,
+      costRoutes: (n) => `+ ${n} ${n === 1 ? "route sans prix" : "routes sans prix"}`,
+      costNoDetail: (n) => `${n} ${n === 1 ? "agent sans ventilation" : "agents sans ventilation"}`
+    },
     incomplete: "un minimum : certains décomptes n’ont pas été enregistrés",
     split: "Répartition des jetons",
     part: { input: "entrée", output: "sortie", cache: "cache" },
@@ -9344,7 +9370,7 @@ var fr = {
       error: "Les jours n’ont pas pu être lus.",
       note: "Hermes ne date pas les jetons appel par appel : une session compte le jour où elle a démarré."
     },
-    agents: { title: "Par agent", calls: (c, s) => `appels ${c} · sessions ${s}`, none: "Aucun agent." },
+    agents: { title: "Par agent", calls: (c, s) => `${c == null ? "appels non enregistrés" : `${c} ${isOne(c) ? "appel" : "appels"}`} · ${s == null ? "sessions non enregistrées" : `${s} ${isOne(s) ? "session" : "sessions"}`}`, none: "Aucun agent." },
     cost: {
       none: "pas de donnée de coût",
       unpriced: "prix inconnu",
@@ -9381,7 +9407,8 @@ var fr = {
       resetPast: "heure de réinitialisation passée, la lecture va se mettre à jour",
       noReset: "heure de réinitialisation inconnue",
       none: (list) => `Hermes n’indique pas encore de quota pour ${list} (la première lecture d’une session peut être vide). Rien n’est affiché plutôt que 0 %.`,
-      noRoute: "Aucune route pour laquelle afficher un quota.",
+      noRoute: "Aucun fournisseur utilisé sur la période n’expose de quota.",
+      needsUsage: "Le quota se lit pour les fournisseurs utilisés : la consommation doit d’abord être lue.",
       some: (list) => `Pas de quota indiqué pour : ${list}.`,
       readAt: (at) => `Lu à ${at}`,
       note: (at) => `Le quota du compte, pas celui d’un agent. Lu auprès de Hermes à ${at}, actualisé toutes les 2 minutes au plus.`
@@ -15037,7 +15064,8 @@ var ICONS = {
   user: "M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z M4 21v-1a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v1",
   alert: "M12 4l9 16H3Z M12 10v4 M12 17h.01",
   info: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M12 11v5 M12 8h.01",
-  campaign: "M12 3l9 5-9 5-9-5Z M3 13l9 5 9-5"
+  campaign: "M12 3l9 5-9 5-9-5Z M3 13l9 5 9-5",
+  coin: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M14.500 9.500c-.5-1-1.500-1.500-2.500-1.500-1.400 0-2.500.8-2.500 2s1 1.700 2.500 2 2.500.8 2.500 2-1.100 2-2.500 2c-1 0-2-.5-2.500-1.500 M12 6.500V8 M12 16v1.500"
 };
 function DlgIcon({ id, size = 16 }) {
   return /* @__PURE__ */ jsx4("svg", { viewBox: "0 0 24 24", width: size, height: size, "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx4("path", { d: ICONS[id] ?? ICONS.spark }) });
@@ -22648,6 +22676,14 @@ function costOf(lines) {
   if (unpriced) return { kind: "mixed", usd: null, pricedUsd: sum, unpriced, source };
   return { kind: "priced", usd: sum, pricedUsd: sum, unpriced: 0, source };
 }
+function costTotal(usage) {
+  const profiles = (usage?.profiles ?? []).filter((p) => rowState(p) === "ok");
+  const lines = profiles.flatMap((p) => p.models ?? []);
+  const c = costOf(lines);
+  const unknown = new Set(lines.filter((l) => !(l.priced && l.usd != null)).map((l) => `${l.provider}\0${l.model}`));
+  const noDetail = profiles.filter((p) => p.models == null).length;
+  return { ...c, routes: unknown.size, noDetail, partial: c.kind === "mixed" || c.kind === "priced" && noDetail > 0 };
+}
 function agentRows(usage, metric = "fresh") {
   const rows = (usage?.profiles ?? []).map((p) => ({
     profile: p.profile,
@@ -22994,34 +23030,76 @@ function Donut({ parts: parts2, total, t }) {
     ] }, key)) })
   ] });
 }
+function CostTile({ cost, t }) {
+  const note = cost.kind === "none" ? null : [cost.routes ? t("usage.tile.costRoutes", cost.routes) : null, cost.noDetail ? t("usage.tile.costNoDetail", cost.noDetail) : null].filter(Boolean).join(" · ") || null;
+  const value = cost.kind === "priced" || cost.kind === "mixed" ? t("usage.tile.costValue", usdLabel(cost.kind === "priced" ? cost.usd : cost.pricedUsd, t.lang)) : null;
+  return /* @__PURE__ */ jsxs34("div", { className: "oc-us-tile cost", "data-usage-tile": "cost", "data-cost-kind": cost.kind, "data-partial": cost.partial ? "" : void 0, "data-value": value ?? "", children: [
+    /* @__PURE__ */ jsx38("span", { className: "oc-us-tico", children: /* @__PURE__ */ jsx38(DlgIcon, { id: "coin", size: 16 }) }),
+    /* @__PURE__ */ jsx38("b", { title: t("usage.cost.estTip", cost.source || "—"), children: value ?? t(cost.kind === "none" ? "usage.absent" : "usage.cost.unpriced") }),
+    /* @__PURE__ */ jsx38("span", { children: t("usage.tile.cost") }),
+    note ? /* @__PURE__ */ jsx38("small", { className: "oc-faint", "data-cost-note": true, children: note }) : null
+  ] });
+}
+function Skeleton({ id, t }) {
+  return /* @__PURE__ */ jsxs34(Fragment19, { children: [
+    /* @__PURE__ */ jsx38("div", { className: "oc-us-top", "data-usage-skeleton": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx38("div", { className: "oc-us-tiles", children: [0, 1, 2, 3].map((k) => /* @__PURE__ */ jsx38("div", { className: "oc-us-tile sk" }, k)) }) }),
+    /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-d`, "data-usage-section": "days", children: [
+      /* @__PURE__ */ jsx38("h3", { id: `${id}-d`, children: t("usage.days.title") }),
+      /* @__PURE__ */ jsx38("div", { className: "oc-us-sk chart", "aria-hidden": "true" })
+    ] }),
+    /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-a`, "data-usage-section": "agents", children: [
+      /* @__PURE__ */ jsx38("h3", { id: `${id}-a`, children: t("usage.agents.title") }),
+      /* @__PURE__ */ jsxs34("div", { className: "oc-us-sk rows", "aria-hidden": "true", children: [
+        /* @__PURE__ */ jsx38("i", {}),
+        /* @__PURE__ */ jsx38("i", {}),
+        /* @__PURE__ */ jsx38("i", {})
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-m`, "data-usage-section": "models", children: [
+      /* @__PURE__ */ jsx38("h3", { id: `${id}-m`, children: t("usage.models.title") }),
+      /* @__PURE__ */ jsxs34("div", { className: "oc-us-sk rows", "aria-hidden": "true", children: [
+        /* @__PURE__ */ jsx38("i", {}),
+        /* @__PURE__ */ jsx38("i", {})
+      ] })
+    ] })
+  ] });
+}
 function Days({ series, metric, t, selected, onSelect }) {
   const totals = series.map((d) => d.parts?.total ?? null);
   const peak = peakOf(totals);
+  const plotted = series.some((d) => d.state === "ok");
   const label = (ms2) => new Date(ms2).toLocaleDateString(t.lang, { weekday: "short", day: "numeric" });
   const sel = selected != null ? series[selected] : null;
   return /* @__PURE__ */ jsxs34("div", { "data-usage-days": true, children: [
-    /* @__PURE__ */ jsx38("div", { className: "oc-us-days", role: "group", "aria-label": t("usage.days.title"), "data-n": series.length, style: { "--n": series.length }, children: series.map((d, i) => {
-      const sparse = series.length > 10;
-      const axis = !sparse || (series.length - 1 - i) % 5 === 0;
-      const h = share(d.parts?.total ?? null, peak);
-      const text3 = d.state === "ok" ? `${t("usage.days.bar", label(d.fromMs), exactLabel(d.parts.total, t.lang))} (${t(`usage.metric.${metric}`)})` : d.state === "none" ? t("usage.days.none", label(d.fromMs)) : t("usage.days.failed", label(d.fromMs));
-      return /* @__PURE__ */ jsxs34("button", { type: "button", className: "oc-us-day", "data-day-state": d.state, "data-day-total": d.parts?.total ?? "", "aria-label": text3, "aria-pressed": selected === i, onClick: () => onSelect(selected === i ? null : i), children: [
-        /* @__PURE__ */ jsx38("span", { className: "oc-us-col", "aria-hidden": "true", children: d.state === "ok" ? /* @__PURE__ */ jsxs34("span", { className: "oc-us-colfill", style: { height: `${h * 100}%` }, children: [
-          d.parts.cache ? /* @__PURE__ */ jsx38("i", { className: "s-cache", style: { flexGrow: d.parts.cache } }) : null,
-          d.parts.output ? /* @__PURE__ */ jsx38("i", { className: "s-out", style: { flexGrow: d.parts.output } }) : null,
-          d.parts.input ? /* @__PURE__ */ jsx38("i", { className: "s-in", style: { flexGrow: d.parts.input } }) : null
-        ] }) : /* @__PURE__ */ jsx38("span", { className: `oc-us-gap${d.state === "failed" ? " fail" : ""}` }) }),
-        /* @__PURE__ */ jsx38("span", { className: "oc-us-val", "aria-hidden": "true", children: sparse ? null : d.state === "ok" ? tokenLabel(d.parts.total, t.lang) : d.state === "none" ? "·" : "?" }),
-        /* @__PURE__ */ jsx38("span", { className: "oc-us-lab", "aria-hidden": "true", children: axis ? sparse ? new Date(d.fromMs).getDate() : label(d.fromMs) : " " })
-      ] }, d.fromMs);
-    }) }),
-    /* @__PURE__ */ jsx38("p", { className: "oc-faint oc-us-daynote", role: "status", "data-usage-day-note": true, children: sel ? sel.state === "ok" ? `${t("usage.days.detail", label(sel.fromMs), exactLabel(sel.parts.total, t.lang))} · ${t("usage.agents.calls", exactLabel(sel.calls, t.lang) ?? t("usage.absent"), exactLabel(sel.sessions, t.lang) ?? t("usage.absent"))}` : sel.state === "none" ? t("usage.days.none", label(sel.fromMs)) : t("usage.days.failed", label(sel.fromMs)) : "" })
+    /* @__PURE__ */ jsxs34("div", { className: "oc-us-chart", children: [
+      plotted ? /* @__PURE__ */ jsxs34("div", { className: "oc-us-yaxis", "aria-hidden": "true", "data-usage-axis": true, children: [
+        /* @__PURE__ */ jsx38("span", { className: "top", "data-usage-max": true, children: tokenLabel(peak, t.lang) }),
+        /* @__PURE__ */ jsx38("span", { className: "mid", children: tokenLabel(peak / 2, t.lang) })
+      ] }) : /* @__PURE__ */ jsx38("span", {}),
+      /* @__PURE__ */ jsx38("div", { className: "oc-us-days", role: "group", "aria-label": t("usage.days.title"), "data-n": series.length, style: { "--n": series.length }, children: series.map((d, i) => {
+        const sparse = series.length > 10;
+        const axis = !sparse || (series.length - 1 - i) % 5 === 0;
+        const h = share(d.parts?.total ?? null, peak);
+        const text3 = d.state === "ok" ? `${t("usage.days.bar", label(d.fromMs), exactLabel(d.parts.total, t.lang))} (${t(`usage.metric.${metric}`)})` : d.state === "none" ? t("usage.days.none", label(d.fromMs)) : t("usage.days.failed", label(d.fromMs));
+        return /* @__PURE__ */ jsxs34("button", { type: "button", className: "oc-us-day", "data-day-state": d.state, "data-day-total": d.parts?.total ?? "", "aria-label": text3, "aria-pressed": selected === i, onClick: () => onSelect(selected === i ? null : i), children: [
+          /* @__PURE__ */ jsx38("span", { className: "oc-us-col", "aria-hidden": "true", children: d.state === "ok" ? /* @__PURE__ */ jsxs34("span", { className: "oc-us-colfill", style: { height: `${h * 100}%` }, children: [
+            d.parts.cache ? /* @__PURE__ */ jsx38("i", { className: "s-cache", style: { flexGrow: d.parts.cache } }) : null,
+            d.parts.output ? /* @__PURE__ */ jsx38("i", { className: "s-out", style: { flexGrow: d.parts.output } }) : null,
+            d.parts.input ? /* @__PURE__ */ jsx38("i", { className: "s-in", style: { flexGrow: d.parts.input } }) : null
+          ] }) : /* @__PURE__ */ jsx38("span", { className: `oc-us-gap${d.state === "failed" ? " fail" : ""}` }) }),
+          /* @__PURE__ */ jsx38("span", { className: "oc-us-val", "aria-hidden": "true", children: sparse ? null : d.state === "ok" ? tokenLabel(d.parts.total, t.lang) : d.state === "none" ? "·" : "?" }),
+          /* @__PURE__ */ jsx38("span", { className: "oc-us-lab", "aria-hidden": "true", children: axis ? sparse ? new Date(d.fromMs).getDate() : label(d.fromMs) : " " })
+        ] }, d.fromMs);
+      }) })
+    ] }),
+    /* @__PURE__ */ jsx38("p", { className: "oc-faint oc-us-daynote", role: "status", "data-usage-day-note": true, children: sel ? sel.state === "ok" ? `${t("usage.days.detail", label(sel.fromMs), exactLabel(sel.parts.total, t.lang))} · ${t("usage.agents.calls", exactLabel(sel.calls, t.lang), exactLabel(sel.sessions, t.lang))}` : sel.state === "none" ? t("usage.days.none", label(sel.fromMs)) : t("usage.days.failed", label(sel.fromMs)) : "" })
   ] });
 }
-function Quota({ quota, query, t }) {
+function Quota({ quota, query, t, usage }) {
   const nowMs = Date.now();
   if (query.isError && !query.data) return /* @__PURE__ */ jsx38("p", { className: "oc-hint oc-dashed", "data-usage-quota": "error", children: t("usage.quota.error") });
-  if (!query.data) return /* @__PURE__ */ jsx38("p", { className: "oc-hint", "data-usage-quota": "loading", children: t("usage.loading") });
+  if (usage === "error") return /* @__PURE__ */ jsx38("p", { className: "oc-hint oc-dashed", "data-usage-quota": "waiting", children: t("usage.quota.needsUsage") });
+  if (!query.data || usage !== "ok") return /* @__PURE__ */ jsx38("p", { className: "oc-hint", "data-usage-quota": "loading", children: t("usage.loading") });
   if (!query.data.options) return /* @__PURE__ */ jsx38("p", { className: "oc-hint oc-dashed", "data-usage-quota": "error", children: t("usage.quota.error") });
   const read2 = clockLabel(query.data.atMs, t.lang, { day: false });
   return /* @__PURE__ */ jsxs34("div", { "data-usage-quota": quota.groups.length ? "ok" : "absent", children: [
@@ -23088,6 +23166,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
   const windows = USAGE_WINDOWS.map((k) => [k, t(`usage.win.${WIN_KEY[k]}`)]);
   const metrics = USAGE_METRICS.map((m) => [m, t(`usage.metric.${m}`), false, t(`usage.metricTip.${m}`)]);
   const hasSplit = tot?.parts && (tot.parts.input || tot.parts.output || tot.parts.cache);
+  const cost = useMemo15(() => data ? costTotal(data) : null, [data]);
   return /* @__PURE__ */ jsxs34(
     Dlg,
     {
@@ -23112,25 +23191,36 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
         /* @__PURE__ */ jsx38("span", { "data-usage-range": true, children: range }),
         /* @__PURE__ */ jsx38(DlgTip, { name: t("usage.window"), children: t("usage.range", range) })
       ] }) : null,
-      actions: /* @__PURE__ */ jsx38("button", { type: "button", className: "oc-btn", onClick: onClose, children: t("dlg.close") }),
       children: [
         /* @__PURE__ */ jsxs34("div", { className: "oc-us-controls", children: [
-          /* @__PURE__ */ jsx38(Seg, { label: t("usage.window"), items: windows, value: kind, attr: "data-usage-window", onPick: (k) => {
-            setKind(k);
-            setDay(null);
-          } }),
-          /* @__PURE__ */ jsx38(Seg, { label: t("usage.metricLabel"), items: metrics, value: metric, attr: "data-usage-metric", onPick: setMetric })
+          /* @__PURE__ */ jsxs34("div", { className: "oc-us-cl", children: [
+            /* @__PURE__ */ jsx38("span", { className: "oc-us-ct", "data-usage-label": "window", children: t("usage.window") }),
+            /* @__PURE__ */ jsx38(Seg, { label: t("usage.window"), items: windows, value: kind, attr: "data-usage-window", onPick: (k) => {
+              setKind(k);
+              setDay(null);
+            } })
+          ] }),
+          /* @__PURE__ */ jsxs34("div", { className: "oc-us-cl", children: [
+            /* @__PURE__ */ jsx38("span", { className: "oc-us-ct", "data-usage-label": "metric", children: t("usage.metricLabel") }),
+            /* @__PURE__ */ jsx38(Seg, { label: t("usage.metricLabel"), items: metrics, value: metric, attr: "data-usage-metric", onPick: setMetric })
+          ] }),
+          /* @__PURE__ */ jsx38("ul", { className: "oc-us-key", "aria-label": t("usage.split"), "data-usage-key": true, children: ["in", "out", ...metric === "all" ? ["cache"] : []].map((k) => /* @__PURE__ */ jsxs34("li", { children: [
+            /* @__PURE__ */ jsx38("i", { className: `s-${k}`, "aria-hidden": "true" }),
+            t(`usage.part.${k === "in" ? "input" : k === "out" ? "output" : "cache"}`)
+          ] }, k)) })
         ] }),
         !usageServed ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", icon: "info", "data-usage-state": "unserved", children: t("usage.unserved") }) : null,
         usageServed && !data && usage.isError ? /* @__PURE__ */ jsx38(Notice, { tone: "bad", icon: "alert", "data-usage-state": "error", children: t("usage.error") }) : null,
-        usageServed && !data && !usage.isError ? /* @__PURE__ */ jsxs34("p", { className: "oc-dg-busy", "data-usage-state": "loading", children: [
+        usageServed && !data && !usage.isError ? /* @__PURE__ */ jsxs34("p", { className: "oc-dg-busy", role: "status", "data-usage-state": "loading", children: [
           /* @__PURE__ */ jsx38("span", { className: "oc-dg-spin", "aria-hidden": "true" }),
           t("usage.loading")
         ] }) : null,
+        usageServed && !data && !usage.isError ? /* @__PURE__ */ jsx38(Skeleton, { id, t }) : null,
         data ? /* @__PURE__ */ jsxs34(Fragment19, { children: [
           partial.length ? /* @__PURE__ */ jsx38(Notice, { tone: "warn", icon: "alert", role: "status", "data-usage-partial": true, children: t("usage.partial", partial.map((p) => p.source).join(", ")) }) : null,
           !tot ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", icon: "info", "data-usage-none": true, children: agents.absent ? t("usage.noneAbsent", agents.absent) : t("usage.none") }) : /* @__PURE__ */ jsxs34("div", { className: "oc-us-top", children: [
             /* @__PURE__ */ jsxs34("div", { className: "oc-us-tiles", role: "group", "aria-label": t("usage.title"), children: [
+              cost ? /* @__PURE__ */ jsx38(CostTile, { cost, t }) : null,
               /* @__PURE__ */ jsx38(Tile, { id: "tokens", icon: "tokens", value: tokenLabel(tot.parts?.total ?? null, t.lang), exact: nf(tot.parts?.total ?? null), label: t(`usage.tile.tokens.${metric}`), note: tot.incomplete ? t("usage.incomplete") : null, t }),
               /* @__PURE__ */ jsx38(Tile, { id: "calls", icon: "calls", value: nf(tot.calls), exact: tot.calls != null ? String(tot.calls) : null, label: t("usage.tile.calls"), t }),
               /* @__PURE__ */ jsx38(Tile, { id: "sessions", icon: "sessions", value: nf(tot.sessions), exact: tot.sessions != null ? String(tot.sessions) : null, label: t("usage.tile.sessions"), t })
@@ -23160,7 +23250,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
               /* @__PURE__ */ jsx38(Bar, { parts: r.parts, peak: agentPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
               /* @__PURE__ */ jsx38("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: r.state === "ok" ? tokenLabel(r.parts?.total ?? null, t.lang) ?? t("usage.absent") : r.state === "none" ? t("usage.noSession") : t(`usage.reason.${r.reason ?? "missing"}`) }),
               /* @__PURE__ */ jsx38("span", { className: "oc-faint oc-us-sub", children: r.state === "ok" ? /* @__PURE__ */ jsxs34(Fragment19, { children: [
-                t("usage.agents.calls", nf(r.calls) ?? t("usage.absent"), nf(r.sessions) ?? t("usage.absent")),
+                t("usage.agents.calls", nf(r.calls), nf(r.sessions)),
                 " · ",
                 /* @__PURE__ */ jsx38(Cost, { cost: r.cost, t })
               ] }) : null })
@@ -23203,7 +23293,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
         ] }) : null,
         usageServed ? /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-q`, "data-usage-section": "quota", children: [
           /* @__PURE__ */ jsx38("h3", { id: `${id}-q`, children: t("usage.quota.title") }),
-          /* @__PURE__ */ jsx38(Quota, { quota, query: quotaQ, t }),
+          /* @__PURE__ */ jsx38(Quota, { quota, query: quotaQ, t, usage: data ? "ok" : usage.isError ? "error" : "loading" }),
           balance ? /* @__PURE__ */ jsxs34("div", { className: "oc-us-balance", "data-usage-balance": true, children: [
             /* @__PURE__ */ jsxs34("p", { children: [
               /* @__PURE__ */ jsx38("b", { children: t("usage.balance.title") }),
@@ -23242,18 +23332,31 @@ var ORANGE7 = "var(--ui-orange, var(--ui-accent))";
 var GREEN6 = "var(--ui-green, var(--ui-accent))";
 var RED6 = "var(--ui-red, var(--destructive, var(--ui-orange)))";
 var TRACK = "color-mix(in oklab, var(--foreground) 9%, transparent)";
+var LINE = "color-mix(in oklab, var(--foreground) 18%, transparent)";
 var USAGE_CSS = `
 /* the window is the shared frame (DialogKit, dialogStyles.js); only what is specific to Resources is here */
 [data-usage-quota]{display:flex;flex-direction:column;gap:12px}
-.oc-us-controls{position:sticky;top:-16px;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-16px -16px 0;padding:12px 16px;background:${CARD};border-bottom:1px solid ${EDGE}}
+.oc-us-controls{position:sticky;top:-16px;z-index:2;display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;margin:-16px -16px 0;padding:12px 16px;background:${CARD};border-bottom:1px solid ${EDGE}}
+.oc-us-cl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.oc-us-ct{font-size:11px;font-weight:600;line-height:16px;color:${SOFT4}}
+/* what the three colours of the bars are, under the controls */
+.oc-us-key{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:4px 16px;margin:0;padding:0;list-style:none;font-size:11px;line-height:16px;color:${SOFT4}}
+.oc-us-key li{display:inline-flex;align-items:center;gap:4px}
+.oc-us-key i{display:inline-block;width:10px;height:10px;border-radius:2px}
 .oc-us-range{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT4}}
 .oc-us-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch}
-.oc-us-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.oc-us-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .oc-us-tile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i v" "l l" "n n";gap:4px 8px;align-items:center;align-content:start;min-width:0;box-sizing:border-box;padding:12px;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--ui-accent) 7%, ${CARD})}
 .oc-us-tico{grid-area:i;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 14%, transparent)}
 .oc-us-tile b{grid-area:v;font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .oc-us-tile > span:not(.oc-us-tico){grid-area:l;font-size:12px;color:${SOFT4}}
 .oc-us-tile small{grid-area:n;font-size:11px}
+.oc-us-tile.cost{border-color:color-mix(in oklab, var(--ui-accent) 40%, ${EDGE});background:color-mix(in oklab, var(--ui-accent) 12%, ${CARD})}
+/* the skeleton: the final order of the sections, blocks that say nothing */
+.oc-us-tile.sk{min-height:72px;border-color:transparent;background:${TRACK}}
+.oc-us-sk.chart{height:112px;border-radius:6px;background:${TRACK}}
+.oc-us-sk.rows{display:flex;flex-direction:column;gap:12px}
+.oc-us-sk.rows i{display:block;height:12px;border-radius:3px;background:${TRACK}}
 /* the split of the tokens: a ring and its three shares */
 .oc-us-split{display:flex;align-items:center;gap:12px;box-sizing:border-box;padding:8px 16px 8px 8px;border:1px solid ${EDGE};border-radius:8px}
 .oc-us-donut{flex:0 0 auto;width:88px;height:88px}
@@ -23288,7 +23391,13 @@ var USAGE_CSS = `
 .oc-us-day:hover{background:color-mix(in oklab, var(--ui-accent) 8%, transparent);border-color:${EDGE}}
 .oc-us-day[aria-pressed="true"]{border-color:var(--ui-accent);background:color-mix(in oklab, var(--ui-accent) 12%, transparent)}
 .oc-us-day:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
-.oc-us-col{display:flex;align-items:flex-end;width:100%;height:112px;border-radius:6px;background:repeating-linear-gradient(to top, transparent 0 27px, color-mix(in oklab, var(--foreground) 8%, transparent) 27px 28px), ${TRACK};overflow:hidden}
+/* the chart: a column of values on the left, a grid on two lines (the highest day, its half) that the figures name */
+.oc-us-chart{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;align-items:start}
+.oc-us-yaxis{position:relative;box-sizing:border-box;height:112px;margin-top:5px;min-width:32px;font-size:11px;line-height:16px;color:${SOFT4};font-variant-numeric:tabular-nums;text-align:right}
+.oc-us-yaxis span{position:absolute;right:0;transform:translateY(-50%);white-space:nowrap}
+.oc-us-yaxis .top{top:0}
+.oc-us-yaxis .mid{top:50%}
+.oc-us-col{display:flex;align-items:flex-end;width:100%;height:112px;border-radius:6px;background:linear-gradient(to bottom, ${LINE} 0 1px, transparent 1px calc(50% - 1px), ${LINE} calc(50% - 1px) 50%, transparent 50%), ${TRACK};overflow:hidden}
 .oc-us-colfill{display:flex;flex-direction:column;width:100%;border-radius:3px 3px 0 0;overflow:hidden}
 .oc-us-colfill i{min-height:1px}
 .oc-us-gap{display:block;width:100%;height:0;border-bottom:2px dotted ${SOFT4}}
@@ -23336,7 +23445,7 @@ var USAGE_CSS = `
 @media (max-width:520px){
   .oc-us-rows li{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n v" "b b" "s s";align-items:baseline}
   .oc-us-controls{top:-12px;margin:-12px -12px 0;padding:8px 12px}
-  .oc-us-tiles{gap:4px}
+  .oc-us-tiles{gap:4px;grid-template-columns:repeat(2,minmax(0,1fr))}
   .oc-us-tile{padding:8px;grid-template-columns:minmax(0,1fr);grid-template-areas:"v" "l" "n"}
   .oc-us-tico{display:none}
   .oc-us-tile b{font-size:20px}
