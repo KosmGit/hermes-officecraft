@@ -3,6 +3,7 @@ import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, use
 
 import { resolveLight } from '../core/daylight.js'
 import { computeGame, decorOf, keepSeenWhilePartial, unlockAnnouncement } from '../core/game.js'
+import { gameInputsKey } from '../core/gamekey.js'
 import { sceneProfiles } from '../core/history.js'
 import { modelOf, withWorkerModels } from '../core/models.js'
 import { withNonEmptySessions } from '../core/roster.js'
@@ -218,7 +219,10 @@ export function OfficePage({ ctx }) {
   const command = useMemo(() => commandDefs(orderJournal.data ?? null, JOURNAL_FETCH), [orderJournal.data])
   // a trophy already seen does not vanish while a source is unreadable (« to be re-checked » until the whole reading is back)
   const unreadable = !history.data?.ok || partialSources(live.data ?? null, history.data ?? null).length > 0
-  const game = useMemo(() => keepSeenWhilePartial(computeGame(history.data ?? null, liveOffice, liveNow, { sober }, command), readSeen(), unreadable), [history.data, liveOffice, liveNow, sober, command, unreadable])
+  // the game is recomputed when what it reads changes (src/core/gamekey.js), not at every /live read: the body carries a timestamp and the
+  // heartbeats move, so the office object is new each time while the game stays the same (40 000 events cost ~90 ms a read, 720 reads an hour)
+  const gameKey = useMemo(() => gameInputsKey(liveOffice, liveNow, history.data ?? null), [liveOffice, liveNow, history.data])
+  const game = useMemo(() => keepSeenWhilePartial(computeGame(history.data ?? null, liveOffice, liveNow, { sober }, command), readSeen(), unreadable), [history.data, gameKey, sober, command, unreadable])   // eslint-disable-line react-hooks/exhaustive-deps
   const gameDecor = useMemo(() => decorOf(game), [game])
   // what the model chose (fiches kept by the agent half), drawn by the engine only while its function is ON, and never in sober
   // mode (« nothing LLM shown »). A role picked by hand still wins over the model's (wardrobe roleOf); the game never sees these roles.
