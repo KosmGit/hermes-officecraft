@@ -259,6 +259,9 @@ test('a replay is read-only: « Open the session » and « Decide » are off, lo
   assert.match(page, /frozen=\{replayOn\}/)
   assert.match(src('ui/SidePanel.jsx'), /onDecide=\{frozen \? null :/)
   assert.match(src('ui/AgentTab.jsx'), /\{onDecide \? <button[^>]*data-decide/)
+  // the reason under the off button is the replay, not « has no session » (a bot with a session would be said to have none)
+  assert.match(src('ui/SidePanel.jsx'), /<AgentTab[\s\S]*?frozen=\{frozen\}/)
+  assert.match(src('ui/AgentTab.jsx'), /const why = frozen \? t\('replay\.noAction'\) : canOpen \?/)
 })
 
 test('the density strip has graduations (hours on a day, days on a week) and a three-word key', () => {

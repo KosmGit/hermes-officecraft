@@ -19185,14 +19185,14 @@ function Roster({ office, sceneBy, project: project2, selected, onPick, t }) {
     ] }) }, a.name)) })
   ] });
 }
-function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, canOpen, grade, project: project2, onPick, onDecide, openKanban: openKanban2, bots = null, orders = null, t }) {
+function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, canOpen, frozen = false, grade, project: project2, onPick, onDecide, openKanban: openKanban2, bots = null, orders = null, t }) {
   const style = useProjectStyle(agent?.home);
   if (!agent) return /* @__PURE__ */ jsx19(Roster, { office, sceneBy, project: project2, selected: null, onPick, t });
   const dressed = roleOf(sceneAgent || agent);
   const outfit = outfitSource(dressed.why);
   const models = modelOf(agent);
   const i = inspectorOf(agent, { nowMs, history, models, roleId: dressed.role, grade });
-  const why = canOpen ? t("openSession", i.label) : t("noSession", i.label);
+  const why = frozen ? t("replay.noAction") : canOpen ? t("openSession", i.label) : t("noSession", i.label);
   const bot = bots?.get(agent.name) ?? null;
   return /* @__PURE__ */ jsxs16("section", { "data-insp": true, "data-agent-of": i.name, "aria-label": t("insp.title"), children: [
     /* @__PURE__ */ jsxs16("div", { className: "ux-ag-h", style, children: [
@@ -19911,6 +19911,7 @@ function SidePanel({
         nowMs,
         onOpen,
         canOpen,
+        frozen,
         grade,
         project: project2,
         onPick,

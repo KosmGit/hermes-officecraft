@@ -67,14 +67,14 @@ function Roster({ office, sceneBy, project, selected, onPick, t }) {
  * the card it runs, the cards that wait for you (one click to decide), its last session, its model and own skills; then « Open the
  * session » (and the kanban when the host can open it).
  */
-export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, canOpen, grade, project, onPick, onDecide, openKanban, bots = null, orders = null, t }) {
+export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, canOpen, frozen = false, grade, project, onPick, onDecide, openKanban, bots = null, orders = null, t }) {
   const style = useProjectStyle(agent?.home)
   if (!agent) return <Roster office={office} sceneBy={sceneBy} project={project} selected={null} onPick={onPick} t={t} />
   const dressed = roleOf(sceneAgent || agent)
   const outfit = outfitSource(dressed.why)   // the outfit the model chose says so, with its source (a manual or rule-based one says nothing new)
   const models = modelOf(agent)
   const i = inspectorOf(agent, { nowMs, history, models, roleId: dressed.role, grade })
-  const why = canOpen ? t('openSession', i.label) : t('noSession', i.label)
+  const why = frozen ? t('replay.noAction') : canOpen ? t('openSession', i.label) : t('noSession', i.label)   // in a replay the button is off because the past is read-only, not for want of a session
   const bot = bots?.get(agent.name) ?? null   // the roster's description of this bot (office.agents do not carry it)
   return (
     <section data-insp data-agent-of={i.name} aria-label={t('insp.title')}>

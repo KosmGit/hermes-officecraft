@@ -41,7 +41,7 @@ export function SidePanel({
   if (tab === 'agent') {
     body = (
       <AgentTab
-        office={office} agent={agent} sceneAgent={sceneAgent} sceneBy={sceneBy} history={history} nowMs={nowMs} onOpen={onOpen} canOpen={canOpen}
+        office={office} agent={agent} sceneAgent={sceneAgent} sceneBy={sceneBy} history={history} nowMs={nowMs} onOpen={onOpen} canOpen={canOpen} frozen={frozen}
         grade={grade} project={project} onPick={onPick} onDecide={frozen ? null : slug => { onProject(slug); onTab('decisions') }} openKanban={openCard?.kanban ?? null}
         bots={bots} orders={answer} t={t}
       />
