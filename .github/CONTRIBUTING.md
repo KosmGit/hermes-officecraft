@@ -10,7 +10,7 @@ Thanks for helping. Bug reports, ideas and pull requests are all welcome.
 ## Setup
 
 ```bash
-npm ci --prefix dev
+npm ci --prefix dev --ignore-scripts
 python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 ```
 

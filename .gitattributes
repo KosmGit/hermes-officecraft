@@ -2,7 +2,6 @@
 
 # the bundle is built from src/: collapsed in diffs, left out of the language statistics
 desktop/plugin.js linguist-generated=true
-dev/package-lock.json linguist-generated=true
 
 *.webp binary
 *.gif binary
