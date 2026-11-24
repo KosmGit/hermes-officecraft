@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { motionReduced } from '../core/daylight.js'
+import { watchDpr } from '../core/dpr.js'
 import { cardProgress, chooseView, countPeople, listZones, sceneFacts, taskTag } from '../core/hud.js'
 import { dateText } from '../core/game.js'
 import { badgeTip, clockText } from '../core/tips.js'
@@ -209,6 +210,8 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+  // the window dragged to a screen of another density changes the ratio without resizing the box: the store must follow
+  useEffect(() => watchDpr(window, setDpr), [])
 
   // decor: what the game layer unlocked (src/core/game.js decorOf); null or sober -> the plain office, no game object
   const fresh = useMemo(() => toSceneModel(office, { nowMs, night, profiles, decor: decor || undefined, seating }), [office, profiles, nowMs, night, decor, seating])
