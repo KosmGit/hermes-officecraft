@@ -15192,7 +15192,7 @@ function DecorDialog({ open, onClose }) {
 }
 
 // src/ui/CampaignDialog.jsx
-import { Fragment as Fragment6, useCallback as useCallback4, useEffect as useEffect10, useId as useId7, useMemo as useMemo4, useReducer as useReducer2, useRef as useRef11, useState as useState9 } from "react";
+import { Fragment as Fragment6, useCallback as useCallback4, useEffect as useEffect10, useId as useId8, useMemo as useMemo4, useReducer as useReducer2, useRef as useRef11, useState as useState9 } from "react";
 
 // src/core/campaignLayout.js
 var GROUP_MIN = 4;
@@ -15788,7 +15788,7 @@ function pricesOf(providers) {
 }
 
 // src/ui/CampaignAssist.jsx
-import { useCallback as useCallback3, useEffect as useEffect6, useMemo, useRef as useRef6, useState as useState5 } from "react";
+import { useCallback as useCallback3, useEffect as useEffect6, useId as useId5, useMemo, useRef as useRef6, useState as useState5 } from "react";
 
 // src/data/llmCampaign.js
 import { useQueryClient as useQueryClient5 } from "@hermes/plugin-sdk";
@@ -16156,6 +16156,7 @@ function Mini({ fiche, colors }) {
 }
 function GraphPanel({ A, draft, colors, onClose }) {
   const t = useT();
+  const fid = useId5();
   const c = A.cg;
   const work = draft.cards.filter((x) => x.kind !== "guard").length;
   const goal = draft.goal.trim();
@@ -16246,10 +16247,10 @@ function GraphPanel({ A, draft, colors, onClose }) {
         /* @__PURE__ */ jsx6("small", { children: [refusal.calls ? t("llm.ref.counted", refusal.calls) : "", t("llm.cg.intact")].filter(Boolean).join(" · ") })
       ] })
     ] }) : null,
-    /* @__PURE__ */ jsxs6("label", { className: "oc-dg-fl", children: [
+    /* @__PURE__ */ jsxs6("div", { className: "oc-dg-fl", children: [
       /* @__PURE__ */ jsxs6("span", { className: "oc-dg-lab", children: [
-        t("llm.cg.notes"),
-        /* @__PURE__ */ jsxs6("small", { className: "oc-mono", "data-lm-notes-count": true, children: [
+        /* @__PURE__ */ jsx6("label", { htmlFor: `${fid}-notes`, children: t("llm.cg.notes") }),
+        /* @__PURE__ */ jsxs6("small", { className: "oc-mono", id: `${fid}-notes-n`, "data-lm-notes-count": true, children: [
           c.notes.length,
           "/",
           NOTES_MAX.toLocaleString("en").replace(",", " ")
@@ -16258,6 +16259,8 @@ function GraphPanel({ A, draft, colors, onClose }) {
       /* @__PURE__ */ jsx6(
         "textarea",
         {
+          id: `${fid}-notes`,
+          "aria-describedby": `${fid}-notes-n`,
           "data-lm-notes": true,
           rows: 3,
           maxLength: NOTES_MAX,
@@ -16330,6 +16333,7 @@ function BodyAsk({ A, card, code }) {
 }
 function BodyProposal({ A, card, code }) {
   const t = useT();
+  const fid = useId5();
   const b = A.body;
   if (b.card !== card.id || b.phase !== "review") return null;
   const ok = bodyApplicable({ cards: [card] }, card.id, b.text);
@@ -16349,20 +16353,20 @@ function BodyProposal({ A, card, code }) {
       ] }),
       /* @__PURE__ */ jsx6("p", { "data-lm-before": true, children: b.before.trim() ? b.before : "—" })
     ] }),
-    /* @__PURE__ */ jsxs6("label", { className: "oc-dg-fl", children: [
+    /* @__PURE__ */ jsxs6("div", { className: "oc-dg-fl", children: [
       /* @__PURE__ */ jsxs6("span", { className: "oc-dg-lab", children: [
-        t("llm.body.after"),
-        /* @__PURE__ */ jsxs6("small", { className: "oc-mono", "data-lm-after-count": true, children: [
+        /* @__PURE__ */ jsx6("label", { htmlFor: `${fid}-after`, children: t("llm.body.after") }),
+        /* @__PURE__ */ jsxs6("small", { className: "oc-mono", id: `${fid}-after-n`, "data-lm-after-count": true, children: [
           b.text.length,
           " / ",
           MAX_BODY.toLocaleString("en").replace(",", " ")
         ] }),
-        mine ? /* @__PURE__ */ jsxs6("span", { className: "oc-lm-mk-static", children: [
+        mine ? /* @__PURE__ */ jsxs6("span", { className: "oc-lm-mk-static", id: `${fid}-after-mk`, children: [
           /* @__PURE__ */ jsx6(DlgIcon, { id: "spark", size: 12 }),
           t("llm.mark.text")
         ] }) : null
       ] }),
-      /* @__PURE__ */ jsx6("textarea", { "data-lm-after": true, rows: 9, maxLength: MAX_BODY, value: b.text, className: mine ? "oc-lm-f" : void 0, onChange: (e) => b.setText(e.target.value) })
+      /* @__PURE__ */ jsx6("textarea", { id: `${fid}-after`, "aria-describedby": `${fid}-after-n${mine ? ` ${fid}-after-mk` : ""}`, "data-lm-after": true, rows: 9, maxLength: MAX_BODY, value: b.text, className: mine ? "oc-lm-f" : void 0, onChange: (e) => b.setText(e.target.value) })
     ] }),
     /* @__PURE__ */ jsxs6("div", { className: "oc-lm-act", children: [
       /* @__PURE__ */ jsx6("small", { children: t("llm.body.note") }),
@@ -16445,7 +16449,7 @@ function LintPanel({ A, cardCount }) {
 }
 
 // src/ui/CampaignGraph.jsx
-import { useId as useId5, useLayoutEffect as useLayoutEffect3, useMemo as useMemo2, useRef as useRef8, useState as useState6 } from "react";
+import { useId as useId6, useLayoutEffect as useLayoutEffect3, useMemo as useMemo2, useRef as useRef8, useState as useState6 } from "react";
 
 // src/ui/Portrait.jsx
 import { useEffect as useEffect7, useRef as useRef7 } from "react";
@@ -16484,7 +16488,7 @@ function CampaignGraph({ cards, info, colors, sceneBy, phases, selected = null, 
   const t = useT();
   const ref = useRef8(null);
   const W = useBox(ref);
-  const mid2 = useId5();
+  const mid2 = useId6();
   const g = useMemo2(() => W ? graphOf(cards, W, { open, keep: new Set(selected ? [selected] : []) }) : null, [cards, W, open, selected]);
   const interactive = typeof onSelect === "function";
   const unfolded = useMemo2(() => foldCards(cards, /* @__PURE__ */ new Set(), new Set(selected ? [selected] : [])).filter((c) => c.kind === "group" && open.has(c.id)), [cards, open, selected]);
@@ -16957,7 +16961,7 @@ button.oc-cgg-node:focus-visible{${RING_FOCUS}}
 
 // src/ui/ModelPicker.jsx
 import { host as host2 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect8, useId as useId6, useMemo as useMemo3, useRef as useRef9, useState as useState7 } from "react";
+import { useEffect as useEffect8, useId as useId7, useMemo as useMemo3, useRef as useRef9, useState as useState7 } from "react";
 
 // src/data/modelOptions.js
 async function loadModelOptions(request = safeRequest, { timeoutMs = MODEL_OPTIONS_TIMEOUT_MS, schedule = setTimeout, cancel = clearTimeout } = {}) {
@@ -17002,7 +17006,7 @@ var SETTINGS_PATH = "/settings?tab=providers";
 var canOpenSettings = () => typeof host2?.navigate === "function";
 function ModelPicker({ opts, model, provider, onChange, invalid = false, describedBy, inheritedTitle = null, inheritedNote = null }) {
   const t = useT();
-  const id = useId6();
+  const id = useId7();
   const listRef = useRef9(null);
   const [browse, setBrowse] = useState7("");
   const [query, setQuery] = useState7("");
@@ -17467,7 +17471,7 @@ function Stepper({ step, t, titleRef }) {
   ] }, k)) });
 }
 function Templates({ draft, apply, bots, colors, t, onClose }) {
-  const id = useId7();
+  const id = useId8();
   const [tpl, setTpl] = useState9("devreview");
   const [mode, setMode] = useState9("append");
   const [n, setN] = useState9({ devreview: 3, audit: 4, phases: 2, chain: 4 });
@@ -17518,7 +17522,7 @@ function Templates({ draft, apply, bots, colors, t, onClose }) {
   ] });
 }
 function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onPatch, onSelect, onDup, onDel, onDep, sel, t, notes, A = null }) {
-  const id = useId7();
+  const id = useId8();
   const pinned = c.model && c.provider && c.model !== defModel(c.who);
   const eligible = sel ? eligibleParents(d, c.id) : [];
   const sceneAgent = sceneBy.get(c.who);
@@ -17636,7 +17640,7 @@ function Row({ c, d, code, deps, colors, sceneBy, bots, defModel, modelOpts, onP
 }
 function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes, replay = false }) {
   const t = useT();
-  const uid = useId7();
+  const uid = useId8();
   const [session] = useState9(() => recallSession());
   const [draft, setDraft] = useState9(() => session?.draft ?? newDraft({ phaseName: t("campaign.tpl.phase", "A") }));
   const [win, dispatch] = useReducer2(windowReducer, session?.win ?? initialWindow());
@@ -18197,15 +18201,15 @@ function CampaignDialog({ open, onClose, desks, boards, sceneBy, orders, writes,
 }
 
 // src/ui/HireDialog.jsx
-import { useEffect as useEffect14, useId as useId10, useMemo as useMemo10, useRef as useRef16, useState as useState13 } from "react";
+import { useEffect as useEffect14, useId as useId12, useMemo as useMemo10, useRef as useRef16, useState as useState13 } from "react";
 
 // src/ui/RolePicker.jsx
-import { useId as useId8 } from "react";
+import { useId as useId9 } from "react";
 import { jsx as jsx12, jsxs as jsxs11 } from "react/jsx-runtime";
 var swatchOf = (id) => ROLES[id]?.looks?.[0]?.main?.[0] ?? null;
 function RolePicker({ value, onPick, guessed, mark = null }) {
   const t = useT();
-  const id = useId8();
+  const id = useId9();
   return /* @__PURE__ */ jsxs11("div", { className: "oc-dg-fl", "data-hire-role": true, children: [
     /* @__PURE__ */ jsxs11("span", { className: "oc-dg-lab", id: `${id}-lab`, children: [
       t("recruit.roleField"),
@@ -18226,7 +18230,7 @@ function RolePicker({ value, onPick, guessed, mark = null }) {
 }
 
 // src/ui/HireAssist.jsx
-import { useCallback as useCallback5, useEffect as useEffect11, useRef as useRef12, useState as useState10 } from "react";
+import { useCallback as useCallback5, useEffect as useEffect11, useId as useId10, useRef as useRef12, useState as useState10 } from "react";
 import { Fragment as Fragment8, jsx as jsx13, jsxs as jsxs12 } from "react/jsx-runtime";
 function useRecruitAssist({ open, draft, setDraft, profiles, lang: lang4 }) {
   const query = useLlm({ enabled: open });
@@ -18458,6 +18462,7 @@ function AssistPanel({ assist, onSee = null }) {
 var stoppedNote = (assist, t) => assist.stopped ? /* @__PURE__ */ jsx13("small", { className: "oc-lm-note", "data-lm-stopped": true, children: t("llm.recruit.stopped") }) : null;
 function SoulStep({ n, draft, set, assist, from }) {
   const t = useT();
+  const fid = useId10();
   if (typeof draft.soul !== "string") return null;
   const clone = draft.start === "clone";
   const keep = clone && draft.soulKeep === true;
@@ -18477,24 +18482,29 @@ function SoulStep({ n, draft, set, assist, from }) {
         items: [["new", t("llm.soul.take")], ["keep", t("llm.soul.keep", from)]]
       }
     ) : null,
-    keep ? /* @__PURE__ */ jsx13("small", { className: "oc-lm-note", children: t("llm.soul.noteClone", from) }) : /* @__PURE__ */ jsxs12("label", { className: "oc-dg-fl oc-lm-soul", children: [
-      /* @__PURE__ */ jsxs12("span", { className: "oc-dg-lab", children: [
-        t("llm.soul.text"),
-        /* @__PURE__ */ jsx13("span", { className: "oc-lm-count", "data-lm-soul-count": true, children: t("llm.soul.count", len) })
-      ] }),
-      /* @__PURE__ */ jsx13(
-        "textarea",
-        {
-          "data-h": "soul",
-          rows: 6,
-          maxLength: SOUL_MAX,
-          value: draft.soul,
-          className: assist?.marked("soul") ? "oc-lm-f" : void 0,
-          onChange: (e) => set({ soul: e.target.value })
-        }
-      ),
-      clone ? /* @__PURE__ */ jsx13("small", { className: "oc-lm-note", children: t("llm.soul.note", from) }) : null
-    ] })
+    keep ? /* @__PURE__ */ jsx13("small", { className: "oc-lm-note", children: t("llm.soul.noteClone", from) }) : (
+      // the <label> holds the name alone: the counter and the note sit beside it and reach the field by aria-describedby
+      /* @__PURE__ */ jsxs12("div", { className: "oc-dg-fl oc-lm-soul", children: [
+        /* @__PURE__ */ jsxs12("span", { className: "oc-dg-lab", children: [
+          /* @__PURE__ */ jsx13("label", { htmlFor: `${fid}-soul`, children: t("llm.soul.text") }),
+          /* @__PURE__ */ jsx13("span", { className: "oc-lm-count", id: `${fid}-soul-n`, "data-lm-soul-count": true, children: t("llm.soul.count", len) })
+        ] }),
+        /* @__PURE__ */ jsx13(
+          "textarea",
+          {
+            id: `${fid}-soul`,
+            "aria-describedby": `${fid}-soul-n${clone ? ` ${fid}-soul-note` : ""}`,
+            "data-h": "soul",
+            rows: 6,
+            maxLength: SOUL_MAX,
+            value: draft.soul,
+            className: assist?.marked("soul") ? "oc-lm-f" : void 0,
+            onChange: (e) => set({ soul: e.target.value })
+          }
+        ),
+        clone ? /* @__PURE__ */ jsx13("small", { className: "oc-lm-note", id: `${fid}-soul-note`, children: t("llm.soul.note", from) }) : null
+      ] })
+    )
   ] });
 }
 
@@ -18553,11 +18563,11 @@ function Face({ agent }) {
 }
 
 // src/ui/ReviseBox.jsx
-import { useEffect as useEffect13, useId as useId9, useRef as useRef14, useState as useState11 } from "react";
+import { useEffect as useEffect13, useId as useId11, useRef as useRef14, useState as useState11 } from "react";
 import { Fragment as Fragment9, jsx as jsx17, jsxs as jsxs14 } from "react/jsx-runtime";
 function DescriptionRow({ agent, description, cut: cut3 = false, isDefault, orders }) {
   const t = useT();
-  const id = useId9();
+  const id = useId11();
   const query = useLlm();
   const actions = useLlmActions();
   const state2 = query.data ?? null;
@@ -19500,7 +19510,7 @@ function hireProfiles(desks, sceneProfiles2) {
 function HireDialog({ open, onClose, profiles, orders, onSeeBot = null }) {
   const t = useT();
   const nameRef = useRef16(null);
-  const id = useId10();
+  const id = useId12();
   const [reqOpen, setReqOpen] = useState13(false);
   const [draft, setDraft] = useState13(() => hireDraft(profiles));
   const [touched, setTouched] = useState13(false);
@@ -19696,7 +19706,7 @@ var SHEET_AT = 600;
 var settingsSheet = (width) => width > 0 && width <= SHEET_AT;
 
 // src/ui/OfficeScene.jsx
-import { useCallback as useCallback7, useEffect as useEffect15, useId as useId11, useLayoutEffect as useLayoutEffect6, useMemo as useMemo11, useRef as useRef17, useState as useState14 } from "react";
+import { useCallback as useCallback7, useEffect as useEffect15, useId as useId13, useLayoutEffect as useLayoutEffect6, useMemo as useMemo11, useRef as useRef17, useState as useState14 } from "react";
 
 // src/core/dpr.js
 function watchDpr(win, onChange) {
@@ -20137,7 +20147,7 @@ function ListDot({ slug }) {
 }
 function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpen, badges = [], motion = "auto", readMs = null, decor = null, grades = null, exportRef = null, seating = null, thoughts = null, project: filter = null, onProject = null, onFit = null, listNote = null }) {
   const t = useT();
-  const thoughtId = useId11();
+  const thoughtId = useId13();
   const boxRef = useRef17(null);
   const stageRef = useRef17(null);
   const canvasRef = useRef17(null);
@@ -20617,7 +20627,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
 }
 
 // src/ui/PageHeader.jsx
-import { useEffect as useEffect17, useId as useId12 } from "react";
+import { useEffect as useEffect17, useId as useId14 } from "react";
 
 // src/ui/PixelIcon.jsx
 import { useEffect as useEffect16, useRef as useRef18 } from "react";
@@ -20697,7 +20707,7 @@ function GameBadge({ game, onOpen, t }) {
 }
 function MoreMenu({ items, label }) {
   const pop = usePopover();
-  const id = useId12();
+  const id = useId14();
   const placed = Boolean(pop.pos);
   const entries = () => [...pop.card.current?.querySelectorAll('[role^="menuitem"]') ?? []];
   useEffect17(() => {
@@ -21164,7 +21174,7 @@ var PAGE_CSS = `
 `;
 
 // src/ui/Legend.jsx
-import { useEffect as useEffect18, useId as useId13, useRef as useRef19, useState as useState15 } from "react";
+import { useEffect as useEffect18, useId as useId15, useRef as useRef19, useState as useState15 } from "react";
 import { jsx as jsx30, jsxs as jsxs26 } from "react/jsx-runtime";
 function Swatch({ rgb }) {
   const ref = useRef19(null);
@@ -21191,7 +21201,7 @@ function Swatch({ rgb }) {
 function Legend() {
   const t = useT();
   const [open, setOpen] = useState15(false);
-  const id = useId13();
+  const id = useId15();
   const wrap = useRef19(null);
   const rows = legendRows(HALO, { workingMs: WORKER_LIVE_WINDOW_MS, staleMs: STALE_AFTER_MS, activeMs: RECENT_WINDOW_MS });
   useEffect18(() => {
@@ -22041,7 +22051,7 @@ var VITRINE_CSS = `
 `;
 
 // src/ui/UsageDialog.jsx
-import { useEffect as useEffect20, useId as useId14, useMemo as useMemo15, useState as useState17 } from "react";
+import { useEffect as useEffect20, useId as useId16, useMemo as useMemo15, useState as useState17 } from "react";
 
 // src/core/usage.js
 var USAGE_WINDOWS = Object.freeze(["24h", "7d", "30d"]);
@@ -22560,7 +22570,7 @@ function Quota({ quota, query, t }) {
 }
 function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
   const t = useT();
-  const id = useId14();
+  const id = useId16();
   const [kind, setKind] = useState17("24h");
   const [metric, setMetric] = useState17("fresh");
   const [day, setDay] = useState17(null);
@@ -22850,12 +22860,12 @@ var USAGE_CSS = `
 `;
 
 // src/ui/SeatingDialog.jsx
-import { useEffect as useEffect21, useId as useId15, useRef as useRef22, useState as useState18 } from "react";
+import { useEffect as useEffect21, useId as useId17, useRef as useRef22, useState as useState18 } from "react";
 import { Fragment as Fragment17, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
 function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   const t = useT();
   const areaRef = useRef22(null);
-  const id = useId15();
+  const id = useId17();
   const query = useLlm();
   const { call } = useLlmActions();
   const [text3, setText] = useState18("");
@@ -22988,11 +22998,11 @@ import { useCallback as useCallback8, useRef as useRef27, useState as useState23
 
 // src/ui/SettingsDialog.jsx
 import * as sdk3 from "@hermes/plugin-sdk";
-import { useEffect as useEffect26, useId as useId19, useRef as useRef26 } from "react";
+import { useEffect as useEffect26, useId as useId21, useRef as useRef26 } from "react";
 
 // src/ui/SettingsForm.jsx
 import { useValue as useValue3 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect25, useId as useId18, useState as useState22 } from "react";
+import { useEffect as useEffect25, useId as useId20, useState as useState22 } from "react";
 
 // src/core/settings.js
 var SETTINGS_TABS = Object.freeze(["general", "game", "replay", "notify", "llm"]);
@@ -23021,7 +23031,7 @@ function ringDash(pct, r) {
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { useEffect as useEffect23, useId as useId17, useMemo as useMemo16, useRef as useRef24, useState as useState20 } from "react";
+import { useEffect as useEffect23, useId as useId19, useMemo as useMemo16, useRef as useRef24, useState as useState20 } from "react";
 
 // src/core/llmSettings.js
 var GRANT_COMMAND = "hermes plugins enable hermes-officecraft";
@@ -23103,7 +23113,7 @@ function pickFromValue(value, choices) {
 }
 
 // src/ui/SettingsKit.jsx
-import { useEffect as useEffect22, useId as useId16, useLayoutEffect as useLayoutEffect7, useRef as useRef23, useState as useState19 } from "react";
+import { useEffect as useEffect22, useId as useId18, useLayoutEffect as useLayoutEffect7, useRef as useRef23, useState as useState19 } from "react";
 import { jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
 var ICONS2 = {
   gear: "M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z M12 2.5l1.4 2.4 2.7-.6.9 2.6 2.6.9-.6 2.7L21.5 12l-2.5 1.5.6 2.7-2.6.9-.9 2.6-2.7-.6L12 21.5l-1.4-2.4-2.7.6-.9-2.6-2.6-.9.6-2.7L2.5 12 5 10.5l-.6-2.7 2.6-.9.9-2.6 2.7.6Z",
@@ -23138,7 +23148,7 @@ function SettingsIcon({ id, size = 18 }) {
 function HelpTip({ name, children }) {
   const t = useT();
   const [open, setOpen] = useState19(false);
-  const id = useId16();
+  const id = useId18();
   const wrap = useRef23(null);
   const btn = useRef23(null);
   const note = useRef23(null);
@@ -23216,7 +23226,7 @@ function Switch({ id, checked, onChange, disabled = false, describedBy, labelled
   );
 }
 function Segmented({ label, value, options, onChange, describedBy }) {
-  const name = useId16();
+  const name = useId18();
   return /* @__PURE__ */ jsx39("span", { className: "oc-sx-seg", role: "radiogroup", "aria-label": label, "aria-describedby": describedBy, children: options.map(([code, text3]) => /* @__PURE__ */ jsxs35("label", { children: [
     /* @__PURE__ */ jsx39("input", { type: "radio", name, value: code, checked: value === code, onChange: () => onChange(code) }),
     /* @__PURE__ */ jsx39("span", { children: text3 })
@@ -23255,7 +23265,7 @@ function LaneChip({ row, t }) {
 }
 function ModelSelect({ lane, sel, choices, busy, onPick, tipped }) {
   const t = useT();
-  const id = useId17();
+  const id = useId19();
   const groups = [];
   choices.forEach((c, i) => {
     let g = groups.find((x) => x.provider === c.provider);
@@ -23320,7 +23330,7 @@ function SettingsFormLlm({ actions = null }) {
   const modelOpts = useModelOptions(state2?.override === "granted");
   const list = useMemo16(() => modelChoices(modelOpts), [modelOpts]);
   const errorRef = useRef24(null);
-  const id = useId17();
+  const id = useId19();
   useEffect23(() => {
     if (!state2) return;
     setUsdText(String(state2.settings.capUsd));
@@ -24088,7 +24098,7 @@ var TAB_ICON = { general: "globe", game: "game", replay: "moon", notify: "bell",
 var lastTab = SETTINGS_TABS[0];
 function SettingsForm({ llm = null }) {
   const t = useT();
-  const base = useId18();
+  const base = useId20();
   const [tab, setTabState] = useState22(() => tabOf(lastTab));
   const setTab = (next) => {
     lastTab = next;
@@ -24261,7 +24271,7 @@ import { jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
 function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
   const t = useT();
   const ref = useRef26(null);
-  const id = useId19();
+  const id = useId21();
   const motion = sdk3.useValue($motionPref);
   useEffect26(() => {
     const dlg = ref.current;

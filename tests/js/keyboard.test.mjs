@@ -245,6 +245,19 @@ test('a <label> holds the name alone: never the « ? », its note, a counter or 
   assert.match(src('CampaignAssist.jsx'), /<button type="button" id=\{id\} className="oc-lm-mk"/)
 })
 
+test('no <label> of the four windows, their assisted panels included, wraps a counter, a note, a mark or a button', () => {
+  const bad = []
+  for (const f of ['HireDialog.jsx', 'DecorDialog.jsx', 'SeatingDialog.jsx', 'CampaignDialog.jsx', 'HireAssist.jsx', 'CampaignAssist.jsx']) {
+    for (const block of labelBlocks(src(f))) {
+      if (/<DlgTip|<Mark\b|<CardMark|<small\b|<button\b|oc-lm-count|oc-lm-mk/.test(block)) bad.push(`${f}: ${block.replace(/\s+/g, ' ').slice(0, 90)}`)
+    }
+  }
+  assert.deepEqual(bad, [])
+  assert.match(src('HireAssist.jsx'), /<label htmlFor=\{`\$\{fid\}-soul`\}>/)
+  assert.match(src('CampaignAssist.jsx'), /<label htmlFor=\{`\$\{fid\}-notes`\}>[\s\S]*aria-describedby=\{`\$\{fid\}-notes-n`\}/)
+  assert.match(src('CampaignAssist.jsx'), /<label htmlFor=\{`\$\{fid\}-after`\}>/)
+})
+
 test('the « ? » stays in a positioned wrapper, so its note opens under its button', async () => {
   const { DIALOG_CSS } = await import('../../src/ui/dialogStyles.js')
   assert.match(DIALOG_CSS, /\.oc-dg-tipw\{position:relative;/)

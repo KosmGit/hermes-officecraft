@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
 import { newId } from '../data/uuid.js'
 import { workReady } from '../core/llm.js'
@@ -196,6 +196,7 @@ const stoppedNote = (assist, t) => (assist.stopped ? <small className="oc-lm-not
  */
 export function SoulStep({ n, draft, set, assist, from }) {
   const t = useT()
+  const fid = useId()
   if (typeof draft.soul !== 'string') return null
   const clone = draft.start === 'clone'
   const keep = clone && draft.soulKeep === true
@@ -207,12 +208,13 @@ export function SoulStep({ n, draft, set, assist, from }) {
           items={[['new', t('llm.soul.take')], ['keep', t('llm.soul.keep', from)]]} />
       ) : null}
       {keep ? <small className="oc-lm-note">{t('llm.soul.noteClone', from)}</small> : (
-        <label className="oc-dg-fl oc-lm-soul">
-          <span className="oc-dg-lab">{t('llm.soul.text')}<span className="oc-lm-count" data-lm-soul-count>{t('llm.soul.count', len)}</span></span>
-          <textarea data-h="soul" rows={6} maxLength={SOUL_MAX} value={draft.soul} className={assist?.marked('soul') ? 'oc-lm-f' : undefined}
+        // the <label> holds the name alone: the counter and the note sit beside it and reach the field by aria-describedby
+        <div className="oc-dg-fl oc-lm-soul">
+          <span className="oc-dg-lab"><label htmlFor={`${fid}-soul`}>{t('llm.soul.text')}</label><span className="oc-lm-count" id={`${fid}-soul-n`} data-lm-soul-count>{t('llm.soul.count', len)}</span></span>
+          <textarea id={`${fid}-soul`} aria-describedby={`${fid}-soul-n${clone ? ` ${fid}-soul-note` : ''}`} data-h="soul" rows={6} maxLength={SOUL_MAX} value={draft.soul} className={assist?.marked('soul') ? 'oc-lm-f' : undefined}
             onChange={e => set({ soul: e.target.value })} />
-          {clone ? <small className="oc-lm-note">{t('llm.soul.note', from)}</small> : null}
-        </label>
+          {clone ? <small className="oc-lm-note" id={`${fid}-soul-note`}>{t('llm.soul.note', from)}</small> : null}
+        </div>
       )}
     </Step>
   )
