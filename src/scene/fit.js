@@ -40,6 +40,21 @@ export function backingOf({ W, H, S, dpr = 1 }) {
   return { w, h, cssW: w / d, cssH: h / d, k, direct }
 }
 
+/** The source column of each store column, for a frame W art pixels wide shown w store pixels wide: a few tables kept (the room and its ground, a resize), not one per frame. */
+const COLUMNS = new Map()
+const COLUMNS_MAX = 8
+function columnsOf(W, w) {
+  const key = `${W}x${w}`
+  let xs = COLUMNS.get(key)
+  if (!xs) {
+    xs = new Int32Array(w)
+    for (let x = 0; x < w; x++) xs[x] = Math.min(W - 1, Math.floor((x + 0.5) * W / w))
+    if (COLUMNS.size >= COLUMNS_MAX) COLUMNS.clear()
+    COLUMNS.set(key, xs)
+  }
+  return xs
+}
+
 /**
  * Nearest-neighbour copy of a W x H RGBA frame into a w x h one (`out`: w * h * 4 bytes, owned and reused by the caller). The whole
  * picture is scaled in one pass from one origin: the same art pixel always lands on the same store pixels (JIT). -> out
@@ -47,8 +62,7 @@ export function backingOf({ W, H, S, dpr = 1 }) {
 export function upscale(src, W, H, out, w, h) {
   const s = new Uint32Array(src.buffer, src.byteOffset, W * H)
   const o = new Uint32Array(out.buffer, out.byteOffset, w * h)
-  const xs = new Int32Array(w)
-  for (let x = 0; x < w; x++) xs[x] = Math.min(W - 1, Math.floor((x + 0.5) * W / w))
+  const xs = columnsOf(W, w)
   let prev = -1
   for (let y = 0; y < h; y++) {
     const sy = Math.min(H - 1, Math.floor((y + 0.5) * H / h))
