@@ -105,9 +105,9 @@ export const PANEL_CSS = `
 .oc-set-link{flex:0 0 auto;display:block;box-sizing:border-box;width:100%;margin-top:10px;padding:10px 0 4px;min-height:28px;font:inherit;font-size:12px;color:var(--ui-accent);background:none;border:0;border-top:1px solid ${EDGE};cursor:pointer;text-decoration:underline;text-align:left}
 .oc-toggle{margin-left:auto;min-height:24px;padding:3px 10px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-toggle[aria-expanded="true"]{border-color:var(--ui-accent)}
-/* legend of the halos, a « ? » at the end of the selection bar, its card opening upwards over the scene edge */
+/* legend of the halos, a named button at the end of the dock, its card opening upwards over the scene edge */
 .oc-legend{position:relative;flex:0 0 auto;margin-left:auto}
-.oc-legend-btn{width:24px;height:24px;padding:0;font:inherit;font-size:12px;font-weight:600;line-height:1;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
+.oc-legend-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:28px;padding:0 8px;font:inherit;font-size:12px;font-weight:500;line-height:1;white-space:nowrap;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-legend-btn:hover,.oc-legend-btn[aria-expanded="true"]{border-color:var(--ui-accent)}
 .oc-legend-pop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:40;box-sizing:border-box;width:max-content;max-width:min(340px,calc(100vw - 24px));padding:8px 10px;border-radius:10px;background:${CARD};border:1px solid var(--ui-accent);box-shadow:0 2px 8px color-mix(in oklab, var(--foreground) 22%, transparent);font-size:11.5px;line-height:1.35;color:var(--foreground)}
 .oc-legend-pop b{display:block;margin-bottom:5px;font-size:11px;font-weight:600;color:${SOFT}}

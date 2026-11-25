@@ -61,7 +61,6 @@ export const en = {
   waitTip: n => (n === 1 ? 'a decision is waiting for you' : `${n} decisions are waiting for you`),
   narrowNote: 'The window is too narrow for the office, so it is shown as a list. Widen the window to bring it back.',
   sceneLabel: 'The office',
-  openBtn: 'Open',
   skipDetails: 'Skip to details',
   selected: name => `${name} selected`,
   legend: {
@@ -1652,7 +1651,6 @@ export const en = {
       label: 'Projects: filter the office and lists',
       all: 'All',
       chip: (slug, progress) => `${slug}: ${progress} done`,
-      hint: 'Click an agent',
       details: 'Details'
     },
     tab: { label: 'Details', decisions: 'Decisions', agent: 'Agent', projects: 'Projects', journal: 'Log' },

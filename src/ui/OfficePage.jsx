@@ -533,6 +533,7 @@ export function OfficePage({ ctx }) {
             onOpen={() => open(picked.name)}
             onDetails={() => goTab('agent')}
             narrow={narrow}
+            showSel={!panelOpen}
             announce={announce}
             t={t}
           />

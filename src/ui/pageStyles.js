@@ -120,10 +120,14 @@ export const PAGE_CSS = `
 .ux-stage .oc-box{flex:1 1 auto;border:0;border-radius:0;padding:8px 0 4px}
 .ux-stage .oc-box.oc-listing{padding:8px 12px}
 .ux-stage .oc-rp-tag{z-index:3}
-.ux-dock{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;padding:8px 12px;border-top:1px solid ${EDGE};background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
-/* a small basis, so the selected-agent bar wraps under the chips of a 390 px stage instead of squeezing their names to 0 px */
-.ux-dk-l{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1 1 240px;min-width:0}
-.ux-pj{display:inline-flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;height:32px;padding:0 12px 0 8px;border-radius:8px;border:1px solid ${EDGE};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .12s,background-color .12s,box-shadow .12s}
+/* the dock is ONE row of a fixed height (a 32 px button + 2 x 8 px of padding, the rule is an inset shadow), whatever is selected: clicking an agent never moves the room above it.
+   The projects take what the selection leaves and scroll (ProjectDock first drops the done/total counts: data-compact, then fades the end: data-over) */
+.ux-dock{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;height:48px;padding:8px 12px;box-shadow:inset 0 1px 0 ${EDGE};background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
+.ux-dk-l{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;flex:1 1 0;min-width:0;overflow-x:auto;overflow-y:hidden;padding:4px;margin:-4px;scrollbar-width:none;overscroll-behavior-x:contain}
+.ux-dk-l::-webkit-scrollbar{display:none}
+.ux-dk-l[data-over]{-webkit-mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent)}
+.ux-dk-l[data-compact] .ux-pj .n{display:none}
+.ux-pj{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;min-width:0;height:32px;padding:0 12px 0 8px;border-radius:8px;border:1px solid ${EDGE};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .12s,background-color .12s,box-shadow .12s}
 .ux-pj b{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .ux-pj:hover{border-color:var(--pc)}
 .ux-pj[aria-pressed="true"]{border-color:var(--pc);background:color-mix(in oklab, var(--pc) 14%, ${CARD});box-shadow:inset 3px 0 0 var(--pc)}
@@ -134,9 +138,8 @@ export const PAGE_CSS = `
 .ux-pj .wb{display:inline-flex;align-items:center;gap:4px;color:${ink(ORANGE)};font-weight:700;font-size:12px}
 .ux-pj.all{--pc:var(--ui-accent)}
 .ux-pj.all .ux-i{color:${T2}}
-.ux-sel{display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;padding-left:8px;border-left:1px solid ${EDGE}}
+.ux-sel{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;padding-left:8px;border-left:1px solid ${EDGE}}
 .ux-sel>b{font-size:12.5px;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ux-sel .hint{font-size:12px;color:${T3};white-space:nowrap}
 .ux-sel .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
 /* ---------- the panel: four tabs (WAI-ARIA tab list), one scrolling body ---------- */
 .ux-panel{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
@@ -369,7 +372,7 @@ export const PAGE_CSS = `
 @container ux (min-width: 1500px){
   .ux-main{grid-template-columns:minmax(0,1fr) 400px}
   .ux-panel{align-self:start;max-height:100%;min-height:min(100%,320px)}
-  .ux-dk-l .ux-pj:not(.all){flex:1 1 auto;max-width:260px}   /* from their content width (a 0 basis would squeeze 8 projects to a ring and a cut count) */
+  .ux-dk-l .ux-pj:not(.all){flex:1 0 auto;max-width:260px}   /* from their content width, never shrunk (the row scrolls instead of cutting a name) */
   .ux-dk-l .ux-pj .n{margin-left:auto}
   .ux-acts .ux-b .lb{display:inline}
   .ux-acts .ux-b:not(.ico){width:auto;padding:0 12px}
@@ -386,7 +389,7 @@ export const PAGE_CSS = `
   .ux-gs{padding:0 8px}
   .ux-kpis-wide{display:none}
 }
-@container ux (max-width: 1180px){ .ux-sel .hint{display:none} .ux-pj.all b{display:none} }
+@container ux (max-width: 1180px){ .ux-pj.all b{display:none} }
 /* with the host sidebar open (1024 / 1280 px windows) the header has no room for everything: the streak leaves it first, so the actions
    and the gear stay whole (it stays in the badge's name and in the trophies window) */
 @container ux (max-width: 1100px){ .ux-game .ux-gs[data-streak]{display:none} }
@@ -406,20 +409,21 @@ export const PAGE_CSS = `
   .ux-acts .only-n{display:inline-flex}
   .ux-main{grid-template-columns:minmax(0,1fr)}
   .ux-stage .oc-box{padding:0}
-  .ux-dock{flex-wrap:wrap;padding:8px}
-  /* in the replay of a 380 px pane the list of desks keeps its height: only what the past needs stays above it (no note, banner sentence, window ends nor empty selection bar) */
+  /* in the replay of a 380 px pane the list of desks keeps its height: only what the past needs stays above it (no note, banner sentence nor window ends) */
   .ux-stage[data-replaying] .oc-list>p{display:none}
-  .ux-stage[data-replaying] .ux-sel:has(.hint){display:none}
   .ux-stage[data-replaying] .oc-rp-ends{display:none}
   .oc-rp-banner .oc-rp-note{display:none}
-  /* the projects are ONE scrollable row, so the list of desks keeps its height (4 wrapped rows would leave it 25 px); a fade says it goes on */
-  .ux-dk-l{flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:2px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent)}
-  .ux-dk-l::-webkit-scrollbar{display:none}
-  .ux-dk-l .ux-pj{flex:0 0 auto}
+  /* two rows of 28 px, always: the projects (one scrollable row, so the list of desks keeps its height), then the selection and the legend.
+     The selected agent keeps its row: the state word leaves first, then the legend's word, then the name is cut */
+  .ux-dock{flex-wrap:wrap;align-content:flex-start;height:80px;padding:8px}
+  .ux-dk-l{flex:1 1 calc(100% + 8px);height:36px}
   .ux-pj{height:28px;font-size:12px}
   .ux-pj.all b{display:none}
-  .ux-sel{flex:1 1 100%;flex-wrap:wrap;min-width:0;padding:0;border-left:0}
-  .ux-sel .hint{display:inline}
+  .ux-sel{flex:1 1 100%;height:28px;min-width:0;padding:0;border-left:0}
+  .ux-sel>b{flex:1 1 0;min-width:4ch;max-width:none}
+  .ux-sel .ux-st .w{display:none}
+  .ux-sel:has(.oc-btn-open) .oc-legend-btn span{display:none}
+  .ux-sel:has(.oc-btn-open) .oc-legend-btn{width:28px;padding:0}
   .ux-tabs{display:none}
   /* the page already frames the panel: a second frame (border and inner margin) would cost a card; the cards keep their own edge */
   .ux-panel{border:0;border-radius:0;background:transparent}

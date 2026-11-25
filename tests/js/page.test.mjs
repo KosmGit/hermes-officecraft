@@ -414,13 +414,35 @@ const base = selector => {
   return m[1]
 }
 
-test('the dock wraps on its own: the selected-agent bar goes to its own line before it squeezes the project chips', () => {
-  assert.match(base('.ux-dock'), /flex-wrap:wrap/, 'the dock wraps whatever the width of the page (the stage can be 390 px in a 1024 px window)')
+// The dock used to wrap (the selected-agent block took a second row and the room above lost 40 px at the click). It is now one row of a
+// fixed height whatever the selection: the chips scroll, the selection is a block that never wraps.
+test('the dock has a fixed height and never wraps: selecting an agent cannot move the room', () => {
+  const dock = base('.ux-dock')
+  assert.match(dock, /flex-wrap:nowrap/, 'one row')
+  assert.match(dock, /height:48px/, 'a fixed height (a 32 px button + 2 x 8 px of padding; the rule is an inset shadow)')
   const chips = base('.ux-dk-l')
-  const basis = chips.match(/flex:\s*1 1 (\d+)px/)
-  assert.ok(basis, 'the chips take a small basis, so the bar (313 px) wraps instead of squeezing them')
-  assert.ok(Number(basis[1]) >= 200, `the basis (${basis[1]} px) keeps at least two readable chips`)
-  assert.match(base('.ux-sel'), /min-width:0/, 'the bar may still shrink (long names) once it is alone on its line')
+  assert.match(chips, /flex:1 1 0/, 'the chips take what the selection leaves')
+  assert.match(chips, /flex-wrap:nowrap;[^}]*overflow-x:auto/, 'and scroll when they are too many')
+  assert.match(base('.ux-pj'), /flex:0 0 auto/, 'a chip never shrinks (its name is cut by nothing: the row scrolls)')
+  assert.match(base('.ux-sel'), /flex-wrap:nowrap/, 'the selection block stays on the row')
+  assert.match(PAGE_CSS, /\.ux-dk-l\[data-compact\] \.ux-pj \.n\{display:none\}/, 'the count goes first')
+  assert.match(PAGE_CSS, /\.ux-dk-l\[data-over\]\{[^}]*mask-image/, 'then the row scrolls and fades')
+  const narrow = PAGE_CSS.match(/@container ux \(max-width: 700px\)\{([\s\S]*?)\n\}/)[1]
+  assert.match(narrow, /\.ux-dock\{[^}]*height:80px/, 'a narrow pane: two rows of 28 px, always')
+})
+
+test('the dock keeps its row: the selected agent is described once (only with the panel hidden), the legend is a named button', () => {
+  const dock = readFileSync(new URL('../../src/ui/ProjectDock.jsx', import.meta.url), 'utf8')
+  assert.match(dock, /\{picked && showSel \? \(/, 'the block of the selected agent shows with the panel hidden only')
+  assert.match(dock, /\{t\('insp\.open'\)\}/, 'its button says « Open session », like the sheet')
+  assert.doesNotMatch(dock, /ux\.dock\.hint/, 'no hint line that comes and goes')
+  const page = readFileSync(new URL('../../src/ui/OfficePage.jsx', import.meta.url), 'utf8')
+  assert.match(page, /showSel=\{!panelOpen\}/)
+  const legend = readFileSync(new URL('../../src/ui/Legend.jsx', import.meta.url), 'utf8')
+  assert.match(legend, /<span>\{t\('legend\.button'\)\}<\/span><\/button>/, 'the legend button carries its word')
+  assert.doesNotMatch(legend, />\?<\/button>/, 'the « ? » is the sign of a field help, not of the scene')
+  for (const code of ['en', 'fr', 'es']) assert.ok(messages[code].legend.button.length > 3, code)
+  assert.equal(messages.fr.insp.open, 'Ouvrir la session')
 })
 
 //    (2)  Agent tab, 380 px, a board with a long name (names are never short): the row « [project] [card code] [Decide] » did not wrap and

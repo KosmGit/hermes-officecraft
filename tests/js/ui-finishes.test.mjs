@@ -92,7 +92,7 @@ test('dialogs: the body of a window shows a shadow where more is hidden (scroll 
 test('1920 / 380: header badge 32 px, wide panel ends with its content, projects on one scrollable row, replay keeps its list', () => {
   assert.match(PAGE_CSS, /\.ux-game\{[^}]*height:32px/)
   assert.match(PAGE_CSS, /@container ux \(min-width: 1500px\)\{[\s\S]*?\.ux-panel\{align-self:start/)
-  assert.match(PAGE_CSS, /\.ux-dk-l\{[^}]*flex-wrap:nowrap;overflow-x:auto/)
+  assert.match(PAGE_CSS, /\.ux-dk-l\{[^}]*flex-wrap:nowrap;[^}]*overflow-x:auto/)
   assert.match(PAGE_CSS, /\.ux-stage\[data-replaying\] \.oc-list>p\{display:none\}/)
   const bar = src('src/ui/ReplayBar.jsx')
   assert.match(bar, /replay\.windowShort/)
@@ -125,14 +125,14 @@ test('Journal tiles: 8 tiles in a 3-column grid, the last one spans 2 so no cell
   assert.match(src('src/ui/replayStyles.js'), /\.oc-nt-grid \.oc-nt-tile:nth-child\(8\):last-child\{grid-column:span 2\}/)
 })
 
-test('1920 px dock: the project chips share the row from their content width, so 8 projects wrap instead of losing their names', () => {
+test('1920 px dock: the project chips share the row from their content width and never shrink, so 8 projects scroll instead of losing their names', () => {
   const wide = PAGE_CSS.match(/@container ux \(min-width: 1500px\)\{([\s\S]*?)\n\}/)[1]
   const chip = wide.match(/\.ux-dk-l \.ux-pj:not\(\.all\)\{([^}]*)\}/)[1]
   const [grow, shrink, basis] = chip.match(/flex:([^;]+)/)[1].trim().split(/\s+/)
   assert.equal(grow, '1', 'the chips grow to share the dock')
-  assert.ok(!/^0(px|%)?$/.test(basis), `basis ${basis}: a 0 basis never wraps, 8 projects are squeezed to a ring and a cut count (measured at 1920 px, 30 agents, 8 projects)`)
-  assert.match(PAGE_CSS, /\.ux-dk-l\{[^}]*flex-wrap:wrap/, 'the dock still wraps on a wide pane')
-  assert.ok(shrink)
+  assert.equal(shrink, '0', 'a chip is never squeezed: the row scrolls (the dock is one row of a fixed height)')
+  assert.ok(!/^0(px|%)?$/.test(basis), `basis ${basis}: a 0 basis would squeeze 8 projects to a ring and a cut count`)
+  assert.match(PAGE_CSS, /\.ux-dk-l\{[^}]*flex-wrap:nowrap/, 'one row, also on a wide pane')
 })
 
 // --- 0 agent ---

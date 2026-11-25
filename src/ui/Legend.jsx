@@ -4,6 +4,7 @@ import { legendRows } from '../core/hud.js'
 import { RECENT_WINDOW_MS, WORKER_LIVE_WINDOW_MS } from '../core/roster.js'
 import { STALE_AFTER_MS } from '../core/office.js'
 import { HALO } from '../scene/furniture.js'
+import { Icon } from './icons.jsx'
 import { StateIcon } from './StateIcon.jsx'
 import { useT } from './useT.js'
 
@@ -29,7 +30,7 @@ function Swatch({ rgb }) {
   return <canvas ref={ref} className="oc-sw" width={10} height={10} aria-hidden="true" data-rgb={rgb.join(',')} />
 }
 
-/** Small « ? » next to the selection bar: opens the legend of the halos (what each colour says), closed again by Escape, a second click or leaving it. */
+/** « Legend », a named button at the end of the dock (the « ? » is the sign of a field's help): opens the legend of the halos (what each colour says), closed again by Escape, a second click or leaving it. */
 export function Legend() {
   const t = useT()
   const [open, setOpen] = useState(false)
@@ -47,7 +48,7 @@ export function Legend() {
   }, [open])
   return (
     <span className="oc-legend" ref={wrap} data-legend>
-      <button type="button" className="oc-legend-btn" aria-expanded={open} aria-controls={id} aria-label={t('legend.button')} onClick={() => setOpen(v => !v)}>?</button>
+      <button type="button" className="oc-legend-btn" aria-expanded={open} aria-controls={id} onClick={() => setOpen(v => !v)}><Icon name="info" size={14} /><span>{t('legend.button')}</span></button>
       {open ? (
         <div id={id} className="oc-legend-pop" role="group" aria-label={t('legend.title')}>
           <b>{t('legend.title')}</b>

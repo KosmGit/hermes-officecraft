@@ -60,7 +60,6 @@ export const es = {
   waitTip: n => (n === 1 ? 'una decisión te espera' : `${n} decisiones te esperan`),
   narrowNote: 'Ventana estrecha: la oficina se muestra como lista. El dibujo vuelve si ensanchas la ventana.',
   sceneLabel: 'La oficina',
-  openBtn: 'Abrir',
   skipDetails: 'Ir a los detalles',
   selected: name => `${name} seleccionado`,
   legend: {
@@ -1651,7 +1650,6 @@ export const es = {
       label: 'Proyectos: filtrar la oficina y las listas',
       all: 'Todos',
       chip: (slug, progress) => `${slug}: ${progress} terminadas`,
-      hint: 'Haz clic en un agente',
       details: 'Detalles'
     },
     tab: { label: 'Detalles', decisions: 'Decisiones', agent: 'Agente', projects: 'Proyectos', journal: 'Registro' },

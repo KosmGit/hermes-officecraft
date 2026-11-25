@@ -63,7 +63,6 @@ export const fr = {
   waitTip: n => (n === 1 ? 'une décision vous attend' : `${n} décisions vous attendent`),
   narrowNote: 'Fenêtre étroite : le bureau s’affiche en liste. Élargissez-la pour retrouver la vue du bureau.',
   sceneLabel: 'Le bureau',
-  openBtn: 'Ouvrir',
   skipDetails: 'Aller aux détails',
   selected: name => `${name} sélectionné`,
   legend: {
@@ -1654,7 +1653,6 @@ export const fr = {
       label: 'Projets : filtrer le bureau et les listes',
       all: 'Tous',
       chip: (slug, progress) => `${slug} : ${progress} terminées`,
-      hint: 'Cliquez sur un agent',
       details: 'Détails'
     },
     tab: { label: 'Détails', decisions: 'Décisions', agent: 'Agent', projects: 'Projets', journal: 'Journal' },

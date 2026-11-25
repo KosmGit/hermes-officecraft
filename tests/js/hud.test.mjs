@@ -56,7 +56,7 @@ test('taskTag: stale = silent for, waiting = the blocked card', () => {
 
 test('taskTag strings exist and translate in en, fr, es', () => {
   for (const lang of ['en', 'fr', 'es']) {
-    for (const [k, args] of [['tagRunning', []], ['tagSilent', ['12 min']], ['tagWaitsRef', ['S3.2']], ['tagWaitsN', [1]], ['tagWaitsN', [3]], ['tagWaits', []], ['narrowNote', []], ['openBtn', []], ['selectHint', []], ['sceneLabel', []], ['selected', ['x']]]) {
+    for (const [k, args] of [['tagRunning', []], ['tagSilent', ['12 min']], ['tagWaitsRef', ['S3.2']], ['tagWaitsN', [1]], ['tagWaitsN', [3]], ['tagWaits', []], ['narrowNote', []], ['selectHint', []], ['sceneLabel', []], ['selected', ['x']]]) {
       const out = translate(messages, lang, k, args)
       assert.ok(out && !out.includes('undefined'), `${lang}.${k}`)
     }
