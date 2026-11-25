@@ -285,3 +285,34 @@ test('closePanel gives the focus to the toggle in the wide layout too', () => {
   assert.ok(!/else setPanelOpen\(false\)\s*$/.test(body.trim()), 'the wide branch must not be the last statement without a focus call')
 })
 }
+
+// ===== the model block of the sheet, in two lines =====
+{
+const { modelLines } = await import('../../src/core/panel.js')
+test('modelLines: the model used, whole, with who imposes it; the default under it; « really used » only when it differs', () => {
+  assert.equal(modelLines(null), null)
+  // a card pins a model, the worker ran with it: two lines, no « really used »
+  assert.deepEqual(modelLines({ card: 'example/model-large', default: 'example/model-fast', actual: 'example/model-large' }, 'A4'), { shown: 'example/model-large', imposedBy: 'A4', actual: null, default: 'example/model-fast' })
+  // the worker ran with something else than the card pins: the third line
+  assert.deepEqual(modelLines({ card: 'example/model-large', default: 'example/model-fast', actual: 'example/model-xl' }, 'A4').actual, 'example/model-xl')
+  // several cards: the code the facts name wins over the sole card
+  assert.equal(modelLines({ card: 'a/b', default: 'c/d', actual: null, cardCode: 'B7' }, 'A4').imposedBy, 'B7')
+  // nothing pinned, the worker differs from the default: its model is the first line and nobody « imposes » it
+  assert.deepEqual(modelLines({ card: '', default: 'example/model-fast', actual: 'example/model-xl' }, 'A4'), { shown: 'example/model-xl', imposedBy: null, actual: null, default: 'example/model-fast' })
+  // a pin on a card with no code: imposed, by « the card »
+  assert.equal(modelLines({ card: 'a/b', default: 'c/d', actual: null }).imposedBy, '')
+  for (const code of ['en', 'fr', 'es']) {
+    assert.match(messages[code].insp.modelImposed('WX-1'), /WX-1/)
+    assert.ok(!/WX-1/.test(messages[code].insp.modelImposed('')) && messages[code].insp.modelImposed('').length > 6, code)
+  }
+})
+
+test('the sheet: the grade is a row of the table after the description, the labels are plain (« None », « Own skills » / « Compétences propres »)', () => {
+  const tab = readFileSync(new URL('../../src/ui/AgentTab.jsx', import.meta.url), 'utf8')
+  assert.ok(tab.indexOf("t('insp.grade')") > tab.indexOf('<DescriptionRow'), 'Grade comes after the description')
+  assert.doesNotMatch(tab, /\{i\.grade \? ` · \$\{i\.grade\}` : ''\}/, 'no longer in the header line')
+  assert.equal(messages.fr.insp.skills, 'Compétences propres')
+  assert.equal(messages.fr.insp.noSession, 'Aucune')
+  for (const code of ['en', 'fr', 'es']) assert.ok(messages[code].insp.grade.length > 3 && messages[code].insp.noSession.length > 3, code)
+})
+}

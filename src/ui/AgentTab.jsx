@@ -1,6 +1,6 @@
 import { formatSpan, waitSign } from '../core/hud.js'
 import { outfitSource } from '../core/llm.js'
-import { boardsKnown, inspectorOf, untitledKey } from '../core/panel.js'
+import { boardsKnown, inspectorOf, modelLines, untitledKey } from '../core/panel.js'
 import { modelOf } from '../core/models.js'
 import { roleOf } from '../scene/index.js'
 import { Icon } from './icons.jsx'
@@ -74,6 +74,7 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
   const outfit = outfitSource(dressed.why)   // the outfit the model chose says so, with its source (a manual or rule-based one says nothing new)
   const models = modelOf(agent)
   const i = inspectorOf(agent, { nowMs, history, models, roleId: dressed.role, grade })
+  const ml = modelLines(i.model, i.current?.code ?? '')
   const why = frozen ? t('replay.noAction') : canOpen ? t('openSession', i.label) : t('noSession', i.label)   // in a replay the button is off because the past is read-only, not for want of a session
   const bot = bots?.get(agent.name) ?? null   // the roster's description of this bot (office.agents do not carry it)
   return (
@@ -83,7 +84,7 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
         <div className="tt">
           <h3 data-insp-name>{i.label}</h3>
           <span data-insp-state><StateTag state={i.state} t={t} /></span>{' '}
-          <small>· {t(`role.${i.roleId || 'none'}`)}{i.grade ? ` · ${i.grade}` : ''}</small>
+          <small>· {t(`role.${i.roleId || 'none'}`)}</small>
           {i.since ? <small className="ux-vh">{t(`insp.since.${i.since.kind}`, t.ago(i.since.ms))}</small> : null}
         </div>
         <button type="button" className="ux-b sm ico ghost" data-pick="" aria-label={t('ux.agent.close')} onClick={() => onPick(null)}><Icon name="x" size={14} /></button>
@@ -125,19 +126,25 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
         <dd>
           {i.session ? <span><span className="one">{i.session.title || t(untitledKey(i.session))}</span>{i.session.ms ? <small>{t.ago(i.session.ms)}</small> : null}</span> : <span>{t('insp.noSession')}</span>}
         </dd>
-        {i.model ? (
+        {ml ? (
           <>
             <dt>{t('insp.model')}</dt>
-            <dd data-insp-model className="ux-mono">
-              <span className="one"><PixelBadge size={10} /> {t('insp.modelCard', i.model.card)}</span>
-              {/* the card that sets the model (several cards) on its own line — appended to the ellipsed line above it was cut away */}
-              {i.model.cardCode ? <small data-insp-model-on>{t('insp.modelOn', i.model.cardCode)}</small> : null}
-              <small>{t('insp.modelDefault', i.model.default)}</small>
-              {i.model.actual ? <small>{t('insp.modelActual', i.model.actual)}</small> : null}
+            {/* two lines: the model the work runs on, WHOLE (it wraps, never cut), and who imposes it; then the bot's default in grey. « Really used » only when it differs. */}
+            <dd data-insp-model>
+              <span className="ux-mono ux-mv" data-insp-model-used>{ml.imposedBy !== null ? <PixelBadge size={10} /> : null} {ml.shown}</span>
+              {ml.imposedBy !== null ? <span className="ux-mi" data-insp-model-on> · {t('insp.modelImposed', ml.imposedBy)}</span> : null}
+              <small className="ux-mono" data-insp-model-default>{t('insp.modelDefault', ml.default)}</small>
+              {ml.actual ? <small className="ux-mono" data-insp-model-actual>{t('insp.modelActual', ml.actual)}</small> : null}
             </dd>
           </>
         ) : null}
         <DescriptionRow agent={i.name} description={bot?.description ?? ''} cut={bot?.cut === true} isDefault={bot?.isDefault === true} orders={orders} />
+        {i.grade ? (
+          <>
+            <dt>{t('insp.grade')}</dt>
+            <dd data-insp-grade>{i.grade}</dd>
+          </>
+        ) : null}
         {i.skills.length ? (
           <>
             <dt>{t('insp.skills')}</dt>

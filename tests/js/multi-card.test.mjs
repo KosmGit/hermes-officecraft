@@ -215,7 +215,7 @@ test('words: the tooltip says the number and names the cards with their time, in
   for (const lang of ['en', 'fr', 'es']) {
     const t = tr(lang)
     assert.equal(t('tagCards', 1).startsWith('1 '), true); assert.ok(t('tagCards', 5).startsWith('5 '))
-    assert.ok(t('insp.cards').length && t('insp.quietFor', '40 min').includes('40 min') && t('insp.modelOn', 'R-API3').includes('R-API3'))
+    assert.ok(t('insp.cards').length && t('insp.quietFor', '40 min').includes('40 min') && t('insp.modelImposed', 'R-API3').includes('R-API3'))
     assert.ok(t('announce.quiet', 'reviewer', 'R-API3', '40 min').includes('R-API3'))
   }
   assert.ok(tr('fr')('announce.quiet', 'reviewer', 'R-API3', '40 min').includes('reviewer\u00a0:'))
@@ -295,17 +295,18 @@ test('replay: a card whose run is open and NOT in a silence of /replay is alive 
 // ===== multi-card =====
 {
 // The inspector's model line of a bot running several cards names the card that sets the model
-// (« · on <code> »). Appended INSIDE the one-line, ellipsed span of the card's model, the code is cut: the panel reads
+// (« · imposed by <code> »). Appended INSIDE the one-line, ellipsed span of the card's model, the code is cut: the panel reads
 // « Card: example/model-large ·… » (at 1024 / 1440 / 1920 px). The code goes on a line of its own,
 // like the default and the actual model under it; one card (no cardCode) renders exactly as before.
 const agentTab = readFileSync(join(import.meta.dirname, '..', '..', 'src', 'ui', 'AgentTab.jsx'), 'utf8')
 
-test('inspector: the card that sets the model is not in the ellipsed one-line span of the model', () => {
+test('inspector: the model is never cut — it wraps, whole, and the card that imposes it is named after it (the model block is two lines)', () => {
   const dd = agentTab.match(/<dd data-insp-model[^>]*>([\s\S]*?)<\/dd>/)
   assert.ok(dd, 'the model row of the inspector')
-  const one = dd[1].match(/<span className="one">([\s\S]*?)<\/span>/)
-  assert.ok(one, 'the one-line span of the card model')
-  assert.ok(!/modelOn/.test(one[1]), 'the code of the card must not be cut with the model name')
-  assert.match(dd[1], /\{i\.model\.cardCode \? <small[^>]*>\{t\('insp\.modelOn', i\.model\.cardCode\)\}<\/small> : null\}/, 'the code on its own line, only with several cards')
+  assert.ok(!/className="one"/.test(dd[1]), 'no ellipsed one-line span: the whole model name is read')
+  assert.match(dd[1], /\{ml\.shown\}/, 'the model the work runs on')
+  assert.match(dd[1], /t\('insp\.modelImposed', ml\.imposedBy\)/, 'imposed by the card')
+  assert.match(dd[1], /\{ml\.actual \? <small[^>]*>\{t\('insp\.modelActual', ml\.actual\)\}<\/small> : null\}/, '« really used » only when it differs')
+  assert.match(agentTab, /modelLines\(i\.model, i\.current\?\.code \?\? ''\)/, 'the sole card is the one that imposes when no other code is given')
 })
 }

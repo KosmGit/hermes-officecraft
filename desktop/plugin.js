@@ -4872,15 +4872,16 @@ var en = {
     waiting: "Waiting for you",
     session: "Last session",
     skills: "Own skills",
+    grade: "Grade",
     model: "Model",
     open: "Open session",
-    noSession: "No chat session",
+    noSession: "None",
     untitled: "Untitled session",
     noCard: "No card running",
     more: (n) => `+${n} more`,
     cards: "Cards",
     quietFor: (span2) => `silent for ${span2}`,
-    modelOn: (code) => `on ${code}`,
+    modelImposed: (code = "") => code ? `imposed by ${code}` : "imposed by the card",
     since: {
       working: (when) => `Started ${when}`,
       waiting: (when) => `Oldest blocked card created ${when}`,
@@ -6629,15 +6630,16 @@ var es = {
     waiting: "Te espera",
     session: "Última sesión",
     skills: "Skills propios",
+    grade: "Grado",
     model: "Modelo",
     open: "Abrir la sesión",
-    noSession: "Sin sesión de chat",
+    noSession: "Ninguna",
     untitled: "Sesión sin título",
     noCard: "Ninguna tarjeta en curso",
     more: (n) => `+${n} más`,
     cards: "Tarjetas",
     quietFor: (span2) => `en silencio desde hace ${span2}`,
-    modelOn: (code) => `en ${code}`,
+    modelImposed: (code = "") => code ? `impuesto por ${code}` : "impuesto por la tarjeta",
     since: {
       working: (when) => `Iniciada ${when}`,
       waiting: (when) => `Tarjeta bloqueada más antigua creada ${when}`,
@@ -8386,16 +8388,17 @@ var fr = {
     card: "Carte",
     waiting: "Vous attend",
     session: "Dernière session",
-    skills: "Skills propres",
+    skills: "Compétences propres",
+    grade: "Grade",
     model: "Modèle",
     open: "Ouvrir la session",
-    noSession: "Aucune session de chat",
+    noSession: "Aucune",
     untitled: "Session sans titre",
     noCard: "Aucune carte en cours",
     more: (n) => `+${n} ${n === 1 ? "autre" : "autres"}`,
     cards: "Cartes",
     quietFor: (span2) => `silencieuse depuis ${span2}`,
-    modelOn: (code) => `sur ${code}`,
+    modelImposed: (code = "") => code ? `imposé par ${code}` : "imposé par la carte",
     since: {
       working: (when) => `Démarrée ${when}`,
       waiting: (when) => `Plus ancienne carte bloquée créée ${when}`,
@@ -11756,6 +11759,16 @@ function inboxView(cards, approvals, max = INBOX_MAX) {
   const shownCards = cards.slice(0, Math.max(0, max - shownApprovals.length));
   const total = cards.length + approvals.length;
   return { approvals: shownApprovals, cards: shownCards, more: total - shownApprovals.length - shownCards.length, total };
+}
+function modelLines(m, soleCardCode = "") {
+  if (!m) return null;
+  const imposed = Boolean(m.card);
+  return {
+    shown: m.card || m.actual || "",
+    imposedBy: imposed ? m.cardCode || soleCardCode || "" : null,
+    actual: imposed && m.actual && m.actual !== m.card ? m.actual : null,
+    default: m.default || ""
+  };
 }
 
 // src/core/alerts.js
@@ -19255,6 +19268,7 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
   const outfit = outfitSource(dressed.why);
   const models = modelOf(agent);
   const i = inspectorOf(agent, { nowMs, history, models, roleId: dressed.role, grade });
+  const ml = modelLines(i.model, i.current?.code ?? "");
   const why = frozen ? t("replay.noAction") : canOpen ? t("openSession", i.label) : t("noSession", i.label);
   const bot = bots?.get(agent.name) ?? null;
   return /* @__PURE__ */ jsxs16("section", { "data-insp": true, "data-agent-of": i.name, "aria-label": t("insp.title"), children: [
@@ -19266,8 +19280,7 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
         " ",
         /* @__PURE__ */ jsxs16("small", { children: [
           "· ",
-          t(`role.${i.roleId || "none"}`),
-          i.grade ? ` · ${i.grade}` : ""
+          t(`role.${i.roleId || "none"}`)
         ] }),
         i.since ? /* @__PURE__ */ jsx19("small", { className: "ux-vh", children: t(`insp.since.${i.since.kind}`, t.ago(i.since.ms)) }) : null
       ] }),
@@ -19309,20 +19322,27 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
         /* @__PURE__ */ jsx19("span", { className: "one", children: i.session.title || t(untitledKey(i.session)) }),
         i.session.ms ? /* @__PURE__ */ jsx19("small", { children: t.ago(i.session.ms) }) : null
       ] }) : /* @__PURE__ */ jsx19("span", { children: t("insp.noSession") }) }),
-      i.model ? /* @__PURE__ */ jsxs16(Fragment12, { children: [
+      ml ? /* @__PURE__ */ jsxs16(Fragment12, { children: [
         /* @__PURE__ */ jsx19("dt", { children: t("insp.model") }),
-        /* @__PURE__ */ jsxs16("dd", { "data-insp-model": true, className: "ux-mono", children: [
-          /* @__PURE__ */ jsxs16("span", { className: "one", children: [
-            /* @__PURE__ */ jsx19(PixelBadge, { size: 10 }),
+        /* @__PURE__ */ jsxs16("dd", { "data-insp-model": true, children: [
+          /* @__PURE__ */ jsxs16("span", { className: "ux-mono ux-mv", "data-insp-model-used": true, children: [
+            ml.imposedBy !== null ? /* @__PURE__ */ jsx19(PixelBadge, { size: 10 }) : null,
             " ",
-            t("insp.modelCard", i.model.card)
+            ml.shown
           ] }),
-          i.model.cardCode ? /* @__PURE__ */ jsx19("small", { "data-insp-model-on": true, children: t("insp.modelOn", i.model.cardCode) }) : null,
-          /* @__PURE__ */ jsx19("small", { children: t("insp.modelDefault", i.model.default) }),
-          i.model.actual ? /* @__PURE__ */ jsx19("small", { children: t("insp.modelActual", i.model.actual) }) : null
+          ml.imposedBy !== null ? /* @__PURE__ */ jsxs16("span", { className: "ux-mi", "data-insp-model-on": true, children: [
+            " · ",
+            t("insp.modelImposed", ml.imposedBy)
+          ] }) : null,
+          /* @__PURE__ */ jsx19("small", { className: "ux-mono", "data-insp-model-default": true, children: t("insp.modelDefault", ml.default) }),
+          ml.actual ? /* @__PURE__ */ jsx19("small", { className: "ux-mono", "data-insp-model-actual": true, children: t("insp.modelActual", ml.actual) }) : null
         ] })
       ] }) : null,
       /* @__PURE__ */ jsx19(DescriptionRow, { agent: i.name, description: bot?.description ?? "", cut: bot?.cut === true, isDefault: bot?.isDefault === true, orders }),
+      i.grade ? /* @__PURE__ */ jsxs16(Fragment12, { children: [
+        /* @__PURE__ */ jsx19("dt", { children: t("insp.grade") }),
+        /* @__PURE__ */ jsx19("dd", { "data-insp-grade": true, children: i.grade })
+      ] }) : null,
       i.skills.length ? /* @__PURE__ */ jsxs16(Fragment12, { children: [
         /* @__PURE__ */ jsx19("dt", { children: t("insp.skills") }),
         /* @__PURE__ */ jsx19("dd", { "data-insp-skills": true, children: /* @__PURE__ */ jsxs16("span", { className: "ux-chips", children: [
@@ -21630,6 +21650,9 @@ var PAGE_CSS = `
 .ux-kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
 .ux-kv .one{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-kv small{display:block;color:${T32};font-size:11.5px}
+/* the model block: the model the work runs on, whole (it wraps), then who imposes it, then the default in grey */
+.ux-mi{color:${T22};font-size:11.5px}
+.ux-mv{overflow-wrap:anywhere}
 .ux-chips{display:flex;flex-wrap:wrap;gap:4px}
 .ux-chip2{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:12px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};font-size:11.5px;max-width:100%}
 .ux-chip2 > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

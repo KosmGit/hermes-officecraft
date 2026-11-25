@@ -254,3 +254,20 @@ export function inboxView(cards, approvals, max = INBOX_MAX) {
   const total = cards.length + approvals.length
   return { approvals: shownApprovals, cards: shownCards, more: total - shownApprovals.length - shownCards.length, total }
 }
+
+/**
+ * The model block of an agent's sheet in two lines: the model the work really runs on, whole, with who imposes it (« imposed by WX-14 »)
+ * when a card pins it; then the bot's default. « Really used » is a third line only when what the worker ran with differs from what the
+ * card pins (when no card pins anything, the worker's model IS the first line). `m` = inspectorOf(...).model; `soleCardCode` = the code of the only running card (the one that pins it when `m` names no other).
+ * -> { shown, imposedBy: code | '' | null (null = not imposed; '' = imposed by a card that has no code), actual: string | null, default: string } | null
+ */
+export function modelLines(m, soleCardCode = '') {
+  if (!m) return null
+  const imposed = Boolean(m.card)
+  return {
+    shown: m.card || m.actual || '',
+    imposedBy: imposed ? m.cardCode || soleCardCode || '' : null,
+    actual: imposed && m.actual && m.actual !== m.card ? m.actual : null,
+    default: m.default || ''
+  }
+}
