@@ -159,6 +159,7 @@ export const PAGE_CSS = `
 .ux-pbar.flt .ux-seg{flex:0 0 auto}
 .ux-seg{display:inline-flex;padding:4px;border:0;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});box-shadow:inset 0 0 0 1px ${EDGE}}
 .ux-seg button{height:24px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:${T2};font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.ux-seg .short{display:none}
 .ux-seg button[aria-pressed="true"]{background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 1px 2px color-mix(in oklab, var(--foreground) 14%, transparent)}
 .ux-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 12px;text-align:center;color:${T3};font-size:12.5px}
 .ux-empty .ux-i{color:${T3}}
@@ -363,6 +364,7 @@ export const PAGE_CSS = `
 .ux-bar button[aria-selected="true"]{color:var(--ui-accent)}
 .ux-bar button[aria-selected="true"]::before{content:"";position:absolute;top:0;left:25%;right:25%;height:2px;border-radius:2px;background:var(--ui-accent)}
 .ux-bar .ux-n{position:absolute;top:4px;left:calc(50% + 4px);min-width:16px;height:16px;border-radius:8px;font-size:11px;background:${ink(ORANGE)};color:${CARD}}
+.ux-bar .ux-n.work{background:${ink('var(--ui-accent)')}}
 /* a very wide pane (1920 px window: 1250 px stage). The panel is a little wider and ends with its content instead of a card with a void; the project chips share the dock */
 @container ux (min-width: 1500px){
   .ux-main{grid-template-columns:minmax(0,1fr) 400px}
@@ -375,6 +377,8 @@ export const PAGE_CSS = `
 /* ---------- a medium pane (up to 1320 px) ---------- */
 @container ux (max-width: 1320px){
   .ux-main{grid-template-columns:minmax(0,1fr) 328px}
+  /* the panel is 328 px wide from here down: « Launch » and « Cancel the campaign » must share one row, so the cancel says « Cancel » */
+  .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline}
   .ux-lvp.agents{display:none}
   .ux-tab svg{display:none}
   .ux-tab{padding:0 4px}
@@ -389,7 +393,6 @@ export const PAGE_CSS = `
 @container ux (max-width: 980px){ .ux-gs.lvl .ux-g2{display:none} .ux-lvp.working .w{display:none} .ux-lvp.working{padding:0 8px;gap:4px} .ux-top{gap:8px} .ux-acts{gap:4px} .ux-acts .sep{margin:0} }
 /* ---------- a narrow pane (<= 700 px): one view at a time, the bar at the bottom ---------- */
 @container ux (max-width: 700px){
-  .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline}
   .ux-top{gap:8px;min-height:40px}
   .ux-brand h1{font-size:15px}
   .ux-brand .mk{width:28px;height:28px}
@@ -418,6 +421,21 @@ export const PAGE_CSS = `
   .ux-sel{flex:1 1 100%;flex-wrap:wrap;min-width:0;padding:0;border-left:0}
   .ux-sel .hint{display:inline}
   .ux-tabs{display:none}
+  /* the page already frames the panel: a second frame (border and inner margin) would cost a card; the cards keep their own edge */
+  .ux-panel{border:0;border-radius:0;background:transparent}
+  .ux-pbody{padding:0 0 12px;scrollbar-gutter:auto}
+  /* the sort shares the line of the first project (« By project / Oldest » in their short words); with nothing to share it, or no room, it takes a line of its own */
+  .ux-seg .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .ux-seg .short{display:inline}
+  [data-inbox]{display:flex;flex-wrap:wrap;align-items:center;column-gap:8px}
+  [data-inbox] > *{order:3;flex:1 0 100%}
+  [data-inbox] > .ux-pbar{order:1;flex:0 0 auto;margin:0}
+  [data-inbox] > .ux-pbar .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  [data-inbox] > .ux-pbar.flt{order:0;flex:1 0 100%;margin:0 0 12px}
+  [data-inbox] > .ux-pbar:not(.flt) + div{display:contents}
+  [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp{order:0;flex:1 1 120px;min-width:0;margin:0}
+  [data-inbox] > .ux-pbar:not(.flt) + div > ul{order:2;flex:1 0 100%;margin-top:8px}
+  [data-inbox] > .ux-pbar:not(.flt) + ul{margin-top:12px}
   .ux-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex:0 0 auto;margin:0 -16px -12px;border-top:1px solid ${EDGE};background:${CARD}}
   .ux-panel{border-radius:12px}
 }

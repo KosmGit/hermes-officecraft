@@ -6479,7 +6479,9 @@ var en = {
       day: "d",
       sort: "Sort",
       byProject: "By project",
+      byProjectShort: "Project",
       byAge: "Oldest first",
+      byAgeShort: "Oldest",
       group: (n) => `${n} to decide`,
       more: "Show the whole title",
       less: "Show less",
@@ -8234,7 +8236,9 @@ var es = {
       day: "d",
       sort: "Ordenar",
       byProject: "Por proyecto",
+      byProjectShort: "Proyecto",
       byAge: "Más antiguas",
+      byAgeShort: "Antiguas",
       group: (n) => `${n} por decidir`,
       more: "Ver el título completo",
       less: "Ver menos",
@@ -9990,7 +9994,9 @@ var fr = {
       day: "j",
       sort: "Trier",
       byProject: "Par projet",
+      byProjectShort: "Projet",
       byAge: "Plus anciennes",
+      byAgeShort: "Anciennes",
       group: (n) => `${n} à décider`,
       more: "Afficher le titre en entier",
       less: "Réduire",
@@ -19605,8 +19611,14 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
     /* @__PURE__ */ jsxs19("div", { className: `ux-pbar${project2 ? " flt" : ""}`, children: [
       /* @__PURE__ */ jsx22("span", { className: project2 ? "lbl ux-vh" : "lbl", id: "ux-sort-l", children: t("ux.dec.sort") }),
       /* @__PURE__ */ jsxs19("span", { className: "ux-seg", role: "group", "aria-labelledby": "ux-sort-l", children: [
-        /* @__PURE__ */ jsx22("button", { type: "button", "aria-pressed": sort === "project", "data-sort": "project", onClick: () => onSort("project"), children: t("ux.dec.byProject") }),
-        /* @__PURE__ */ jsx22("button", { type: "button", "aria-pressed": sort === "age", "data-sort": "age", onClick: () => onSort("age"), children: t("ux.dec.byAge") })
+        /* @__PURE__ */ jsxs19("button", { type: "button", "aria-pressed": sort === "project", "data-sort": "project", "aria-label": t("ux.dec.byProject"), onClick: () => onSort("project"), children: [
+          /* @__PURE__ */ jsx22("span", { className: "full", "aria-hidden": "true", children: t("ux.dec.byProject") }),
+          /* @__PURE__ */ jsx22("span", { className: "short", "aria-hidden": "true", children: t("ux.dec.byProjectShort") })
+        ] }),
+        /* @__PURE__ */ jsxs19("button", { type: "button", "aria-pressed": sort === "age", "data-sort": "age", "aria-label": t("ux.dec.byAge"), onClick: () => onSort("age"), children: [
+          /* @__PURE__ */ jsx22("span", { className: "full", "aria-hidden": "true", children: t("ux.dec.byAge") }),
+          /* @__PURE__ */ jsx22("span", { className: "short", "aria-hidden": "true", children: t("ux.dec.byAgeShort") })
+        ] })
       ] }),
       /* @__PURE__ */ jsxs19("span", { className: project2 ? "ux-fltg" : "grow", children: [
         project2 ? /* @__PURE__ */ jsx22(FilterChip, { slug: project2, onClear: () => onProject(null), t }) : null,
@@ -21502,6 +21514,7 @@ var PAGE_CSS = `
 .ux-pbar.flt .ux-seg{flex:0 0 auto}
 .ux-seg{display:inline-flex;padding:4px;border:0;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});box-shadow:inset 0 0 0 1px ${EDGE}}
 .ux-seg button{height:24px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:${T22};font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.ux-seg .short{display:none}
 .ux-seg button[aria-pressed="true"]{background:${CARD};color:var(--foreground);font-weight:600;box-shadow:0 1px 2px color-mix(in oklab, var(--foreground) 14%, transparent)}
 .ux-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 12px;text-align:center;color:${T32};font-size:12.5px}
 .ux-empty .ux-i{color:${T32}}
@@ -21706,6 +21719,7 @@ var PAGE_CSS = `
 .ux-bar button[aria-selected="true"]{color:var(--ui-accent)}
 .ux-bar button[aria-selected="true"]::before{content:"";position:absolute;top:0;left:25%;right:25%;height:2px;border-radius:2px;background:var(--ui-accent)}
 .ux-bar .ux-n{position:absolute;top:4px;left:calc(50% + 4px);min-width:16px;height:16px;border-radius:8px;font-size:11px;background:${ink4(ORANGE4)};color:${CARD}}
+.ux-bar .ux-n.work{background:${ink4("var(--ui-accent)")}}
 /* a very wide pane (1920 px window: 1250 px stage). The panel is a little wider and ends with its content instead of a card with a void; the project chips share the dock */
 @container ux (min-width: 1500px){
   .ux-main{grid-template-columns:minmax(0,1fr) 400px}
@@ -21718,6 +21732,8 @@ var PAGE_CSS = `
 /* ---------- a medium pane (up to 1320 px) ---------- */
 @container ux (max-width: 1320px){
   .ux-main{grid-template-columns:minmax(0,1fr) 328px}
+  /* the panel is 328 px wide from here down: « Launch » and « Cancel the campaign » must share one row, so the cancel says « Cancel » */
+  .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline}
   .ux-lvp.agents{display:none}
   .ux-tab svg{display:none}
   .ux-tab{padding:0 4px}
@@ -21732,7 +21748,6 @@ var PAGE_CSS = `
 @container ux (max-width: 980px){ .ux-gs.lvl .ux-g2{display:none} .ux-lvp.working .w{display:none} .ux-lvp.working{padding:0 8px;gap:4px} .ux-top{gap:8px} .ux-acts{gap:4px} .ux-acts .sep{margin:0} }
 /* ---------- a narrow pane (<= 700 px): one view at a time, the bar at the bottom ---------- */
 @container ux (max-width: 700px){
-  .ux-dc-o .ux-b.cx .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .ux-dc-o .ux-b.cx .short{display:inline}
   .ux-top{gap:8px;min-height:40px}
   .ux-brand h1{font-size:15px}
   .ux-brand .mk{width:28px;height:28px}
@@ -21761,6 +21776,21 @@ var PAGE_CSS = `
   .ux-sel{flex:1 1 100%;flex-wrap:wrap;min-width:0;padding:0;border-left:0}
   .ux-sel .hint{display:inline}
   .ux-tabs{display:none}
+  /* the page already frames the panel: a second frame (border and inner margin) would cost a card; the cards keep their own edge */
+  .ux-panel{border:0;border-radius:0;background:transparent}
+  .ux-pbody{padding:0 0 12px;scrollbar-gutter:auto}
+  /* the sort shares the line of the first project (« By project / Oldest » in their short words); with nothing to share it, or no room, it takes a line of its own */
+  .ux-seg .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .ux-seg .short{display:inline}
+  [data-inbox]{display:flex;flex-wrap:wrap;align-items:center;column-gap:8px}
+  [data-inbox] > *{order:3;flex:1 0 100%}
+  [data-inbox] > .ux-pbar{order:1;flex:0 0 auto;margin:0}
+  [data-inbox] > .ux-pbar .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  [data-inbox] > .ux-pbar.flt{order:0;flex:1 0 100%;margin:0 0 12px}
+  [data-inbox] > .ux-pbar:not(.flt) + div{display:contents}
+  [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp{order:0;flex:1 1 120px;min-width:0;margin:0}
+  [data-inbox] > .ux-pbar:not(.flt) + div > ul{order:2;flex:1 0 100%;margin-top:8px}
+  [data-inbox] > .ux-pbar:not(.flt) + ul{margin-top:12px}
   .ux-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex:0 0 auto;margin:0 -16px -12px;border-top:1px solid ${EDGE};background:${CARD}}
   .ux-panel{border-radius:12px}
 }
@@ -21916,9 +21946,9 @@ function ProjectDock({ boards, project: project2, onProject, picked, sceneAgent,
 }
 
 // src/ui/TabBar.jsx
-import { jsx as jsx33, jsxs as jsxs29 } from "react/jsx-runtime";
+import { Fragment as Fragment17, jsx as jsx33, jsxs as jsxs29 } from "react/jsx-runtime";
 var ICON4 = { office: "office", decisions: "inbox", projects: "folder", journal: "list" };
-function TabBar({ view, onView, decisions, t }) {
+function TabBar({ view, onView, decisions, working = 0, t }) {
   const onKey = (e) => {
     const next = tabForKey(BAR, barOf(view), e.key);
     if (!next) return;
@@ -21930,13 +21960,17 @@ function TabBar({ view, onView, decisions, t }) {
   return /* @__PURE__ */ jsx33("nav", { className: "ux-bar", role: "tablist", "aria-label": t("ux.bar.label"), "data-tabbar": true, children: BAR.map((k) => /* @__PURE__ */ jsxs29("button", { type: "button", role: "tab", "data-view": k, "aria-selected": barOf(view) === k, tabIndex: barOf(view) === k ? 0 : -1, onKeyDown: onKey, onClick: () => onView(k), children: [
     /* @__PURE__ */ jsx33(Icon, { name: ICON4[k], size: 20 }),
     k === "office" ? t("ux.bar.office") : t(`ux.tab.${k}`),
-    k === "decisions" && decisions ? /* @__PURE__ */ jsx33("span", { className: "ux-n warn", "aria-label": String(decisions), children: decisions }) : null
+    k === "decisions" && decisions ? /* @__PURE__ */ jsx33("span", { className: "ux-n warn", "aria-label": String(decisions), children: decisions }) : null,
+    k === "office" && working > 0 ? /* @__PURE__ */ jsxs29(Fragment17, { children: [
+      /* @__PURE__ */ jsx33("span", { className: "ux-n work", "aria-hidden": "true", "data-working-count": true, children: working }),
+      /* @__PURE__ */ jsx33("span", { className: "ux-vh", children: t("ux.pill.workingLabel", working) })
+    ] }) : null
   ] }, k)) });
 }
 
 // src/ui/ReplayBar.jsx
 import { useMemo as useMemo12 } from "react";
-import { Fragment as Fragment17, jsx as jsx34, jsxs as jsxs30 } from "react/jsx-runtime";
+import { Fragment as Fragment18, jsx as jsx34, jsxs as jsxs30 } from "react/jsx-runtime";
 var BINS = 96;
 function Density({ entries, fromMs, toMs: toMs2 }) {
   const bins = useMemo12(() => density(entries, fromMs, toMs2, BINS), [entries, fromMs, toMs2]);
@@ -21981,7 +22015,7 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
       replay ? /* @__PURE__ */ jsx34("span", { className: "oc-rp-range", "data-replay-range": true, children: t("replay.range", label(replay.fromMs), label(replay.toMs)) }) : null,
       replay && counts ? /* @__PURE__ */ jsx34("span", { className: "oc-rp-state", "aria-live": "polite", "data-replay-state": true, children: counts.working + counts.waiting + counts.silent ? t("replay.state", counts.working, counts.waiting, counts.silent) : t("replay.stateNone") }) : null
     ] }),
-    replay ? /* @__PURE__ */ jsxs30(Fragment17, { children: [
+    replay ? /* @__PURE__ */ jsxs30(Fragment18, { children: [
       /* @__PURE__ */ jsxs30("div", { className: "oc-rp-track", children: [
         /* @__PURE__ */ jsx34(Density, { entries, fromMs: replay.fromMs, toMs: replay.toMs }),
         /* @__PURE__ */ jsx34(
@@ -22038,7 +22072,7 @@ function ReplayBar({ replay, status, kind, onKind, atMs, onAt, entries, counts, 
 
 // src/ui/ReplayPanel.jsx
 import { useMemo as useMemo13 } from "react";
-import { Fragment as Fragment18, jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
+import { Fragment as Fragment19, jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
 var STATUS3 = new Set(CARD_STATUSES);
 var MAX_ROWS = 120;
 function factText(e, t) {
@@ -22060,7 +22094,7 @@ function Moment({ office, nowMs, t }) {
   const cardOf = (a) => (a.state === "waiting" ? a.blocked[0] ?? runningCards(a, nowMs)[0] : runningCards(a, nowMs)[0] ?? a.blocked[0]) ?? null;
   return /* @__PURE__ */ jsxs31("section", { className: "oc-psec", "aria-labelledby": "oc-h-moment", "data-moment": true, children: [
     /* @__PURE__ */ jsx35("h3", { id: "oc-h-moment", children: t("replay.moment.title") }),
-    agents.length || blocked.length ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+    agents.length || blocked.length ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
       /* @__PURE__ */ jsx35("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.agents"), children: agents.map((a) => {
         const c = cardOf(a);
         const tag = taskTag(a, nowMs);
@@ -22070,7 +22104,7 @@ function Moment({ office, nowMs, t }) {
           /* @__PURE__ */ jsx35("span", { className: `oc-tag oc-t-${a.state}`, children: t(`state.${a.state}`) }),
           /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
             /* @__PURE__ */ jsx35("b", { children: a.label }),
-            c ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+            c ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
               " ",
@@ -22080,11 +22114,11 @@ function Moment({ office, nowMs, t }) {
                 ")"
               ] })
             ] }) : null,
-            many ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+            many ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-faint oc-mono", "data-moment-more": true, title: cardsTip(tag, t), children: c.title ? plusOf(tag.more) : codeText("", tag.more, t) })
             ] }) : null,
-            quiet2 ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+            quiet2 ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
               " ",
               /* @__PURE__ */ jsxs31("span", { className: "oc-faint", "data-moment-quiet": true, style: { display: "inline-flex", alignItems: "center", gap: 4 }, children: [
                 /* @__PURE__ */ jsx35(StateIcon, { state: "stale" }),
@@ -22094,7 +22128,7 @@ function Moment({ office, nowMs, t }) {
           ] })
         ] }) }, a.name);
       }) }),
-      blocked.length ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+      blocked.length ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
         /* @__PURE__ */ jsx35("h4", { className: "oc-faint", style: { margin: "8px 0 4px" }, children: t("replay.moment.blocked", blocked.length) }),
         /* @__PURE__ */ jsx35("ul", { className: "oc-facts oc-moment", "aria-label": t("replay.moment.blocked", blocked.length), children: blocked.slice(0, 12).map((c) => /* @__PURE__ */ jsx35("li", { "data-moment-blocked": c.id, children: /* @__PURE__ */ jsx35("span", { className: "oc-fact oc-fact-static", children: /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
           /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: c.title, children: c.title || c.id }),
@@ -22164,7 +22198,7 @@ function ReplayPanel({ replay, office, summary: summary2, entries, atMs, nowMs, 
           /* @__PURE__ */ jsx35("time", { dateTime: new Date(e.ms).toISOString(), children: clockLabel(e.ms, t.lang, { day }) }),
           /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
             /* @__PURE__ */ jsx35("span", { className: "oc-fk", children: factText(e, t) }),
-            e.group === "order" && e.result ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+            e.group === "order" && e.result ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-tag", children: t(`orders.result.${e.result}`) })
             ] }) : null,
@@ -22172,11 +22206,11 @@ function ReplayPanel({ replay, office, summary: summary2, entries, atMs, nowMs, 
               " ",
               t("replay.fact.to", STATUS3.has(e.to) ? t(`status.${e.to}`) : e.to)
             ] }) : null,
-            e.group === "cron" && e.title ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+            e.group === "cron" && e.title ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-mono", children: e.title })
             ] }) : null,
-            e.task && e.source !== "cron" ? /* @__PURE__ */ jsxs31(Fragment18, { children: [
+            e.task && e.source !== "cron" ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-mono", title: e.title ? void 0 : t("replay.journal.noTitle"), children: e.title || e.task })
             ] }) : null,
@@ -23124,7 +23158,7 @@ function useQuotaRetry(query, hasWindows) {
 }
 
 // src/ui/UsageDialog.jsx
-import { Fragment as Fragment19, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
+import { Fragment as Fragment20, jsx as jsx38, jsxs as jsxs34 } from "react/jsx-runtime";
 var WIN_KEY = { "24h": "24h", "7d": "7d", "30d": "30d" };
 function Bar({ parts: parts2, peak, label }) {
   if (!parts2) return /* @__PURE__ */ jsx38("span", { className: "oc-us-bar oc-us-bar-none", "aria-hidden": "true" });
@@ -23187,7 +23221,7 @@ function CostTile({ cost, t }) {
   ] });
 }
 function Skeleton({ id, t }) {
-  return /* @__PURE__ */ jsxs34(Fragment19, { children: [
+  return /* @__PURE__ */ jsxs34(Fragment20, { children: [
     /* @__PURE__ */ jsx38("div", { className: "oc-us-top", "data-usage-skeleton": true, "aria-hidden": "true", children: /* @__PURE__ */ jsx38("div", { className: "oc-us-tiles", children: [0, 1, 2, 3].map((k) => /* @__PURE__ */ jsx38("div", { className: "oc-us-tile sk" }, k)) }) }),
     /* @__PURE__ */ jsxs34("section", { className: "oc-us-sec", "aria-labelledby": `${id}-d`, "data-usage-section": "days", children: [
       /* @__PURE__ */ jsx38("h3", { id: `${id}-d`, children: t("usage.days.title") }),
@@ -23362,7 +23396,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
           t("usage.loading")
         ] }) : null,
         usageServed && !data && !usage.isError ? /* @__PURE__ */ jsx38(Skeleton, { id, t }) : null,
-        data ? /* @__PURE__ */ jsxs34(Fragment19, { children: [
+        data ? /* @__PURE__ */ jsxs34(Fragment20, { children: [
           partial.length ? /* @__PURE__ */ jsx38(Notice, { tone: "warn", icon: "alert", role: "status", "data-usage-partial": true, children: t("usage.partial", partial.map((p) => p.source).join(", ")) }) : null,
           !tot ? /* @__PURE__ */ jsx38(Notice, { tone: "neutral", icon: "info", "data-usage-none": true, children: agents.absent ? t("usage.noneAbsent", agents.absent) : t("usage.none") }) : /* @__PURE__ */ jsxs34("div", { className: "oc-us-top", children: [
             /* @__PURE__ */ jsxs34("div", { className: "oc-us-tiles", role: "group", "aria-label": t("usage.title"), children: [
@@ -23395,7 +23429,7 @@ function UsageDialog({ open, onClose, ctx, usageServed, replayServed }) {
               /* @__PURE__ */ jsx38("b", { className: "oc-us-name", title: r.profile, children: r.profile }),
               /* @__PURE__ */ jsx38(Bar, { parts: r.parts, peak: agentPeak, label: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0 }),
               /* @__PURE__ */ jsx38("span", { className: "oc-us-num", title: r.parts ? t("usage.exact", nf(r.parts.total)) : void 0, children: r.state === "ok" ? tokenLabel(r.parts?.total ?? null, t.lang) ?? t("usage.absent") : r.state === "none" ? t("usage.noSession") : t(`usage.reason.${r.reason ?? "missing"}`) }),
-              /* @__PURE__ */ jsx38("span", { className: "oc-faint oc-us-sub", children: r.state === "ok" ? /* @__PURE__ */ jsxs34(Fragment19, { children: [
+              /* @__PURE__ */ jsx38("span", { className: "oc-faint oc-us-sub", children: r.state === "ok" ? /* @__PURE__ */ jsxs34(Fragment20, { children: [
                 t("usage.agents.calls", nf(r.calls), nf(r.sessions)),
                 " · ",
                 /* @__PURE__ */ jsx38(Cost, { cost: r.cost, t })
@@ -23606,7 +23640,7 @@ var USAGE_CSS = `
 
 // src/ui/SeatingDialog.jsx
 import { useEffect as useEffect22, useId as useId20, useRef as useRef25, useState as useState23 } from "react";
-import { Fragment as Fragment20, jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
+import { Fragment as Fragment21, jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
 function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   const t = useT();
   const areaRef = useRef25(null);
@@ -23665,7 +23699,7 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
         setAnswer(null);
         onChoice("default");
       }), children: t("llm.seating.revert") }),
-      actions: /* @__PURE__ */ jsxs35(Fragment20, { children: [
+      actions: /* @__PURE__ */ jsxs35(Fragment21, { children: [
         /* @__PURE__ */ jsx39("button", { type: "button", className: "oc-btn", "data-seating-close": true, onClick: onClose, children: t("llm.decor.close") }),
         /* @__PURE__ */ jsxs35("button", { type: "submit", className: "oc-btn oc-primary", "data-seating-run": true, "aria-disabled": blocked ? true : void 0, children: [
           /* @__PURE__ */ jsx39(DlgIcon, { id: "spark", size: 14 }),
@@ -24003,7 +24037,7 @@ function Segmented({ label, value, options, onChange, describedBy }) {
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { Fragment as Fragment21, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
+import { Fragment as Fragment22, jsx as jsx41, jsxs as jsxs37 } from "react/jsx-runtime";
 var STATE_TONE = { off: "off", ready: "ok", unavailable: "warn", outdated: "warn", cap: "warn", error: "warn" };
 var GAUGE_R = 34;
 function lastLine(state2, feature, t) {
@@ -24109,7 +24143,7 @@ function SettingsFormLlm({ actions = null }) {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
   const title = /* @__PURE__ */ jsx41(WhereLine, { where: "server", name: t("llm.title"), tip: t("llm.hint") });
-  if (query.isError) return /* @__PURE__ */ jsxs37(Fragment21, { children: [
+  if (query.isError) return /* @__PURE__ */ jsxs37(Fragment22, { children: [
     title,
     /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", "data-llm-unavailable": true, children: t("llm.unavailable") })
   ] });
@@ -24307,7 +24341,7 @@ function SettingsFormLlm({ actions = null }) {
           ] })
         ] })
       ] }),
-      view.lists ? /* @__PURE__ */ jsxs37(Fragment21, { children: [
+      view.lists ? /* @__PURE__ */ jsxs37(Fragment22, { children: [
         /* @__PURE__ */ jsx41(ModelSelect, { lane: "strong", sel: view.selects.strong, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }), tipped: true }),
         /* @__PURE__ */ jsx41(ModelSelect, { lane: "light", sel: view.selects.light, choices: list.choices, busy: saving, onPick: (lane, pick) => apply({ models: { [lane]: pick } }) })
       ] }) : /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn oc-lm-wide", role: "status", "data-llm-too-old": true, children: t("llm.grant.tooOld") }),
@@ -24343,7 +24377,7 @@ function SettingsFormLlm({ actions = null }) {
 // src/ui/SettingsFormNotify.jsx
 import { host as host3 } from "@hermes/plugin-sdk";
 import { useEffect as useEffect25, useRef as useRef28, useState as useState26 } from "react";
-import { Fragment as Fragment22, jsx as jsx42, jsxs as jsxs38 } from "react/jsx-runtime";
+import { Fragment as Fragment23, jsx as jsx42, jsxs as jsxs38 } from "react/jsx-runtime";
 var MESSAGING_PATH = "/messaging";
 var selectStyle = {
   font: "inherit",
@@ -24402,7 +24436,7 @@ function SettingsFormNotify() {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
   const title = /* @__PURE__ */ jsx42(WhereLine, { where: "server" });
-  if (query.isError) return /* @__PURE__ */ jsxs38(Fragment22, { children: [
+  if (query.isError) return /* @__PURE__ */ jsxs38(Fragment23, { children: [
     title,
     /* @__PURE__ */ jsx42("p", { className: "oc-sx-warn", "data-notify-unavailable": true, children: t("notify.unavailable") })
   ] });
@@ -24554,7 +24588,7 @@ function SettingsFormNotify() {
     /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
     preview ? /* @__PURE__ */ jsxs38("div", { "data-notify-preview-box": true, children: [
       /* @__PURE__ */ jsx42(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
-      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment22, { children: [
+      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment23, { children: [
         /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
         /* @__PURE__ */ jsx42(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
       ] }) : null,
@@ -24570,7 +24604,7 @@ function SettingsFormNotify() {
         control: ({ id, describedBy }) => /* @__PURE__ */ jsx42(Switch, { id, describedBy, checked: quiet2.enabled, ...held(saving), onChange: hold(saving, (checked) => apply({ quiet: { enabled: checked } })) })
       }
     ),
-    quiet2.enabled ? /* @__PURE__ */ jsxs38(Fragment22, { children: [
+    quiet2.enabled ? /* @__PURE__ */ jsxs38(Fragment23, { children: [
       /* @__PURE__ */ jsx42(
         SettingsRow,
         {
@@ -24578,7 +24612,7 @@ function SettingsFormNotify() {
           group: true,
           label: t("notify.quiet.range"),
           help: zone ? t("notify.quiet.clock", zone) : null,
-          control: ({ describedBy }) => /* @__PURE__ */ jsxs38(Fragment22, { children: [
+          control: ({ describedBy }) => /* @__PURE__ */ jsxs38(Fragment23, { children: [
             /* @__PURE__ */ jsx42(
               "select",
               {
@@ -24886,10 +24920,16 @@ ${ringed(".oc-sd-x:focus-visible")}
   .oc-sx-name{gap:16px}
   .oc-sx-ctl,.oc-lm-ctl{gap:16px}
   .oc-sx-sw{width:48px;height:28px;border-radius:14px}
+  .oc-sx-sw::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}   /* 48 x 28 to the eye, 48 x 40 to the finger */
   .oc-sx-sw::after{top:3px;left:3px;width:20px;height:20px}
   .oc-sx-sw:checked::after{transform:translateX(20px)}
   .oc-sx-seg span{height:40px}
-  .oc-sx-btn,.oc-sx-link,.oc-sd-f .oc-sx-btn{min-height:40px}
+  .oc-sx-btn,.oc-sx-link,.oc-sd-f .oc-sx-btn,.oc-nt-note .oc-sx-link{min-height:40px}
+  .oc-lm-ib{flex:0 0 40px}
+  .oc-lm-top{row-gap:16px}
+  .oc-lm-mod{gap:16px}
+  .oc-lm-modh{height:24px}
+  .oc-sx-cap{margin-top:16px}
   .oc-sx-cap summary{min-height:40px}
   .oc-fc,.oc-lm-sel,.oc-sx-capg input{height:40px!important}
   .oc-nt-chip span,.oc-nt-line .oc-nt-chip span{min-height:40px}
@@ -24902,7 +24942,7 @@ ${ringed(".oc-sd-x:focus-visible")}
 `;
 
 // src/ui/SettingsForm.jsx
-import { Fragment as Fragment23, jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
+import { Fragment as Fragment24, jsx as jsx43, jsxs as jsxs39 } from "react/jsx-runtime";
 var selectStyle2 = {
   font: "inherit",
   height: "32px",
@@ -24967,7 +25007,7 @@ function SettingsForm({ llm = null }) {
         code
       )) }),
       /* @__PURE__ */ jsxs39("div", { id: `${base}-panel`, className: "oc-sf-panel", role: "tabpanel", tabIndex: 0, "aria-labelledby": `${base}-tab-${tab}`, "data-settings-tab": tab, children: [
-        tab === "general" ? /* @__PURE__ */ jsxs39(Fragment23, { children: [
+        tab === "general" ? /* @__PURE__ */ jsxs39(Fragment24, { children: [
           /* @__PURE__ */ jsx43(WhereLine, { where: "local" }),
           /* @__PURE__ */ jsx43("h3", { className: "oc-sf-sec", "data-sec": "display", children: t("settings.sec.display") }),
           /* @__PURE__ */ jsx43(
@@ -25041,7 +25081,7 @@ function SettingsForm({ llm = null }) {
               label: t("settings.night"),
               help: t("settings.nightHint"),
               tip: t("settings.nightTip"),
-              control: ({ describedBy }) => /* @__PURE__ */ jsxs39(Fragment23, { children: [
+              control: ({ describedBy }) => /* @__PURE__ */ jsxs39(Fragment24, { children: [
                 /* @__PURE__ */ jsx43(
                   "select",
                   {
@@ -26089,7 +26129,7 @@ function OfficePage({ ctx }) {
     ] }) : null,
     /* @__PURE__ */ jsx47(AlertRail, { alerts, narrow, t, failingNames }),
     body,
-    narrow && model.body === "office" ? /* @__PURE__ */ jsx47(TabBar, { view: officeView ? "office" : tab, onView: goView, decisions: decisionCount, t }) : null,
+    narrow && model.body === "office" ? /* @__PURE__ */ jsx47(TabBar, { view: officeView ? "office" : tab, onView: goView, decisions: decisionCount, working: counts.working, t }) : null,
     roster.data ? /* @__PURE__ */ jsx47(HireDialog, { open: hireOpen, onClose: closeHire, profiles: hireList, orders, onSeeBot: (name) => {
       setHireOpen(false);
       pickAgent(name);

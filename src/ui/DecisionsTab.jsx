@@ -110,8 +110,8 @@ export function DecisionsTab({ office, history, orders, writes, openCard, approv
       <div className={`ux-pbar${project ? ' flt' : ''}`}>
         <span className={project ? 'lbl ux-vh' : 'lbl'} id="ux-sort-l">{t('ux.dec.sort')}</span>
         <span className="ux-seg" role="group" aria-labelledby="ux-sort-l">
-          <button type="button" aria-pressed={sort === 'project'} data-sort="project" onClick={() => onSort('project')}>{t('ux.dec.byProject')}</button>
-          <button type="button" aria-pressed={sort === 'age'} data-sort="age" onClick={() => onSort('age')}>{t('ux.dec.byAge')}</button>
+          <button type="button" aria-pressed={sort === 'project'} data-sort="project" aria-label={t('ux.dec.byProject')} onClick={() => onSort('project')}><span className="full" aria-hidden="true">{t('ux.dec.byProject')}</span><span className="short" aria-hidden="true">{t('ux.dec.byProjectShort')}</span></button>
+          <button type="button" aria-pressed={sort === 'age'} data-sort="age" aria-label={t('ux.dec.byAge')} onClick={() => onSort('age')}><span className="full" aria-hidden="true">{t('ux.dec.byAge')}</span><span className="short" aria-hidden="true">{t('ux.dec.byAgeShort')}</span></button>
         </span>
         {/* the filter's chip and the « ? » wrap together, so the « ? » is never alone on a line */}
         <span className={project ? 'ux-fltg' : 'grow'}>{project ? <FilterChip slug={project} onClear={() => onProject(null)} t={t} /> : null}<ListHelp t={t} /></span>

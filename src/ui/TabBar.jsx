@@ -5,9 +5,10 @@ const ICON = { office: 'office', decisions: 'inbox', projects: 'folder', journal
 
 /**
  * The bar of a narrow pane (<= 700 px): Office, Decisions, Projects, Journal, one view at a time. Each entry is a tab of its own list
- * (arrows move, Home / End jump), the decisions carry their count. The Agent view belongs to the Office entry (it opens from an agent).
+ * (arrows move, Home / End jump), the decisions carry their count and the Office the number of agents at work (the header of a narrow pane
+ * keeps only the decisions). The Agent view belongs to the Office entry (it opens from an agent).
  */
-export function TabBar({ view, onView, decisions, t }) {
+export function TabBar({ view, onView, decisions, working = 0, t }) {
   const onKey = e => {
     const next = tabForKey(BAR, barOf(view), e.key)
     if (!next) return
@@ -23,6 +24,7 @@ export function TabBar({ view, onView, decisions, t }) {
           <Icon name={ICON[k]} size={20} />
           {k === 'office' ? t('ux.bar.office') : t(`ux.tab.${k}`)}
           {k === 'decisions' && decisions ? <span className="ux-n warn" aria-label={String(decisions)}>{decisions}</span> : null}
+          {k === 'office' && working > 0 ? <><span className="ux-n work" aria-hidden="true" data-working-count>{working}</span><span className="ux-vh">{t('ux.pill.workingLabel', working)}</span></> : null}
         </button>
       ))}
     </nav>

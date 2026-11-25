@@ -629,7 +629,7 @@ export function OfficePage({ ctx }) {
         ) : null}
         <AlertRail alerts={alerts} narrow={narrow} t={t} failingNames={failingNames} />
         {body}
-        {narrow && model.body === 'office' ? <TabBar view={officeView ? 'office' : tab} onView={goView} decisions={decisionCount} t={t} /> : null}
+        {narrow && model.body === 'office' ? <TabBar view={officeView ? 'office' : tab} onView={goView} decisions={decisionCount} working={counts.working} t={t} /> : null}
         {roster.data ? <HireDialog open={hireOpen} onClose={closeHire} profiles={hireList} orders={orders} onSeeBot={name => { setHireOpen(false); pickAgent(name) }} /> : null}
         {roster.data && writes.includes('campaign') ? <CampaignDialog open={campaignOpen} onClose={closeCampaign} desks={desks} boards={liveOffice.boards} sceneBy={sceneByName} orders={orders} writes={writes} replay={replayOn} /> : null}
         {usageOpen ? <UsageDialog open={usageOpen} onClose={closeUsage} ctx={ctx} usageServed={reads.includes('usage')} replayServed={replayServed} /> : null}
