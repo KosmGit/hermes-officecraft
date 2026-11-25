@@ -3,6 +3,7 @@
 // this file's own seeded generator, so what is checked is the SHAPE of each setup.
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { readFileSync } from 'node:fs'
 
 import { foldRank, taskTag, waitBearers, waitSign } from '../../src/core/hud.js'
 import { buildOffice } from '../../src/core/office.js'
@@ -12,6 +13,7 @@ import {
   overlappingPairs, placeLabels, podArea, project, spriteBoxes, toSceneModel
 } from '../../src/scene/index.js'
 import { TH2, TW2 } from '../../src/scene/constants.js'
+import { SCENE_CSS } from '../../src/ui/sceneStyles.js'
 
 const NOW = 1_800_000_000_000
 const sec = ms => ms / 1000
@@ -61,8 +63,8 @@ export const SETUPS = {
 /** The page measures a label's width in the DOM; here an estimate of the same label (11 px font, 6.5 px a letter, the padding and the dot). */
 const chipSize = ({ name, code, wait }) => ({ w: Math.ceil(7 + 5 + 5 + name.length * 6.5 + (code ? 5 + 10 + code.length * 6.6 : 0) + (wait ? 5 + 15 : 0) + 4), h: 20 })
 const islandSizes = (slug, done, total) => [
-  { w: Math.ceil(9 + 8 + 7 + slug.length * 6.6 + 7 + 14 + 7 + `${done}/${total}`.length * 6.6 + 9), h: 24, mode: 'full' },
-  { w: Math.ceil(9 + 8 + 7 + slug.length * 6.6 + 7 + `${done}/${total}`.length * 6.6 + 9), h: 24, mode: 'short' },
+  { w: Math.ceil(9 + 8 + 7 + slug.length * 6.6 + 7 + 14 + 9), h: 24, mode: 'full' },
+  { w: Math.ceil(9 + 8 + 7 + slug.length * 6.6 + 9), h: 24, mode: 'short' },
   { w: DOT + 8, h: 20, mode: 'dot' }
 ]
 
@@ -260,4 +262,30 @@ test('the 7 setups exercise the « a decision waits » sign: bots at work with a
     for (const a of office.agents.filter(waitSign)) assert.equal(labelOf(a, taskTag(a, NOW)).wait, true, `${name}/${a.name}`)
   }
   assert.ok(carriers > 0, 'at least one setup puts the sign on a label')
+})
+
+test('the 7 setups: 0 overlap between an island label and an agent label or dot (kinds measured apart), at two stage widths', () => {
+  let pairs = 0
+  for (const [name, make] of Object.entries(SETUPS)) {
+    for (const stageW of [1000, 760]) {
+      const r = place(make(), { stageW, stageH: 560 })
+      if (r.listed) continue
+      const isl = r.res.placed.filter(p => p.kind === 'island')
+      const other = r.res.placed.filter(p => p.kind !== 'island')
+      for (const a of isl) for (const b of other) {
+        pairs++
+        assert.deepEqual(overlappingPairs([a, b]), [], `${name} @${stageW}: ${a.key} / ${b.key}`)
+      }
+    }
+  }
+  assert.ok(pairs > 100, `${pairs} island x agent pairs measured`)
+})
+
+test('an island label says its project once: name and ring, never the counts the dock under the scene carries, and the name is written as is', () => {
+  const scene = readFileSync(new URL('../../src/ui/OfficeScene.jsx', import.meta.url), 'utf8')
+  const island = scene.match(/function Island\([\s\S]*?\n}\n/)[0]
+  assert.doesNotMatch(island, /oc-prog|oc-wb|\{progress\}|\{blocked\}/, 'no done/total, no blocked count on the label')
+  assert.match(island, /aria-label=\{`\$\{t\('ux\.dock\.chip', board\.slug, progress\)\}\$\{blocked/, 'the counts stay in its name for a screen reader')
+  assert.doesNotMatch(SCENE_CSS, /\.oc-zone b\{[^}]*text-transform/, '« bakery-site » is an identifier: written the same way everywhere')
+  assert.doesNotMatch(SCENE_CSS, /\.oc-wb/)
 })

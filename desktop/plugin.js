@@ -20423,7 +20423,7 @@ var SCENE_CSS = `
 .oc-station[aria-pressed="true"]{box-shadow:0 0 0 2px var(--sel);background:color-mix(in oklab, var(--sel) 12%, transparent)}
 .oc-zone{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:8px;font:inherit;font-size:11px;line-height:1;white-space:nowrap;
   background:${CARD2};border:1px solid ${EDGE};color:var(--foreground);box-shadow:${SHADOW};pointer-events:auto}
-.oc-zone b{font-weight:600;text-transform:capitalize}
+.oc-zone b{font-weight:600}
 .oc-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
 .oc-warn{color:${ink3(ORANGE3)};font-weight:600}
 /* an island's label: on the front edge of its rug, in the project's colour, a short stem to the edge, a button that filters on the project */
@@ -20434,8 +20434,7 @@ var SCENE_CSS = `
 .oc-isl::before{content:"";position:absolute;left:50%;bottom:100%;width:2px;height:calc(var(--stem, 7px) - 1px);margin-left:-1px;background:var(--pc);opacity:.7}
 .oc-pdot{width:8px;height:8px;flex:0 0 auto;border-radius:2px;background:var(--pc)}
 .oc-isl .oc-ring{flex:0 0 auto;width:14px;height:14px}
-.oc-isl .oc-wb{display:inline-flex;align-items:center;gap:2px}
-.oc-isl[data-isl="short"] .oc-ring,.oc-isl[data-isl="short"] .oc-wb{display:none}
+.oc-isl[data-isl="short"] .oc-ring{display:none}
 .oc-isl[data-isl="dot"]{gap:0;padding:0;width:20px;justify-content:center;height:20px;border-radius:6px}
 .oc-isl[data-isl="dot"] > :not(.oc-pdot){display:none}
 .oc-isl[data-isl="dot"] .oc-pdot{width:10px;height:10px}
@@ -20681,12 +20680,7 @@ function Island({ board, hall, count: count2, dim, active, onPick, t }) {
       children: [
         /* @__PURE__ */ jsx28("span", { className: "oc-pdot", "aria-hidden": "true" }),
         /* @__PURE__ */ jsx28("b", { children: board.slug }),
-        /* @__PURE__ */ jsx28(Ring, { done: board.done, total: board.total, r: 5, box: 14, stroke: 2.4, className: "ux-ring oc-ring" }),
-        /* @__PURE__ */ jsx28("span", { className: "oc-mono oc-prog", children: progress }),
-        blocked ? /* @__PURE__ */ jsxs25("span", { className: "oc-warn oc-wb", children: [
-          /* @__PURE__ */ jsx28(Icon, { name: "warn", size: 12 }),
-          /* @__PURE__ */ jsx28("span", { "aria-hidden": "true", children: blocked })
-        ] }) : null
+        /* @__PURE__ */ jsx28(Ring, { done: board.done, total: board.total, r: 5, box: 14, stroke: 2.4, className: "ux-ring oc-ring" })
       ]
     }
   );

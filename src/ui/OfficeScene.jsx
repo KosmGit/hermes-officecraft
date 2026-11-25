@@ -11,7 +11,7 @@ import { createTicker, shouldAnimate } from '../core/ticker.js'
 import { anchors, backingOf, bleedOf, boardAnchors, buildBackdrop, buildBase, decorMap, dimOf, drawScene, hotspots, labelOf, layoutScene, needsAnimation, placeLabels, project, roleOf, spriteBoxes, toSceneModel, upscale } from '../scene/index.js'
 import { TW2 } from '../scene/constants.js'
 import { pileTip } from '../scene/pile.js'
-import { Icon, Ring } from './icons.jsx'
+import { Ring } from './icons.jsx'
 import { PixelBadge } from './PixelBadge.jsx'
 import { cardsTip, codeText, quietTip, tagText } from './cardFacts.js'
 import { Face, StateIcon } from './StateIcon.jsx'
@@ -137,7 +137,11 @@ function agentFacts(a, t, nowMs, badge) {
   return { state, code: codeText(lab.code, lab.more, t), quiet: lab.quiet === true, wait: lab.wait === true, tag: full, cardsText: cards, quietText: quiet, label: `${a.label || a.name} — ${said}. ${when}${pin}${more}`, tip: [said, full, cards, quiet].filter(Boolean).join(' · ') }
 }
 
-/** The label of an island (a project of the office), a button that filters on it: dot + name, ring and `done/total`, blocked cards. `data-isl` = its size (full / short / dot). */
+/**
+ * The label of an island (a project of the office), a button that filters on it: dot + name + the ring of its progress. The counts
+ * (`done/total`, blocked cards) are the dock's, right under the scene: written once. They stay in the button's name for the screen
+ * reader. `data-isl` = its size (full / short = no ring / dot).
+ */
 function Island({ board, hall, count, dim, active, onPick, t }) {
   const style = useProjectStyle(hall ? null : board.slug)
   if (hall) {
@@ -166,8 +170,6 @@ function Island({ board, hall, count, dim, active, onPick, t }) {
       <span className="oc-pdot" aria-hidden="true" />
       <b>{board.slug}</b>
       <Ring done={board.done} total={board.total} r={5} box={14} stroke={2.4} className="ux-ring oc-ring" />
-      <span className="oc-mono oc-prog">{progress}</span>
-      {blocked ? <span className="oc-warn oc-wb"><Icon name="warn" size={12} /><span aria-hidden="true">{blocked}</span></span> : null}
     </button>
   )
 }
