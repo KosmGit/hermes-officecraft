@@ -171,5 +171,9 @@ export const SCENE_CSS = `
 .oc-thought[data-hide]{visibility:hidden}
 .oc-thought i,.oc-lthought i{font-style:normal;font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.1;margin-right:5px;padding:0 3px;border-radius:4px;border:1px solid ${EDGE};color:${SOFT}}
 .oc-lthought{display:block;margin:0 8px;padding:0 0 5px;font-size:11.5px;line-height:1.3;color:var(--foreground);overflow-wrap:anywhere}
+@media (pointer:coarse){
+  .oc-lrow{margin-bottom:8px}
+  .oc-lrow .oc-chip{min-height:40px}
+}
 @media (prefers-reduced-motion: reduce){.oc-chip{transition:none}}
 `

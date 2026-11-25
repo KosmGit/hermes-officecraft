@@ -15095,7 +15095,7 @@ var DIALOG_TAIL = `
   .oc-dg-x{width:40px;height:40px}
   .oc-dg-help{position:relative}
   .oc-dg-help::after{content:"";position:absolute;inset:-9px}
-  .oc-dg .oc-btn,.oc-dg-link,.oc-dg-pill,.oc-rp-chip,.oc-mp-opt,.oc-mp-off > summary{min-height:40px}
+  .oc-dg .oc-btn,.oc-dg-link,.oc-dg-link.quiet,.oc-dg-pill,.oc-rp-chip,.oc-mp-opt,.oc-mp-off > summary{min-height:40px}
   .oc-dg input[type=text],.oc-dg input[type=search],.oc-dg input:not([type]),.oc-dg textarea,.oc-dg select{min-height:40px}
   .oc-dg-seg button,.oc-dg-seg label{height:40px}
   .oc-lm-mk{min-height:40px;min-width:40px}
@@ -20515,6 +20515,10 @@ var SCENE_CSS = `
 .oc-thought[data-hide]{visibility:hidden}
 .oc-thought i,.oc-lthought i{font-style:normal;font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.1;margin-right:5px;padding:0 3px;border-radius:4px;border:1px solid ${EDGE};color:${SOFT2}}
 .oc-lthought{display:block;margin:0 8px;padding:0 0 5px;font-size:11.5px;line-height:1.3;color:var(--foreground);overflow-wrap:anywhere}
+@media (pointer:coarse){
+  .oc-lrow{margin-bottom:8px}
+  .oc-lrow .oc-chip{min-height:40px}
+}
 @media (prefers-reduced-motion: reduce){.oc-chip{transition:none}}
 `;
 
@@ -21812,7 +21816,7 @@ var PAGE_CSS = `
   .ux-seg button{height:40px;padding:0 12px}
   .ux-lnk{min-height:40px}
   .ux-roster{gap:8px}
-  .ux-pbar{gap:8px 16px}
+  .ux-pbar{gap:16px}
   .ux-pop.menu{gap:8px}
   .ux-pop.menu button{height:44px}
   .ux-help::after,.ux-b.sm.ico.ghost.op::after{content:"";position:absolute;inset:-8px}
@@ -22348,6 +22352,11 @@ var REPLAY_CSS = `
 .oc-nt-agents .oc-faint{grid-column:2}
 .oc-nt-agents b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .oc-nt-go{align-self:flex-start}
+@media (pointer:coarse){
+  .oc-rp-exit{min-height:40px}
+  .oc-rp-step{height:40px}
+  .oc-rp-win button{min-height:40px}
+}
 @media (max-width:520px){.oc-nt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.oc-rp-state{margin-left:0;flex:1 1 100%}.oc-rp-exit{margin-left:0}}
 `;
 

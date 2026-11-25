@@ -119,5 +119,10 @@ export const REPLAY_CSS = `
 .oc-nt-agents .oc-faint{grid-column:2}
 .oc-nt-agents b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .oc-nt-go{align-self:flex-start}
+@media (pointer:coarse){
+  .oc-rp-exit{min-height:40px}
+  .oc-rp-step{height:40px}
+  .oc-rp-win button{min-height:40px}
+}
 @media (max-width:520px){.oc-nt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.oc-rp-state{margin-left:0;flex:1 1 100%}.oc-rp-exit{margin-left:0}}
 `

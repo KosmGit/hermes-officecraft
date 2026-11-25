@@ -457,7 +457,7 @@ export const PAGE_CSS = `
   .ux-seg button{height:40px;padding:0 12px}
   .ux-lnk{min-height:40px}
   .ux-roster{gap:8px}
-  .ux-pbar{gap:8px 16px}
+  .ux-pbar{gap:16px}
   .ux-pop.menu{gap:8px}
   .ux-pop.menu button{height:44px}
   .ux-help::after,.ux-b.sm.ico.ghost.op::after{content:"";position:absolute;inset:-8px}
