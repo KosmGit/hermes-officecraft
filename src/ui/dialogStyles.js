@@ -293,7 +293,7 @@ const DIALOG_TAIL = `
 @media (pointer:coarse){
   .oc-dg-x{width:40px;height:40px}
   .oc-dg-help{position:relative}
-  .oc-dg-help::after{content:"";position:absolute;inset:-8px}
+  .oc-dg-help::after{content:"";position:absolute;inset:-9px}
   .oc-dg .oc-btn,.oc-dg-link,.oc-dg-pill,.oc-rp-chip,.oc-mp-opt,.oc-mp-off > summary{min-height:40px}
   .oc-dg input[type=text],.oc-dg input[type=search],.oc-dg input:not([type]),.oc-dg textarea,.oc-dg select{min-height:40px}
   .oc-dg-seg button,.oc-dg-seg label{height:40px}

@@ -15094,7 +15094,7 @@ var DIALOG_TAIL = `
 @media (pointer:coarse){
   .oc-dg-x{width:40px;height:40px}
   .oc-dg-help{position:relative}
-  .oc-dg-help::after{content:"";position:absolute;inset:-8px}
+  .oc-dg-help::after{content:"";position:absolute;inset:-9px}
   .oc-dg .oc-btn,.oc-dg-link,.oc-dg-pill,.oc-rp-chip,.oc-mp-opt,.oc-mp-off > summary{min-height:40px}
   .oc-dg input[type=text],.oc-dg input[type=search],.oc-dg input:not([type]),.oc-dg textarea,.oc-dg select{min-height:40px}
   .oc-dg-seg button,.oc-dg-seg label{height:40px}
@@ -21815,7 +21815,8 @@ var PAGE_CSS = `
   .ux-pop.menu button{height:44px}
   .ux-help::after,.ux-b.sm.ico.ghost.op::after{content:"";position:absolute;inset:-8px}
   .ux-b.sm.ico.ghost.op{position:relative;width:28px;min-width:28px;height:28px}
-  .ux-b.sm.ico.ghost.op::after{inset:-6px}
+  .ux-b.sm.ico.ghost.op::after{inset:-7px}   /* a 1 px border: the ::after is measured from the padding box */
+  .ux-pbar{padding-right:8px}   /* the « ? » at the end of a bar keeps its hit area inside the clipped body */
 }
 @media (prefers-reduced-motion: reduce){
   .ux *,.ux *::before,.ux *::after{animation:none!important;transition:none!important}
@@ -24916,9 +24917,9 @@ ${ringed(".oc-sd-x:focus-visible")}
   .oc-sd-x,.oc-lm-ib{width:40px;height:40px}
   .oc-sf-tab{height:40px}
   .oc-sx-help{position:relative}
-  .oc-sx-help::after{content:"";position:absolute;inset:-8px}
-  .oc-sx-name{gap:16px}
-  .oc-sx-ctl,.oc-lm-ctl{gap:16px}
+  .oc-sx-help::after{content:"";position:absolute;inset:-9px}   /* the 24 px « ? » has a 1 px border: the ::after is measured from its padding box */
+  .oc-sx-name{gap:20px}
+  .oc-sx-ctl,.oc-lm-ctl{gap:20px}
   .oc-sx-sw{width:48px;height:28px;border-radius:14px}
   .oc-sx-sw::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}   /* 48 x 28 to the eye, 48 x 40 to the finger */
   .oc-sx-sw::after{top:3px;left:3px;width:20px;height:20px}
@@ -24926,8 +24927,8 @@ ${ringed(".oc-sd-x:focus-visible")}
   .oc-sx-seg span{height:40px}
   .oc-sx-btn,.oc-sx-link,.oc-sd-f .oc-sx-btn,.oc-nt-note .oc-sx-link{min-height:40px}
   .oc-lm-ib{flex:0 0 40px}
-  .oc-lm-top{row-gap:16px}
-  .oc-lm-mod{gap:16px}
+  .oc-lm-top{row-gap:20px}
+  .oc-lm-mod{gap:20px}
   .oc-lm-modh{height:24px}
   .oc-sx-cap{margin-top:16px}
   .oc-sx-cap summary{min-height:40px}
@@ -25513,7 +25514,7 @@ var PANEL_CSS = `
   .oc-gear,.oc-x{width:40px;height:40px}
   .oc-toggle,.oc-set-link{min-height:40px}
   .oc-legend-btn{position:relative}
-  .oc-legend-btn::after{content:"";position:absolute;inset:-8px}
+  .oc-legend-btn::after{content:"";position:absolute;inset:-9px}
 }
 @media (max-width:560px){.oc-hbody{grid-template-columns:minmax(0,1fr)}.oc-hprev{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left}.oc-hire{padding:12px}}
 `;

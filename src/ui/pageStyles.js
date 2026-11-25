@@ -460,7 +460,8 @@ export const PAGE_CSS = `
   .ux-pop.menu button{height:44px}
   .ux-help::after,.ux-b.sm.ico.ghost.op::after{content:"";position:absolute;inset:-8px}
   .ux-b.sm.ico.ghost.op{position:relative;width:28px;min-width:28px;height:28px}
-  .ux-b.sm.ico.ghost.op::after{inset:-6px}
+  .ux-b.sm.ico.ghost.op::after{inset:-7px}   /* a 1 px border: the ::after is measured from the padding box */
+  .ux-pbar{padding-right:8px}   /* the « ? » at the end of a bar keeps its hit area inside the clipped body */
 }
 @media (prefers-reduced-motion: reduce){
   .ux *,.ux *::before,.ux *::after{animation:none!important;transition:none!important}

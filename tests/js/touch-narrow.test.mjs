@@ -49,7 +49,7 @@ test('the page: buttons, pills, tabs, segments, links at 40 px; the menu rows at
   assert.equal(decls(body, '.ux-acts').gap, '8px')
   // the « ? » (24 px) and the « open » icon (28 px): same look, a bigger hit area, 8 px and 6 px beyond
   assert.equal(decls(body, '.ux-help::after').inset, '-8px')
-  assert.equal(decls(body, '.ux-b.sm.ico.ghost.op::after').inset, '-6px')
+  assert.equal(decls(body, '.ux-b.sm.ico.ghost.op::after').inset, '-7px', 'a 1 px border: measured from the padding box, 28 + 12 = 40')
   assert.equal(decls(body, '.ux-b.sm.ico.ghost.op').width, '28px', 'the open icon keeps its look: only its hit area grows')
   // it comes after the container rules it must win over (a narrow pane sets 28 px for the dock's chips)
   assert.ok(at > clean.indexOf('@container ux (max-width: 700px)'), 'the coarse block follows the narrow-pane rules')
@@ -73,8 +73,8 @@ test('the settings: the switch is 48 x 28 (48 x 40 to the finger), segments, but
   assert.equal(decls(body, '.oc-sx-btn')['min-height'], '40px')
   assert.equal(decls(body, '.oc-sf-tab').height, '40px')
   assert.equal(decls(body, '.oc-sd-x').width, '40px')
-  assert.equal(decls(body, '.oc-sx-help::after').inset, '-8px')
-  assert.equal(decls(body, '.oc-sx-ctl').gap, '16px', 'two targets 8 px apart: the « ? » reaches 8 px beyond itself')
+  assert.equal(decls(body, '.oc-sx-help::after').inset, '-9px', '24 px with a 1 px border: 22 + 18 = 40')
+  assert.equal(decls(body, '.oc-sx-ctl').gap, '20px', 'two targets 8 px apart: the « ? » reaches 9 px beyond itself')
   assert.match(decls(body, '.oc-fc').height, /^40px/, 'the selects (their height is inline: !important)')
   const base = clean.replace(body, '')
   assert.equal(decls(base, '.oc-sx-sw').width, '40px')
@@ -86,10 +86,10 @@ test('the gear, the legend « ? », the dialogs: the same rule, in their own she
   const p = coarse(PANEL_CSS).body
   assert.equal(decls(p, '.oc-gear').width, '40px')
   assert.equal(decls(p, '.oc-gear').height, '40px')
-  assert.equal(decls(p, '.oc-legend-btn::after').inset, '-8px')
+  assert.equal(decls(p, '.oc-legend-btn::after').inset, '-9px')
   const d = coarse(DIALOG_CSS).body
   assert.equal(decls(d, '.oc-dg-x').height, '40px')
-  assert.equal(decls(d, '.oc-dg-help::after').inset, '-8px')
+  assert.equal(decls(d, '.oc-dg-help::after').inset, '-9px')
   assert.equal(decls(d, '.oc-dg-seg button')?.height, '40px')
   assert.equal(decls(d, '.oc-dg .oc-btn')['min-height'], '40px')
   assert.equal(decls(strip(PANEL_CSS).replace(p, ''), '.oc-gear').width, '28px', 'a mouse keeps the 28 px gear')
