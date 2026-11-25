@@ -53,6 +53,8 @@ export function SettingsForm({ llm = null }) {
   const counts = { llm: llmTabBadge(useLlm()), notify: notifyTabBadge(useNotify()) }
   // on a narrow strip (it scrolls) the chosen tab is brought into view
   useEffect(() => { document.getElementById(`${base}-tab-${tab}`)?.scrollIntoView?.({ inline: 'nearest', block: 'nearest' }) }, [base, tab])
+  // the three tabs share one scrolling panel: a tab opens at its top, not at the depth the previous one was scrolled to
+  useEffect(() => { const panel = document.getElementById(`${base}-panel`); if (panel) panel.scrollTop = 0 }, [base, tab])
 
   const onKeyDown = event => {
     const next = tabAfterKey(tab, event.key)

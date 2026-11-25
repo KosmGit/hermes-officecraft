@@ -25000,6 +25000,10 @@ function SettingsForm({ llm = null }) {
   useEffect26(() => {
     document.getElementById(`${base}-tab-${tab}`)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
   }, [base, tab]);
+  useEffect26(() => {
+    const panel = document.getElementById(`${base}-panel`);
+    if (panel) panel.scrollTop = 0;
+  }, [base, tab]);
   const onKeyDown = (event) => {
     const next = tabAfterKey(tab, event.key);
     if (!next) return;

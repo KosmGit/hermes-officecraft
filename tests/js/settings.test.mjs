@@ -186,3 +186,9 @@ test('the page decides the sheet with settingsSheet(width), not a re-typed compa
   assert.doesNotMatch(page, /SHEET_AT\s*=/, 'the threshold lives in src/ui/layout.js only')
 })
 }
+
+test('the tabs share one scrolling panel: changing tab brings the panel back to its top', () => {
+  const form = readFileSync(new URL('../../src/ui/SettingsForm.jsx', import.meta.url), 'utf8')
+  // without it, the LLM tab opened after scrolling Notifications to its end starts in the middle of the functions, its paid-option line out of sight
+  assert.match(form, /useEffect\(\(\) => \{ const panel = document\.getElementById\(`\$\{base\}-panel`\); if \(panel\) panel\.scrollTop = 0 \}, \[base, tab\]\)/)
+})
