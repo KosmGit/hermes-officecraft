@@ -19340,10 +19340,7 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
             " ",
             ml.shown
           ] }),
-          ml.imposedBy !== null ? /* @__PURE__ */ jsxs16("span", { className: "ux-mi", "data-insp-model-on": true, children: [
-            " · ",
-            t("insp.modelImposed", ml.imposedBy)
-          ] }) : null,
+          ml.imposedBy !== null ? /* @__PURE__ */ jsx19("span", { className: "ux-mi", "data-insp-model-on": true, children: t("insp.modelImposed", ml.imposedBy) }) : null,
           /* @__PURE__ */ jsx19("small", { className: "ux-mono", "data-insp-model-default": true, children: t("insp.modelDefault", ml.default) }),
           ml.actual ? /* @__PURE__ */ jsx19("small", { className: "ux-mono", "data-insp-model-actual": true, children: t("insp.modelActual", ml.actual) }) : null
         ] })
@@ -21705,7 +21702,7 @@ var PAGE_CSS = `
 .ux-kv .one{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-kv small{display:block;color:${T32};font-size:11.5px}
 /* the model block: the model the work runs on, whole (it wraps), then who imposes it, then the default in grey */
-.ux-mi{color:${T22};font-size:11.5px}
+.ux-mi{display:inline-block;margin-left:8px;color:${T22};font-size:11.5px;white-space:nowrap}
 .ux-mv{overflow-wrap:anywhere}
 .ux-chips{display:flex;flex-wrap:wrap;gap:4px}
 .ux-chip2{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:12px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};font-size:11.5px;max-width:100%}

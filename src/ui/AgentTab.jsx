@@ -132,7 +132,7 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
             {/* two lines: the model the work runs on, WHOLE (it wraps, never cut), and who imposes it; then the bot's default in grey. « Really used » only when it differs. */}
             <dd data-insp-model>
               <span className="ux-mono ux-mv" data-insp-model-used>{ml.imposedBy !== null ? <PixelBadge size={10} /> : null} {ml.shown}</span>
-              {ml.imposedBy !== null ? <span className="ux-mi" data-insp-model-on> · {t('insp.modelImposed', ml.imposedBy)}</span> : null}
+              {ml.imposedBy !== null ? <span className="ux-mi" data-insp-model-on>{t('insp.modelImposed', ml.imposedBy)}</span> : null}
               <small className="ux-mono" data-insp-model-default>{t('insp.modelDefault', ml.default)}</small>
               {ml.actual ? <small className="ux-mono" data-insp-model-actual>{t('insp.modelActual', ml.actual)}</small> : null}
             </dd>

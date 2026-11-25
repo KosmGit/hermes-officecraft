@@ -269,7 +269,7 @@ export const PAGE_CSS = `
 .ux-kv .one{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-kv small{display:block;color:${T3};font-size:11.5px}
 /* the model block: the model the work runs on, whole (it wraps), then who imposes it, then the default in grey */
-.ux-mi{color:${T2};font-size:11.5px}
+.ux-mi{display:inline-block;margin-left:8px;color:${T2};font-size:11.5px;white-space:nowrap}
 .ux-mv{overflow-wrap:anywhere}
 .ux-chips{display:flex;flex-wrap:wrap;gap:4px}
 .ux-chip2{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:12px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};font-size:11.5px;max-width:100%}
