@@ -111,7 +111,7 @@ def _with_partial(name: str, fn) -> dict:
 @router.get("/live")
 def live() -> dict:
     from .snapshot import hermes_boards, hermes_ops
-    return _with_partial("live", lambda: _sources({"boards": (lambda: hermes_boards(history=False, reasons=True), []),
+    return _with_partial("live", lambda: _sources({"boards": (lambda: hermes_boards(history=False, reasons=True, links=True), []),
                                                    "ops": (hermes_ops, None)}))
 
 

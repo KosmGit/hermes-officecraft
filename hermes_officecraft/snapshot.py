@@ -47,6 +47,7 @@ INTERNAL_LISTING_FALLBACK = ("kanban", "tool", "oneshot")   # hermes_state_sessi
 DESCRIPTION_MAX = 280
 BLOCK_REASON_MAX = 280    # the reason a bot gave when it blocked a card: bounded like a description, cut on a word
 BLOCK_REASON_READ = 2000  # characters of it ever looked at (Hermes accepts any length)
+LIVE_LINKS_MAX = 2000     # parent -> child links `/live` serves per board (the ones that still hold a card back); more is flagged, never served
 OWN_SKILLS_MAX = 40
 MODEL_NAME_MAX = 120   # a model/provider name, never a config block (same bound as workerModel)
 SMALL_SKILL_SET = 12   # a profile that kept this few skills hand-picked them: all of them describe it
@@ -244,10 +245,30 @@ def read_block_reasons(con: sqlite3.Connection, ids: list[str]) -> dict[str, Opt
     return out
 
 
-def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: bool = True, reasons: bool = False) -> dict:
+def read_live_links(con: sqlite3.Connection, source: str) -> list[list[str]]:
+    """The links `/live` serves: ``[parent, child]`` ids of the links that still hold a card back, i.e. neither end is done or archived
+    (a finished parent holds nothing back, a finished child is no longer waiting). Ids only, in a stable order, at most
+    ``LIVE_LINKS_MAX``: past that the board is flagged (the page then knows its queue may be incomplete) and the rest is not served.
+    A board without the ``task_links`` table or its columns serves none, without an error (an older Hermes)."""
+    if not {"parent_id", "child_id"} <= _columns(con, "task_links"):
+        return []
+    rows = con.execute(
+        "SELECT l.parent_id, l.child_id FROM task_links l "
+        "JOIN tasks c ON c.id = l.child_id JOIN tasks p ON p.id = l.parent_id "
+        "WHERE c.status NOT IN ('done', 'archived') AND p.status NOT IN ('done', 'archived') "
+        "ORDER BY l.child_id, l.parent_id LIMIT ?", (LIVE_LINKS_MAX + 1,)).fetchall()
+    if len(rows) > LIVE_LINKS_MAX:
+        flag(source, "unreadable")
+        rows = rows[:LIVE_LINKS_MAX]
+    return [[p, c] for p, c in rows]
+
+
+def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: bool = True, reasons: bool = False, links: bool = False) -> dict:
     """One board: its non-archived cards (whitelisted columns) and, with ``history``, finished
     runs and whitelisted events. An empty board is returned too (an empty pod is a fact).
-    ``reasons`` (the page's ``/live`` only): each ``blocked`` card also carries ``blockReason`` (``_block_reason``, None when it has none)."""
+    ``reasons`` (the page's ``/live`` only): each ``blocked`` card also carries ``blockReason`` (``_block_reason``, None when it has none).
+    ``links`` (the page's ``/live`` only): ``links`` = the links that still hold a card back (``read_live_links``); with ``history`` the
+    same key carries every link between the cards served (the chain achievements), a different and slower read."""
     board: dict = {"slug": slug, "createdAt": iso_to_epoch(created_at), "tasks": [], "runs": [], "events": []}
     source = f"kanban:{_safe(slug)}"
     if not Path(db_path).is_file():
@@ -283,6 +304,8 @@ def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: boo
             found = read_block_reasons(con, [t["id"] for t in blocked])
             for t in blocked:
                 t["blockReason"] = found.get(t["id"])
+        if links and not history:
+            board["links"] = read_live_links(con, source)
         if history:
             run_cols = _columns(con, "task_runs")
             if not {"profile", "started_at", "ended_at", "outcome"} <= run_cols:
@@ -311,13 +334,13 @@ def read_board(db_path: Path, slug: str, *, created_at: Any = None, history: boo
     return board
 
 
-def hermes_boards(*, history: bool = True, reasons: bool = False) -> list[dict]:
+def hermes_boards(*, history: bool = True, reasons: bool = False, links: bool = False) -> list[dict]:
     """Every live (non-archived) board of this Hermes home, ``default`` first."""
     from hermes_cli.kanban_db_boards import list_boards
     out = []
     for meta in list_boards(include_archived=False):
         try:
-            out.append(read_board(Path(meta["db_path"]), meta["slug"], created_at=meta.get("created_at"), history=history, reasons=reasons))
+            out.append(read_board(Path(meta["db_path"]), meta["slug"], created_at=meta.get("created_at"), history=history, reasons=reasons, links=links))
         except sqlite3.Error as exc:
             # a board being migrated, locked or damaged: skipped this round (never fails the whole read), and said
             flag(f"kanban:{_safe(meta['slug'])}", classify(exc))
