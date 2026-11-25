@@ -307,6 +307,7 @@ const DIALOG_TAIL = `
   .oc-lm-box{gap:20px}
   .oc-lm-ar .oc-btn{height:40px}
   .oc-dg-fl > .oc-dg-lab:has(.oc-dg-help){margin-bottom:16px}
+  .oc-dg-start{gap:8px 20px}   /* the « ? » after the « bot to copy » list reaches 9 px beyond itself: 20 px keeps 8 px between the two */
 }
 `
 

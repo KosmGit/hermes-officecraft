@@ -41,6 +41,7 @@ test('the page: buttons, pills, tabs, segments, links at 40 px; the menu rows at
   assert.equal(decls(body, '.ux-b')['min-width'], '40px')
   for (const sel of ['.ux-b.ico', '.ux-b.sm.ico']) assert.equal(decls(body, sel).width, '40px', sel)
   for (const sel of ['.ux-lvp', '.ux-al', '.ux-game', '.ux-pj', '.ux-prjx']) assert.equal(decls(body, sel).height, '40px', sel)
+  assert.equal(decls(body, '.ux-lvp')['min-width'], '40px', 'the « at work » pill of a medium pane is only a dot and a number (38 px wide, measured)')
   assert.equal(decls(body, '.ux-tab').height, '44px')
   assert.equal(decls(body, '.ux-tabs').gap, '8px', 'two tabs: 8 px apart')
   assert.equal(decls(body, '.ux-seg button').height, '40px')
@@ -67,8 +68,11 @@ test('the settings: the switch is 48 x 28 (48 x 40 to the finger), segments, but
   const { body, clean } = coarse(SETTINGS_CSS)
   assert.equal(decls(body, '.oc-sx-sw').width, '48px')
   assert.equal(decls(body, '.oc-sx-sw').height, '28px')
-  assert.equal(decls(body, '.oc-sx-sw::before').top, '-6px', 'the hit area of the switch reaches 40 px in height')
-  assert.equal(decls(body, '.oc-sx-sw::before').bottom, '-6px')
+  // the switch has a 1 px border: its ::before sits on the padding box (28 - 2 = 26 px), so it must reach 7 px beyond it for 40 px (6 px gave 38, measured)
+  const sw = decls(body, '.oc-sx-sw::before')
+  assert.equal(parseFloat(decls(body, '.oc-sx-sw').height) - 2 * 1 - parseFloat(sw.top) - parseFloat(sw.bottom), 40, 'the hit area of the switch reaches 40 px in height')
+  // a « ? » reaches 9 px beyond itself: a button beside it in a function row needs 9 + 8 px of gap
+  assert.ok(parseFloat(decls(body, '.oc-lm-row')['column-gap']) >= 17, 'the « Decorate » button and the « ? » of its row are 8 px apart')
   assert.equal(decls(body, '.oc-sx-sw:checked::after').transform, 'translateX(20px)', 'the knob travels the longer track')
   assert.equal(decls(body, '.oc-sx-seg span').height, '40px')
   assert.equal(decls(body, '.oc-sx-btn')['min-height'], '40px')
@@ -92,6 +96,8 @@ test('the gear, the legend « ? », the dialogs: the same rule, in their own she
   const d = coarse(DIALOG_CSS).body
   assert.equal(decls(d, '.oc-dg-x').height, '40px')
   assert.equal(decls(d, '.oc-dg-help::after').inset, '-9px')
+  // the « ? » of the starting point follows the « bot to copy » list on one line: 9 px of hit area beyond it + 8 px between the two
+  assert.ok(parseFloat(decls(d, '.oc-dg-start').gap.split(' ')[1]) >= 17, 'the list and the « ? » beside it are 8 px apart')
   assert.equal(decls(d, '.oc-dg-seg button')?.height, '40px')
   assert.equal(decls(d, '.oc-dg-link.quiet')['min-height'], '40px', 'the quiet footer link of the recruitment window too')
   assert.equal(decls(coarse(readFileSync(new URL('../../src/ui/replayStyles.js', import.meta.url), 'utf8')).body, '.oc-rp-win button')['min-height'], '40px')

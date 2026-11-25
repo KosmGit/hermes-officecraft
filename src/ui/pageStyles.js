@@ -451,6 +451,7 @@ export const PAGE_CSS = `
   .ux-b,.ux-b.sm{height:40px;min-width:40px}
   .ux-b.ico,.ux-b.sm.ico{width:40px}
   .ux-lvp,.ux-al,.ux-game{height:40px}
+  .ux-lvp{min-width:40px}   /* the « at work » pill of a medium pane shows only its dot and number: 38 px wide without this */
   .ux-game{min-width:40px}
   .ux-pj,.ux-prjx{height:40px}
   .ux-tab{height:44px}
