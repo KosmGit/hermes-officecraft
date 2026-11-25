@@ -1697,6 +1697,9 @@ export const fr = {
       decideCard: title => `Décider : ${title}`
     },
     prj: {
+      done: 'faites',
+      pinned: 'Modèle imposé',
+      blockedGo: slug => `Ouvrir les décisions de ${slug}`,
       running: 'en cours',
       todo: 'à faire',
       blocked: 'bloquées',

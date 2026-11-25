@@ -1695,6 +1695,9 @@ export const en = {
       decideCard: title => `Decide: ${title}`
     },
     prj: {
+      done: 'done',
+      pinned: 'Model set by card',
+      blockedGo: slug => `Open the decisions of ${slug}`,
       running: 'running',
       todo: 'to do',
       blocked: 'blocked',

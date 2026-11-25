@@ -1694,6 +1694,9 @@ export const es = {
       decideCard: title => `Decidir: ${title}`
     },
     prj: {
+      done: 'hechas',
+      pinned: 'Modelo fijado',
+      blockedGo: slug => `Abrir las decisiones de ${slug}`,
       running: 'en curso',
       todo: 'por hacer',
       blocked: 'bloqueadas',

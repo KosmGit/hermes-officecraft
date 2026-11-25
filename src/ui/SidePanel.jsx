@@ -47,7 +47,7 @@ export function SidePanel({
       />
     )
   } else if (tab === 'projects') {
-    body = <ProjectsTab office={office} project={project} onProject={onProject} openKanban={openCard?.kanban ?? null} t={t} />
+    body = <ProjectsTab office={office} project={project} onProject={onProject} onDecide={frozen ? null : slug => { onProject(slug); onTab('decisions') }} openKanban={openCard?.kanban ?? null} t={t} />
   } else if (tab === 'journal') {
     body = <JournalTab history={history} office={office} game={game} journal={journal} night={night} project={project} filter={jfilter} onFilter={onJfilter} nowMs={nowMs} readMs={readMs} t={t} />
   } else {

@@ -6515,6 +6515,9 @@ var en = {
       decideCard: (title) => `Decide: ${title}`
     },
     prj: {
+      done: "done",
+      pinned: "Model set by card",
+      blockedGo: (slug) => `Open the decisions of ${slug}`,
       running: "running",
       todo: "to do",
       blocked: "blocked",
@@ -8273,6 +8276,9 @@ var es = {
       decideCard: (title) => `Decidir: ${title}`
     },
     prj: {
+      done: "hechas",
+      pinned: "Modelo fijado",
+      blockedGo: (slug) => `Abrir las decisiones de ${slug}`,
       running: "en curso",
       todo: "por hacer",
       blocked: "bloqueadas",
@@ -10032,6 +10038,9 @@ var fr = {
       decideCard: (title) => `Décider : ${title}`
     },
     prj: {
+      done: "faites",
+      pinned: "Modèle imposé",
+      blockedGo: (slug) => `Ouvrir les décisions de ${slug}`,
       running: "en cours",
       todo: "à faire",
       blocked: "bloquées",
@@ -11770,6 +11779,8 @@ function modelLines(m, soleCardCode = "") {
     default: m.default || ""
   };
 }
+var PROGRESS_RANK = { done: 0, running: 1, review: 1, blocked: 2 };
+var byProgress = (queue) => queue.map((q, i) => [q, i]).sort((a, b) => (PROGRESS_RANK[a[0].status] ?? 3) - (PROGRESS_RANK[b[0].status] ?? 3) || a[1] - b[1]).map(([q]) => q);
 
 // src/core/alerts.js
 var ORDER = ["incident", "gateway", "degraded", "crons", "stale", "partial", "roster"];
@@ -19842,7 +19853,7 @@ var PINNED_SHOWN = 3;
 var STATUS2 = new Set(CARD_STATUSES);
 var statusText2 = (t, s) => STATUS2.has(s) ? t(`status.${s}`) : String(s ?? "");
 var TODO = ["todo", "ready", "triage", "scheduled"];
-function Card({ b, c, project: project2, onProject, openKanban: openKanban2, t }) {
+function Card({ b, c, project: project2, onProject, onDecide, openKanban: openKanban2, t }) {
   const style = useProjectStyle(b.slug);
   const pressed = project2 === b.slug;
   const n = (k) => b.counts[k] || 0;
@@ -19870,24 +19881,38 @@ function Card({ b, c, project: project2, onProject, openKanban: openKanban2, t }
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs22("div", { className: "cn", children: [
+    /* @__PURE__ */ jsxs22("div", { className: "cn", "data-pj-legend": true, children: [
       /* @__PURE__ */ jsxs22("span", { children: [
+        /* @__PURE__ */ jsx25("i", { className: "ux-sw done", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx25("b", { children: b.done }),
+        " ",
+        t("ux.prj.done")
+      ] }),
+      /* @__PURE__ */ jsxs22("span", { children: [
+        /* @__PURE__ */ jsx25("i", { className: "ux-sw running", "aria-hidden": "true" }),
         /* @__PURE__ */ jsx25("b", { children: running }),
         " ",
         t("ux.prj.running")
       ] }),
-      /* @__PURE__ */ jsxs22("span", { children: [
-        /* @__PURE__ */ jsx25("b", { children: todo }),
-        " ",
-        t("ux.prj.todo")
-      ] }),
-      /* @__PURE__ */ jsxs22("span", { className: blocked ? "w" : "", children: [
+      blocked && onDecide ? /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-lnk w", "data-decide-project": b.slug, title: t("ux.prj.blockedGo", b.slug), onClick: () => onDecide(b.slug), children: [
+        /* @__PURE__ */ jsx25("i", { className: "ux-sw blocked", "aria-hidden": "true" }),
         /* @__PURE__ */ jsx25("b", { children: blocked }),
         " ",
         t("ux.prj.blocked")
+      ] }) : /* @__PURE__ */ jsxs22("span", { className: blocked ? "w" : "", children: [
+        /* @__PURE__ */ jsx25("i", { className: "ux-sw blocked", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx25("b", { children: blocked }),
+        " ",
+        t("ux.prj.blocked")
+      ] }),
+      /* @__PURE__ */ jsxs22("span", { children: [
+        /* @__PURE__ */ jsx25("i", { className: "ux-sw todo", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx25("b", { children: todo }),
+        " ",
+        t("ux.prj.todo")
       ] })
     ] }),
-    /* @__PURE__ */ jsx25("div", { className: "ux-pips", role: "list", "aria-label": t("chains.queue", b.slug), title: chainLabel, children: c.queue.map((q) => /* @__PURE__ */ jsx25(
+    /* @__PURE__ */ jsx25("div", { className: "ux-pips", role: "list", "aria-label": t("chains.queue", b.slug), title: chainLabel, children: byProgress(c.queue).map((q) => /* @__PURE__ */ jsx25(
       "i",
       {
         role: "listitem",
@@ -19898,7 +19923,34 @@ function Card({ b, c, project: project2, onProject, openKanban: openKanban2, t }
       },
       q.id
     )) }),
-    c.queue.length ? /* @__PURE__ */ jsx25("button", { type: "button", className: "ux-lnk ux-pq-toggle", "data-queue-toggle": true, "aria-expanded": listed, "aria-controls": listId, onClick: () => setListed((v) => !v), children: listed ? t("ux.prj.hideCards") : t("ux.prj.showCards") }) : null,
+    c.pinned.length ? (
+      // the cards that set another model than their bot's: the row says what it is (« Model set by card »), then the card and the model
+      /* @__PURE__ */ jsxs22("div", { className: "pins", "data-pins": true, children: [
+        /* @__PURE__ */ jsx25("span", { className: "lbl", children: t("ux.prj.pinned") }),
+        c.pinned.slice(-PINNED_SHOWN).reverse().map((q) => /* @__PURE__ */ jsxs22("div", { className: "pin", "data-pinrow": q.id, children: [
+          /* @__PURE__ */ jsx25("span", { className: "ux-mono", children: q.code }),
+          /* @__PURE__ */ jsxs22("span", { className: "ux-dc-pin ux-mono", title: `${t("chains.pinned")}: ${q.pin.model || q.pin.provider}`, children: [
+            /* @__PURE__ */ jsx25(PixelBadge, { size: 9 }),
+            /* @__PURE__ */ jsx25("span", { children: q.pin.model || q.pin.provider })
+          ] })
+        ] }, q.id)),
+        c.pinned.length > PINNED_SHOWN ? /* @__PURE__ */ jsx25("small", { children: t("insp.more", c.pinned.length - PINNED_SHOWN) }) : null
+      ] })
+    ) : null,
+    /* @__PURE__ */ jsxs22("div", { className: "ac", children: [
+      /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-b sm", "aria-pressed": pressed, "data-project-filter": b.slug, onClick: () => onProject(pressed ? null : b.slug), children: [
+        /* @__PURE__ */ jsx25(Icon, { name: "filter", size: 14 }),
+        pressed ? t("ux.prj.filtered") : t("ux.prj.filter")
+      ] }),
+      c.queue.length ? /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-b sm ghost", "data-queue-toggle": true, "aria-expanded": listed, "aria-controls": listId, onClick: () => setListed((v) => !v), children: [
+        /* @__PURE__ */ jsx25(Icon, { name: listed ? "down" : "chev", size: 14 }),
+        listed ? t("ux.prj.hideCards") : t("ux.prj.showCards")
+      ] }) : null,
+      openKanban2 ? /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-b sm ghost", onClick: () => openKanban2(), children: [
+        /* @__PURE__ */ jsx25(Icon, { name: "ext", size: 14 }),
+        t("ux.prj.kanban")
+      ] }) : null
+    ] }),
     listed ? /* @__PURE__ */ jsx25("ol", { className: "ux-pq", id: listId, "data-queue": true, "aria-label": t("chains.queue", b.slug), children: c.queue.map((q) => /* @__PURE__ */ jsxs22("li", { "data-status": q.status, children: [
       /* @__PURE__ */ jsx25("i", { className: `ux-pip ${q.status}`, "aria-hidden": "true" }),
       /* @__PURE__ */ jsx25("span", { className: "ux-mono code", children: q.code }),
@@ -19908,35 +19960,17 @@ function Card({ b, c, project: project2, onProject, openKanban: openKanban2, t }
         /* @__PURE__ */ jsx25(PixelBadge, { size: 9 }),
         /* @__PURE__ */ jsx25("span", { children: q.pin.model || q.pin.provider })
       ] }) : null
-    ] }, q.id)) }) : null,
-    c.pinned.slice(-PINNED_SHOWN).reverse().map((q) => /* @__PURE__ */ jsxs22("div", { className: "pin", "data-pinrow": q.id, children: [
-      /* @__PURE__ */ jsx25("span", { className: "ux-mono", children: q.code }),
-      /* @__PURE__ */ jsxs22("span", { className: "ux-dc-pin ux-mono", title: `${t("chains.pinned")}: ${q.pin.model || q.pin.provider}`, children: [
-        /* @__PURE__ */ jsx25(PixelBadge, { size: 9 }),
-        /* @__PURE__ */ jsx25("span", { children: q.pin.model || q.pin.provider })
-      ] })
-    ] }, q.id)),
-    c.pinned.length > PINNED_SHOWN ? /* @__PURE__ */ jsx25("div", { className: "pin", children: /* @__PURE__ */ jsx25("small", { children: t("insp.more", c.pinned.length - PINNED_SHOWN) }) }) : null,
-    /* @__PURE__ */ jsxs22("div", { className: "ac", children: [
-      /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-b sm", "aria-pressed": pressed, "data-project-filter": b.slug, onClick: () => onProject(pressed ? null : b.slug), children: [
-        /* @__PURE__ */ jsx25(Icon, { name: "filter", size: 14 }),
-        pressed ? t("ux.prj.filtered") : t("ux.prj.filter")
-      ] }),
-      openKanban2 ? /* @__PURE__ */ jsxs22("button", { type: "button", className: "ux-b sm ghost", onClick: () => openKanban2(), children: [
-        /* @__PURE__ */ jsx25(Icon, { name: "ext", size: 14 }),
-        t("ux.prj.kanban")
-      ] }) : null
-    ] })
+    ] }, q.id)) }) : null
   ] });
 }
-function ProjectsTab({ office, project: project2, onProject, openKanban: openKanban2, t }) {
+function ProjectsTab({ office, project: project2, onProject, onDecide = null, openKanban: openKanban2, t }) {
   const chains2 = useMemo8(() => chainsView(office), [office]);
   const by4 = new Map(chains2.map((c) => [c.slug, c]));
   if (!office.boards.length) return /* @__PURE__ */ jsxs22("p", { className: "ux-empty", "data-chains": true, children: [
     /* @__PURE__ */ jsx25(Icon, { name: "folder", size: 32 }),
     /* @__PURE__ */ jsx25("span", { children: boardsKnown(office) ? t("chains.empty") : t("panel.needsAgentHalf") })
   ] });
-  return /* @__PURE__ */ jsx25("section", { "data-chains": true, "aria-label": t("ux.tab.projects"), children: office.boards.map((b) => /* @__PURE__ */ jsx25(Card, { b, c: by4.get(b.slug), project: project2, onProject, openKanban: openKanban2, t }, b.slug)) });
+  return /* @__PURE__ */ jsx25("section", { "data-chains": true, "aria-label": t("ux.tab.projects"), children: office.boards.map((b) => /* @__PURE__ */ jsx25(Card, { b, c: by4.get(b.slug), project: project2, onProject, onDecide, openKanban: openKanban2, t }, b.slug)) });
 }
 
 // src/ui/SidePanel.jsx
@@ -20017,7 +20051,10 @@ function SidePanel({
       }
     );
   } else if (tab === "projects") {
-    body = /* @__PURE__ */ jsx26(ProjectsTab, { office, project: project2, onProject, openKanban: openCard?.kanban ?? null, t });
+    body = /* @__PURE__ */ jsx26(ProjectsTab, { office, project: project2, onProject, onDecide: frozen ? null : (slug) => {
+      onProject(slug);
+      onTab("decisions");
+    }, openKanban: openCard?.kanban ?? null, t });
   } else if (tab === "journal") {
     body = /* @__PURE__ */ jsx26(JournalTab, { history, office, game, journal, night, project: project2, filter: jfilter, onFilter: onJfilter, nowMs, readMs, t });
   } else {
@@ -21707,7 +21744,15 @@ var PAGE_CSS = `
 .ux-pjc h4 .n{flex:0 0 auto;font-size:12px;font-weight:500;color:${T32}}
 .ux-pjc .cn{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:${T22}}
 .ux-pjc .cn b{color:var(--foreground)}
-.ux-pjc .cn .w b{color:${ink4(ORANGE4)}}
+.ux-pjc .cn .w{color:${ink4(ORANGE4)};font-weight:600}
+.ux-pjc .cn .w b{color:inherit}
+.ux-pjc .cn .ux-lnk.w{font-size:12px;text-decoration:underline;text-underline-offset:2px}
+/* the legend of the strip: the shape of each segment (filled = done, arrow tip = running, hatched = blocked, hollow = to do) */
+.ux-sw{display:inline-block;width:12px;height:8px;margin-right:4px;border-radius:2px;vertical-align:baseline;background:${SUNKEN}}
+.ux-sw.done{background:color-mix(in oklab, var(--pc) 75%, ${CARD})}
+.ux-sw.running{background:var(--ui-accent);clip-path:polygon(0 0,calc(100% - 4px) 0,100% 50%,calc(100% - 4px) 100%,0 100%);border-radius:2px 0 0 2px}
+.ux-sw.blocked{background:repeating-linear-gradient(135deg, ${ORANGE4} 0 3px, color-mix(in oklab, ${ORANGE4} 35%, ${CARD}) 3px 6px)}
+.ux-sw.todo{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ui-stroke-secondary)}
 .ux-pips{grid-column:1/-1;display:flex;gap:4px;margin-top:8px}
 .ux-pips i{flex:1 1 0;min-width:4px;height:8px;border-radius:2px;background:${SUNKEN}}
 .ux-pips i.done{background:color-mix(in oklab, var(--pc) 75%, ${CARD})}
@@ -21718,7 +21763,6 @@ var PAGE_CSS = `
 .ux-pips i.running,.ux-pips i.review,.ux-pq .ux-pip.running,.ux-pq .ux-pip.review{clip-path:polygon(0 0,calc(100% - 4px) 0,100% 50%,calc(100% - 4px) 100%,0 100%);border-radius:2px 0 0 2px}
 .ux-pips i.blocked,.ux-pq .ux-pip.blocked{background:repeating-linear-gradient(135deg, ${ORANGE4} 0 3px, color-mix(in oklab, ${ORANGE4} 35%, ${CARD}) 3px 6px)}
 .ux-pips i[data-pin]{box-shadow:inset 0 -3px 0 var(--foreground)}
-.ux-pq-toggle{grid-column:1/-1;justify-self:start;margin-top:4px;font-size:12px}
 .ux-pq{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;margin:4px 0 0;padding:0;list-style:none}
 .ux-pq li{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-width:0;font-size:12px}
 .ux-pq .ux-pip{flex:0 0 16px;height:8px;border-radius:2px;background:${SUNKEN}}
@@ -21729,8 +21773,11 @@ var PAGE_CSS = `
 .ux-pq .st{color:${T22};font-weight:600}
 .ux-pq .tt{flex:1 1 100%;min-width:0;padding-left:24px;overflow-wrap:anywhere;color:var(--foreground)}
 .ux-why{display:block;flex:1 1 100%;margin:4px 0 0;font-size:11.5px;line-height:1.35;color:${T22}}
-.ux-pjc .pin{grid-column:1/-1;display:flex;gap:8px;align-items:baseline;min-width:0;font-size:11px}
-.ux-pjc .pin small{font-size:11px;color:${T32}}
+/* the cards that set another model than their bot's: one captioned block (« Model set by card »), then a row a card */
+.ux-pjc .pins{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;min-width:0;margin-top:4px;font-size:11px}
+.ux-pjc .pins .lbl{font-weight:600;color:${T22}}
+.ux-pjc .pin{display:flex;gap:8px;align-items:baseline;min-width:0;font-size:11px}
+.ux-pjc .pins small{font-size:11px;color:${T32}}
 .ux-pjc .ac{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 /* journal tab */
 .ux-nightc{margin:0 0 12px}

@@ -316,3 +316,32 @@ test('the sheet: the grade is a row of the table after the description, the labe
   for (const code of ['en', 'fr', 'es']) assert.ok(messages[code].insp.grade.length > 3 && messages[code].insp.noSession.length > 3, code)
 })
 }
+
+// ===== the Projects tab =====
+{
+const { byProgress } = await import('../../src/core/panel.js')
+const { PAGE_CSS } = await import('../../src/ui/pageStyles.js')
+test('byProgress: the strip goes done, running, blocked, to do — stable inside each group, the input untouched', () => {
+  const q = ['todo', 'done', 'blocked', 'running', 'ready', 'done', 'review', 'triage', 'blocked'].map((status, i) => ({ id: `c${i}`, status }))
+  const copy = JSON.stringify(q)
+  assert.deepEqual(byProgress(q).map(c => c.id), ['c1', 'c5', 'c3', 'c6', 'c2', 'c8', 'c0', 'c4', 'c7'])
+  assert.equal(JSON.stringify(q), copy, 'a copy is sorted')
+  assert.deepEqual(byProgress([]), [])
+})
+
+test('Projects tab: « N blocked » is orange and opens the decisions of the project, the pinned-model row is named, the cards button joins the buttons', () => {
+  const tab = readFileSync(new URL('../../src/ui/ProjectsTab.jsx', import.meta.url), 'utf8')
+  assert.match(tab, /\{blocked && onDecide \? \(\s*<button type="button" className="ux-lnk w" data-decide-project=\{b\.slug\}[^>]*onClick=\{\(\) => onDecide\(b\.slug\)\}/, 'a button that decides: the project filter, then the Decisions tab')
+  assert.match(tab, /byProgress\(c\.queue\)\.map/, 'the strip follows the progress order')
+  assert.match(tab, /<span className="lbl">\{t\('ux\.prj\.pinned'\)\}<\/span>/, 'the pinned-model row has its label')
+  const ac = tab.match(/<div className="ac">([\s\S]*?)\n      <\/div>/)[1]
+  assert.match(ac, /data-queue-toggle/, '« Show the cards » is in the row of buttons')
+  assert.ok(ac.indexOf('data-project-filter') < ac.indexOf('data-queue-toggle') && ac.indexOf('data-queue-toggle') < ac.indexOf('openKanban'), 'filter, cards, kanban')
+  const order = [...tab.matchAll(/<span><i className="ux-sw (\w+)"/g)].map(m => m[1])
+  assert.deepEqual(order, ['done', 'running', 'todo'], 'the legend follows the strip (blocked sits between, as a button or a span)')
+  assert.match(readFileSync(new URL('../../src/ui/SidePanel.jsx', import.meta.url), 'utf8'), /<ProjectsTab [^>]*onDecide=\{frozen \? null : slug => \{ onProject\(slug\); onTab\('decisions'\) \}\}/, 'the same path as the sheet\'s « Decide »; none in a replay')
+  assert.match(PAGE_CSS, /\.ux-pjc \.cn \.w\{color:color-mix\(in oklab, var\(--ui-orange/, 'orange text')
+  for (const code of ['en', 'fr', 'es']) for (const k of ['done', 'pinned']) assert.ok(messages[code].ux.prj[k].length > 3, `${code} ${k}`)
+  assert.equal(messages.fr.ux.prj.pinned, 'Modèle imposé')
+})
+}

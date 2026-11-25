@@ -327,7 +327,15 @@ export const PAGE_CSS = `
 .ux-pjc h4 .n{flex:0 0 auto;font-size:12px;font-weight:500;color:${T3}}
 .ux-pjc .cn{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:${T2}}
 .ux-pjc .cn b{color:var(--foreground)}
-.ux-pjc .cn .w b{color:${ink(ORANGE)}}
+.ux-pjc .cn .w{color:${ink(ORANGE)};font-weight:600}
+.ux-pjc .cn .w b{color:inherit}
+.ux-pjc .cn .ux-lnk.w{font-size:12px;text-decoration:underline;text-underline-offset:2px}
+/* the legend of the strip: the shape of each segment (filled = done, arrow tip = running, hatched = blocked, hollow = to do) */
+.ux-sw{display:inline-block;width:12px;height:8px;margin-right:4px;border-radius:2px;vertical-align:baseline;background:${SUNKEN}}
+.ux-sw.done{background:color-mix(in oklab, var(--pc) 75%, ${CARD})}
+.ux-sw.running{background:var(--ui-accent);clip-path:polygon(0 0,calc(100% - 4px) 0,100% 50%,calc(100% - 4px) 100%,0 100%);border-radius:2px 0 0 2px}
+.ux-sw.blocked{background:repeating-linear-gradient(135deg, ${ORANGE} 0 3px, color-mix(in oklab, ${ORANGE} 35%, ${CARD}) 3px 6px)}
+.ux-sw.todo{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ui-stroke-secondary)}
 .ux-pips{grid-column:1/-1;display:flex;gap:4px;margin-top:8px}
 .ux-pips i{flex:1 1 0;min-width:4px;height:8px;border-radius:2px;background:${SUNKEN}}
 .ux-pips i.done{background:color-mix(in oklab, var(--pc) 75%, ${CARD})}
@@ -338,7 +346,6 @@ export const PAGE_CSS = `
 .ux-pips i.running,.ux-pips i.review,.ux-pq .ux-pip.running,.ux-pq .ux-pip.review{clip-path:polygon(0 0,calc(100% - 4px) 0,100% 50%,calc(100% - 4px) 100%,0 100%);border-radius:2px 0 0 2px}
 .ux-pips i.blocked,.ux-pq .ux-pip.blocked{background:repeating-linear-gradient(135deg, ${ORANGE} 0 3px, color-mix(in oklab, ${ORANGE} 35%, ${CARD}) 3px 6px)}
 .ux-pips i[data-pin]{box-shadow:inset 0 -3px 0 var(--foreground)}
-.ux-pq-toggle{grid-column:1/-1;justify-self:start;margin-top:4px;font-size:12px}
 .ux-pq{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;margin:4px 0 0;padding:0;list-style:none}
 .ux-pq li{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-width:0;font-size:12px}
 .ux-pq .ux-pip{flex:0 0 16px;height:8px;border-radius:2px;background:${SUNKEN}}
@@ -349,8 +356,11 @@ export const PAGE_CSS = `
 .ux-pq .st{color:${T2};font-weight:600}
 .ux-pq .tt{flex:1 1 100%;min-width:0;padding-left:24px;overflow-wrap:anywhere;color:var(--foreground)}
 .ux-why{display:block;flex:1 1 100%;margin:4px 0 0;font-size:11.5px;line-height:1.35;color:${T2}}
-.ux-pjc .pin{grid-column:1/-1;display:flex;gap:8px;align-items:baseline;min-width:0;font-size:11px}
-.ux-pjc .pin small{font-size:11px;color:${T3}}
+/* the cards that set another model than their bot's: one captioned block (« Model set by card »), then a row a card */
+.ux-pjc .pins{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;min-width:0;margin-top:4px;font-size:11px}
+.ux-pjc .pins .lbl{font-weight:600;color:${T2}}
+.ux-pjc .pin{display:flex;gap:8px;align-items:baseline;min-width:0;font-size:11px}
+.ux-pjc .pins small{font-size:11px;color:${T3}}
 .ux-pjc .ac{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 /* journal tab */
 .ux-nightc{margin:0 0 12px}

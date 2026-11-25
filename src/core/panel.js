@@ -271,3 +271,8 @@ export function modelLines(m, soleCardCode = '') {
     default: m.default || ''
   }
 }
+
+const PROGRESS_RANK = { done: 0, running: 1, review: 1, blocked: 2 }   // everything else (to do, ready, triage, scheduled) is 3
+
+/** The strip of a project's cards in the order of the work's progress: done, running, blocked, to do (stable inside each group). */
+export const byProgress = queue => queue.map((q, i) => [q, i]).sort((a, b) => (PROGRESS_RANK[a[0].status] ?? 3) - (PROGRESS_RANK[b[0].status] ?? 3) || a[1] - b[1]).map(([q]) => q)
