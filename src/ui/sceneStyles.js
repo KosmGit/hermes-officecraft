@@ -70,7 +70,7 @@ export const SCENE_CSS = `
 .oc-s-queued{--sel:${COOL}}
 /* the bots a selected bot in the queue waits for, up to the head of the queue: a dashed ring in the hue of the state (the selection itself is a solid one) */
 .oc-station[data-upstream] .oc-chip,.oc-lrow[data-upstream] .oc-chip{border-color:${COOL};border-style:dashed}
-.oc-station[data-upstream],.oc-lrow[data-upstream]{z-index:2;box-shadow:0 0 0 2px color-mix(in oklab, ${COOL} 70%, transparent);background:color-mix(in oklab, ${COOL} 14%, transparent)}
+.oc-station[data-upstream],.oc-lrow[data-upstream]{z-index:2;outline:2px dashed ${COOL};outline-offset:1px;background:color-mix(in oklab, ${COOL} 14%, transparent)}
 .oc-station[aria-pressed="true"] .oc-chip{border-color:var(--sel)}
 .oc-station[aria-pressed="true"]{box-shadow:0 0 0 2px var(--sel);background:color-mix(in oklab, var(--sel) 12%, transparent)}
 .oc-zone{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:8px;font:inherit;font-size:11px;line-height:1;white-space:nowrap;

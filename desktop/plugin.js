@@ -14687,7 +14687,7 @@ var STATE_ICONS = Object.freeze({
   waiting: ["...###...", "...###...", "...###...", "...###...", "...###...", "....#....", ".........", "...###...", "...###..."],
   idle: ["#####....", "...##....", "..##.....", ".##......", "#####....", ".....####", "......##.", ".....##..", ".....####"],
   stale: ["#########", ".#######.", "..#####..", "...###...", "....#....", "...#.#...", "..#...#..", ".#.###.#.", "#########"],
-  queued: [".........", ".........", ".###.###.", "#...#...#", "#...#...#", "#...#...#", ".###.###.", ".........", "........."],
+  queued: [".........", ".........", ".###.###.", "#...#...#", "#.#####.#", "#...#...#", ".###.###.", ".........", "........."],
   new: ["..#...#..", "..#...#..", ".#######.", ".#######.", ".#######.", "..#####..", "...###...", "....#....", "....#...."],
   unknown: ["..#####..", ".##...##.", ".##...##.", "......##.", "....###..", "....#....", ".........", "....#....", "....#...."]
 });
@@ -19601,34 +19601,49 @@ function QueueBlock({ lines, waited, onDecide, t }) {
   return /* @__PURE__ */ jsx19("div", { className: "ux-ag-q", "data-insp-queue": lines ? "queued" : "waited", role: "group", "aria-label": t("state.queued"), children: lines ? /* @__PURE__ */ jsxs16(Fragment12, { children: [
     /* @__PURE__ */ jsxs16("p", { "data-queue-waits": true, children: [
       /* @__PURE__ */ jsx19("span", { className: "k", children: t("queue.waits") }),
-      lines.waits.items.map((it, i) => /* @__PURE__ */ jsxs16("span", { className: "it", children: [
-        /* @__PURE__ */ jsx19("b", { children: it.who }),
-        it.title ? /* @__PURE__ */ jsxs16("i", { children: [
-          " · ",
-          it.title
-        ] }) : null,
-        i < lines.waits.items.length - 1 ? "," : ""
-      ] }, i)),
-      lines.waits.more ? /* @__PURE__ */ jsx19("span", { className: "mo", children: t("queue.more", lines.waits.more) }) : null
+      /* @__PURE__ */ jsxs16("span", { className: "v", children: [
+        lines.waits.items.map((it, i) => /* @__PURE__ */ jsxs16("span", { className: "it", children: [
+          /* @__PURE__ */ jsx19("b", { children: it.who }),
+          it.title ? /* @__PURE__ */ jsxs16("i", { children: [
+            " · ",
+            it.title
+          ] }) : null,
+          i < lines.waits.items.length - 1 ? ", " : ""
+        ] }, i)),
+        lines.waits.more ? /* @__PURE__ */ jsxs16("span", { className: "mo", children: [
+          " ",
+          t("queue.more", lines.waits.more)
+        ] }) : null
+      ] })
     ] }),
     lines.head ? /* @__PURE__ */ jsxs16("p", { "data-queue-head": true, children: [
       /* @__PURE__ */ jsx19("span", { className: "k", children: t("queue.head") }),
-      /* @__PURE__ */ jsxs16("span", { className: "it", children: [
-        /* @__PURE__ */ jsx19("b", { children: lines.head.who }),
-        lines.head.fact ? `, ${lines.head.fact}` : ""
-      ] }),
-      lines.head.more ? /* @__PURE__ */ jsx19("span", { className: "mo", children: lines.head.more }) : null,
-      lines.head.rank ? /* @__PURE__ */ jsxs16("span", { className: "rk", "data-queue-rank": true, children: [
-        "· ",
-        lines.head.rank
-      ] }) : null,
-      lines.head.decide && onDecide ? /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm pri", "data-decide": true, "data-queue-decide": true, onClick: () => onDecide(lines.head.board), children: t("ux.agent.decide") }) : null
+      /* @__PURE__ */ jsxs16("span", { className: "v", children: [
+        /* @__PURE__ */ jsxs16("span", { className: "it", children: [
+          /* @__PURE__ */ jsx19("b", { children: lines.head.who }),
+          lines.head.fact ? `, ${lines.head.fact}` : ""
+        ] }),
+        lines.head.more ? /* @__PURE__ */ jsxs16("span", { className: "mo", children: [
+          " ",
+          lines.head.more
+        ] }) : null,
+        lines.head.rank ? /* @__PURE__ */ jsxs16("span", { className: "rk", "data-queue-rank": true, children: [
+          " · ",
+          lines.head.rank
+        ] }) : null,
+        lines.head.decide && onDecide ? /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm pri", "data-decide": true, "data-queue-decide": true, onClick: () => onDecide(lines.head.board), children: t("ux.agent.decide") }) : null
+      ] })
     ] }) : null,
     lines.note ? /* @__PURE__ */ jsx19("small", { "data-queue-note": true, children: lines.note }) : null
-  ] }) : /* @__PURE__ */ jsxs16("p", { "data-queue-waited": true, children: [
+  ] }) : /* @__PURE__ */ jsxs16("p", { "data-queue-waited": true, className: "full", children: [
     /* @__PURE__ */ jsx19("span", { className: "k", children: waited.lead }),
-    /* @__PURE__ */ jsx19("span", { className: "it", children: waited.names.join(", ") }),
-    waited.more ? /* @__PURE__ */ jsx19("span", { className: "mo", children: t("queue.more", waited.more) }) : null
+    /* @__PURE__ */ jsxs16("span", { className: "v", children: [
+      /* @__PURE__ */ jsx19("span", { className: "it", children: waited.names.join(", ") }),
+      waited.more ? /* @__PURE__ */ jsxs16("span", { className: "mo", children: [
+        " ",
+        t("queue.more", waited.more)
+      ] }) : null
+    ] })
   ] }) });
 }
 function StateTag({ state: state2, t }) {
@@ -20893,7 +20908,7 @@ var SCENE_CSS = `
 .oc-s-queued{--sel:${COOL}}
 /* the bots a selected bot in the queue waits for, up to the head of the queue: a dashed ring in the hue of the state (the selection itself is a solid one) */
 .oc-station[data-upstream] .oc-chip,.oc-lrow[data-upstream] .oc-chip{border-color:${COOL};border-style:dashed}
-.oc-station[data-upstream],.oc-lrow[data-upstream]{z-index:2;box-shadow:0 0 0 2px color-mix(in oklab, ${COOL} 70%, transparent);background:color-mix(in oklab, ${COOL} 14%, transparent)}
+.oc-station[data-upstream],.oc-lrow[data-upstream]{z-index:2;outline:2px dashed ${COOL};outline-offset:1px;background:color-mix(in oklab, ${COOL} 14%, transparent)}
 .oc-station[aria-pressed="true"] .oc-chip{border-color:var(--sel)}
 .oc-station[aria-pressed="true"]{box-shadow:0 0 0 2px var(--sel);background:color-mix(in oklab, var(--sel) 12%, transparent)}
 .oc-zone{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:8px;font:inherit;font-size:11px;line-height:1;white-space:nowrap;
@@ -22147,14 +22162,15 @@ var PAGE_CSS = `
 .ux-ag-wr .hd b{font-size:12px}
 .ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
 /* a card that waits for a colleague's: who it waits for, and what is at the head of the queue (the hue is the calm, cool one of the state) */
-.ux-ag-q{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${COOL} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${COOL} 8%, transparent);display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
-.ux-ag-q p{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0;min-width:0;overflow-wrap:anywhere}
-.ux-ag-q .k{color:${ink4(COOL)};font-weight:600}
-.ux-ag-q .it{min-width:0}
+.ux-ag-q{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${COOL} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${COOL} 8%, transparent);display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 8px;align-items:baseline;font-size:12.5px;min-width:0}
+.ux-ag-q p{display:contents}
+.ux-ag-q .k{color:${ink4(COOL)};font-weight:600;white-space:nowrap}
+.ux-ag-q .v{min-width:0;overflow-wrap:anywhere}
 .ux-ag-q .it b{font-weight:600}
 .ux-ag-q .it i{font-style:normal;color:${T22}}
 .ux-ag-q .rk,.ux-ag-q .mo,.ux-ag-q small{color:${T32};font-size:11.5px}
-.ux-ag-q .dc{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ux-ag-q small{grid-column:1 / -1}
+.ux-ag-q .ux-b{margin-left:8px;vertical-align:middle}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .ux-rosterb{display:grid;grid-template-columns:24px minmax(0,112px) minmax(0,1fr) 112px 20px;align-items:center;column-gap:8px;width:100%;min-width:0;min-height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}

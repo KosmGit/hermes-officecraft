@@ -44,25 +44,28 @@ function QueueBlock({ lines, waited, onDecide, t }) {
         <>
           <p data-queue-waits>
             <span className="k">{t('queue.waits')}</span>
-            {lines.waits.items.map((it, i) => <span key={i} className="it"><b>{it.who}</b>{it.title ? <i> · {it.title}</i> : null}{i < lines.waits.items.length - 1 ? ',' : ''}</span>)}
-            {lines.waits.more ? <span className="mo">{t('queue.more', lines.waits.more)}</span> : null}
+            <span className="v">
+              {lines.waits.items.map((it, i) => <span key={i} className="it"><b>{it.who}</b>{it.title ? <i> · {it.title}</i> : null}{i < lines.waits.items.length - 1 ? ', ' : ''}</span>)}
+              {lines.waits.more ? <span className="mo"> {t('queue.more', lines.waits.more)}</span> : null}
+            </span>
           </p>
           {lines.head ? (
             <p data-queue-head>
               <span className="k">{t('queue.head')}</span>
-              <span className="it"><b>{lines.head.who}</b>{lines.head.fact ? `, ${lines.head.fact}` : ''}</span>
-              {lines.head.more ? <span className="mo">{lines.head.more}</span> : null}
-              {lines.head.rank ? <span className="rk" data-queue-rank>· {lines.head.rank}</span> : null}
-              {lines.head.decide && onDecide ? <button type="button" className="ux-b sm pri" data-decide data-queue-decide onClick={() => onDecide(lines.head.board)}>{t('ux.agent.decide')}</button> : null}
+              <span className="v">
+                <span className="it"><b>{lines.head.who}</b>{lines.head.fact ? `, ${lines.head.fact}` : ''}</span>
+                {lines.head.more ? <span className="mo"> {lines.head.more}</span> : null}
+                {lines.head.rank ? <span className="rk" data-queue-rank> · {lines.head.rank}</span> : null}
+                {lines.head.decide && onDecide ? <button type="button" className="ux-b sm pri" data-decide data-queue-decide onClick={() => onDecide(lines.head.board)}>{t('ux.agent.decide')}</button> : null}
+              </span>
             </p>
           ) : null}
           {lines.note ? <small data-queue-note>{lines.note}</small> : null}
         </>
       ) : (
-        <p data-queue-waited>
+        <p data-queue-waited className="full">
           <span className="k">{waited.lead}</span>
-          <span className="it">{waited.names.join(', ')}</span>
-          {waited.more ? <span className="mo">{t('queue.more', waited.more)}</span> : null}
+          <span className="v"><span className="it">{waited.names.join(', ')}</span>{waited.more ? <span className="mo"> {t('queue.more', waited.more)}</span> : null}</span>
         </p>
       )}
     </div>

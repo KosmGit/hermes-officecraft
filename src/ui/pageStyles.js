@@ -289,14 +289,15 @@ export const PAGE_CSS = `
 .ux-ag-wr .hd b{font-size:12px}
 .ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
 /* a card that waits for a colleague's: who it waits for, and what is at the head of the queue (the hue is the calm, cool one of the state) */
-.ux-ag-q{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${COOL} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${COOL} 8%, transparent);display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
-.ux-ag-q p{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0;min-width:0;overflow-wrap:anywhere}
-.ux-ag-q .k{color:${ink(COOL)};font-weight:600}
-.ux-ag-q .it{min-width:0}
+.ux-ag-q{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${COOL} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${COOL} 8%, transparent);display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 8px;align-items:baseline;font-size:12.5px;min-width:0}
+.ux-ag-q p{display:contents}
+.ux-ag-q .k{color:${ink(COOL)};font-weight:600;white-space:nowrap}
+.ux-ag-q .v{min-width:0;overflow-wrap:anywhere}
 .ux-ag-q .it b{font-weight:600}
 .ux-ag-q .it i{font-style:normal;color:${T2}}
 .ux-ag-q .rk,.ux-ag-q .mo,.ux-ag-q small{color:${T3};font-size:11.5px}
-.ux-ag-q .dc{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ux-ag-q small{grid-column:1 / -1}
+.ux-ag-q .ux-b{margin-left:8px;vertical-align:middle}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .ux-rosterb{display:grid;grid-template-columns:24px minmax(0,112px) minmax(0,1fr) 112px 20px;align-items:center;column-gap:8px;width:100%;min-width:0;min-height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
