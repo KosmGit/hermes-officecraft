@@ -452,6 +452,8 @@ export const PAGE_CSS = `
   .ux-game{min-width:40px}
   .ux-pj,.ux-prjx{height:40px}
   .ux-tab{height:44px}
+  .ux-tabs{gap:8px}
+  .ux-pj.all{min-width:40px}
   .ux-seg button{height:40px;padding:0 12px}
   .ux-lnk{min-height:40px}
   .ux-roster{gap:8px}

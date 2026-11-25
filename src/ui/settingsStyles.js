@@ -248,6 +248,7 @@ ${ringed('.oc-sd-x:focus-visible')}
 @media (pointer:coarse){
   .oc-sd-x,.oc-lm-ib{width:40px;height:40px}
   .oc-sf-tab{height:40px}
+  .oc-sf-nav{gap:8px}
   .oc-sx-help{position:relative}
   .oc-sx-help::after{content:"";position:absolute;inset:-9px}   /* the 24 px « ? » has a 1 px border: the ::after is measured from its padding box */
   .oc-sx-name{gap:20px}

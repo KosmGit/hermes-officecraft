@@ -42,6 +42,7 @@ test('the page: buttons, pills, tabs, segments, links at 40 px; the menu rows at
   for (const sel of ['.ux-b.ico', '.ux-b.sm.ico']) assert.equal(decls(body, sel).width, '40px', sel)
   for (const sel of ['.ux-lvp', '.ux-al', '.ux-game', '.ux-pj', '.ux-prjx']) assert.equal(decls(body, sel).height, '40px', sel)
   assert.equal(decls(body, '.ux-tab').height, '44px')
+  assert.equal(decls(body, '.ux-tabs').gap, '8px', 'two tabs: 8 px apart')
   assert.equal(decls(body, '.ux-seg button').height, '40px')
   assert.equal(decls(body, '.ux-lnk')['min-height'], '40px')
   assert.equal(decls(body, '.ux-pop.menu button').height, '44px', 'the rows of the « More » menu')
