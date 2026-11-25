@@ -289,3 +289,22 @@ test('an island label says its project once: name and ring, never the counts the
   assert.doesNotMatch(SCENE_CSS, /\.oc-zone b\{[^}]*text-transform/, '« bakery-site » is an identifier: written the same way everywhere')
   assert.doesNotMatch(SCENE_CSS, /\.oc-wb/)
 })
+
+// ===== the building is centred in its frame =====
+{
+const { liftOf, bleedOf } = await import('../../src/scene/index.js')
+const { layoutScene } = await import('../../src/scene/index.js')
+test('liftOf: the room is lifted by half the headroom it keeps above the walls, so the lawn above and below the BUILDING is the same (±1 CSS px)', () => {
+  const { WH, SLAB, TH2 } = { WH: 80, SLAB: 7, TH2: 8 }
+  const o = Array.from({ length: 3 }, (_, i) => ({ slug: `p${i}`, label: `p${i}`, done: 1, total: 3, blocked: 0 }))
+  const layout = layoutScene({ boards: o, agents: [] })
+  for (const S of [1, 2, 3]) {
+    const lift = liftOf(layout, S)
+    assert.ok(Number.isInteger(lift) && lift >= 0)
+    const above = (layout.origin.oy - 80) * S - lift
+    const below = (layout.H - layout.origin.oy - (layout.X + layout.Y) * 8 - 7) * S + lift
+    assert.ok(Math.abs(above - below) <= 1, `S=${S}: ${above} above, ${below} below`)
+  }
+  assert.ok(bleedOf({ availW: 900, availH: 600, W: 500, H: 300, S: 1, shift: 40 }).b > bleedOf({ availW: 900, availH: 600, W: 500, H: 300, S: 1 }).b, 'the ground reaches further under a lifted room')
+})
+}

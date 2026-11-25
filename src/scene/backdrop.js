@@ -16,13 +16,15 @@ export const FRAME_PAD = [8, 8, 8, 4]
 /**
  * Art pixels of ground to add on each side of the room canvas so that the ground reaches the edge of the frame.
  * availW / availH: the content box of the frame, in CSS px; W / H: the room canvas in art pixels; S: the view scale.
+ * shift: the CSS px the room is lifted above its centred place (0 when it is not lifted).
  * The room is centred in the frame (margin auto), the free space is split in two.
  */
-export function bleedOf({ availW, availH, W, H, S, pad = FRAME_PAD, step = BACKDROP_STEP }) {
+export function bleedOf({ availW, availH, W, H, S, pad = FRAME_PAD, step = BACKDROP_STEP, shift = 0 }) {
   const up = css => Math.ceil((Math.max(0, css) + S) / S / step) * step
   const fx = Math.max(0, availW - W * S) / 2
   const fy = Math.max(0, availH - H * S) / 2
-  return { l: up(fx + pad[0]), r: up(fx + pad[1]), t: up(fy + pad[2]), b: up(fy + pad[3]) }
+  // the room may be lifted by `shift` CSS px (src/scene/fit.js liftOf): the ground then reaches that much further below it
+  return { l: up(fx + pad[0]), r: up(fx + pad[1]), t: up(fy + pad[2]), b: up(fy + shift + pad[3]) }
 }
 
 // the lawn, the bark and the leaves are the ones the glazing shows (src/scene/outdoor.js): one outdoor world

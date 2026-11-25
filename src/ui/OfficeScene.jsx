@@ -8,7 +8,7 @@ import { badgeTip, clockText } from '../core/tips.js'
 import { outfitSource } from '../core/llm.js'
 import { posterTip } from '../core/wallart.js'
 import { createTicker, shouldAnimate } from '../core/ticker.js'
-import { anchors, backingOf, bleedOf, boardAnchors, buildBackdrop, buildBase, decorMap, dimOf, drawScene, hotspots, labelOf, layoutScene, needsAnimation, placeLabels, project, roleOf, spriteBoxes, toSceneModel, upscale } from '../scene/index.js'
+import { anchors, backingOf, bleedOf, boardAnchors, buildBackdrop, buildBase, decorMap, dimOf, drawScene, hotspots, labelOf, layoutScene, liftOf, needsAnimation, placeLabels, project, roleOf, spriteBoxes, toSceneModel, upscale } from '../scene/index.js'
 import { TW2 } from '../scene/constants.js'
 import { pileTip } from '../scene/pile.js'
 import { Ring } from './icons.jsx'
@@ -250,7 +250,9 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
 
   // the ground around the room, under the room canvas, reaching the edges of the frame. A separate layer: drawScene (the room, the
   // postcard) does not know it. Built after the room is painted, once per structure / light / size step (a resize is debounced).
-  const bleed = useMemo(() => (asScene ? bleedOf({ availW: size.w, availH: size.h, W: layout.W, H: layout.H, S }) : null), [asScene, size.w, size.h, layout.W, layout.H, S])
+  // the building, not the canvas, is centred in the frame (the canvas keeps its headroom above the walls): the room is lifted by that much
+  const lift = asScene ? liftOf(layout, S) : 0
+  const bleed = useMemo(() => (asScene ? bleedOf({ availW: size.w, availH: size.h, W: layout.W, H: layout.H, S, shift: lift }) : null), [asScene, size.w, size.h, layout.W, layout.H, S, lift])
   const groundKey = bleed ? JSON.stringify([layout.X, layout.Y, layout.lounge.x0, layout.W, layout.H, layout.origin, !!model.night, bleed]) : ''
   const groundRef = useRef(null)
   const groundBuf = useRef(null)
@@ -530,7 +532,8 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
         role="group"
         aria-label={t('sceneLabel')}
         data-store={`${back.w}x${back.h}`}
-        style={{ width: back.cssW, height: back.cssH }}
+        data-lift={lift}
+        style={{ width: back.cssW, height: back.cssH, top: -lift }}
       >
         {ground ? (
           <canvas

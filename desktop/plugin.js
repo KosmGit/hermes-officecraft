@@ -11377,6 +11377,11 @@ function upscale(src, W, H, out, w, h) {
   }
   return out;
 }
+function liftOf(layout2, S) {
+  const top = layout2.origin.oy - WH;
+  const bottom = layout2.H - (layout2.origin.oy + (layout2.X + layout2.Y) * TH2 + SLAB);
+  return Math.max(0, Math.round((top - bottom) / 2 * S));
+}
 
 // src/core/tabs.js
 var TABS = Object.freeze(["decisions", "agent", "projects", "journal"]);
@@ -14405,11 +14410,11 @@ function stateIconCells(state2) {
 // src/scene/backdrop.js
 var BACKDROP_STEP = 16;
 var FRAME_PAD = [8, 8, 8, 4];
-function bleedOf({ availW, availH, W, H, S, pad = FRAME_PAD, step = BACKDROP_STEP }) {
+function bleedOf({ availW, availH, W, H, S, pad = FRAME_PAD, step = BACKDROP_STEP, shift = 0 }) {
   const up = (css) => Math.ceil((Math.max(0, css) + S) / S / step) * step;
   const fx = Math.max(0, availW - W * S) / 2;
   const fy = Math.max(0, availH - H * S) / 2;
-  return { l: up(fx + pad[0]), r: up(fx + pad[1]), t: up(fy + pad[2]), b: up(fy + pad[3]) };
+  return { l: up(fx + pad[0]), r: up(fx + pad[1]), t: up(fy + pad[2]), b: up(fy + shift + pad[3]) };
 }
 var STONE = ["#cfc5b3", "#c3b8a5", "#d6ccba"].map(hx);
 var GROUT = hx("#9c917f");
@@ -20802,7 +20807,8 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
   useEffect16(() => {
     if (onFit && size.h > 0) onFit({ W: layout2.W, H: layout2.H, availW: size.w, availH: size.h, dpr, people, mode: view.mode });
   }, [onFit, layout2.W, layout2.H, size.w, size.h, dpr, people, view.mode]);
-  const bleed = useMemo11(() => asScene ? bleedOf({ availW: size.w, availH: size.h, W: layout2.W, H: layout2.H, S }) : null, [asScene, size.w, size.h, layout2.W, layout2.H, S]);
+  const lift = asScene ? liftOf(layout2, S) : 0;
+  const bleed = useMemo11(() => asScene ? bleedOf({ availW: size.w, availH: size.h, W: layout2.W, H: layout2.H, S, shift: lift }) : null, [asScene, size.w, size.h, layout2.W, layout2.H, S, lift]);
   const groundKey = bleed ? JSON.stringify([layout2.X, layout2.Y, layout2.lounge.x0, layout2.W, layout2.H, layout2.origin, !!model.night, bleed]) : "";
   const groundRef = useRef20(null);
   const groundBuf = useRef20(null);
@@ -20955,11 +20961,11 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
       const r = rect(b);
       if (!r.width) continue;
       let spot = null;
-      for (const lift of [0, 14, 28, 42, 56, 70, 84]) {
+      for (const lift2 of [0, 14, 28, 42, 56, 70, 84]) {
         for (const dx of [0, -30, 30, -60, 60, -90, 90, -120, 120, -150, 150]) {
-          const m = { ...r, left: r.left + dx, right: r.right + dx, top: r.top - lift, bottom: r.bottom - lift };
+          const m = { ...r, left: r.left + dx, right: r.right + dx, top: r.top - lift2, bottom: r.bottom - lift2 };
           if (inside(m) && !placed.some((f) => hits2(f, m))) {
-            spot = { dx, lift, m };
+            spot = { dx, lift: lift2, m };
             break;
           }
         }
@@ -21099,7 +21105,8 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
         role: "group",
         "aria-label": t("sceneLabel"),
         "data-store": `${back.w}x${back.h}`,
-        style: { width: back.cssW, height: back.cssH },
+        "data-lift": lift,
+        style: { width: back.cssW, height: back.cssH, top: -lift },
         children: [
           ground ? /* @__PURE__ */ jsx28(
             "canvas",

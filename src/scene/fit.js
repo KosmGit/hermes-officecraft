@@ -1,4 +1,5 @@
 /* Scale the art into the pane. The page never scrolls: the scene fits in width AND height. */
+import { SLAB, TH2, WH } from './constants.js'
 
 /** Scene scale under which pixel art stops being readable: the page shows the same facts as a list. */
 export const LIST_BELOW = 0.75
@@ -73,4 +74,16 @@ export function upscale(src, W, H, out, w, h) {
     prev = sy
   }
   return out
+}
+
+/**
+ * How many CSS px the room is lifted so that the BUILDING is centred in its frame, not the canvas: the canvas keeps `WH + 46` art
+ * pixels above the floor corner (headroom for what stands above the walls) and only 6 below the slab, so a canvas centred in the frame
+ * left far more lawn above the building than below it. Half the difference of the empty rows above and below it, at scale S, whole CSS px.
+ * The headroom that remains is empty canvas (the ground is a separate layer, the labels sit below the wall tops): nothing the page draws is cut.
+ */
+export function liftOf(layout, S) {
+  const top = layout.origin.oy - WH
+  const bottom = layout.H - (layout.origin.oy + (layout.X + layout.Y) * TH2 + SLAB)
+  return Math.max(0, Math.round(((top - bottom) / 2) * S))
 }
