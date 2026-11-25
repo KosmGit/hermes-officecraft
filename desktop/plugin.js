@@ -19627,9 +19627,12 @@ function QueueBlock({ lines, waited, onDecide, t }) {
           " ",
           lines.head.more
         ] }) : null,
-        lines.head.rank ? /* @__PURE__ */ jsxs16("span", { className: "rk", "data-queue-rank": true, children: [
-          " · ",
-          lines.head.rank
+        lines.head.rank ? /* @__PURE__ */ jsxs16(Fragment12, { children: [
+          " ",
+          /* @__PURE__ */ jsxs16("span", { className: "rk", "data-queue-rank": true, children: [
+            "· ",
+            lines.head.rank
+          ] })
         ] }) : null,
         lines.head.decide && onDecide ? /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm pri", "data-decide": true, "data-queue-decide": true, onClick: () => onDecide(lines.head.board), children: t("ux.agent.decide") }) : null
       ] })

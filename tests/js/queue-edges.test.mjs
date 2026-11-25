@@ -39,4 +39,6 @@ test('the team list puts a queued bot after the ones at work and a recent sessio
 test('the rank behind the head of the queue stays on one line (« 2ᵉ derrière » is never cut between its two words)', () => {
   const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
   assert.ok(/\.ux-ag-q \.rk\{[^}]*white-space:nowrap/.test(css))
+  // the space before it stays outside the unbreakable span: the line may still break between the head's words and the rank
+  assert.match(src('src/ui/AgentTab.jsx'), /\{' '\}<span className="rk" data-queue-rank>· \{lines\.head\.rank\}<\/span>/)
 })
