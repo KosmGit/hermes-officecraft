@@ -111,15 +111,22 @@ export function SettingsRow({ id, label, help = null, helpRole = undefined, tip 
   )
 }
 
-/** A section's title and where its settings are kept (« this computer » / « Hermes server »): the user knows what a change reaches. */
-export function SectionTitle({ label, where, tip = null }) {
+/**
+ * Where the settings of a tab are kept (« this device » / « Hermes server »): the user knows what a change reaches. The badge carries its
+ * own short explanation (the tooltip, and the same words for a screen reader). No title: the tab already says which one this is.
+ * `tip` is the long note of the tab, behind a « ? ».
+ */
+export function WhereLine({ where, tip = null, name }) {
   const t = useT()
+  const note = t(where === 'server' ? 'settings.serverTip' : 'settings.localTip')
   return (
-    <h3>
-      {label}
-      <span className="oc-sf-where" data-where={where}>{t(where === 'server' ? 'settings.server' : 'settings.local')}</span>
-      {tip ? <HelpTip name={label}>{tip}</HelpTip> : null}
-    </h3>
+    <div className="oc-sf-wl">
+      <span className="oc-sf-where" data-where={where} title={note}>
+        {t(where === 'server' ? 'settings.server' : 'settings.local')}
+        <span className="oc-sx-vh">{`. ${note}`}</span>
+      </span>
+      {tip ? <HelpTip name={name}>{tip}</HelpTip> : null}
+    </div>
   )
 }
 

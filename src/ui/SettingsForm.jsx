@@ -9,7 +9,7 @@ import { $gameMode, $languagePref, $lightPref, $motionPref, $nightPref, setGameM
 import { ENDONYMS } from '../i18n/index.js'
 import { SettingsFormLlm } from './SettingsFormLlm.jsx'
 import { SettingsFormNotify } from './SettingsFormNotify.jsx'
-import { SectionTitle, Segmented, SettingsIcon, SettingsRow, Switch } from './SettingsKit.jsx'
+import { Segmented, SettingsIcon, SettingsRow, Switch, WhereLine } from './SettingsKit.jsx'
 import { SETTINGS_CSS } from './settingsStyles.js'
 import { CARD, FIELD_CSS, FIELD_EDGE, FIELD_RADIUS } from './tokens.js'
 import { systemLocales, useAppLocale, useT } from './useT.js'
@@ -25,15 +25,15 @@ const selectStyle = {
   border: `1px solid ${FIELD_EDGE}`
 }
 const HOURS = Array.from({ length: 24 }, (_, h) => h)
-const TAB_ICON = { general: 'globe', game: 'game', replay: 'moon', notify: 'bell', llm: 'spark' }
+const TAB_ICON = { general: 'globe', notify: 'bell', llm: 'spark' }
 
 /** The tab last used, for the next opening in this session (not a preference: nothing is stored, so no key to keep compatible). */
 let lastTab = SETTINGS_TABS[0]
 
 /**
  * The Officecraft settings, written once: Settings → Plugins → Officecraft renders it (SettingsPage) and so does the gear of the
- * page (SettingsGear). Tabs instead of one long scroll (General, Game, Replay, Notifications, LLM functions: each one click away,
- * none under another), one line of help per setting, the rest behind its « ? ». With src/data/prefs.js, the only place that writes a
+ * page (SettingsGear). Tabs instead of one long scroll (General, with its Display, Game and Replay parts; Notifications; LLM functions:
+ * each one click away, none under another), one line of help per setting, the rest behind its « ? ». With src/data/prefs.js, the only place that writes a
  * preference. The tabs sit on the side when the form is wide and on top when it is narrow (a container query: same component in the
  * gear's window and in Hermes' settings page).
  */
@@ -78,8 +78,9 @@ export function SettingsForm({ llm = null }) {
         <div id={`${base}-panel`} className="oc-sf-panel" role="tabpanel" tabIndex={0} aria-labelledby={`${base}-tab-${tab}`} data-settings-tab={tab}>
           {tab === 'general' ? (
             <>
-              <SectionTitle label={t('settings.tab.general')} where="local" />
-              <SettingsRow id="officecraft-language" label={t('settings.language')} help={t('settings.languageHint')} tip={t('settings.languageTip')}
+              <WhereLine where="local" />
+              <h3 className="oc-sf-sec" data-sec="display">{t('settings.sec.display')}</h3>
+              <SettingsRow id="officecraft-language" label={t('settings.language')} help={t('settings.languageHint')}
                 control={({ id, describedBy }) => (
                   <select id={id} className="oc-fc" aria-describedby={describedBy} value={pref} onChange={event => setLanguagePref(event.target.value)} style={selectStyle}>
                     <option value="auto">{t('settings.auto', ENDONYMS[detected])}</option>
@@ -100,20 +101,10 @@ export function SettingsForm({ llm = null }) {
                   <Segmented label={t('settings.motion')} describedBy={describedBy} value={motion} onChange={setMotionPref}
                     options={MOTION_PREFS.map(code => [code, t(`settings.motion${code[0].toUpperCase()}${code.slice(1)}`)])} />
                 )} />
-            </>
-          ) : null}
-
-          {tab === 'game' ? (
-            <>
-              <SectionTitle label={t('settings.tab.game')} where="local" />
+              <h3 className="oc-sf-sec" data-sec="game">{t('settings.sec.game')}</h3>
               <SettingsRow id="officecraft-game" label={t('settings.gameOn')} help={t('settings.gameHint')} tip={t('settings.gameTip')}
                 control={({ id, describedBy }) => <Switch id={id} describedBy={describedBy} checked={game} onChange={setGameMode} />} />
-            </>
-          ) : null}
-
-          {tab === 'replay' ? (
-            <>
-              <SectionTitle label={t('settings.tab.replay')} where="local" />
+              <h3 className="oc-sf-sec" data-sec="replay">{t('settings.sec.replay')}</h3>
               <SettingsRow id="officecraft-night" group label={t('settings.night')} help={t('settings.nightHint')} tip={t('settings.nightTip')}
                 control={({ describedBy }) => (
                   <>

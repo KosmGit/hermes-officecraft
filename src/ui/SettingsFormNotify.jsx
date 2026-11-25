@@ -8,7 +8,7 @@ import {
 import { timeText } from '../core/format.js'
 import { sendTest, useNotify, useSaveNotify } from '../data/notify.js'
 import { held, hold } from './hold.js'
-import { SectionTitle, SettingsIcon, SettingsRow, Switch } from './SettingsKit.jsx'
+import { SettingsIcon, SettingsRow, Switch, WhereLine } from './SettingsKit.jsx'
 import { CARD, FIELD_EDGE, FIELD_RADIUS } from './tokens.js'
 import { useT } from './useT.js'
 
@@ -94,7 +94,7 @@ export function SettingsFormNotify() {
   const errorRef = useRef(null)
   useEffect(() => { if (error) errorRef.current?.scrollIntoView?.({ block: 'nearest' }) }, [error])
 
-  const title = <SectionTitle label={t('notify.title')} where="server" />
+  const title = <WhereLine where="server" />
   if (query.isError) return <>{title}<p className="oc-sx-warn" data-notify-unavailable>{t('notify.unavailable')}</p></>
   if (!state) return title
 
@@ -144,7 +144,7 @@ export function SettingsFormNotify() {
 
   return (
     <div data-notify>
-      <SectionTitle label={t('notify.title')} where="server" tip={t('notify.hint', state.cap)} />
+      <WhereLine where="server" name={t('notify.title')} tip={t('notify.hint', state.cap)} />
 
       <h4 className="oc-nt-sub" data-notify-recipients>{t('notify.recipients')}</h4>
       {state.targets.map((target, i) => {

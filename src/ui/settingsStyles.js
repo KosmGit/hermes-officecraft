@@ -25,8 +25,11 @@ ${ringed('.oc-sf-tab:focus-visible')}
 .oc-sf-bd{margin-left:auto;display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:color-mix(in oklab, ${VIOLET} 18%, transparent);color:var(--foreground)}
 .oc-sf-panel{min-width:0;min-height:0;padding:8px 20px 16px}
 .oc-sf-panel:focus-visible{outline:2px solid transparent;box-shadow:inset 0 0 0 2px color-mix(in oklab, ${RING} 60%, transparent)}
-.oc-sf-panel h3{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:12px 0 4px;font-size:15px;font-weight:600}
-.oc-sf-where{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
+.oc-sf-panel h3{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:20px 0 0;font-size:15px;font-weight:600}
+.oc-sf-wl{display:flex;align-items:center;gap:8px;margin:12px 0 0}
+.oc-sf-wl + h3{margin-top:12px}
+.oc-sx-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.oc-sf-where{position:relative;display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
 .oc-sx-row{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 0;border-bottom:1px solid ${HAIR}}
 .oc-sx-row:last-child{border-bottom:0}
 .oc-sx-lab{flex:1 1 192px;min-width:0}

@@ -6,13 +6,16 @@ import { LLM_ALL } from './llm.js'
  */
 
 /** The tabs, in order. Every setting lives in exactly one of them (tests/js/settings.test.mjs). */
-export const SETTINGS_TABS = Object.freeze(['general', 'game', 'replay', 'notify', 'llm'])
+export const SETTINGS_TABS = Object.freeze(['general', 'notify', 'llm'])
+
+/** Tabs that no longer exist and the one that holds their settings now (a remembered or linked name must not land on nothing). */
+export const TAB_ALIASES = Object.freeze({ game: 'general', replay: 'general' })
 
 /** The longest help line under a setting (characters). The rest goes behind the « ? » of the setting. */
 export const HELP_MAX = 60
 
-/** Anything that is not a known tab is the first one. */
-export const tabOf = value => (SETTINGS_TABS.includes(value) ? value : SETTINGS_TABS[0])
+/** A tab that was folded into another one is that one; anything else that is not a known tab is the first. */
+export const tabOf = value => (SETTINGS_TABS.includes(value) ? value : Object.hasOwn(TAB_ALIASES, value) ? TAB_ALIASES[value] : SETTINGS_TABS[0])
 
 /**
  * The tab a key moves to from `current` (WAI-ARIA tabs, automatic activation), or null when the key is not for the tab list.

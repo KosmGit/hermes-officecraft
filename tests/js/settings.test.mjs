@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { LLM_ALL } from '../../src/core/llm.js'
 import { NOTIFY_TYPES } from '../../src/core/notify.js'
-import { HELP_MAX, SETTINGS_TABS, llmOnCount, llmTabBadge, ringDash, tabAfterKey, tabOf } from '../../src/core/settings.js'
+import { HELP_MAX, SETTINGS_TABS, TAB_ALIASES, llmOnCount, llmTabBadge, ringDash, tabAfterKey, tabOf } from '../../src/core/settings.js'
 import { messages } from '../../src/i18n/index.js'
 import { SHEET_AT, settingsSheet } from '../../src/ui/layout.js'
 
@@ -14,22 +14,41 @@ import { SHEET_AT, settingsSheet } from '../../src/ui/layout.js'
 const src = f => readFileSync(new URL(`../../src/${f}`, import.meta.url), 'utf8')
 const LANGS = ['en', 'fr', 'es']
 
-test('the tabs: General, Game, Replay, Notifications, LLM functions, in that order', () => {
-  assert.deepEqual([...SETTINGS_TABS], ['general', 'game', 'replay', 'notify', 'llm'])
+test('the tabs: General, Notifications, LLM functions, in that order', () => {
+  assert.deepEqual([...SETTINGS_TABS], ['general', 'notify', 'llm'])
   for (const lang of LANGS) for (const tab of SETTINGS_TABS) assert.ok(messages[lang].settings.tab[tab]?.length > 2, `${lang} settings.tab.${tab}`)
   assert.equal(tabOf('nope'), 'general')
   assert.equal(tabOf(undefined), 'general')
   assert.equal(tabOf('llm'), 'llm')
+  assert.equal(tabOf('notify'), 'notify')
+})
+
+test('Game and Replay are no longer tabs: a link or a remembered state that names one lands on General, and their settings sit under General', () => {
+  assert.deepEqual({ ...TAB_ALIASES }, { game: 'general', replay: 'general' })
+  assert.equal(tabOf('game'), 'general')
+  assert.equal(tabOf('replay'), 'general')
+  assert.equal(tabOf('toString'), 'general', 'an inherited property name is not a tab')
+  assert.equal(tabOf('__proto__'), 'general')
+  const form = src('ui/SettingsForm.jsx')
+  // General holds three parts, in this order, each with its own sub-title; the game switch and the night range are in it
+  const general = form.slice(form.indexOf("tab === 'general'"), form.indexOf("tab === 'notify'"))
+  const at = ['display', 'game', 'replay'].map(k => general.indexOf(`data-sec="${k}"`))
+  assert.ok(at.every(i => i > 0) && at[0] < at[1] && at[1] < at[2], 'Display, Game, Replay in order')
+  assert.ok(general.indexOf('officecraft-game') > at[1] && general.indexOf('officecraft-game') < at[2], 'the game switch is under « Game »')
+  assert.ok(general.indexOf('officecraft-night-start') > at[2], 'the night range is under « Replay »')
+  for (const lang of LANGS) for (const k of ['display', 'game', 'replay']) assert.ok(messages[lang].settings.sec[k]?.length > 2, `${lang} settings.sec.${k}`)
+  for (const lang of LANGS) assert.equal(messages[lang].settings.tab.game, undefined, 'no label for a tab that does not exist')
 })
 
 test('keyboard model of the tab list: arrows both ways (side or top), wrap around, Home / End, other keys are not ours', () => {
-  assert.equal(tabAfterKey('general', 'ArrowDown'), 'game')
-  assert.equal(tabAfterKey('general', 'ArrowRight'), 'game')
+  assert.equal(tabAfterKey('general', 'ArrowDown'), 'notify')
+  assert.equal(tabAfterKey('general', 'ArrowRight'), 'notify')
   assert.equal(tabAfterKey('general', 'ArrowUp'), 'llm', 'wraps to the last')
   assert.equal(tabAfterKey('llm', 'ArrowDown'), 'general', 'wraps to the first')
   assert.equal(tabAfterKey('notify', 'Home'), 'general')
   assert.equal(tabAfterKey('notify', 'End'), 'llm')
-  for (const key of ['Enter', ' ', 'Tab', 'a', 'Escape']) assert.equal(tabAfterKey('game', key), null, key)
+  assert.equal(tabAfterKey('game', 'ArrowDown'), 'notify', 'a remembered name of a folded tab moves on from General')
+  for (const key of ['Enter', ' ', 'Tab', 'a', 'Escape']) assert.equal(tabAfterKey('notify', key), null, key)
 })
 
 test('the badge of the LLM tab counts the functions that are on', () => {
@@ -82,7 +101,7 @@ test(`one line of help per setting: at most ${HELP_MAX} characters, in en, fr an
 test('what leaves the line is kept behind the « ? »: every long explanation still exists in the three languages', () => {
   for (const lang of LANGS) {
     const m = messages[lang]
-    for (const k of ['languageTip', 'gameTip', 'motionTip', 'nightTip']) assert.ok(m.settings[k].length > HELP_MAX, `${lang} settings.${k}`)
+    for (const k of ['gameTip', 'motionTip', 'nightTip']) assert.ok(m.settings[k].length > HELP_MAX, `${lang} settings.${k}`)
     assert.ok(m.notify.hint(6).length > HELP_MAX && /6/.test(m.notify.hint(6)), `${lang} notify.hint`)
     assert.ok(m.llm.hint.length > HELP_MAX, `${lang} llm.hint`)
     for (const f of LLM_ALL) for (const k of ['what', 'detail', 'cost']) assert.ok(m.llm.f[f][k]?.length > 3, `${lang} llm.f.${f}.${k}`)

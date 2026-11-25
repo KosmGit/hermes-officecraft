@@ -8,7 +8,7 @@ import { artBody } from '../core/wallart.js'
 import { useLlm, useLlmActions } from '../data/llm.js'
 import { held, hold } from './hold.js'
 import { useModelOptions } from './ModelPicker.jsx'
-import { HelpTip, SectionTitle, SettingsIcon, Switch } from './SettingsKit.jsx'
+import { HelpTip, SettingsIcon, Switch, WhereLine } from './SettingsKit.jsx'
 import { useT } from './useT.js'
 
 const STATE_TONE = { off: 'off', ready: 'ok', unavailable: 'warn', outdated: 'warn', cap: 'warn', error: 'warn' }
@@ -127,7 +127,7 @@ export function SettingsFormLlm({ actions = null }) {
   }, [state?.settings.capUsd, state?.settings.callCap])   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (error) errorRef.current?.scrollIntoView?.({ block: 'nearest' }) }, [error])
 
-  const title = <SectionTitle label={t('llm.title')} where="server" tip={t('llm.hint')} />
+  const title = <WhereLine where="server" name={t('llm.title')} tip={t('llm.hint')} />
   // an agent half without the routes (older, or not restarted): nothing LLM at all, said once
   if (query.isError) return <>{title}<p className="oc-sx-warn" data-llm-unavailable>{t('llm.unavailable')}</p></>
   if (!state) return title

@@ -5453,7 +5453,7 @@ var en = {
       kanbanAll: (n, at) => `kanban, ${n} ${n === 1 ? "project" : "projects"}${at ? `, read at ${at}` : ""}`,
       gateway: (at) => `Hermes gateway status${at ? `, read at ${at}` : ""}`,
       crons: (at) => `Hermes scheduled jobs${at ? `, read at ${at}` : ""}`,
-      clock: "this computer’s clock",
+      clock: "this device’s clock",
       noAgentHalf: "needs Officecraft’s agent half, which is not available",
       card: (board, code) => `kanban ${board}, card ${code}`
     }
@@ -5601,16 +5601,19 @@ var en = {
   },
   settings: {
     // one short line per setting (HELP_MAX characters, tests/js/settings.test.mjs); the long explanation sits behind the “?” (…Tip)
-    tab: { general: "General", game: "Game", replay: "Replay", notify: "Notifications", llm: "LLM functions" },
+    tab: { general: "General", notify: "Notifications", llm: "LLM functions" },
+    // the three sub-titles of the General tab (Game and Replay no longer have a tab)
+    sec: { display: "Display", game: "Game", replay: "Replay" },
     tabs: "Settings sections",
-    local: "This computer",
+    local: "This device",
     server: "Hermes server",
+    localTip: "Kept in this browser: another device has its own settings.",
+    serverTip: "Kept on the Hermes server: the same in all your browsers and devices.",
     saved: "Saved on every change",
     close: "Close",
     helpFor: (name) => `Help: ${name}`,
     language: "Language",
     languageHint: "Auto follows Hermes, then your system.",
-    languageTip: "Automatic follows the Hermes app language, then your system language, then English.",
     auto: (detected) => `Automatic (${detected})`,
     gameOn: "Game mode",
     gameHint: "Trophies, grades, mascot, unlockable decor.",
@@ -5619,29 +5622,30 @@ var en = {
     lightAuto: "Auto",
     lightDay: "Day",
     lightNight: "Night",
-    lightHint: "Auto: night from 7 pm to 7 am.",
-    motion: "Motion",
+    lightHint: "Auto: dark from 7 pm to 7 am.",
+    motion: "Animations",
     motionAuto: "Auto",
     motionReduced: "Reduced",
     motionHint: "Auto follows your system.",
     motionTip: "Automatic respects your system’s reduced-motion setting. Reduced keeps the office still.",
-    night: "Night",
+    night: "Range of “Overnight”",
     nightFrom: "From",
     nightTo: "To",
     nightHour: (h) => `${String(h).padStart(2, "0")}:00`,
-    nightHint: "The hours “Overnight” covers.",
-    nightTip: "The hours “What happened overnight” covers, on this computer’s clock. 19:00 – 07:00 by default; a night may cross midnight. Setting the same hour twice gives a 24-hour night.",
+    nightHint: "Default: 7 pm to 7 am.",
+    nightTip: "The hours “What happened overnight” covers, on this device’s clock. 19:00 – 07:00 by default; a night may cross midnight. Setting the same hour twice gives a 24-hour night.",
     gear: "Officecraft settings",
     gearTip: "Language, light, game, replay, notifications and LLM functions of the page",
-    openInHermes: "Open in Hermes settings"
+    openInHermes: "Open these settings in Hermes",
+    openInHermesTip: "The same form is in Hermes’ settings, under Plugins → Officecraft."
   },
   notify: {
     title: "Notifications",
     hint: (cap) => `Get notified on a messaging app Hermes already serves, without keeping the page open. Messages carry only the basics (project, card code and title, agent, state, duration), never any content. Everything is off by default. At most ${cap} ${cap === 1 ? "message" : "messages"} an hour per recipient, one per event, grouped when several arrive together. Nothing can be sent during an outage. Test projects (sandbox-*) are never reported.`,
     type: {
       decision: "Decisions",
-      silent: "Silences",
-      gateway: "Gateway",
+      silent: "Silent agents",
+      gateway: "Hermes gateway",
       cron: "Scheduled jobs",
       campaign: "Campaigns",
       review: "Reviews sent back",
@@ -5651,7 +5655,7 @@ var en = {
     typeHint: {
       decision: "A card is blocked, or an approval is requested.",
       silent: "A running card shows no sign of life for 5 min.",
-      gateway: "Downtime, reported on recovery; a messaging app in trouble.",
+      gateway: "Hermes stopped, or a messaging app stopped answering.",
       cron: "The last run of a job ended in error.",
       campaign: "A phase is ready to launch, or a campaign is done.",
       review: "A reviewer sent a card back, or needs you.",
@@ -5662,7 +5666,7 @@ var en = {
     types: "Types",
     sameForAll: "Same for all",
     sameForAllHint: "One recipient for every type.",
-    mixed: "Mixed",
+    mixed: "Per type",
     noneChosen: "None",
     targetLabel: (platform, label) => `${platform} ${label}`,
     noTarget: "Hermes has no recipients yet.",
@@ -7349,16 +7353,19 @@ var es = {
   },
   settings: {
     // una línea de ayuda corta por ajuste (HELP_MAX caracteres, tests/js/settings.test.mjs); la explicación larga va tras el «?» (…Tip)
-    tab: { general: "General", game: "Juego", replay: "Replay", notify: "Notificaciones", llm: "Funciones LLM" },
+    tab: { general: "General", notify: "Notificaciones", llm: "Funciones LLM" },
+    // los tres subtítulos de la pestaña General (Juego y Replay ya no tienen pestaña)
+    sec: { display: "Pantalla", game: "Juego", replay: "Replay" },
     tabs: "Secciones de los ajustes",
     local: "Este dispositivo",
     server: "Servidor Hermes",
+    localTip: "Se guarda en este navegador: otro dispositivo tiene sus propios ajustes.",
+    serverTip: "Se guarda en el servidor Hermes: igual en todos tus navegadores y dispositivos.",
     saved: "Se guarda en cada cambio",
     close: "Cerrar",
     helpFor: (name) => `Ayuda: ${name}`,
     language: "Idioma",
     languageHint: "Auto: el idioma de Hermes; si no, el del sistema.",
-    languageTip: "Automático usa el idioma de la app Hermes; si no, el del sistema y, en último caso, el inglés.",
     auto: (detected) => `Automático (${detected})`,
     gameOn: "Modo juego",
     gameHint: "Trofeos, grados, mascota, decoración desbloqueable.",
@@ -7367,29 +7374,30 @@ var es = {
     lightAuto: "Auto",
     lightDay: "Día",
     lightNight: "Noche",
-    lightHint: "Auto: noche de 19 h a 7 h.",
-    motion: "Movimiento",
+    lightHint: "Auto: oscuro de 19 h a 7 h.",
+    motion: "Animaciones",
     motionAuto: "Auto",
     motionReduced: "Reducido",
     motionHint: "Auto sigue el ajuste del sistema.",
     motionTip: "Automático respeta el ajuste de movimiento reducido de tu sistema. Reducido mantiene la oficina quieta.",
-    night: "Noche",
+    night: "Franja de «Esta noche»",
     nightFrom: "Desde",
     nightTo: "Hasta",
     nightHour: (h) => `${String(h).padStart(2, "0")}:00`,
-    nightHint: "Las horas que cubre «Esta noche».",
+    nightHint: "Por defecto: de 19 h a 7 h.",
     nightTip: "Las horas que cubre «Lo que pasó esta noche», según el reloj de este dispositivo. De 19:00 a 07:00 por defecto; una noche puede cruzar la medianoche. La misma hora dos veces = una noche de 24 horas.",
     gear: "Ajustes de Officecraft",
     gearTip: "Idioma, luz, juego, repetición, notificaciones y funciones LLM de la página",
-    openInHermes: "Abrir en la configuración de Hermes"
+    openInHermes: "Abrir estos ajustes en Hermes",
+    openInHermesTip: "El mismo formulario está en los ajustes de Hermes, en Plugins → Officecraft."
   },
   notify: {
     title: "Notificaciones",
     hint: (cap) => `Recibe los avisos en una app de mensajería que Hermes ya tenga conectada, sin tener la página abierta. Solo datos (proyecto, código y título de la tarjeta, agente, estado, duración), nunca contenido. Todo desactivado por defecto; como máximo ${cap} ${cap === 1 ? "mensaje" : "mensajes"} por hora y destinatario, uno por evento, agrupados cuando llegan varios a la vez. Durante una caída no se puede enviar nada. Los proyectos de prueba (sandbox-*) nunca generan avisos.`,
     type: {
       decision: "Decisiones",
-      silent: "Silencios",
-      gateway: "Gateway",
+      silent: "Agentes en silencio",
+      gateway: "Pasarela de Hermes",
       cron: "Tareas programadas",
       campaign: "Campañas",
       review: "Revisiones devueltas",
@@ -7399,7 +7407,7 @@ var es = {
     typeHint: {
       decision: "Una tarjeta está bloqueada, o se pide una aprobación.",
       silent: "Una tarjeta en curso lleva 5 min sin dar señales.",
-      gateway: "Una caída (se avisa al volver) o una app con problemas.",
+      gateway: "Hermes se detuvo o una app de mensajería dejó de responder.",
       cron: "La última ejecución de una tarea falló.",
       campaign: "Una fase está lista para lanzar, o una campaña terminó.",
       review: "Un revisor devolvió una tarjeta, o te espera.",
@@ -7410,7 +7418,7 @@ var es = {
     types: "Tipos",
     sameForAll: "El mismo para todo",
     sameForAllHint: "Un destinatario para todos los tipos.",
-    mixed: "Varios",
+    mixed: "Según el tipo",
     noneChosen: "Ninguno",
     targetLabel: (platform, label) => `${platform} ${label}`,
     noTarget: "Hermes no conoce ningún destinatario.",
@@ -8950,7 +8958,7 @@ var fr = {
       kanbanAll: (n, at) => `kanban, ${n} ${n === 1 ? "projet" : "projets"}${at ? `, lu à ${at}` : ""}`,
       gateway: (at) => `état du gateway Hermes${at ? `, lu à ${at}` : ""}`,
       crons: (at) => `tâches planifiées Hermes${at ? `, lues à ${at}` : ""}`,
-      clock: "l’horloge de cet ordinateur",
+      clock: "l’horloge de cet appareil",
       noAgentHalf: "nécessite la partie agent d’Officecraft, indisponible",
       card: (board, code) => `kanban ${board}, carte ${code}`
     }
@@ -9098,16 +9106,19 @@ var fr = {
   },
   settings: {
     // une ligne d’aide courte par réglage (HELP_MAX caractères, tests/js/settings.test.mjs) ; l’explication longue est derrière le « ? » (…Tip)
-    tab: { general: "Général", game: "Jeu", replay: "Replay", notify: "Notifications", llm: "Fonctions LLM" },
+    tab: { general: "Général", notify: "Notifications", llm: "Fonctions LLM" },
+    // les trois sous-titres de l’onglet Général (Jeu et Replay n’ont plus d’onglet)
+    sec: { display: "Affichage", game: "Jeu", replay: "Replay" },
     tabs: "Sections des réglages",
-    local: "Cet ordinateur",
+    local: "Cet appareil",
     server: "Serveur Hermes",
+    localTip: "Gardé dans ce navigateur : un autre appareil a ses propres réglages.",
+    serverTip: "Gardé sur le serveur Hermes : le même dans tous vos navigateurs et appareils.",
     saved: "Enregistré à chaque changement",
     close: "Fermer",
     helpFor: (name) => `Aide : ${name}`,
     language: "Langue",
     languageHint: "Auto suit Hermes, puis votre système.",
-    languageTip: "Automatique suit la langue de l’app Hermes, puis celle du système, puis l’anglais.",
     auto: (detected) => `Automatique (${detected})`,
     gameOn: "Mode jeu",
     gameHint: "Trophées, grades, mascotte, décor à débloquer.",
@@ -9116,29 +9127,30 @@ var fr = {
     lightAuto: "Auto",
     lightDay: "Jour",
     lightNight: "Nuit",
-    lightHint: "Auto : nuit de 19 h à 7 h.",
-    motion: "Mouvement",
+    lightHint: "Auto : sombre de 19 h à 7 h.",
+    motion: "Animations",
     motionAuto: "Auto",
     motionReduced: "Réduit",
     motionHint: "Auto suit votre système.",
     motionTip: "Automatique respecte le réglage de mouvement réduit de votre système. Réduit garde le bureau immobile.",
-    night: "Nuit",
+    night: "Plage de « Cette nuit »",
     nightFrom: "De",
     nightTo: "À",
     nightHour: (h) => `${String(h).padStart(2, "0")} h`,
-    nightHint: "Les heures que couvre « Cette nuit ».",
-    nightTip: "Les heures que couvre « Ce qui s’est passé cette nuit », à l’heure de cet ordinateur. 19 h – 7 h par défaut ; une nuit peut passer minuit. La même heure deux fois = une nuit de 24 h.",
+    nightHint: "Par défaut : de 19 h à 7 h.",
+    nightTip: "Les heures que couvre « Ce qui s’est passé cette nuit », à l’heure de cet appareil. 19 h – 7 h par défaut ; une nuit peut passer minuit. La même heure deux fois = une nuit de 24 h.",
     gear: "Réglages d’Officecraft",
     gearTip: "Langue, lumière, jeu, relecture, notifications et fonctions LLM de la page",
-    openInHermes: "Ouvrir dans les paramètres de Hermes"
+    openInHermes: "Ouvrir ces réglages dans Hermes",
+    openInHermesTip: "Le même formulaire se trouve dans les paramètres de Hermes, sous Plugins → Officecraft."
   },
   notify: {
     title: "Notifications",
     hint: (cap) => `Recevez une alerte sur une messagerie déjà connectée à Hermes, même sans page ouverte. Les messages ne donnent que des informations factuelles (projet, code et titre de carte, agent, état, durée), jamais de contenu. Tout est désactivé par défaut ; au plus ${cap} ${cap === 1 ? "message" : "messages"} par heure et par destinataire, un par événement, regroupés quand plusieurs arrivent ensemble. Pendant une panne, rien ne peut être envoyé. Les projets de test (sandbox-*) ne sont jamais signalés.`,
     type: {
       decision: "Décisions",
-      silent: "Silences",
-      gateway: "Gateway",
+      silent: "Agents silencieux",
+      gateway: "Passerelle Hermes",
       cron: "Tâches planifiées",
       campaign: "Campagnes",
       review: "Revues refusées",
@@ -9148,7 +9160,7 @@ var fr = {
     typeHint: {
       decision: "Une carte est bloquée, ou une approbation est demandée.",
       silent: "Une carte en cours ne donne plus signe de vie depuis 5 min.",
-      gateway: "Arrêt signalé au redémarrage ; messagerie en difficulté.",
+      gateway: "Hermes s’est arrêté ou une messagerie ne répond plus.",
       cron: "La dernière exécution d’une tâche a échoué.",
       campaign: "Une phase est prête à lancer, ou une campagne est terminée.",
       review: "Un relecteur a refusé une carte, ou vous attend.",
@@ -9159,7 +9171,7 @@ var fr = {
     types: "Types",
     sameForAll: "Le même pour tous",
     sameForAllHint: "Un destinataire pour tous les types.",
-    mixed: "Mixte",
+    mixed: "Selon le type",
     noneChosen: "Aucun",
     targetLabel: (platform, label) => `${platform} ${label}`,
     noTarget: "Hermes ne connaît aucun destinataire.",
@@ -23688,8 +23700,9 @@ import { useValue as useValue3 } from "@hermes/plugin-sdk";
 import { useEffect as useEffect26, useId as useId23, useState as useState27 } from "react";
 
 // src/core/settings.js
-var SETTINGS_TABS = Object.freeze(["general", "game", "replay", "notify", "llm"]);
-var tabOf = (value) => SETTINGS_TABS.includes(value) ? value : SETTINGS_TABS[0];
+var SETTINGS_TABS = Object.freeze(["general", "notify", "llm"]);
+var TAB_ALIASES = Object.freeze({ game: "general", replay: "general" });
+var tabOf = (value) => SETTINGS_TABS.includes(value) ? value : Object.hasOwn(TAB_ALIASES, value) ? TAB_ALIASES[value] : SETTINGS_TABS[0];
 function tabAfterKey(current, key) {
   const at = SETTINGS_TABS.indexOf(tabOf(current));
   const n = SETTINGS_TABS.length;
@@ -23883,12 +23896,15 @@ function SettingsRow({ id, label, help = null, helpRole = void 0, tip = null, gr
     /* @__PURE__ */ jsx40("div", { className: "oc-sx-ctl", children: control({ id, describedBy: help ? hid : void 0 }) })
   ] });
 }
-function SectionTitle({ label, where, tip = null }) {
+function WhereLine({ where, tip = null, name }) {
   const t = useT();
-  return /* @__PURE__ */ jsxs36("h3", { children: [
-    label,
-    /* @__PURE__ */ jsx40("span", { className: "oc-sf-where", "data-where": where, children: t(where === "server" ? "settings.server" : "settings.local") }),
-    tip ? /* @__PURE__ */ jsx40(HelpTip, { name: label, children: tip }) : null
+  const note = t(where === "server" ? "settings.serverTip" : "settings.localTip");
+  return /* @__PURE__ */ jsxs36("div", { className: "oc-sf-wl", children: [
+    /* @__PURE__ */ jsxs36("span", { className: "oc-sf-where", "data-where": where, title: note, children: [
+      t(where === "server" ? "settings.server" : "settings.local"),
+      /* @__PURE__ */ jsx40("span", { className: "oc-sx-vh", children: `. ${note}` })
+    ] }),
+    tip ? /* @__PURE__ */ jsx40(HelpTip, { name, children: tip }) : null
   ] });
 }
 function Switch({ id, checked, onChange, disabled = false, describedBy, labelledBy, ...rest3 }) {
@@ -24022,7 +24038,7 @@ function SettingsFormLlm({ actions = null }) {
   useEffect24(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
-  const title = /* @__PURE__ */ jsx41(SectionTitle, { label: t("llm.title"), where: "server", tip: t("llm.hint") });
+  const title = /* @__PURE__ */ jsx41(WhereLine, { where: "server", name: t("llm.title"), tip: t("llm.hint") });
   if (query.isError) return /* @__PURE__ */ jsxs37(Fragment21, { children: [
     title,
     /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", "data-llm-unavailable": true, children: t("llm.unavailable") })
@@ -24306,7 +24322,7 @@ function SettingsFormNotify() {
   useEffect25(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
-  const title = /* @__PURE__ */ jsx42(SectionTitle, { label: t("notify.title"), where: "server" });
+  const title = /* @__PURE__ */ jsx42(WhereLine, { where: "server" });
   if (query.isError) return /* @__PURE__ */ jsxs38(Fragment22, { children: [
     title,
     /* @__PURE__ */ jsx42("p", { className: "oc-sx-warn", "data-notify-unavailable": true, children: t("notify.unavailable") })
@@ -24352,7 +24368,7 @@ function SettingsFormNotify() {
     return t(`notify.tested.${key}`);
   };
   return /* @__PURE__ */ jsxs38("div", { "data-notify": true, children: [
-    /* @__PURE__ */ jsx42(SectionTitle, { label: t("notify.title"), where: "server", tip: t("notify.hint", state2.cap) }),
+    /* @__PURE__ */ jsx42(WhereLine, { where: "server", name: t("notify.title"), tip: t("notify.hint", state2.cap) }),
     /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-recipients": true, children: t("notify.recipients") }),
     state2.targets.map((target2, i) => {
       const view = testView(tests[target2.key], now, cool);
@@ -24557,8 +24573,11 @@ ${ringed(".oc-sf-tab:focus-visible")}
 .oc-sf-bd{margin-left:auto;display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:color-mix(in oklab, ${VIOLET4} 18%, transparent);color:var(--foreground)}
 .oc-sf-panel{min-width:0;min-height:0;padding:8px 20px 16px}
 .oc-sf-panel:focus-visible{outline:2px solid transparent;box-shadow:inset 0 0 0 2px color-mix(in oklab, ${RING} 60%, transparent)}
-.oc-sf-panel h3{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:12px 0 4px;font-size:15px;font-weight:600}
-.oc-sf-where{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
+.oc-sf-panel h3{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:20px 0 0;font-size:15px;font-weight:600}
+.oc-sf-wl{display:flex;align-items:center;gap:8px;margin:12px 0 0}
+.oc-sf-wl + h3{margin-top:12px}
+.oc-sx-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.oc-sf-where{position:relative;display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;color:var(--ui-text-secondary)}
 .oc-sx-row{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 0;border-bottom:1px solid ${HAIR}}
 .oc-sx-row:last-child{border-bottom:0}
 .oc-sx-lab{flex:1 1 192px;min-width:0}
@@ -24777,7 +24796,7 @@ var selectStyle2 = {
   border: `1px solid ${FIELD_EDGE}`
 };
 var HOURS = Array.from({ length: 24 }, (_, h) => h);
-var TAB_ICON = { general: "globe", game: "game", replay: "moon", notify: "bell", llm: "spark" };
+var TAB_ICON = { general: "globe", notify: "bell", llm: "spark" };
 var lastTab = SETTINGS_TABS[0];
 function SettingsForm({ llm = null }) {
   const t = useT();
@@ -24831,14 +24850,14 @@ function SettingsForm({ llm = null }) {
       )) }),
       /* @__PURE__ */ jsxs39("div", { id: `${base}-panel`, className: "oc-sf-panel", role: "tabpanel", tabIndex: 0, "aria-labelledby": `${base}-tab-${tab}`, "data-settings-tab": tab, children: [
         tab === "general" ? /* @__PURE__ */ jsxs39(Fragment23, { children: [
-          /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.general"), where: "local" }),
+          /* @__PURE__ */ jsx43(WhereLine, { where: "local" }),
+          /* @__PURE__ */ jsx43("h3", { className: "oc-sf-sec", "data-sec": "display", children: t("settings.sec.display") }),
           /* @__PURE__ */ jsx43(
             SettingsRow,
             {
               id: "officecraft-language",
               label: t("settings.language"),
               help: t("settings.languageHint"),
-              tip: t("settings.languageTip"),
               control: ({ id, describedBy }) => /* @__PURE__ */ jsxs39("select", { id, className: "oc-fc", "aria-describedby": describedBy, value: pref, onChange: (event) => setLanguagePref(event.target.value), style: selectStyle2, children: [
                 /* @__PURE__ */ jsx43("option", { value: "auto", children: t("settings.auto", ENDONYMS[detected]) }),
                 SUPPORTED_LOCALES.map((code) => /* @__PURE__ */ jsx43("option", { value: code, lang: code, children: ENDONYMS[code] }, code))
@@ -24883,10 +24902,8 @@ function SettingsForm({ llm = null }) {
                 }
               )
             }
-          )
-        ] }) : null,
-        tab === "game" ? /* @__PURE__ */ jsxs39(Fragment23, { children: [
-          /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.game"), where: "local" }),
+          ),
+          /* @__PURE__ */ jsx43("h3", { className: "oc-sf-sec", "data-sec": "game", children: t("settings.sec.game") }),
           /* @__PURE__ */ jsx43(
             SettingsRow,
             {
@@ -24896,10 +24913,8 @@ function SettingsForm({ llm = null }) {
               tip: t("settings.gameTip"),
               control: ({ id, describedBy }) => /* @__PURE__ */ jsx43(Switch, { id, describedBy, checked: game, onChange: setGameMode })
             }
-          )
-        ] }) : null,
-        tab === "replay" ? /* @__PURE__ */ jsxs39(Fragment23, { children: [
-          /* @__PURE__ */ jsx43(SectionTitle, { label: t("settings.tab.replay"), where: "local" }),
+          ),
+          /* @__PURE__ */ jsx43("h3", { className: "oc-sf-sec", "data-sec": "replay", children: t("settings.sec.replay") }),
           /* @__PURE__ */ jsx43(
             SettingsRow,
             {
