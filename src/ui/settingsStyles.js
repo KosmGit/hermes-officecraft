@@ -253,10 +253,16 @@ ${ringed('.oc-sd-x:focus-visible')}
   .oc-sx-name{gap:16px}
   .oc-sx-ctl,.oc-lm-ctl{gap:16px}
   .oc-sx-sw{width:48px;height:28px;border-radius:14px}
+  .oc-sx-sw::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}   /* 48 x 28 to the eye, 48 x 40 to the finger */
   .oc-sx-sw::after{top:3px;left:3px;width:20px;height:20px}
   .oc-sx-sw:checked::after{transform:translateX(20px)}
   .oc-sx-seg span{height:40px}
-  .oc-sx-btn,.oc-sx-link,.oc-sd-f .oc-sx-btn{min-height:40px}
+  .oc-sx-btn,.oc-sx-link,.oc-sd-f .oc-sx-btn,.oc-nt-note .oc-sx-link{min-height:40px}
+  .oc-lm-ib{flex:0 0 40px}
+  .oc-lm-top{row-gap:16px}
+  .oc-lm-mod{gap:16px}
+  .oc-lm-modh{height:24px}
+  .oc-sx-cap{margin-top:16px}
   .oc-sx-cap summary{min-height:40px}
   .oc-fc,.oc-lm-sel,.oc-sx-capg input{height:40px!important}
   .oc-nt-chip span,.oc-nt-line .oc-nt-chip span{min-height:40px}
