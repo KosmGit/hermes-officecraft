@@ -234,7 +234,7 @@ test('buttons: radius 4 px, weight 500 (text buttons), the host focus ring', () 
   assert.match(RING_FOCUS, /box-shadow:0 0 0 3px color-mix\(in oklab, .+ 50%, transparent\)/)
   assert.match(RING_FOCUS, /border-color:/)
   assert.match(RING, /--ring/, 'the host ring colour first')
-  for (const sel of ['.oc-legend-btn']) {   // the other buttons of the old panel (.oc-btn, .oc-toggle, .oc-gear, .oc-x) have no user any more
+  for (const sel of ['.oc-legend-btn', '.oc-gear', '.oc-x']) {
     assert.equal(decl(PANEL_CSS, sel, 'border-radius'), '4px', `${sel} radius`)
     const ring = focusRule(PANEL_CSS, sel)
     assert.ok(ring.includes('box-shadow:0 0 0 3px'), `${sel}: focus ring is the host's (3 px halo): ${ring}`)

@@ -4841,7 +4841,6 @@ var en = {
   waitTip: (n) => n === 1 ? "a decision is waiting for you" : `${n} decisions are waiting for you`,
   narrowNote: "The window is too narrow for the office, so it is shown as a list. Widen the window to bring it back.",
   sceneLabel: "The office",
-  openBtn: "Open",
   skipDetails: "Skip to details",
   selected: (name) => `${name} selected`,
   legend: {
@@ -6471,7 +6470,6 @@ var en = {
       label: "Projects: filter the office and lists",
       all: "All",
       chip: (slug, progress) => `${slug}: ${progress} done`,
-      hint: "Click an agent",
       details: "Details"
     },
     tab: { label: "Details", decisions: "Decisions", agent: "Team", projects: "Projects", journal: "Log" },
@@ -6602,7 +6600,6 @@ var es = {
   waitTip: (n) => n === 1 ? "una decisión te espera" : `${n} decisiones te esperan`,
   narrowNote: "Ventana estrecha: la oficina se muestra como lista. El dibujo vuelve si ensanchas la ventana.",
   sceneLabel: "La oficina",
-  openBtn: "Abrir",
   skipDetails: "Ir a los detalles",
   selected: (name) => `${name} seleccionado`,
   legend: {
@@ -8232,7 +8229,6 @@ var es = {
       label: "Proyectos: filtrar la oficina y las listas",
       all: "Todos",
       chip: (slug, progress) => `${slug}: ${progress} terminadas`,
-      hint: "Haz clic en un agente",
       details: "Detalles"
     },
     tab: { label: "Detalles", decisions: "Decisiones", agent: "Equipo", projects: "Proyectos", journal: "Registro" },
@@ -8364,7 +8360,6 @@ var fr = {
   waitTip: (n) => n === 1 ? "une décision vous attend" : `${n} décisions vous attendent`,
   narrowNote: "Fenêtre étroite : le bureau s’affiche en liste. Élargissez-la pour retrouver la vue du bureau.",
   sceneLabel: "Le bureau",
-  openBtn: "Ouvrir",
   skipDetails: "Aller aux détails",
   selected: (name) => `${name} sélectionné`,
   legend: {
@@ -9994,7 +9989,6 @@ var fr = {
       label: "Projets : filtrer le bureau et les listes",
       all: "Tous",
       chip: (slug, progress) => `${slug} : ${progress} terminées`,
-      hint: "Cliquez sur un agent",
       details: "Détails"
     },
     tab: { label: "Détails", decisions: "Décisions", agent: "Équipe", projects: "Projets", journal: "Journal" },
@@ -10069,7 +10063,7 @@ var ENDONYMS = Object.freeze({ en: "English", fr: "Français", es: "Español" })
 
 // src/ui/OfficePage.jsx
 import { EmptyState, host as host6, useQueryClient as useQueryClient6, useValue as useValue5 } from "@hermes/plugin-sdk";
-import { useCallback as useCallback9, useDeferredValue, useEffect as useEffect29, useLayoutEffect as useLayoutEffect10, useMemo as useMemo17, useRef as useRef32, useState as useState30 } from "react";
+import { useCallback as useCallback9, useDeferredValue, useEffect as useEffect29, useLayoutEffect as useLayoutEffect11, useMemo as useMemo17, useRef as useRef33, useState as useState30 } from "react";
 
 // src/core/achievements.js
 var DAY_MS3 = 864e5;
@@ -21303,7 +21297,17 @@ function GameBadge({ game, onOpen, t }) {
   const streak = game.quests?.streakDays ?? 0;
   const name = t(`game.levelName.${lvl.name}`);
   return /* @__PURE__ */ jsxs26("button", { type: "button", className: "ux-game", "data-game": true, "data-badge": true, "aria-haspopup": "dialog", title: t("ux.badge.tip"), "aria-label": t("ux.badge.open", [`${name}, ${t("ux.badge.level", lvl.level)}`, t("ux.badge.trophiesTip", got, total), streak > 0 ? t("ux.badge.streakLabel", streak) : ""].filter(Boolean).join(", ")), onClick: onOpen, children: [
-    /* @__PURE__ */ jsxs26("span", { className: "ux-gs lvl", "data-game": true, "data-level": lvl.level, "data-level-name": lvl.name, title: t("ux.badge.levelTip", lvl.done, lvl.next), children: [
+    /* @__PURE__ */ jsxs26("span", { className: "ux-gs cmp", "data-game": true, "data-badge-compact": true, title: `${t("ux.badge.levelTip", lvl.done, lvl.next)} · ${t("ux.badge.trophiesTip", got, total)}`, children: [
+      /* @__PURE__ */ jsx30(PixelIcon, { id: "chain", size: 20 }),
+      /* @__PURE__ */ jsxs26("b", { className: "ux-mono", children: [
+        t("ux.badge.level", lvl.level),
+        " · ",
+        got,
+        "/",
+        total
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs26("span", { className: "ux-gs lvl wide", "data-game": true, "data-level": lvl.level, "data-level-name": lvl.name, title: t("ux.badge.levelTip", lvl.done, lvl.next), children: [
       /* @__PURE__ */ jsx30(PixelIcon, { id: "office", size: 20 }),
       /* @__PURE__ */ jsxs26("span", { className: "ux-g2", children: [
         /* @__PURE__ */ jsxs26("b", { children: [
@@ -21317,7 +21321,7 @@ function GameBadge({ game, onOpen, t }) {
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs26("span", { className: "ux-gs", "data-game": true, "data-trophy-count": true, title: t("ux.badge.trophiesTip", got, total), children: [
+    /* @__PURE__ */ jsxs26("span", { className: "ux-gs wide", "data-game": true, "data-trophy-count": true, title: t("ux.badge.trophiesTip", got, total), children: [
       /* @__PURE__ */ jsx30(PixelIcon, { id: "chain", size: 20 }),
       /* @__PURE__ */ jsxs26("span", { className: "ux-g2", children: [
         /* @__PURE__ */ jsxs26("b", { className: "ux-mono", children: [
@@ -21330,7 +21334,7 @@ function GameBadge({ game, onOpen, t }) {
         /* @__PURE__ */ jsx30("small", { children: t("ux.badge.trophies") })
       ] })
     ] }),
-    streak > 0 ? /* @__PURE__ */ jsxs26("span", { className: "ux-gs", "data-game": true, "data-streak": streak, title: t("game.streakTip"), children: [
+    streak > 0 ? /* @__PURE__ */ jsxs26("span", { className: "ux-gs wide", "data-game": true, "data-streak": streak, title: t("game.streakTip"), children: [
       /* @__PURE__ */ jsx30(PixelIcon, { id: "flame", size: 20 }),
       /* @__PURE__ */ jsxs26("span", { className: "ux-g2", children: [
         /* @__PURE__ */ jsx30("b", { className: "ux-mono", children: t("ux.badge.days", streak) }),
@@ -21446,6 +21450,7 @@ var T32 = "color-mix(in oklab, var(--ui-text-secondary) 55%, var(--ui-text-terti
 var ORANGE4 = "var(--ui-orange, var(--ui-accent))";
 var GREEN3 = "var(--ui-green, var(--ui-accent))";
 var RED3 = "var(--ui-red, var(--destructive, var(--ui-orange)))";
+var ORANGE_FILL = `color-mix(in oklab, ${ORANGE4} 62%, var(--background, Canvas))`;
 var ink4 = (hue) => `color-mix(in oklab, ${hue} 55%, var(--foreground))`;
 var PAGE_CSS = `
 .ux{container-type:inline-size;container-name:ux}
@@ -21510,24 +21515,28 @@ var PAGE_CSS = `
 .ux-lvp b{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
 .ux-lvp:hover{border-color:var(--ui-accent)}
 .ux-lvp.working b{color:${ink4("var(--ui-accent)")}}
-.ux-lvp.warn{border-color:color-mix(in oklab, ${ORANGE4} 60%, ${EDGE});background:color-mix(in oklab, ${ORANGE4} 9%, ${CARD})}
-.ux-lvp.warn b{color:${ink4(ORANGE4)}}
+.ux-lvp.warn{border-color:${ORANGE_FILL};background:${ORANGE_FILL};color:var(--foreground)}
+.ux-lvp.warn b{color:inherit}
+.ux-lvp.warn:hover{border-color:var(--foreground)}
 .ux-pulse{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:var(--ui-accent);animation:ux-pulse 2s ease-out infinite}
 .ux-pulse.off{animation:none;background:${T32}}
 @keyframes ux-pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab, var(--ui-accent) 55%, transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
 .ux-sp{flex:1 1 auto;min-width:0}
-/* the game badge: three segments of the same structure (icon + value over its caption), centred on one axis, 40 px */
-.ux-game{display:inline-flex;align-items:stretch;flex:0 0 auto;box-sizing:border-box;height:32px;padding:0;border:1px solid color-mix(in oklab, ${ORANGE4} 35%, ${EDGE});border-radius:12px;overflow:hidden;background:linear-gradient(180deg, color-mix(in oklab, ${ORANGE4} 9%, ${CARD}), ${CARD});color:var(--foreground);font:inherit;cursor:pointer;text-align:left}
-.ux-game:hover{border-color:${ORANGE4}}
+/* the game badge, discreet (the decisions come first; orange is the colour of « waits for you »): a neutral border and no tint. Under 1500 px one compact segment
+   (trophy + « lvl 2 · 12/35 »); from 1500 px three segments of the same structure (icon + value over its caption), centred on one axis, 32 px */
+.ux-game{display:inline-flex;align-items:stretch;flex:0 0 auto;box-sizing:border-box;height:32px;padding:0;border:1px solid ${EDGE};border-radius:12px;overflow:hidden;background:${CARD};color:var(--foreground);font:inherit;cursor:pointer;text-align:left}
+.ux-game:hover{border-color:${T22}}
 .ux-gs{display:inline-flex;align-items:center;gap:8px;padding:0 12px;white-space:nowrap;min-height:0}
-.ux-gs + .ux-gs{border-left:1px solid color-mix(in oklab, ${ORANGE4} 22%, ${EDGE})}
+.ux-gs.wide{display:none}
+.ux-gs.wide + .ux-gs.wide{border-left:1px solid ${EDGE}}
+.ux-gs.cmp b{font-size:12.5px;line-height:14px;font-weight:600}
 .ux-g2{display:flex;flex-direction:column;justify-content:center;gap:1px}
 .ux-g2 b{font-size:12.5px;line-height:14px;font-weight:700}
 .ux-g2 b .of{font-weight:500;color:${T32}}
 .ux-g2 small{font-size:11px;line-height:12px;color:${T32}}
 .ux-g2b{display:flex;align-items:center;gap:8px;line-height:12px}
 .ux-mbar{display:block;flex:0 0 auto;width:56px;height:4px;border-radius:2px;background:${SUNKEN};overflow:hidden}
-.ux-mbar i{display:block;height:100%;background:linear-gradient(90deg, ${ORANGE4}, color-mix(in oklab, ${ORANGE4} 60%, ${RED3}))}
+.ux-mbar i{display:block;height:100%;background:${T22}}
 .ux-acts{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 .ux-acts .sep{width:1px;height:24px;background:${EDGE};margin:0 4px}
 .ux-acts .only-n{display:none}
@@ -21553,10 +21562,14 @@ var PAGE_CSS = `
 .ux-stage .oc-box{flex:1 1 auto;border:0;border-radius:0;padding:8px 0 4px}
 .ux-stage .oc-box.oc-listing{padding:8px 12px}
 .ux-stage .oc-rp-tag{z-index:3}
-.ux-dock{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;padding:8px 12px;border-top:1px solid ${EDGE};background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
-/* a small basis, so the selected-agent bar wraps under the chips of a 390 px stage instead of squeezing their names to 0 px */
-.ux-dk-l{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1 1 240px;min-width:0}
-.ux-pj{display:inline-flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;height:32px;padding:0 12px 0 8px;border-radius:8px;border:1px solid ${EDGE};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .12s,background-color .12s,box-shadow .12s}
+/* the dock is ONE row of a fixed height (a 32 px button + 2 x 8 px of padding, the rule is an inset shadow), whatever is selected: clicking an agent never moves the room above it.
+   The projects take what the selection leaves and scroll (ProjectDock first drops the done/total counts: data-compact, then fades the end: data-over) */
+.ux-dock{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;height:48px;padding:8px 12px;box-shadow:inset 0 1px 0 ${EDGE};background:color-mix(in oklab, var(--foreground) 3%, ${CARD})}
+.ux-dk-l{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;flex:1 1 0;min-width:0;overflow-x:auto;overflow-y:hidden;padding:4px;margin:-4px;scrollbar-width:none;overscroll-behavior-x:contain}
+.ux-dk-l::-webkit-scrollbar{display:none}
+.ux-dk-l[data-over]{-webkit-mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent)}
+.ux-dk-l[data-compact] .ux-pj .n{display:none}
+.ux-pj{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;min-width:0;height:32px;padding:0 12px 0 8px;border-radius:8px;border:1px solid ${EDGE};background:${CARD};color:var(--foreground);font:inherit;font-size:12.5px;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .12s,background-color .12s,box-shadow .12s}
 .ux-pj b{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .ux-pj:hover{border-color:var(--pc)}
 .ux-pj[aria-pressed="true"]{border-color:var(--pc);background:color-mix(in oklab, var(--pc) 14%, ${CARD});box-shadow:inset 3px 0 0 var(--pc)}
@@ -21567,9 +21580,8 @@ var PAGE_CSS = `
 .ux-pj .wb{display:inline-flex;align-items:center;gap:4px;color:${ink4(ORANGE4)};font-weight:700;font-size:12px}
 .ux-pj.all{--pc:var(--ui-accent)}
 .ux-pj.all .ux-i{color:${T22}}
-.ux-sel{display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0;padding-left:8px;border-left:1px solid ${EDGE}}
+.ux-sel{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;flex:0 0 auto;min-width:0;padding-left:8px;border-left:1px solid ${EDGE}}
 .ux-sel>b{font-size:12.5px;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ux-sel .hint{font-size:12px;color:${T32};white-space:nowrap}
 .ux-sel .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
 /* ---------- the panel: four tabs (WAI-ARIA tab list), one scrolling body ---------- */
 .ux-panel{container:uxp / inline-size;display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
@@ -21654,8 +21666,6 @@ var PAGE_CSS = `
 .ux-dc-o .ux-b.cx .short{display:none}
 .ux-dc-o .ux-b.sm:not(.ico){padding:0 8px}
 .ux-ch-extra{display:flex;flex-wrap:wrap;gap:8px}
-.ux-slot:empty{display:none}
-.ux-slot{display:block}
 /* the confirmation, the draft and the 6 s window live IN the card */
 .ux-cf{display:flex;flex-direction:column;gap:8px;padding:8px 12px;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};animation:ux-in .14s ease both}
 .ux-cf p{margin:0;font-size:12.5px;overflow-wrap:anywhere}
@@ -21825,8 +21835,13 @@ var PAGE_CSS = `
 @container ux (min-width: 1500px){
   .ux-main{grid-template-columns:minmax(0,1fr) 400px}
   .ux-panel{align-self:start;max-height:100%;min-height:min(100%,320px)}
-  .ux-dk-l .ux-pj:not(.all){flex:1 1 auto;max-width:260px}   /* from their content width (a 0 basis would squeeze 8 projects to a ring and a cut count) */
+  .ux-dk-l .ux-pj:not(.all){flex:1 0 auto;max-width:260px}   /* from their content width, never shrunk (the row scrolls instead of cutting a name) */
   .ux-dk-l .ux-pj .n{margin-left:auto}
+  .ux-gs.cmp{display:none}
+  .ux-gs.wide{display:inline-flex}
+}
+/* the actions are named from 1280 px of pane (the compact badge pays for it); under that they are icons, their words stay in aria-label and title */
+@container ux (min-width: 1280px){
   .ux-acts .ux-b .lb{display:inline}
   .ux-acts .ux-b:not(.ico){width:auto;padding:0 12px}
 }
@@ -21842,11 +21857,9 @@ var PAGE_CSS = `
   .ux-gs{padding:0 8px}
   .ux-kpis-wide{display:none}
 }
-@container ux (max-width: 1180px){ .ux-sel .hint{display:none} .ux-pj.all b{display:none} }
-/* with the host sidebar open (1024 / 1280 px windows) the header has no room for everything: the streak leaves it first, so the actions
-   and the gear stay whole (it stays in the badge's name and in the trophies window) */
-@container ux (max-width: 1100px){ .ux-game .ux-gs[data-streak]{display:none} }
-@container ux (max-width: 980px){ .ux-gs.lvl .ux-g2{display:none} .ux-lvp.working .w{display:none} .ux-lvp.working{padding:0 8px;gap:4px} .ux-top{gap:8px} .ux-acts{gap:4px} .ux-acts .sep{margin:0} }
+@container ux (max-width: 1180px){ .ux-pj.all b{display:none} }
+/* a pane under 980 px (a 1024 window with the host sidebar open): tighter gaps. The word of the « working » pill stays: the badge is compact and has no caption to give up first */
+@container ux (max-width: 980px){ .ux-top{gap:8px} .ux-acts{gap:4px} .ux-acts .sep{margin:0} }
 /* ---------- a narrow pane (<= 700 px): one view at a time, the bar at the bottom ---------- */
 @container ux (max-width: 700px){
   .ux-top{gap:8px;min-height:40px}
@@ -21856,26 +21869,27 @@ var PAGE_CSS = `
   .ux-live .ux-lvp:not(.dec){display:none}
   .ux-game{height:32px}
   .ux-game .ux-gs:not(:first-child){display:none}
-  .ux-game .ux-g2{display:none}
+  .ux-game .ux-g2,.ux-game .ux-gs.cmp b{display:none}
   .ux-acts .ux-b:not(.keep){display:none}
   .ux-acts .sep{display:none}
   .ux-acts .only-n{display:inline-flex}
   .ux-main{grid-template-columns:minmax(0,1fr)}
   .ux-stage .oc-box{padding:0}
-  .ux-dock{flex-wrap:wrap;padding:8px}
-  /* in the replay of a 380 px pane the list of desks keeps its height: only what the past needs stays above it (no note, banner sentence, window ends nor empty selection bar) */
+  /* in the replay of a 380 px pane the list of desks keeps its height: only what the past needs stays above it (no note, banner sentence nor window ends) */
   .ux-stage[data-replaying] .oc-list>p{display:none}
-  .ux-stage[data-replaying] .ux-sel:has(.hint){display:none}
   .ux-stage[data-replaying] .oc-rp-ends{display:none}
   .oc-rp-banner .oc-rp-note{display:none}
-  /* the projects are ONE scrollable row, so the list of desks keeps its height (4 wrapped rows would leave it 25 px); a fade says it goes on */
-  .ux-dk-l{flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:2px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,var(--foreground) calc(100% - 24px),transparent)}
-  .ux-dk-l::-webkit-scrollbar{display:none}
-  .ux-dk-l .ux-pj{flex:0 0 auto}
+  /* two rows of 28 px, always: the projects (one scrollable row, so the list of desks keeps its height), then the selection and the legend.
+     The selected agent keeps its row: the state word leaves first, then the legend's word, then the name is cut */
+  .ux-dock{flex-wrap:wrap;align-content:flex-start;height:80px;padding:8px}
+  .ux-dk-l{flex:1 1 calc(100% + 8px);height:36px}
   .ux-pj{height:28px;font-size:12px}
   .ux-pj.all b{display:none}
-  .ux-sel{flex:1 1 100%;flex-wrap:wrap;min-width:0;padding:0;border-left:0}
-  .ux-sel .hint{display:inline}
+  .ux-sel{flex:1 1 100%;height:28px;min-width:0;padding:0;border-left:0}
+  .ux-sel>b{flex:1 1 0;min-width:4ch;max-width:none}
+  .ux-sel .ux-st .w{display:none}
+  .ux-sel:has(.oc-btn-open) .oc-legend-btn span{display:none}
+  .ux-sel:has(.oc-btn-open) .oc-legend-btn{width:28px;padding:0}
   .ux-tabs{display:none}
   /* the page already frames the panel: a second frame (border and inner margin) would cost a card; the cards keep their own edge */
   .ux-panel{border:0;border-radius:0;background:transparent}
@@ -21933,6 +21947,9 @@ var PAGE_CSS = `
 .ux[data-motion="reduced"] .ux-cd .bar{transform:scaleX(.5)}
 `;
 
+// src/ui/ProjectDock.jsx
+import { useLayoutEffect as useLayoutEffect9, useRef as useRef23 } from "react";
+
 // src/ui/Legend.jsx
 import { useEffect as useEffect19, useId as useId18, useRef as useRef22, useState as useState20 } from "react";
 import { jsx as jsx31, jsxs as jsxs27 } from "react/jsx-runtime";
@@ -21985,7 +22002,10 @@ function Legend() {
     };
   }, [open]);
   return /* @__PURE__ */ jsxs27("span", { className: "oc-legend", ref: wrap, "data-legend": true, children: [
-    /* @__PURE__ */ jsx31("button", { type: "button", className: "oc-legend-btn", "aria-expanded": open, "aria-controls": id, "aria-label": t("legend.button"), onClick: () => setOpen((v) => !v), children: "?" }),
+    /* @__PURE__ */ jsxs27("button", { type: "button", className: "oc-legend-btn", "aria-expanded": open, "aria-controls": id, onClick: () => setOpen((v) => !v), children: [
+      /* @__PURE__ */ jsx31(Icon, { name: "info", size: 14 }),
+      /* @__PURE__ */ jsx31("span", { children: t("legend.button") })
+    ] }),
     open ? /* @__PURE__ */ jsxs27("div", { id, className: "oc-legend-pop", role: "group", "aria-label": t("legend.title"), children: [
       /* @__PURE__ */ jsx31("b", { children: t("legend.title") }),
       /* @__PURE__ */ jsxs27("ul", { children: [
@@ -22026,9 +22046,27 @@ function ProjectButton({ b, pressed, onPick, t }) {
     ] }) : null
   ] });
 }
-function ProjectDock({ boards, project: project2, onProject, picked, sceneAgent, replayOn, canOpen, why, onOpen, onDetails, narrow, announce, t }) {
+function ProjectDock({ boards, project: project2, onProject, picked, sceneAgent, replayOn, canOpen, why, onOpen, onDetails, narrow, showSel = true, announce, t }) {
+  const row = useRef23(null);
+  const sig = boards.map((b) => `${b.slug}:${b.done}/${b.total}:${b.blocked.length}`).join("|");
+  useLayoutEffect9(() => {
+    const el = row.current;
+    if (!el) return void 0;
+    const fit = () => {
+      el.removeAttribute("data-compact");
+      el.removeAttribute("data-over");
+      if (el.scrollWidth <= el.clientWidth + 1) return;
+      el.setAttribute("data-compact", "");
+      if (el.scrollWidth > el.clientWidth + 1) el.setAttribute("data-over", "");
+    };
+    fit();
+    if (typeof ResizeObserver !== "function") return void 0;
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [sig, t.lang]);
   return /* @__PURE__ */ jsxs28("div", { className: "ux-dock", "data-dock": true, children: [
-    boards.length ? /* @__PURE__ */ jsxs28("div", { className: "ux-dk-l", role: "group", "aria-label": t("ux.dock.label"), children: [
+    boards.length ? /* @__PURE__ */ jsxs28("div", { className: "ux-dk-l", ref: row, role: "group", "aria-label": t("ux.dock.label"), children: [
       /* @__PURE__ */ jsxs28("button", { type: "button", className: "ux-pj all", "aria-pressed": !project2, "aria-label": t("ux.dock.all"), onClick: () => onProject(null), children: [
         /* @__PURE__ */ jsx32(Icon, { name: "filter", size: 14 }),
         /* @__PURE__ */ jsx32("b", { children: t("ux.dock.all") })
@@ -22036,16 +22074,16 @@ function ProjectDock({ boards, project: project2, onProject, picked, sceneAgent,
       boards.map((b) => /* @__PURE__ */ jsx32(ProjectButton, { b, pressed: project2 === b.slug, onPick: onProject, t }, b.slug))
     ] }) : /* @__PURE__ */ jsx32("span", { className: "ux-sp" }),
     /* @__PURE__ */ jsxs28("div", { className: "ux-sel", children: [
-      picked ? /* @__PURE__ */ jsxs28(Fragment16, { children: [
+      picked && showSel ? /* @__PURE__ */ jsxs28(Fragment16, { children: [
         sceneAgent ? /* @__PURE__ */ jsx32(Portrait, { agent: sceneAgent }) : null,
         /* @__PURE__ */ jsx32("b", { title: picked.label, children: picked.label }),
         /* @__PURE__ */ jsxs28("span", { className: `ux-st ux-st-${picked.state}`, children: [
           /* @__PURE__ */ jsx32("span", { className: "ux-sdot", "aria-hidden": "true" }),
-          t(`state.${picked.state}`)
+          /* @__PURE__ */ jsx32("span", { className: "w", children: t(`state.${picked.state}`) })
         ] }),
         narrow ? /* @__PURE__ */ jsx32("button", { type: "button", className: "ux-b sm", onClick: onDetails, children: t("ux.dock.details") }) : null,
-        /* @__PURE__ */ jsx32(WhyButton, { className: "ux-b sm pri oc-btn-open", reason: canOpen ? "" : why, title: why, "data-selected-open": true, onGo: onOpen, children: t("openBtn") })
-      ] }) : /* @__PURE__ */ jsx32("span", { className: "hint", children: t("ux.dock.hint") }),
+        /* @__PURE__ */ jsx32(WhyButton, { className: "ux-b sm pri oc-btn-open", reason: canOpen ? "" : why, title: why, "data-selected-open": true, onGo: onOpen, children: t("insp.open") })
+      ] }) : null,
       /* @__PURE__ */ jsx32("span", { className: "oc-announce", "data-announce": true, "aria-live": "polite", children: announce }),
       /* @__PURE__ */ jsx32(Legend, {})
     ] })
@@ -22354,8 +22392,6 @@ var REPLAY_CSS = `
 .oc-rp-exit:focus-visible,.oc-rp-win button:focus-visible,.oc-rp-step:focus-visible,.oc-fact:focus-visible,.oc-nt-tile:focus-visible,.oc-rp-sel:focus-visible{${RING_FOCUS}}
 /* the scene of a replay wears the replay's colour on its own frame, with the moment in its corner: a past office cannot be
    taken for the present even when the banner is out of sight (the eye is on the scene) */
-.oc-col[data-replaying]{position:relative}
-.oc-col[data-replaying] .oc-box{border:2px solid var(--ui-accent);box-shadow:inset 0 0 0 3px color-mix(in oklab, var(--ui-accent) 22%, transparent)}
 /* the list view (narrow pane) sits right under the banner: its frame is enough, the moment is not said twice in a short column */
 .oc-rp-tag:has(+ .oc-box.oc-listing){display:none}
 .oc-rp-tag{position:absolute;top:8px;left:8px;z-index:4;display:inline-flex;align-items:center;gap:6px;max-width:calc(100% - 16px);box-sizing:border-box;padding:3px 9px;border:1px solid var(--ui-accent);border-radius:999px;background:${CARD};color:var(--foreground);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;box-shadow:0 1px 3px color-mix(in oklab, var(--foreground) 18%, transparent)}
@@ -22461,7 +22497,7 @@ var REPLAY_CSS = `
 `;
 
 // src/ui/Collection.jsx
-import { useMemo as useMemo14, useRef as useRef23, useState as useState21 } from "react";
+import { useMemo as useMemo14, useRef as useRef24, useState as useState21 } from "react";
 
 // src/core/vitrine.js
 var RECENT_MS = 2 * 864e5;
@@ -22678,8 +22714,8 @@ function Vitrine({ open, onClose, game, office, readMs, nowMs, onPostcard, t }) 
   const view = useMemo14(() => vitrineView(game, nowMs), [game, nowMs]);
   const [picked, setPicked] = useState21(null);
   const [rov, setRov] = useState21(0);
-  const refs = useRef23([]);
-  const detailRef = useRef23(null);
+  const refs = useRef24([]);
+  const detailRef = useRef24(null);
   const byId = useMemo14(() => new Map(view.shelves.flatMap((f) => f.items).map((a) => [a.id, a])), [view]);
   const selId = picked && byId.has(picked) ? picked : view.first;
   const sel = byId.get(selId) ?? null;
@@ -23167,7 +23203,7 @@ var percentLabel = (p) => p == null || !Number.isFinite(p) ? null : String(Math.
 
 // src/data/usage.js
 import { useQuery as useQuery8 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect20, useRef as useRef24 } from "react";
+import { useEffect as useEffect20, useRef as useRef25 } from "react";
 var USAGE_POLL_MS = 6e4;
 var QUOTA_POLL_MS = 12e4;
 var QUOTA_RETRY_MS = 8e3;
@@ -23257,7 +23293,7 @@ function useQuota({ enabled }) {
   return query;
 }
 function useQuotaRetry(query, hasWindows) {
-  const tried = useRef24(false);
+  const tried = useRef25(false);
   const at = query.dataUpdatedAt;
   useEffect20(() => {
     if (!at || hasWindows || tried.current) return void 0;
@@ -23751,11 +23787,11 @@ var USAGE_CSS = `
 `;
 
 // src/ui/SeatingDialog.jsx
-import { useEffect as useEffect22, useId as useId20, useRef as useRef25, useState as useState23 } from "react";
+import { useEffect as useEffect22, useId as useId20, useRef as useRef26, useState as useState23 } from "react";
 import { Fragment as Fragment21, jsx as jsx39, jsxs as jsxs35 } from "react/jsx-runtime";
 function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
   const t = useT();
-  const areaRef = useRef25(null);
+  const areaRef = useRef26(null);
   const id = useId20();
   const query = useLlm();
   const { call } = useLlmActions();
@@ -23885,11 +23921,11 @@ function SeatingDialog({ open, onClose, weights, choice, onChoice }) {
 
 // src/ui/SettingsGear.jsx
 import * as sdk4 from "@hermes/plugin-sdk";
-import { useCallback as useCallback8, useRef as useRef30, useState as useState28 } from "react";
+import { useCallback as useCallback8, useRef as useRef31, useState as useState28 } from "react";
 
 // src/ui/SettingsDialog.jsx
 import * as sdk3 from "@hermes/plugin-sdk";
-import { useEffect as useEffect27, useId as useId24, useRef as useRef29 } from "react";
+import { useEffect as useEffect27, useId as useId24, useRef as useRef30 } from "react";
 
 // src/ui/SettingsForm.jsx
 import { useValue as useValue3 } from "@hermes/plugin-sdk";
@@ -23923,7 +23959,7 @@ function ringDash(pct, r) {
 }
 
 // src/ui/SettingsFormLlm.jsx
-import { useEffect as useEffect24, useId as useId22, useMemo as useMemo16, useRef as useRef27, useState as useState25 } from "react";
+import { useEffect as useEffect24, useId as useId22, useMemo as useMemo16, useRef as useRef28, useState as useState25 } from "react";
 
 // src/core/llmSettings.js
 var GRANT_COMMAND = "hermes plugins enable hermes-officecraft";
@@ -24025,7 +24061,7 @@ function pickFromValue(value, choices) {
 }
 
 // src/ui/SettingsKit.jsx
-import { useEffect as useEffect23, useId as useId21, useLayoutEffect as useLayoutEffect9, useRef as useRef26, useState as useState24 } from "react";
+import { useEffect as useEffect23, useId as useId21, useLayoutEffect as useLayoutEffect10, useRef as useRef27, useState as useState24 } from "react";
 import { jsx as jsx40, jsxs as jsxs36 } from "react/jsx-runtime";
 var ICONS2 = {
   gear: "M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z M12 2.5l1.4 2.4 2.7-.6.9 2.6 2.6.9-.6 2.7L21.5 12l-2.5 1.5.6 2.7-2.6.9-.9 2.6-2.7-.6L12 21.5l-1.4-2.4-2.7.6-.9-2.6-2.6-.9.6-2.7L2.5 12 5 10.5l-.6-2.7 2.6-.9.9-2.6 2.7.6Z",
@@ -24061,11 +24097,11 @@ function HelpTip({ name, children }) {
   const t = useT();
   const [open, setOpen] = useState24(false);
   const id = useId21();
-  const wrap = useRef26(null);
-  const btn = useRef26(null);
-  const note = useRef26(null);
+  const wrap = useRef27(null);
+  const btn = useRef27(null);
+  const note = useRef27(null);
   const [up, setUp] = useState24(false);
-  useLayoutEffect9(() => {
+  useLayoutEffect10(() => {
     if (!open) {
       setUp(false);
       return;
@@ -24244,7 +24280,7 @@ function SettingsFormLlm({ actions = null }) {
   const state2 = query.data ?? null;
   const modelOpts = useModelOptions(state2?.override === "granted");
   const list = useMemo16(() => modelChoices(modelOpts), [modelOpts]);
-  const errorRef = useRef27(null);
+  const errorRef = useRef28(null);
   const id = useId22();
   useEffect24(() => {
     if (!state2) return;
@@ -24488,7 +24524,7 @@ function SettingsFormLlm({ actions = null }) {
 
 // src/ui/SettingsFormNotify.jsx
 import { host as host3 } from "@hermes/plugin-sdk";
-import { useEffect as useEffect25, useRef as useRef28, useState as useState26 } from "react";
+import { useEffect as useEffect25, useRef as useRef29, useState as useState26 } from "react";
 import { Fragment as Fragment23, jsx as jsx42, jsxs as jsxs38 } from "react/jsx-runtime";
 var MESSAGING_PATH = "/messaging";
 var selectStyle = {
@@ -24543,7 +24579,7 @@ function SettingsFormNotify() {
   useEffect25(() => {
     if (query.data) setState(query.data);
   }, [query.data]);
-  const errorRef = useRef28(null);
+  const errorRef = useRef29(null);
   useEffect25(() => {
     if (error) errorRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
@@ -24849,7 +24885,6 @@ ${ringed(".oc-sx-btn:focus-visible")}
 .oc-sx-link{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:4px 0;text-align:left;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;line-height:16px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 ${ringed(".oc-sx-link:focus-visible")}
 
-.oc-sx-budget{position:relative;display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;align-items:center;margin:8px 0;padding:12px;border:1px solid color-mix(in oklab, ${VIOLET4} 30%, ${EDGE});border-radius:12px;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET4} 12%, ${CARD}), ${CARD})}
 .oc-sx-gauge{display:block;width:88px;height:88px}
 .oc-sx-gauge circle{fill:none;stroke-width:9}
 .oc-sx-gauge .bg{stroke:color-mix(in oklab, var(--foreground) 14%, ${CARD})}
@@ -24857,9 +24892,6 @@ ${ringed(".oc-sx-link:focus-visible")}
 .oc-sx-gauge[data-hit="true"] .fg{stroke:${ORANGE8}}
 .oc-sx-gauge text{fill:var(--foreground);font:700 14px ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
 .oc-sx-gauge .u{fill:${TEXT3};font:500 10px ui-monospace,SFMono-Regular,Menlo,monospace}
-.oc-sx-bud{min-width:0}
-.oc-sx-bud .oc-sx-name{font-size:14px}
-.oc-sx-bud small{display:block;color:${TEXT3};font-size:12px}
 .oc-sx-cap{margin-top:8px}
 .oc-sx-cap summary{display:inline-flex;align-items:center;gap:4px;min-height:24px;color:var(--ui-accent);font-size:12.5px;cursor:pointer;list-style:none}
 .oc-sx-cap summary::-webkit-details-marker{display:none}
@@ -24902,16 +24934,6 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 .oc-sx-row:has(+ .oc-nt-sub){border-bottom:0}
 .oc-nt-type .oc-sx-warn{flex:1 0 100%;margin:0}
 .oc-nt-cap{margin:12px 0 0;color:${TEXT3};font-size:12px;line-height:16px}
-.oc-nt-test{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.oc-sx-feat{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 0;border-bottom:1px solid ${HAIR}}
-.oc-sx-fi{grid-row:1 / 3;display:grid;place-items:center;width:36px;height:36px;border-radius:9px;color:${VIOLET4};background:color-mix(in oklab, ${VIOLET4} 13%, ${CARD});border:1px solid color-mix(in oklab, ${VIOLET4} 30%, ${EDGE})}
-.oc-sx-feat[data-state="off"] .oc-sx-fi{color:${TEXT3};background:color-mix(in oklab, var(--foreground) 6%, ${CARD});border-color:${EDGE}}
-.oc-sx-feat .oc-sx-name{grid-column:2;flex-wrap:wrap}
-.oc-sx-feat small{grid-column:2;color:${TEXT3};font-size:12px}
-.oc-sx-feat .oc-sx-ctl{grid-row:1 / 3;grid-column:3}
-.oc-sx-fx{grid-column:2 / -1;display:flex;flex-direction:column;align-items:flex-start}
-.oc-sx-fx>*{margin-top:8px}
-.oc-sx-fx>*:empty{margin:0}
 /* the gauge and the two models on top, the ten functions in two groups of rows, each row = name + state + « Sends », lane chip, action, « ? » + switch */
 /* the window keeps ONE size whichever tab is open (a window that grows when a tab opens moves the tab list from under the pointer): the size of the tallest tab that fits the screen, the rest scrolls inside */
 .oc-lm-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px 16px;align-items:start;border:1px solid ${EDGE};border-radius:12px;padding:8px 12px;margin:4px 0 0;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET4} 7%, ${CARD}), ${CARD} 60%)}
@@ -25245,7 +25267,7 @@ function SettingsForm({ llm = null }) {
 import { jsx as jsx44, jsxs as jsxs40 } from "react/jsx-runtime";
 function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
   const t = useT();
-  const ref = useRef29(null);
+  const ref = useRef30(null);
   const id = useId24();
   const motion = sdk3.useValue($motionPref);
   useEffect27(() => {
@@ -25328,7 +25350,7 @@ var GEAR = gearPath();
 function SettingsGear({ sheet, llm = null }) {
   const t = useT();
   const [open, setOpen] = useState28(false);
-  const btn = useRef30(null);
+  const btn = useRef31(null);
   const close = useCallback8(() => {
     setOpen(false);
     setTimeout(() => btn.current?.focus(), 0);
@@ -25368,9 +25390,9 @@ function EmptyOffice({ onRecruit, t }) {
 }
 
 // src/ui/usePartialStreaks.js
-import { useRef as useRef31 } from "react";
+import { useRef as useRef32 } from "react";
 function usePartialStreaks(data, dataUpdatedAt) {
-  const ref = useRef31({ at: 0, streaks: /* @__PURE__ */ new Map() });
+  const ref = useRef32({ at: 0, streaks: /* @__PURE__ */ new Map() });
   if (data && dataUpdatedAt && dataUpdatedAt !== ref.current.at) ref.current = { at: dataUpdatedAt, streaks: nextStreaks(ref.current.streaks, toPartial(data.partial) ?? []) };
   return ref.current.streaks;
 }
@@ -25422,12 +25444,8 @@ var PANEL_CSS = `
 .oc-hint{margin:0;font-size:12px;color:${SOFT5}}
 .oc-dashed{padding:8px 10px;border:1px dashed ${EDGE};border-radius:8px}
 .oc-faint{font-size:11px;color:${SOFT5}}
-.oc-age{display:block}
 .oc-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-.oc-clip{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.oc-clip2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;font-size:12px;font-weight:600}
 /* five tiles on a 6-column grid, 3 then 2 (no empty cell; the wider second row holds « Cartes ouvertes » / « Tarjetas abiertas ») */
-.oc-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
 .oc-stat{grid-column:span 2;display:flex;flex-direction:column;gap:1px;padding:6px 8px;border:1px solid ${EDGE};border-radius:8px;min-width:0}
 .oc-stat:nth-child(n+4){grid-column:span 3}
 .oc-stat b{font-size:1.05rem;font-variant-numeric:tabular-nums}
@@ -25436,66 +25454,22 @@ var PANEL_CSS = `
 .oc-stat.hot{border-color:color-mix(in oklab, var(--ui-accent) 60%, ${EDGE})}
 .oc-stat.warn{border-color:${ORANGE9}}
 .oc-stat.warn b{color:${ink6(ORANGE9)}}
-.oc-ihead{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .oc-portrait{flex:0 0 auto;width:56px;height:60px;image-rendering:pixelated;image-rendering:crisp-edges;border-radius:8px;border:1px solid ${EDGE};background:color-mix(in oklab, var(--ui-accent) 8%, transparent)}
-.oc-iname{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
-.oc-iname b{font-size:14px;overflow-wrap:anywhere}
 .oc-tag{display:inline-block;padding:0 7px;border:1px solid ${EDGE};border-radius:999px;font-size:11px;font-weight:600;color:var(--foreground)}
 .oc-t-working{border-color:var(--ui-accent);color:${ink6("var(--ui-accent)")}}
 .oc-t-waiting,.oc-warnt{border-color:${ORANGE9};color:${ink6(ORANGE9)}}
 .oc-t-active{border-color:color-mix(in oklab, ${GREEN8} 60%, ${EDGE})}
 .oc-t-stale{border-style:dashed;color:${SOFT5}}
-.oc-kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;margin:0 0 10px;font-size:12px}
-.oc-kv dt{color:${SOFT5};white-space:nowrap}
-.oc-kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
-.oc-chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.oc-skill{padding:0 7px;border:1px solid ${EDGE};border-radius:999px;font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.oc-skill small{color:${SOFT5};font-size:11px}
-.oc-modelline{color:${ink6("var(--ui-accent)")}}
 .oc-pin{display:inline-block;flex:0 0 auto;color:${ink6("var(--ui-accent)")};vertical-align:-1px}
-.oc-pinline{display:inline-flex;align-items:center;gap:4px;margin-top:3px;font-size:11px;color:${ink6("var(--ui-accent)")};max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oc-btn{display:inline-block;padding:5px 12px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid var(--ui-accent);border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-btn[aria-disabled="true"]{opacity:.5;cursor:default}
-.oc-cards{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
-.oc-cards li{display:flex;flex-direction:column;gap:4px;padding:7px 9px;border:1px solid ${EDGE};border-radius:8px;min-width:0}
-.oc-meta{display:flex;flex-wrap:wrap;gap:5px 8px;align-items:center;font-size:11px;color:${SOFT5}}
-.oc-meta .oc-tag{font-size:11px}
 .oc-psec p.oc-faint{margin:6px 0 0}
-.oc-chain{display:flex;flex-direction:column;gap:5px;padding:7px 0;border-top:1px solid ${EDGE}}
-.oc-chain:first-of-type{border-top:0;padding-top:0}
-.oc-top2{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:12px}
-.oc-top2 b{text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.oc-queue{display:flex;flex-wrap:wrap;gap:3px}
-.oc-pill{position:relative;display:block;width:12px;height:12px;border-radius:3px;box-sizing:border-box;background:var(--ui-text-quaternary);border:1px solid transparent}
-.oc-p-done{background:${GREEN8}}
-.oc-p-running{background:var(--ui-accent);box-shadow:0 0 0 1px color-mix(in oklab, var(--ui-accent) 40%, transparent)}
-.oc-p-review{background:color-mix(in oklab, var(--ui-accent) 45%, transparent);border-color:var(--ui-accent)}
-.oc-p-blocked{background:${ORANGE9}}
-.oc-p-ready,.oc-p-scheduled{background:var(--ui-text-tertiary)}
-.oc-p-todo,.oc-p-triage{background:transparent;border-color:var(--ui-text-tertiary)}
-.oc-pill[data-pin]::after{content:"";position:absolute;right:-3px;top:-3px;width:5px;height:5px;background:var(--foreground);border:1px solid ${CARD}}
-.oc-pinrow{display:flex;gap:8px;align-items:baseline;font-size:11px;min-width:0}
-.oc-pinref{flex:0 1 6.5rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.oc-events{display:flex;flex-direction:column;gap:5px;margin:0;padding:0;list-style:none;font-size:12px}
 /* 6.75rem holds « il y a 26 minutes » / « hace 26 minutos » (5.5rem would clip them) */
-.oc-events li{display:grid;grid-template-columns:6.75rem minmax(0,1fr);gap:8px;align-items:baseline}
-.oc-events time{font-size:11px;color:${SOFT5};white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.oc-events li > span{min-width:0;overflow-wrap:anywhere}
-.oc-main{position:relative;display:flex;flex:1 1 auto;min-width:0;min-height:0;gap:12px}
-.oc-col{display:flex;flex-direction:column;gap:16px;flex:1 1 auto;min-width:0;min-height:0}
-.oc-hright{margin-left:auto;display:inline-flex;align-items:center;gap:8px;align-self:center}
 .oc-gear{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-gear:hover,.oc-gear[aria-expanded="true"]{border-color:var(--ui-accent)}
-.oc-set-link:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
-.oc-set-pop{position:absolute;top:calc(100% + 8px);right:0;z-index:50;box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:min(calc(100vh - 150px),640px);display:flex;flex-direction:column;overflow:hidden;padding:12px 14px;border-radius:12px;background:${CARD};border:1px solid var(--ui-accent);box-shadow:0 8px 28px color-mix(in oklab, var(--foreground) 28%, transparent);color:var(--foreground)}
-.oc-set-body{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
-.oc-set-pop.oc-sheet{top:auto;right:0;left:0;bottom:0;width:auto;max-height:80%;border-radius:12px 12px 0 0}
-.oc-set-link{flex:0 0 auto;display:block;box-sizing:border-box;width:100%;margin-top:10px;padding:10px 0 4px;min-height:28px;font:inherit;font-size:12px;color:var(--ui-accent);background:none;border:0;border-top:1px solid ${EDGE};cursor:pointer;text-decoration:underline;text-align:left}
-.oc-toggle{margin-left:auto;min-height:24px;padding:3px 10px;font:inherit;font-size:12px;font-weight:500;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
-.oc-toggle[aria-expanded="true"]{border-color:var(--ui-accent)}
-/* legend of the halos, a « ? » at the end of the selection bar, its card opening upwards over the scene edge */
+/* legend of the halos, a named button at the end of the dock, its card opening upwards over the scene edge */
 .oc-legend{position:relative;flex:0 0 auto;margin-left:auto}
-.oc-legend-btn{width:24px;height:24px;padding:0;font:inherit;font-size:12px;font-weight:600;line-height:1;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
+.oc-legend-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:28px;padding:0 8px;font:inherit;font-size:12px;font-weight:500;line-height:1;white-space:nowrap;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:${BTN_RADIUS};cursor:pointer}
 .oc-legend-btn:hover,.oc-legend-btn[aria-expanded="true"]{border-color:var(--ui-accent)}
 .oc-legend-pop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:40;box-sizing:border-box;width:max-content;max-width:min(340px,calc(100vw - 24px));padding:8px 10px;border-radius:10px;background:${CARD};border:1px solid var(--ui-accent);box-shadow:0 2px 8px color-mix(in oklab, var(--foreground) 22%, transparent);font-size:11.5px;line-height:1.35;color:var(--foreground)}
 .oc-legend-pop b{display:block;margin-bottom:5px;font-size:11px;font-weight:600;color:${SOFT5}}
@@ -25511,130 +25485,33 @@ var PANEL_CSS = `
 .oc-announce{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* the decision box. Risk = text + colour (theme variables); the bar of the order in flight floats over the bottom of the page */
 .oc-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.oc-orders{display:flex;flex-direction:column;gap:6px;margin-top:2px}
 .oc-ord{padding:3px 8px;font-size:11.5px;line-height:1.5}
 .oc-ord[aria-disabled="true"],.oc-btn[aria-disabled="true"]{opacity:.55}
 .oc-btn.oc-primary{background:color-mix(in oklab, var(--ui-accent) 14%, ${CARD})}
-.oc-ordbox .oc-text:focus-visible{${RING_FOCUS}}
 /* 11 px like every other text; the class also reads without colour: a shape before the word (hollow circle = safe,
    half circle = reversible, solid triangle = final) and a final tag is filled, a safe one is not */
-.oc-risk{display:inline-flex;align-items:center;gap:4px;margin-left:2px;padding:0 5px;border:1px solid currentColor;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.03em;line-height:1.45;text-transform:uppercase;vertical-align:1px;white-space:nowrap}
-.oc-risk::before{content:"";flex:0 0 auto;box-sizing:border-box;width:7px;height:7px;border:1.5px solid currentColor;border-radius:50%}
-.oc-r-safe{color:${ink6(GREEN8)}}
-.oc-r-rev{color:${ink6("var(--ui-accent)")}}
-.oc-r-rev::before{background:linear-gradient(90deg, currentColor 50%, transparent 50%)}
-.oc-r-final{color:${ink6(RED7)};background:color-mix(in oklab, ${RED7} 12%, ${CARD})}
-.oc-r-final::before{width:8px;height:7px;border:0;border-radius:0;background:currentColor;clip-path:polygon(50% 0, 100% 100%, 0 100%)}
-.oc-undo .oc-risk{flex:0 0 auto;margin-left:0}
 /* the card (or approval) an order counts down / travels for keeps a mark while the bar names it */
-.oc-cards li.oc-target{border-color:var(--ui-accent);box-shadow:0 0 0 1px var(--ui-accent)}
-.oc-ordbox{display:flex;flex-direction:column;gap:6px;padding:8px 9px;border:1px solid ${EDGE};border-left:3px solid ${RED7};border-radius:8px;background:color-mix(in oklab, ${RED7} 5%, transparent)}
-.oc-ordbox p{margin:0;font-size:12px;overflow-wrap:anywhere}
-.oc-ordbox .oc-ctitle{font-size:12.5px}
-.oc-ordbox .oc-text{display:block;box-sizing:border-box;width:100%;min-height:72px;max-height:220px;padding:6px 8px;font-family:inherit;color:var(--foreground);background:${CARD};border:1px solid ${FIELD_EDGE};border-radius:${FIELD_RADIUS};resize:vertical}
 /* approvals in the decision box (an approval row = who + session, Hermes' one-line summary, age, the allowed answers with their risk) */
-.oc-cards li.oc-appr{border-left:3px solid ${ORANGE9}}
-.oc-apprhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;min-width:0}
-.oc-apprwho{font-size:12.5px}
-.oc-apprwhat{margin:0;font-size:12px;overflow-wrap:anywhere}
-.oc-cards .oc-choices{display:flex;flex-direction:column;gap:5px;margin:2px 0 0;padding:0;list-style:none}
-.oc-cards .oc-choices li{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0;border:0;border-radius:0}
-.oc-chexp{font-size:11px;overflow-wrap:anywhere}
-.oc-textmeta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline;font-size:11px}
-.oc-counter{white-space:nowrap;color:${SOFT5}}
-.oc-counter.oc-near{color:${ink6(ORANGE9)};font-weight:600}
 .oc-ordnote{margin:0;font-size:11px;color:${ink6(RED7)}}
 /* under the floating bar the refusal (« another order is waiting ») has its own background, so it never runs over the page's hint line */
 .oc-ordbar .oc-ordnote{padding:5px 12px;border:1px solid ${EDGE};border-radius:8px;background:${CARD}}
 /* while the bar floats over the foot of the panel (drawer at 1024 / 380 px), the panel can scroll its last rows above it */
 .ux-main:has(.oc-ordbar) .ux-pbody{padding-bottom:140px;scroll-padding-bottom:140px}
 .oc-ordbar{position:absolute;left:50%;bottom:12px;z-index:45;transform:translateX(-50%);box-sizing:border-box;width:min(560px,calc(100% - 24px));display:flex;flex-direction:column;gap:4px}
-.oc-undo{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;box-sizing:border-box;padding:9px 12px 12px 14px;border:1px solid var(--ui-accent);border-radius:12px;background:${CARD};color:var(--foreground);font-size:12.5px;box-shadow:0 8px 28px color-mix(in oklab, var(--foreground) 28%, transparent);overflow:hidden}
-.oc-undotx,.oc-outtx{flex:1 1 12rem;min-width:0;overflow-wrap:anywhere}
-.oc-drain{position:absolute;left:0;right:0;bottom:0;height:3px;background:color-mix(in oklab, var(--ui-accent) 18%, transparent)}
-.oc-drain i{display:block;height:100%;background:var(--ui-accent);transform-origin:left center;animation:oc-drain linear forwards}
 @keyframes oc-drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-.oc-spin{flex:0 0 auto;width:10px;height:10px;box-sizing:border-box;border:2px solid ${EDGE};border-top-color:var(--ui-accent);border-radius:50%;animation:oc-turn .8s linear infinite}
 @keyframes oc-turn{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.oc-drain{display:none}.oc-spin{animation:none;border-top-color:var(--ui-accent);border-right-color:var(--ui-accent)}}
-.oc-out-ok{border-color:${GREEN8}}
-.oc-out-ko{border-color:${RED7}}
-.oc-out-cancel{border-color:${EDGE}}
-.oc-outtag{flex:0 0 auto;padding:0 6px;border:1px solid currentColor;border-radius:5px;font-size:11px;letter-spacing:.03em;text-transform:uppercase}
 /* done / failed / cancelled also differ by shape (tick, solid triangle, hollow circle), not only by the word and the colour */
-.oc-outtag{display:inline-flex;align-items:center;gap:5px}
-.oc-outtag::before{content:"";flex:0 0 auto;box-sizing:border-box;width:7px;height:7px;border:1.5px solid currentColor;border-radius:50%}
-.oc-out-ok .oc-outtag::before{width:4px;height:8px;margin:0 1px 2px;border-width:0 2px 2px 0;border-radius:0;transform:rotate(45deg)}
-.oc-out-ko .oc-outtag::before{width:8px;height:7px;border:0;border-radius:0;background:currentColor;clip-path:polygon(50% 0, 100% 100%, 0 100%)}
-.oc-out-ok .oc-outtag{color:${ink6(GREEN8)}}
-.oc-out-ko .oc-outtag{color:${ink6(RED7)}}
-.oc-out-cancel .oc-outtag{color:${SOFT5}}
-.oc-res-done{border-color:color-mix(in oklab, ${GREEN8} 60%, ${EDGE});color:${ink6(GREEN8)}}
-.oc-res-failed,.oc-res-refused{border-color:color-mix(in oklab, ${RED7} 60%, ${EDGE});color:${ink6(RED7)}}
-.oc-ojournal li > span .oc-tag{padding:0 5px;font-size:11px}
 /* the recruitment window (native <dialog>: focus trap and Escape for free). Theme variables only. */
-.oc-recruit{margin-left:0}
-.oc-dlg{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
-.oc-dlg[open]{display:flex;flex-direction:column}
-.oc-dlg::backdrop{background:color-mix(in oklab, var(--foreground) 38%, transparent)}
-.oc-hire{display:flex;flex-direction:column;min-height:0;max-height:calc(100vh - 26px);padding:14px 16px;gap:10px;font-size:12.5px;overflow-y:auto;overscroll-behavior:contain}
-.oc-hhead{display:flex;align-items:center;gap:8px}
-.oc-hhead h2{margin:0;font-size:15px;font-weight:600}
-.oc-hbody{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;min-width:0}
-.oc-hprev{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:10px 8px;border:1px solid ${EDGE};border-radius:10px;background:color-mix(in oklab, var(--ui-accent) 6%, transparent);align-self:start}
-.oc-hprev .oc-portrait{width:84px;height:90px;image-rendering:pixelated}
-.oc-hprevname{font-size:13px;overflow-wrap:anywhere}
-.oc-hprev .oc-faint{font-size:11px;overflow-wrap:anywhere}
-.oc-hfields{display:flex;flex-direction:column;gap:9px;min-width:0}
-.oc-field{display:flex;flex-direction:column;gap:3px;min-width:0}
-.oc-field > span{font-size:11.5px;font-weight:600}
 /* no font-size of our own on fields: the host sizes them (16 px minimum in the browser, inherited in the app). A size of ours would beat
    the host on <input> but not on <textarea>/<select>, and one form would mix two field sizes */
-.oc-hire input[type=text],.oc-hire input:not([type]),.oc-hire textarea,.oc-hire select{box-sizing:border-box;width:100%;max-width:100%;padding:5px 8px;font-family:inherit;color:var(--foreground);background:${CARD};border:1px solid ${FIELD_EDGE};border-radius:${FIELD_RADIUS}}
-.oc-hire textarea{resize:vertical;min-height:48px}
-.oc-hire input:not([type=radio]):not([type=checkbox]):focus-visible,.oc-hire textarea:focus-visible,.oc-hire select:focus-visible{${RING_FOCUS}}
-.oc-hire summary:focus-visible,.oc-hire input[type=radio]:focus-visible,.oc-hire input[type=checkbox]:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
-.oc-hire input[aria-invalid=true]{border-color:${RED7}}
-.oc-hire small{font-size:11px;color:${SOFT5};overflow-wrap:anywhere}
-.oc-fs{margin:0;padding:6px 9px 8px;border:1px solid ${EDGE};border-radius:8px;min-width:0;display:flex;flex-direction:column;gap:5px}
-.oc-fs legend{padding:0 4px;font-size:11.5px;font-weight:600}
-.oc-radio{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
-.oc-radio select{width:auto;flex:1 1 8rem;min-width:0}
-.oc-hskills .oc-radio span{min-width:0;overflow-wrap:anywhere}
 /* a skill's box stays on the line of its name (a long name must not wrap under its own checkbox) */
-.oc-hskills .oc-radio{flex-wrap:nowrap;align-items:flex-start}
-.oc-hskills .oc-radio input{flex:0 0 auto;margin-top:2px}
-.oc-hskills{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;max-height:120px;overflow-y:auto}
-.oc-hmodel summary,.oc-hreq summary{cursor:pointer;font-size:12px;font-weight:600}
-.oc-hrow2{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:6px 0}
-.oc-herr{display:flex;flex-direction:column;gap:2px}
-.oc-herr p{margin:0;font-size:11.5px;color:${ink6(RED7)}}
-.oc-hreq pre{margin:6px 0 0;padding:8px;max-height:150px;overflow:auto;font-size:11px;line-height:1.4;border:1px solid ${EDGE};border-radius:8px;background:color-mix(in oklab, var(--foreground) 5%, transparent);white-space:pre-wrap;overflow-wrap:anywhere}
-.oc-hfoot{position:sticky;bottom:-14px;z-index:1;padding:8px 0 2px;background:${CARD};display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
-.oc-hrisk{flex:1 1 14rem;min-width:0;font-size:11.5px}
 .oc-hermesmsg{padding:6px 8px;border:1px dashed ${EDGE};border-radius:8px}
-/* the decorator's window: ideas to start from, the fiche as labelled swatches */
-.oc-decor{width:min(560px,calc(100vw - 24px))}
-.oc-decor-ex{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.oc-chipbtn{max-width:100%;padding:3px 9px;font:inherit;font-size:11.5px;text-align:left;color:var(--foreground);background:${CARD};border:1px solid ${EDGE};border-radius:999px;cursor:pointer;overflow-wrap:anywhere}
-.oc-chipbtn:hover:not(:disabled){border-color:var(--ui-accent)}
-.oc-chipbtn:focus-visible{${RING_FOCUS}}
-.oc-chipbtn:disabled{opacity:.5;cursor:default}
-.oc-decor-out{min-height:0}
-.oc-decor-out p{margin:0 0 2px;font-size:12px}
-.oc-decor-h{margin:0 0 6px;font-size:12px;font-weight:600;overflow-wrap:anywhere}
-.oc-fiche{display:flex;flex-direction:column;gap:6px}
-.oc-fsw{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px 10px;margin:0;padding:0;list-style:none}
-.oc-fsw li{display:flex;align-items:center;gap:6px;min-width:0;font-size:11.5px}
-.oc-fsw i{flex:0 0 auto;width:22px;height:16px;border-radius:3px;border:1px solid ${FIELD_EDGE}}
-.oc-fiche p{margin:0;font-size:11.5px}
 @media (pointer:coarse){
   .oc-gear,.oc-x{width:40px;height:40px}
-  .oc-toggle,.oc-set-link{min-height:40px}
   .oc-legend-btn{position:relative}
   .oc-legend-btn::after{content:"";position:absolute;inset:-9px}
 }
-@media (max-width:560px){.oc-hbody{grid-template-columns:minmax(0,1fr)}.oc-hprev{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left}.oc-hire{padding:12px}}
 `;
 
 // src/ui/styles.js
@@ -25692,7 +25569,7 @@ function usePageClock() {
 import { jsx as jsx47, jsxs as jsxs43 } from "react/jsx-runtime";
 function useWidth(ref) {
   const [w, setW] = useState30(0);
-  useLayoutEffect10(() => {
+  useLayoutEffect11(() => {
     const el = ref.current;
     if (!el || typeof ResizeObserver !== "function") return void 0;
     const ro = new ResizeObserver((entries) => {
@@ -25746,8 +25623,8 @@ function OfficePage({ ctx }) {
   const sort = isSort(sortPref) ? sortPref : "project";
   const [jfilter, setJfilter] = useState30("all");
   const [hireOpen, setHireOpen] = useState30(false);
-  const usageBtnRef = useRef32(null);
-  const pageRef = useRef32(null);
+  const usageBtnRef = useRef33(null);
+  const pageRef = useRef33(null);
   const giveFocusBack = useCallback9((...selectors) => {
     setTimeout(() => {
       const root = pageRef.current;
@@ -25773,7 +25650,7 @@ function OfficePage({ ctx }) {
     giveFocusBack("[data-campaign-open]");
   }, [giveFocusBack]);
   const [vitrineOpen, setVitrineOpen] = useState30(false);
-  const vitrineFrom = useRef32(null);
+  const vitrineFrom = useRef33(null);
   const openVitrine = useCallback9(() => {
     vitrineFrom.current = document.activeElement;
     setVitrineOpen(true);
@@ -25782,8 +25659,8 @@ function OfficePage({ ctx }) {
     setVitrineOpen(false);
     setTimeout(() => vitrineFrom.current?.focus?.(), 0);
   }, []);
-  const toggleRef = useRef32(null);
-  const headRef = useRef32(null);
+  const toggleRef = useRef33(null);
+  const headRef = useRef33(null);
   const width = useWidth(pageRef);
   const sheet = settingsSheet(width);
   const desks = roster.data?.desks ?? [];
@@ -25800,7 +25677,7 @@ function OfficePage({ ctx }) {
     return { office: { ...built, agents: withNonEmptySessions(withWorkerModels(built.agents, history.data ?? null), history.data ?? null) }, nowMs: now };
   }, [desks, live.data, history.data, clock3]);
   const replayServed = reads.includes("replay");
-  const replayTo = useRef32(0);
+  const replayTo = useRef33(0);
   const nightPref = useValue5($nightPref);
   const nightWin = useMemo17(() => nightWindow(Date.now(), nightPref), [nightPref, clock3]);
   const nightQuery = useReplay(ctx, { enabled: replayServed, kind: "night", night: nightPref, anchor: nightWin.from, poll: nightWin.ongoing && !replayOn });
@@ -25871,7 +25748,7 @@ function OfficePage({ ctx }) {
   const workRoles = useMemo17(() => thoughtRoles(sceneAgents), [sceneAgents]);
   useThoughts({ ready: llmShown.thoughtsReady && !replayOn, visible: pageVisible, roles: workRoles, lang: t.lang });
   const [decorOpen, setDecorOpen] = useState30(false);
-  const decorFrom = useRef32("[data-decor-open]");
+  const decorFrom = useRef33("[data-decor-open]");
   const closeDecor = useCallback9(() => {
     setDecorOpen(false);
     giveFocusBack(decorFrom.current);
@@ -25902,7 +25779,7 @@ function OfficePage({ ctx }) {
     else if (res.kind === "many") host6.notify({ kind: "success", message: t("game.toast.many", res.ids.length) });
     else if (res.kind === "new") host6.notify({ kind: "success", message: t("game.toast.new", res.ids.map((id) => t(`game.ach.${id}.name`)).join(", ")) });
   }, [complete, unlockedKey]);
-  const exportRef = useRef32(null);
+  const exportRef = useRef33(null);
   const postcard = useCallback9(() => {
     const buffer = exportRef.current?.();
     if (buffer) savePostcard(buffer, postcardName(Date.now()));
@@ -25911,9 +25788,9 @@ function OfficePage({ ctx }) {
   const night = resolveLight(lightPref, new Date(nowMs)) === "night";
   const picked = office.agents.find((a) => a.name === selected) ?? null;
   const badges = useMemo17(() => badgesOf(office.agents, new Map(office.agents.map((a) => [a.name, modelOf(a)]))), [office]);
-  const seenBadges = useRef32(null);
-  const seenStates = useRef32(null);
-  const seenQuiet = useRef32(null);
+  const seenBadges = useRef33(null);
+  const seenStates = useRef33(null);
+  const seenQuiet = useRef33(null);
   const [announce, setAnnounce] = useState30("");
   useEffect29(() => {
     if (replayOn) {
@@ -25932,7 +25809,7 @@ function OfficePage({ ctx }) {
     if (said.length) setAnnounce(said.join(". "));
   }, [badges, office.agents, t, replayOn]);
   const queryClient = useQueryClient6();
-  const replayBtnRef = useRef32(null);
+  const replayBtnRef = useRef33(null);
   const busy = isBusy(orders.state);
   const enterReplay = useCallback9((kind = "night", group = null) => {
     if (busy) return;
@@ -25962,7 +25839,7 @@ function OfficePage({ ctx }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [replayOn, dialogOpen, drawerOpen, narrow, exitReplay]);
-  const focused = useRef32(false);
+  const focused = useRef33(false);
   useEffect29(() => {
     if (!replayOn) {
       focused.current = false;
@@ -25973,7 +25850,7 @@ function OfficePage({ ctx }) {
       pageRef.current?.querySelector("[data-replay-cursor]")?.focus({ preventScroll: true });
     }
   }, [replayOn, replayData]);
-  const edge = useRef32(null);
+  const edge = useRef33(null);
   useEffect29(() => {
     if (!replayData) {
       edge.current = null;
@@ -26006,7 +25883,7 @@ function OfficePage({ ctx }) {
     if (fx.foldPanel) toggleWide(true);
     if (fx.focusToggle) toggleRef.current?.focus();
   };
-  const skipPending = useRef32(false);
+  const skipPending = useRef33(false);
   const skipToDetails = (e) => {
     e.preventDefault();
     const plan = skipPlan({ panelOpen, narrow });
@@ -26150,6 +26027,7 @@ function OfficePage({ ctx }) {
             onOpen: () => open(picked.name),
             onDetails: () => goTab("agent"),
             narrow,
+            showSel: !panelOpen,
             announce,
             t
           }
