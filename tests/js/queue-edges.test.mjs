@@ -40,5 +40,7 @@ test('the rank behind the head of the queue stays on one line (« 2ᵉ derrière
   const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
   assert.ok(/\.ux-ag-q \.rk\{[^}]*white-space:nowrap/.test(css))
   // the space before it stays outside the unbreakable span: the line may still break between the head's words and the rank
-  assert.match(src('src/ui/AgentTab.jsx'), /\{' '\}<span className="rk" data-queue-rank>· \{lines\.head\.rank\}<\/span>/)
+  assert.match(src('src/ui/AgentTab.jsx'), /\{' '\}<span className="rk" data-queue-rank>\{lines\.head\.rank\}<\/span>/)
+  // the separator ends the line before the rank: a wrapped rank never starts its line with a lone dot
+  assert.match(src('src/ui/AgentTab.jsx'), /\{lines\.head\.rank \? ' ·' : ''\}<\/span>/)
 })

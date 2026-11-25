@@ -53,9 +53,9 @@ function QueueBlock({ lines, waited, onDecide, t }) {
             <p data-queue-head>
               <span className="k">{t('queue.head')}</span>
               <span className="v">
-                <span className="it"><b>{lines.head.who}</b>{lines.head.fact ? `, ${lines.head.fact}` : ''}</span>
+                <span className="it"><b>{lines.head.who}</b>{lines.head.fact ? `, ${lines.head.fact}` : ''}{lines.head.rank ? ' ·' : ''}</span>
                 {lines.head.more ? <span className="mo"> {lines.head.more}</span> : null}
-                {lines.head.rank ? <>{' '}<span className="rk" data-queue-rank>· {lines.head.rank}</span></> : null}
+                {lines.head.rank ? <>{' '}<span className="rk" data-queue-rank>{lines.head.rank}</span></> : null}
                 {lines.head.decide && onDecide ? <button type="button" className="ux-b sm pri" data-decide data-queue-decide onClick={() => onDecide(lines.head.board)}>{t('ux.agent.decide')}</button> : null}
               </span>
             </p>

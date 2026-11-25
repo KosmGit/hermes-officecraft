@@ -1,7 +1,7 @@
 {
   "name": "hermes-officecraft",
   "label": "Officecraft",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Backend routes for the Officecraft desktop page.",
   "tab": { "hidden": true },
   "entry": "index.js",

@@ -9,7 +9,7 @@
  *            a silent run is reclaimed by the dispatcher, a decision is not)
  *   stale    a card of theirs is `running` but its heartbeat is > 5 min old
  *            (never shown as working: the office must not lie)
- *   queued   (a bot with no session of the moment) a card of theirs waits for an unfinished parent card, and none runs or is blocked
+ *   queued   (a bot that is idle or only has a recent session) a card of theirs waits for an unfinished parent card, and none runs or is blocked
  *            (src/core/queue.js; replaces `idle` and `active` only)
  *   active   a human session touched in the last 10 min
  *   idle     has sessions, none recent       new: never ran       unknown: no session fields
