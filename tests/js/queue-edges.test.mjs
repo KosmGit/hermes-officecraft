@@ -1,10 +1,11 @@
 // The queue, at its edges: what the main tests of the queue did not hold (a card that is not `todo` in the middle of a chain, the bot of the
-// blocked card itself, the place of the state in the team list).
+// blocked card itself, the place of the state in the team list, the rank of the sheet kept on one line).
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
 import { chainOf, holdsBack, isWaiting, waitIndex } from '../../src/core/queue.js'
+import { PAGE_CSS } from '../../src/ui/pageStyles.js'
 
 const src = path => readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8')
 const card = (id, status, assignee) => ({ id, title: `Card ${id}`, status, assignee, createdMs: 0 })
@@ -33,4 +34,9 @@ test('the team list puts a queued bot after the ones at work and a recent sessio
   assert.ok(order.working < order.queued && order.active < order.queued, 'after at work and a recent session')
   assert.ok(order.queued < order.idle && order.queued < order.new, 'before at rest and no session yet')
   assert.ok(order.waiting < order.queued && order.stale < order.queued)
+})
+
+test('the rank behind the head of the queue stays on one line (« 2ᵉ derrière » is never cut between its two words)', () => {
+  const css = PAGE_CSS.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.ok(/\.ux-ag-q \.rk\{[^}]*white-space:nowrap/.test(css))
 })

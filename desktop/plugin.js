@@ -22169,6 +22169,7 @@ var PAGE_CSS = `
 .ux-ag-q .it b{font-weight:600}
 .ux-ag-q .it i{font-style:normal;color:${T22}}
 .ux-ag-q .rk,.ux-ag-q .mo,.ux-ag-q small{color:${T32};font-size:11.5px}
+.ux-ag-q .rk{white-space:nowrap}
 .ux-ag-q small{grid-column:1 / -1}
 .ux-ag-q .ux-b{margin-left:8px;vertical-align:middle}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
