@@ -427,13 +427,14 @@ export const PAGE_CSS = `
   /* the sort shares the line of the first project (« By project / Oldest » in their short words); with nothing to share it, or no room, it takes a line of its own */
   .ux-seg .full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .ux-seg .short{display:inline}
-  [data-inbox]{display:flex;flex-wrap:wrap;align-items:center;column-gap:8px}
+  /* row-reverse: the sort is the first item, at the right end; with no room beside it the project's line goes under it, never squeezed into an ellipsis */
+  [data-inbox]{display:flex;flex-direction:row-reverse;flex-wrap:wrap;align-items:center;column-gap:8px}
   [data-inbox] > *{order:3;flex:1 0 100%}
-  [data-inbox] > .ux-pbar{order:1;flex:0 0 auto;margin:0}
+  [data-inbox] > .ux-pbar{order:0;flex:0 0 auto;margin:0}
   [data-inbox] > .ux-pbar .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   [data-inbox] > .ux-pbar.flt{order:0;flex:1 0 100%;margin:0 0 12px}
   [data-inbox] > .ux-pbar:not(.flt) + div{display:contents}
-  [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp{order:0;flex:1 1 120px;min-width:0;margin:0}
+  [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp{order:1;flex:1 0 auto;max-width:100%;min-width:0;margin:0}
   [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp .ln{display:none}   /* the name of the project gets the room the rule would take */
   [data-inbox] > .ux-pbar:not(.flt) + div > ul{order:2;flex:1 0 100%;margin-top:8px}
   [data-inbox] > .ux-pbar:not(.flt) + ul{margin-top:12px}

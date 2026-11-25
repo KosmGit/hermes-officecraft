@@ -115,9 +115,15 @@ test('a narrow pane: the decisions panel has no second frame, the sort shares th
   const narrow = css.slice(css.indexOf('@container ux (max-width: 700px){'), css.indexOf('@container ux (max-width: 420px)'))
   assert.match(narrow, /\.ux-panel\{border:0;border-radius:0;background:transparent\}/)
   assert.match(narrow, /\.ux-pbody\{padding:0 0 12px;/)
-  assert.match(narrow, /\[data-inbox\]\{display:flex;flex-wrap:wrap;/)
   assert.match(narrow, /\[data-inbox\] > \.ux-pbar:not\(\.flt\) \+ div\{display:contents\}/, 'the first group sits in the same flex line as the sort')
-  assert.match(narrow, /\.ux-pbar:not\(\.flt\) \+ div > \.ux-grp\{order:0;flex:1 1 120px;/, 'and wraps below it when there is no room for both')
+  // the project's line never shrinks below its own width (a shrinkable basis cut « docs-portal » to « docs-p… » at 380 px): when the
+  // sort and the name do not fit side by side, the name goes under the sort (row-reverse: the sort, first in order, stays on top)
+  assert.match(narrow, /\[data-inbox\]\{display:flex;flex-direction:row-reverse;flex-wrap:wrap;/)
+  assert.match(narrow, /\[data-inbox\] > \.ux-pbar\{order:0;/, 'the sort is the first item of the reversed line: on top when the line breaks')
+  const grp = narrow.match(/\.ux-pbar:not\(\.flt\) \+ div > \.ux-grp\{([^}]*)\}/)?.[1] ?? ''
+  assert.match(grp, /order:1;/)
+  assert.match(grp, /flex:1 0 auto;/, 'the project\'s line does not shrink: it wraps below the sort when there is no room for both')
+  assert.match(grp, /max-width:100%/, 'a name longer than the whole line still ends in an ellipsis instead of pushing the pane wider')
   assert.match(narrow, /\.ux-seg \.short\{display:inline\}/, 'the sort says « Project / Oldest » there')
   assert.match(narrow, /\.ux-grp \.ln\{display:none\}/, 'the project name keeps the room the rule would take')
   const tail = css.slice(css.indexOf('@container ux (max-width: 1320px){'), css.indexOf('@container ux (max-width: 1180px)'))
