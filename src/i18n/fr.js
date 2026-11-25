@@ -41,7 +41,7 @@ export const fr = {
   cronsFailing: n => (n === 1 ? '1 tâche planifiée en échec' : `${n} tâches planifiées en échec`),
   state: {
     working: 'Au travail',
-    active: 'Actif',
+    active: 'Session récente',
     idle: 'Au repos',
     waiting: 'Vous attend',
     stale: 'Silencieux',
@@ -1328,7 +1328,7 @@ export const fr = {
       ignored: 'Ignoré : rien n’a changé.',
       done: name => `Description de ${name} enregistrée et vérifiée dans la liste des bots.`,
       doneUnread: name => `Description de ${name} envoyée ; la liste des bots n’a pas pu être vérifiée.`,
-      check: 'Relisez la description du bot dans l’onglet Agent pour vérifier.',
+      check: 'Relisez la description du bot dans l’onglet Équipe pour vérifier.',
       count: (n, max) => `${n}/${max}`
     },
     // le côté assisté de l’éditeur de campagne
@@ -1655,7 +1655,7 @@ export const fr = {
       chip: (slug, progress) => `${slug} : ${progress} terminées`,
       details: 'Détails'
     },
-    tab: { label: 'Détails', decisions: 'Décisions', agent: 'Agent', projects: 'Projets', journal: 'Journal' },
+    tab: { label: 'Détails', decisions: 'Décisions', agent: 'Équipe', projects: 'Projets', journal: 'Journal' },
     bar: { label: 'Vues', office: 'Bureau' },
     dec: {
       day: 'j',

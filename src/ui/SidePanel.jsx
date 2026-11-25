@@ -9,7 +9,7 @@ import { JournalTab } from './JournalTab.jsx'
 import { ProjectsTab } from './ProjectsTab.jsx'
 import { useT } from './useT.js'
 
-const ICON = { decisions: 'inbox', agent: 'office', projects: 'folder', journal: 'list' }
+const ICON = { decisions: 'inbox', agent: 'users', projects: 'folder', journal: 'list' }
 
 /**
  * The Details panel: four tabs next to the office — Decisions (first), Agent, Projects, Journal. In a wide pane the tab list

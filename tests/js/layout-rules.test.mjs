@@ -4,6 +4,7 @@ import { test } from 'node:test'
 
 import { railFit } from '../../src/core/alerts.js'
 import { POP_EDGE, placePopover, scrollCloses } from '../../src/core/popover.js'
+import { messages } from '../../src/i18n/index.js'
 import { PAGE_CSS } from '../../src/ui/pageStyles.js'
 import { SCENE_CSS } from '../../src/ui/sceneStyles.js'
 import { USAGE_CSS } from '../../src/ui/usageStyles.js'
@@ -22,14 +23,32 @@ function rule(css, selector) {
 }
 const has = (decls, prop, value) => new RegExp(`(?:^|;)\\s*${prop}\\s*:\\s*${value}\\s*(?:;|!important|$)`).test(decls ?? '')
 
-test('team list: the name gives way with an ellipsis, the project chip first, the state never', () => {
+test('team list: fixed columns (portrait, name, project in 1fr, state on a fixed width, sign), the name cut with an ellipsis, the state never', () => {
+  const row = rule(PAGE_CSS, '.ux-rosterb')
+  const cols = row.match(/grid-template-columns:([^;]+)/)[1].trim().split(/\s+(?![^(]*\))/)
+  assert.equal(cols.length, 5, 'portrait, name, project, state, sign')
+  assert.match(cols[1], /^minmax\(0,\s*\d+px\)$/, 'a fixed name column: the projects line up from one row to the next')
+  assert.equal(cols[2], 'minmax(0,1fr)', 'the project takes what is left')
+  assert.match(cols[3], /^\d+px$/, 'the state has a fixed width, left aligned: the dots line up')
+  assert.ok(Number(cols[3].replace('px', '')) >= 104, 'wide enough for the longest state word of the three languages')
   const nm = rule(PAGE_CSS, '.ux-rosterb .nm')
-  assert.ok(has(nm, 'flex', '0 1 auto'), 'the name may shrink')
   assert.ok(has(nm, 'text-overflow', 'ellipsis') && has(nm, 'overflow', 'hidden') && has(nm, 'white-space', 'nowrap'))
-  const chip = rule(PAGE_CSS, '.ux-rosterb .ux-prj')
-  assert.match(chip, /flex:\s*0 100 auto/, 'the chip shrinks 100 times faster than the name')
-  assert.ok(has(rule(PAGE_CSS, '.ux-rosterb .ux-st'), 'flex', '0 0 auto'), 'the state keeps its width')
+  assert.ok(has(rule(PAGE_CSS, '.ux-rosterb .ux-st'), 'white-space', 'nowrap') && has(rule(PAGE_CSS, '.ux-rosterb .ux-st'), 'justify-self', 'start'), 'the state keeps its width and its left edge')
   assert.match(src('AgentTab.jsx'), /className="nm" title=\{a\.label \|\| a\.name\}/, 'the whole name is also on the row')
+  // a side panel under 420 px: the project goes under the name
+  const narrow = block(PAGE_CSS, '@container uxp (max-width: 419px)')
+  assert.match(narrow, /\.ux-rosterb \.ux-prj\{grid-column:2 \/ 5;grid-row:2\}/, 'the project under the name')
+  assert.match(PAGE_CSS, /\.ux-panel\{container:uxp \/ inline-size/, 'the panel is the container that query reads')
+})
+
+test('the states say what they are: « active » is a chat session of the last 10 minutes (not work), « new » a bot that never had a session', () => {
+  for (const code of ['en', 'fr', 'es']) {
+    const s = messages[code].state
+    const words = [s.working, s.active, s.idle, s.new]
+    assert.equal(new Set(words).size, words.length, `${code}: four different words`)
+    assert.ok(!/^(actif|active|activo)$/i.test(s.active), `${code}: « ${s.active} » read as « working »`)
+  }
+  assert.equal(messages.fr.state.active, 'Session récente')
 })
 
 test('scene label: the name has a ceiling and an ellipsis; the whole name stays in the accessible name', () => {

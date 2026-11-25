@@ -148,7 +148,7 @@ export const PAGE_CSS = `
 .ux-sel>b{font-size:12.5px;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ux-sel .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
 /* ---------- the panel: four tabs (WAI-ARIA tab list), one scrolling body ---------- */
-.ux-panel{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
+.ux-panel{container:uxp / inline-size;display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
 .ux-tabs{display:flex;gap:4px;flex:0 0 auto;padding:4px 12px 0;border-bottom:1px solid ${EDGE}}
 .ux-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1 1 auto;min-width:0;height:36px;padding:0 8px;border:0;border-radius:6px 6px 0 0;background:transparent;color:${T3};font:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer}
 .ux-tab:hover{color:var(--foreground);background:color-mix(in oklab, var(--foreground) 5%, transparent)}
@@ -286,15 +286,25 @@ export const PAGE_CSS = `
 .ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
-.ux-rosterb{display:flex;align-items:center;gap:8px;width:100%;min-width:0;height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
+.ux-rosterb{display:grid;grid-template-columns:24px minmax(0,112px) minmax(0,1fr) 112px 20px;align-items:center;column-gap:8px;width:100%;min-width:0;min-height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
 .ux-rosterb:hover{background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .ux-rosterb[aria-current="true"]{background:color-mix(in oklab, var(--ui-accent) 10%, transparent)}
 .ux-rosterb .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
-/* a long name is cut with an ellipsis (the whole name is the button's name): the project chip gives way first, then the name; the state word is kept whole */
-.ux-rosterb .nm{flex:0 1 auto;min-width:8ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:12.5px}
-.ux-rosterb .ux-prj{flex:0 100 auto;min-width:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ux-rosterb .ux-st{flex:0 0 auto;white-space:nowrap}
-.ux-rosterb .ux-st{margin-left:auto;font-size:11.5px}
+/* fixed columns (portrait, name, project, state, sign), so the projects and the states line up from one row to the next: the project takes what is left and is cut only when it is really too long; the state keeps a column wide enough for its longest word */
+.ux-rosterb .oc-portrait{grid-column:1}
+.ux-rosterb .nm{grid-column:2;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:12.5px}
+.ux-rosterb .ux-prj{grid-column:3;justify-self:start;max-width:100%;min-width:0}
+.ux-rosterb .ux-st{grid-column:4;justify-self:start;white-space:nowrap;font-size:11.5px}
+.ux-rosterb .ux-wait{grid-column:5}
+/* a side panel under 420 px (always, at the usual 330-400): the project goes under the name, and the state keeps its column */
+@container uxp (max-width: 419px){
+  .ux-rosterb{grid-template-columns:24px minmax(0,1fr) 112px 20px;grid-template-rows:auto auto;row-gap:4px;min-height:56px;padding:8px}
+  .ux-rosterb .oc-portrait{grid-row:1 / 3}
+  .ux-rosterb .nm{grid-column:2;grid-row:1}
+  .ux-rosterb .ux-prj{grid-column:2 / 5;grid-row:2}
+  .ux-rosterb .ux-st{grid-column:3;grid-row:1}
+  .ux-rosterb .ux-wait{grid-column:4;grid-row:1}
+}
 /* the « a decision waits for you » sign beside the state of a bot at work: same tinted square as the scene's label */
 .ux-wait{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:20px;height:20px;border-radius:5px;color:${ink(ORANGE)};background:color-mix(in oklab, ${ORANGE} 18%, transparent)}
 /* projects tab */

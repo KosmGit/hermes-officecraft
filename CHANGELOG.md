@@ -10,8 +10,8 @@ First public release.
 ### Added
 
 - The isometric pixel-art office: one desk per Hermes profile, one island per kanban board, states read from Hermes
-  (working, active, waiting for you, silent, idle), day and night, light and dark themes.
-- A side panel with four tabs: Decisions, Agent, Projects, Log.
+  (working, recent session, waiting for you, silent, idle), day and night, light and dark themes.
+- A side panel with four tabs: Decisions, Team, Projects, Log.
 - Actions from the office: unblock and comment a card, answer approval requests, recruit a bot. Each with a risk
   class, a confirmation, six seconds to cancel and a line in the audit log.
 - Campaign editor: a graph of cards created in one write, four chain templates, guards, Launch and Cancel.

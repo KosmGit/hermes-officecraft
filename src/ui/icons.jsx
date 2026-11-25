@@ -20,6 +20,7 @@ const PATHS = {
   office: <><path d="M3 10 12 4l9 6v10H3z" /><path d="M9 20v-6h6v6" /></>,
   inbox: <><path d="M3 13 6 5h12l3 8v6H3z" /><path d="M3 13h5l1 3h6l1-3h5" /></>,
   folder: <path d="M3 6h6l2 2h10v11H3z" />,
+  users: <><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><circle cx="17.5" cy="9" r="2.8" /><path d="M17 14.3a5.3 5.3 0 0 1 4.5 5.7" /></>,
   list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
   more: <><circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" /></>,
   msg: <path d="M4 5h16v11H8l-4 4z" />,

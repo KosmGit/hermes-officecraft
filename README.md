@@ -23,7 +23,7 @@ Officecraft draws your Hermes profiles as people in an isometric office, one isl
 
 | | |
 |---|---|
-| **Live office** | One desk per agent, one island per project. States are read, not declared: *working*, *active*, *waiting for you*, *silent*, *idle*. |
+| **Live office** | One desk per agent, one island per project. States are read, not declared: *working*, *recent session*, *waiting for you*, *silent*, *idle*. |
 | **Decisions inbox** | Blocked cards and approval requests, grouped by project. Unblock, comment or answer without leaving the page. |
 | **Campaigns** | Compose a graph of cards, preview it, create it in one write. A guard card holds everything until you press *Launch*. |
 | **Recruit** | Create a new bot from the office: identity, starting point, model and provider. |
@@ -34,7 +34,7 @@ Officecraft draws your Hermes profiles as people in an isometric office, one isl
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/images/scene-night.webp" alt="The office at night with an agent selected: the Agent tab lists its running cards, model and skills."></td>
+    <td width="50%"><img src="docs/images/scene-night.webp" alt="The office at night with an agent selected: the Team tab lists its running cards, model and skills."></td>
     <td width="50%"><img src="docs/images/scene-live.gif" alt="A short loop of the office: agents type at their desks while exclamation marks flag the cards that wait for a decision."></td>
   </tr>
   <tr>

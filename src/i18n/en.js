@@ -39,7 +39,7 @@ export const en = {
   cronsFailing: n => (n === 1 ? '1 scheduled job failing' : `${n} scheduled jobs failing`),
   state: {
     working: 'Working',
-    active: 'Active',
+    active: 'Recent session',
     idle: 'Idle',
     waiting: 'Waiting for you',
     stale: 'Silent',
@@ -1326,7 +1326,7 @@ export const en = {
       ignored: 'Ignored: nothing changed.',
       done: name => `Description of ${name} saved and verified in the bot list.`,
       doneUnread: name => `Description of ${name} sent; the bot list could not be reloaded.`,
-      check: 'Check the bot’s description in the Agent tab.',
+      check: 'Check the bot’s description in the Team tab.',
       count: (n, max) => `${n}/${max}`
     },
     // the assisted side of the campaign editor
@@ -1653,7 +1653,7 @@ export const en = {
       chip: (slug, progress) => `${slug}: ${progress} done`,
       details: 'Details'
     },
-    tab: { label: 'Details', decisions: 'Decisions', agent: 'Agent', projects: 'Projects', journal: 'Log' },
+    tab: { label: 'Details', decisions: 'Decisions', agent: 'Team', projects: 'Projects', journal: 'Log' },
     bar: { label: 'Views', office: 'Office' },
     dec: {
       day: 'd',

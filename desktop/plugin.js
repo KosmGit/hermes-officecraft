@@ -4819,7 +4819,7 @@ var en = {
   cronsFailing: (n) => n === 1 ? "1 scheduled job failing" : `${n} scheduled jobs failing`,
   state: {
     working: "Working",
-    active: "Active",
+    active: "Recent session",
     idle: "Idle",
     waiting: "Waiting for you",
     stale: "Silent",
@@ -6145,7 +6145,7 @@ var en = {
       ignored: "Ignored: nothing changed.",
       done: (name) => `Description of ${name} saved and verified in the bot list.`,
       doneUnread: (name) => `Description of ${name} sent; the bot list could not be reloaded.`,
-      check: "Check the bot’s description in the Agent tab.",
+      check: "Check the bot’s description in the Team tab.",
       count: (n, max) => `${n}/${max}`
     },
     // the assisted side of the campaign editor
@@ -6473,7 +6473,7 @@ var en = {
       hint: "Click an agent",
       details: "Details"
     },
-    tab: { label: "Details", decisions: "Decisions", agent: "Agent", projects: "Projects", journal: "Log" },
+    tab: { label: "Details", decisions: "Decisions", agent: "Team", projects: "Projects", journal: "Log" },
     bar: { label: "Views", office: "Office" },
     dec: {
       day: "d",
@@ -6576,7 +6576,7 @@ var es = {
   cronsFailing: (n) => n === 1 ? "1 tarea programada con fallo" : `${n} tareas programadas con fallo`,
   state: {
     working: "Trabajando",
-    active: "Activo",
+    active: "Sesión reciente",
     idle: "En reposo",
     waiting: "Te espera",
     stale: "En silencio",
@@ -7902,7 +7902,7 @@ var es = {
       ignored: "Ignorado: no ha cambiado nada.",
       done: (name) => `Descripción de ${name} guardada y verificada en la lista de bots.`,
       doneUnread: (name) => `Descripción de ${name} enviada; no se pudo verificar la lista de bots.`,
-      check: "Lee la descripción del bot en la pestaña Agente para comprobarlo.",
+      check: "Lee la descripción del bot en la pestaña Equipo para comprobarlo.",
       count: (n, max) => `${n}/${max}`
     },
     // el lado asistido del editor de campañas
@@ -8230,7 +8230,7 @@ var es = {
       hint: "Haz clic en un agente",
       details: "Detalles"
     },
-    tab: { label: "Detalles", decisions: "Decisiones", agent: "Agente", projects: "Proyectos", journal: "Registro" },
+    tab: { label: "Detalles", decisions: "Decisiones", agent: "Equipo", projects: "Proyectos", journal: "Registro" },
     bar: { label: "Vistas", office: "Oficina" },
     dec: {
       day: "d",
@@ -8334,7 +8334,7 @@ var fr = {
   cronsFailing: (n) => n === 1 ? "1 tâche planifiée en échec" : `${n} tâches planifiées en échec`,
   state: {
     working: "Au travail",
-    active: "Actif",
+    active: "Session récente",
     idle: "Au repos",
     waiting: "Vous attend",
     stale: "Silencieux",
@@ -9660,7 +9660,7 @@ var fr = {
       ignored: "Ignoré : rien n’a changé.",
       done: (name) => `Description de ${name} enregistrée et vérifiée dans la liste des bots.`,
       doneUnread: (name) => `Description de ${name} envoyée ; la liste des bots n’a pas pu être vérifiée.`,
-      check: "Relisez la description du bot dans l’onglet Agent pour vérifier.",
+      check: "Relisez la description du bot dans l’onglet Équipe pour vérifier.",
       count: (n, max) => `${n}/${max}`
     },
     // le côté assisté de l’éditeur de campagne
@@ -9988,7 +9988,7 @@ var fr = {
       hint: "Cliquez sur un agent",
       details: "Détails"
     },
-    tab: { label: "Détails", decisions: "Décisions", agent: "Agent", projects: "Projets", journal: "Journal" },
+    tab: { label: "Détails", decisions: "Décisions", agent: "Équipe", projects: "Projets", journal: "Journal" },
     bar: { label: "Vues", office: "Bureau" },
     dec: {
       day: "j",
@@ -12345,6 +12345,12 @@ var PATHS = {
     /* @__PURE__ */ jsx("path", { d: "M3 13h5l1 3h6l1-3h5" })
   ] }),
   folder: /* @__PURE__ */ jsx("path", { d: "M3 6h6l2 2h10v11H3z" }),
+  users: /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx("circle", { cx: "9", cy: "8", r: "3.5" }),
+    /* @__PURE__ */ jsx("path", { d: "M2.5 20a6.5 6.5 0 0 1 13 0" }),
+    /* @__PURE__ */ jsx("circle", { cx: "17.5", cy: "9", r: "2.8" }),
+    /* @__PURE__ */ jsx("path", { d: "M17 14.3a5.3 5.3 0 0 1 4.5 5.7" })
+  ] }),
   list: /* @__PURE__ */ jsx("path", { d: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" }),
   more: /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx("circle", { cx: "5", cy: "12", r: "1.3" }),
@@ -19915,7 +19921,7 @@ function ProjectsTab({ office, project: project2, onProject, openKanban: openKan
 
 // src/ui/SidePanel.jsx
 import { jsx as jsx26, jsxs as jsxs23 } from "react/jsx-runtime";
-var ICON3 = { decisions: "inbox", agent: "office", projects: "folder", journal: "list" };
+var ICON3 = { decisions: "inbox", agent: "users", projects: "folder", journal: "list" };
 function SidePanel({
   office,
   history,
@@ -21502,7 +21508,7 @@ var PAGE_CSS = `
 .ux-sel .hint{font-size:12px;color:${T32};white-space:nowrap}
 .ux-sel .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
 /* ---------- the panel: four tabs (WAI-ARIA tab list), one scrolling body ---------- */
-.ux-panel{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
+.ux-panel{container:uxp / inline-size;display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid ${EDGE};border-radius:12px;background:${CARD};color:var(--foreground);overflow:hidden}
 .ux-tabs{display:flex;gap:4px;flex:0 0 auto;padding:4px 12px 0;border-bottom:1px solid ${EDGE}}
 .ux-tab{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1 1 auto;min-width:0;height:36px;padding:0 8px;border:0;border-radius:6px 6px 0 0;background:transparent;color:${T32};font:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer}
 .ux-tab:hover{color:var(--foreground);background:color-mix(in oklab, var(--foreground) 5%, transparent)}
@@ -21640,15 +21646,25 @@ var PAGE_CSS = `
 .ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
-.ux-rosterb{display:flex;align-items:center;gap:8px;width:100%;min-width:0;height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
+.ux-rosterb{display:grid;grid-template-columns:24px minmax(0,112px) minmax(0,1fr) 112px 20px;align-items:center;column-gap:8px;width:100%;min-width:0;min-height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
 .ux-rosterb:hover{background:color-mix(in oklab, var(--foreground) 5%, transparent)}
 .ux-rosterb[aria-current="true"]{background:color-mix(in oklab, var(--ui-accent) 10%, transparent)}
 .ux-rosterb .oc-portrait{width:24px;height:24px;border-radius:6px;border:0}
-/* a long name is cut with an ellipsis (the whole name is the button's name): the project chip gives way first, then the name; the state word is kept whole */
-.ux-rosterb .nm{flex:0 1 auto;min-width:8ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:12.5px}
-.ux-rosterb .ux-prj{flex:0 100 auto;min-width:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ux-rosterb .ux-st{flex:0 0 auto;white-space:nowrap}
-.ux-rosterb .ux-st{margin-left:auto;font-size:11.5px}
+/* fixed columns (portrait, name, project, state, sign), so the projects and the states line up from one row to the next: the project takes what is left and is cut only when it is really too long; the state keeps a column wide enough for its longest word */
+.ux-rosterb .oc-portrait{grid-column:1}
+.ux-rosterb .nm{grid-column:2;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:12.5px}
+.ux-rosterb .ux-prj{grid-column:3;justify-self:start;max-width:100%;min-width:0}
+.ux-rosterb .ux-st{grid-column:4;justify-self:start;white-space:nowrap;font-size:11.5px}
+.ux-rosterb .ux-wait{grid-column:5}
+/* a side panel under 420 px (always, at the usual 330-400): the project goes under the name, and the state keeps its column */
+@container uxp (max-width: 419px){
+  .ux-rosterb{grid-template-columns:24px minmax(0,1fr) 112px 20px;grid-template-rows:auto auto;row-gap:4px;min-height:56px;padding:8px}
+  .ux-rosterb .oc-portrait{grid-row:1 / 3}
+  .ux-rosterb .nm{grid-column:2;grid-row:1}
+  .ux-rosterb .ux-prj{grid-column:2 / 5;grid-row:2}
+  .ux-rosterb .ux-st{grid-column:3;grid-row:1}
+  .ux-rosterb .ux-wait{grid-column:4;grid-row:1}
+}
 /* the « a decision waits for you » sign beside the state of a bot at work: same tinted square as the scene's label */
 .ux-wait{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:20px;height:20px;border-radius:5px;color:${ink4(ORANGE4)};background:color-mix(in oklab, ${ORANGE4} 18%, transparent)}
 /* projects tab */

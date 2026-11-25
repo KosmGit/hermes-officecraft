@@ -38,7 +38,7 @@ export const es = {
   cronsFailing: n => (n === 1 ? '1 tarea programada con fallo' : `${n} tareas programadas con fallo`),
   state: {
     working: 'Trabajando',
-    active: 'Activo',
+    active: 'Sesión reciente',
     idle: 'En reposo',
     waiting: 'Te espera',
     stale: 'En silencio',
@@ -1325,7 +1325,7 @@ export const es = {
       ignored: 'Ignorado: no ha cambiado nada.',
       done: name => `Descripción de ${name} guardada y verificada en la lista de bots.`,
       doneUnread: name => `Descripción de ${name} enviada; no se pudo verificar la lista de bots.`,
-      check: 'Lee la descripción del bot en la pestaña Agente para comprobarlo.',
+      check: 'Lee la descripción del bot en la pestaña Equipo para comprobarlo.',
       count: (n, max) => `${n}/${max}`
     },
     // el lado asistido del editor de campañas
@@ -1652,7 +1652,7 @@ export const es = {
       chip: (slug, progress) => `${slug}: ${progress} terminadas`,
       details: 'Detalles'
     },
-    tab: { label: 'Detalles', decisions: 'Decisiones', agent: 'Agente', projects: 'Proyectos', journal: 'Registro' },
+    tab: { label: 'Detalles', decisions: 'Decisiones', agent: 'Equipo', projects: 'Proyectos', journal: 'Registro' },
     bar: { label: 'Vistas', office: 'Oficina' },
     dec: {
       day: 'd',
