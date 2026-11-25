@@ -42,7 +42,7 @@ export function SettingsDialog({ onClose, llm = null, href = null, sheet = false
       </div>
       <footer className="oc-sd-f">
         {href ? (
-          <button type="button" className="oc-sx-link" data-settings-link onClick={() => { onClose(); sdk.host.navigate(href) }}>
+          <button type="button" className="oc-sx-link" data-settings-link title={t('settings.openInHermesTip')} onClick={() => { onClose(); sdk.host.navigate(href) }}>
             <SettingsIcon id="ext" size={14} />
             {t('settings.openInHermes')}
           </button>

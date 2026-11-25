@@ -126,9 +126,7 @@ ${ringed('.oc-sx-cap summary:focus-visible')}
 .oc-sx-fx>*{margin-top:8px}
 .oc-sx-fx>*:empty{margin:0}
 /* the gauge and the two models on top, the ten functions in two groups of rows, each row = name + state + « Sends », lane chip, action, « ? » + switch */
-/* the LLM tab is the widest and tallest of the window (1040 px, nothing to scroll at 1440 x 900); the other tabs keep the window they had */
-.oc-sd:has([data-llm]){width:min(1040px,calc(100vw - 16px))}
-.oc-sd:has([data-llm]) .oc-sf-in{height:min(760px,calc(100dvh - 160px))}
+/* the window keeps ONE size whichever tab is open (a window that grows when a tab opens moves the tab list from under the pointer): the size of the tallest tab that fits the screen, the rest scrolls inside */
 .oc-lm-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px 16px;align-items:start;border:1px solid ${EDGE};border-radius:12px;padding:8px 12px;margin:4px 0 0;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET} 7%, ${CARD}), ${CARD} 60%)}
 .oc-lm-wide{grid-column:1 / -1;margin:0}
 .oc-lm-load{color:${TEXT3};font-size:12px}
@@ -159,14 +157,20 @@ ${ringed('.oc-lm-ib:focus-visible')}
 .oc-lm-g .n{font-weight:500;color:${TEXT3}}
 .oc-lm-g .ln{flex:1 1 auto;height:1px;background:${HAIR}}
 .oc-lm-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) max-content max-content max-content;column-gap:12px;align-items:center;min-height:40px;padding:2px 0;border-bottom:1px solid ${HAIR}}
-.oc-lm-mc{display:flex;flex-direction:column;min-width:0}
+.oc-lm-mc{grid-column:1;display:flex;flex-direction:column;min-width:0}
+.oc-lm-pay{margin:8px 0 0;color:var(--ui-text-secondary);font-size:12.5px;line-height:16px}
+.oc-lm-gn{margin:8px 0 0}
+.oc-lm-row[data-quiet="true"]{opacity:.62}
+.oc-lm-calls{white-space:nowrap}
 /* the « ? » of a feature sits at the right end of its row: its note opens under it, right-aligned */
 .oc-lm-row .oc-sx-tip{left:auto;right:0}
 .oc-lm-mc .oc-sx-name{flex-wrap:wrap}
 .oc-lm-mc small{font-size:12px;line-height:16px;color:${TEXT3}}
 .oc-lm-lc,.oc-lm-ac{display:flex;align-items:center}
-.oc-lm-ac:empty{display:none}
-.oc-lm-ctl{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.oc-lm-lc{grid-column:2}
+.oc-lm-ac{grid-column:3}
+.oc-lm-ac:empty,.oc-lm-lc:empty{display:none}
+.oc-lm-ctl{grid-column:4;display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .oc-lm-fx{grid-column:1 / -1;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .oc-lm-fx:empty,.oc-lm-fx>*:empty{display:none}
 .oc-lm-fx:not(:has(*:not(:empty))){display:none}
@@ -177,7 +181,8 @@ ${ringed('.oc-lm-ib:focus-visible')}
 .oc-lm-lane.host{border-style:dashed}
 @container (max-width:640px){
   .oc-lm-top{grid-template-columns:minmax(0,1fr)}
-  .oc-lm-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"mc ctl" "lc ac";gap:4px 8px;padding:8px 0}
+  .oc-lm-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"mc ctl" "lc ac";gap:0 8px;padding:8px 0}
+  .oc-lm-lc,.oc-lm-ac{margin-top:4px}
   .oc-lm-mc{grid-area:mc}.oc-lm-ctl{grid-area:ctl;align-self:start}.oc-lm-lc{grid-area:lc}.oc-lm-ac{grid-area:ac;justify-content:flex-end}
 }
 .oc-sx-state{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;white-space:nowrap}
@@ -185,7 +190,7 @@ ${ringed('.oc-lm-ib:focus-visible')}
 .oc-sx-state[data-tone="warn"]{border-color:color-mix(in oklab, ${ORANGE} 60%, ${EDGE});background:color-mix(in oklab, ${ORANGE} 14%, transparent)}
 .oc-sx-state[data-tone="off"]{color:var(--ui-text-secondary)}
 
-.oc-sd{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(780px,calc(100vw - 16px));max-height:calc(100dvh - 32px);padding:0;border:1px solid ${EDGE};border-radius:14px;background:${CARD};color:var(--foreground);overflow:hidden;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 30%, transparent)}
+.oc-sd{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(860px,calc(100vw - 16px));max-height:calc(100dvh - 32px);padding:0;border:1px solid ${EDGE};border-radius:14px;background:${CARD};color:var(--foreground);overflow:hidden;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 30%, transparent)}
 .oc-sd[open]{display:flex;flex-direction:column;animation:oc-sd-in .18s ease both}
 .oc-sd::backdrop{background:color-mix(in oklab, var(--foreground) 40%, transparent)}
 .oc-sd-h{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid ${EDGE};flex:0 0 auto}
@@ -196,7 +201,7 @@ ${ringed('.oc-lm-ib:focus-visible')}
 ${ringed('.oc-sd-x:focus-visible')}
 .oc-sd-b{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .oc-sd .oc-sf{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-.oc-sd .oc-sf-in{flex:1 1 auto;height:min(560px,calc(100dvh - 160px))}
+.oc-sd .oc-sf-in{flex:1 1 auto;height:min(620px,calc(100dvh - 160px))}
 .oc-sd .oc-sf-panel{overflow-y:auto;overscroll-behavior:contain}
 .oc-sd-f{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid ${EDGE};flex:0 0 auto}
 .oc-sd-f .grow{flex:1 1 auto}

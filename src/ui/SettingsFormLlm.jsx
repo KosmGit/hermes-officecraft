@@ -199,17 +199,20 @@ export function SettingsFormLlm({ actions = null }) {
     } else if (f === 'seating' && actions?.onSeating && st === 'ready') action = <button type="button" className="oc-sx-btn" data-llm-open-seating onClick={actions.onSeating}>{t('llm.seating.open')}</button>
     const status = done ? (done.kind === 'done' ? (f === 'art' ? t('llm.art.done', done.fiche?.posters?.length ?? 0) : t('llm.outfits.done', done.fiche?.outfits?.length ?? 0)) : t(`llm.reason.${done.reason}`)) : ''
     const cost = done && costKind(done) === 'known' ? ` ${t('llm.decor.costKnown', formatUsd(done.costUsd, t.lang))}` : done && costKind(done) === 'unknown' ? ` ${t('llm.decor.costUnknown')}` : ''
-    const warn = st === 'cap' && hit ? t(`llm.capReached.${hit}`) : st === 'unavailable' ? t('llm.noModel') : st === 'error' && !done ? t('llm.lastError') : ''
+    // « no model » is said once, at the top of the tab (`data-llm-nomodel`), not under every row
+    const warn = st === 'cap' && hit ? t(`llm.capReached.${hit}`) : st === 'error' && !done ? t('llm.lastError') : ''
+    // a switch that is off says so by itself; a state the whole group shares is said once by the group (the row is only dimmed)
+    const pill = st !== 'off' && !row.quiet
     return (
-      <div key={f} className="oc-lm-row" role="group" aria-label={name} data-llm-feature={f} data-state={st} data-on={row.on ? 'true' : 'false'}>
+      <div key={f} className="oc-lm-row" role="group" aria-label={name} data-llm-feature={f} data-state={st} data-on={row.on ? 'true' : 'false'} data-quiet={row.quiet ? 'true' : undefined}>
         <span className="oc-lm-mc">
           <span className="oc-sx-name">
             <label htmlFor={`${id}-${f}`} id={`${id}-${f}-n`}>{name}</label>
-            <span className="oc-sx-state" data-tone={STATE_TONE[st]} data-llm-state id={`${id}-${f}-s`}>{t(`llm.state.${st}`)}</span>
+            {pill ? <span className="oc-sx-state" data-tone={STATE_TONE[st]} data-llm-state id={`${id}-${f}-s`}>{t(`llm.state.${st}`)}</span> : null}
           </span>
-          <small id={`${id}-${f}-d`} data-llm-sends>{t('llm.sends', t(`llm.f.${f}.sends`))}</small>
+          <small id={`${id}-${f}-d`} data-llm-sends>{t('llm.sends', t(`llm.f.${f}.sends`))}<span className="oc-lm-calls" data-llm-calls> · {t(`llm.f.${f}.calls`)}</span></small>
         </span>
-        <span className="oc-lm-lc"><LaneChip row={row} t={t} /></span>
+        <span className="oc-lm-lc">{row.chip ? <LaneChip row={row} t={t} /> : null}</span>
         <span className="oc-lm-ac">{action}</span>
         <span className="oc-lm-ctl">
           <HelpTip name={name}>
@@ -218,7 +221,7 @@ export function SettingsFormLlm({ actions = null }) {
             <p data-llm-cost>{t('llm.cost', t(`llm.f.${f}.cost`))}{last ? ` ${last}` : ''}</p>
             {f === 'thoughts' ? <p>{t('llm.thoughts.note')}</p> : null}
           </HelpTip>
-          <Switch id={`${id}-${f}`} labelledBy={`${id}-${f}-n`} describedBy={`${id}-${f}-s ${id}-${f}-d`} checked={row.on} disabled={!row.switchable} {...held(saving)}
+          <Switch id={`${id}-${f}`} labelledBy={`${id}-${f}-n`} describedBy={pill ? `${id}-${f}-s ${id}-${f}-d` : `${id}-${f}-d`} checked={row.on} disabled={!row.switchable} {...held(saving)}
             onChange={hold(saving, checked => apply({ features: { [f]: checked } }))} data-llm-switch={f} />
         </span>
         <span className="oc-lm-fx">
@@ -232,6 +235,7 @@ export function SettingsFormLlm({ actions = null }) {
   return (
     <div data-llm data-llm-override={view.override}>
       {title}
+      <p className="oc-lm-pay" data-llm-pay>{t('llm.pay')}</p>
       {!state.available ? <p className="oc-sx-warn" role="status" data-llm-nomodel>{t('llm.noModel')}</p> : null}
 
       <div className="oc-lm-top" data-llm-top data-grant={view.granted ? 'yes' : 'no'}>
@@ -291,6 +295,7 @@ export function SettingsFormLlm({ actions = null }) {
         {['work', 'decor'].map(g => (
           <section key={g} className="oc-lm-grp" aria-labelledby={`${id}-g-${g}`} data-llm-group={g}>
             <h4 className="oc-lm-g" id={`${id}-g-${g}`}>{t(`llm.groups.${g}.name`)}<span className="n">{t(`llm.groups.${g}.note`)}</span><span className="ln" aria-hidden="true" /></h4>
+            {view.notices[g] ? <p className="oc-sx-warn oc-lm-gn" role="status" data-llm-group-notice={view.notices[g]}>{t('llm.groupOutdated')}</p> : null}
             {view.groups[g].map(renderRow)}
           </section>
         ))}

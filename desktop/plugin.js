@@ -5973,6 +5973,8 @@ var en = {
   llm: {
     title: "LLM functions",
     hint: "Decor: the model dresses up the office. Work: it fills in a draft for you to review; nothing is created, changed or launched without your click. Each function has its own switch (all off by default) and says what it sends and what it costs.",
+    pay: "Optional. Every call is billed by your model provider; everything is off by default, nothing is sent without your click.",
+    groupOutdated: "These functions need a newer agent half. Update Officecraft, then restart Hermes.",
     unavailable: "LLM functions need an up-to-date Officecraft agent half. Update the plugin, then restart the gateway.",
     month: "This month",
     spendUsd: (usd, cap) => `$${usd} of $${cap} · estimate`,
@@ -6279,16 +6281,16 @@ var en = {
       allRead: "All cards marked as read."
     },
     f: {
-      recruit: { name: "Assisted recruitment", what: "Describe the mission in one sentence and the model fills in the recruitment form: name, title, description, bot type, starting point, skills to keep and a written personality. Nothing is created until you click “Recruit”.", sends: "mission, bots, bot types, reserved names", detail: "the mission; for each bot, its name, description and the names of its own skills; the bot types; the reserved names. Never an existing SOUL", cost: "one call, two when the description is too long. Light model" },
-      revise: { name: "Bot revision", what: "Rewrites a bot’s description for routing (what it takes on, what it delivers, what it does not take on). Only the description changes, when you click “Apply”.", sends: "this bot, name and description of the others", detail: "this bot’s name, description and own skill names; the name and description of the others", cost: "one call. Light model" },
-      campaign: { name: "Propose a graph", what: "Proposes a draft graph in the campaign editor, checked like a hand-made draft. Nothing is created until you click “Create”.", sends: "objective, notes, bots (name, description), limits", detail: "the objective, your notes, the name and description of each bot, the limits (40 cards, 8 phases, length of titles and instructions)", cost: "one call. Strong model" },
-      cardbody: { name: "Rewrite the instructions", what: "Rewrites the instructions for one card in the draft: scope, steps, out of scope, criteria, proof. No invented facts: check paths and figures.", sends: "objective, one card in the draft, its bot", detail: "the objective; the title, bot and instructions of this card; the name and description of that bot", cost: "one call. Strong model" },
-      lint: { name: "Review before launch", what: "Reads the draft before it is created: up to 8 remarks. Advice only: none of them blocks “Create”.", sends: "draft cards, bots, prices of pinned models", detail: "the cards of this draft (reference, phase, title, bot, model, dependencies, instructions), the name and description of each bot, the price of pinned models", cost: "one call. Light model" },
-      decor: { name: "Decorator", what: "Describe a style: walls, wainscot, floor, the view from the windows, sofa, furniture and desks are set for you.", sends: "the style you type", detail: "the style you type", cost: "one call per request" },
-      outfits: { name: "Custom outfits", what: "Each agent is dressed for its role in your setup, with an outfit from the catalog (a stylish designer, a director in shirtsleeves…). A role you picked yourself always wins.", sends: "name, description, skill names", detail: "name, description and skill names of each agent (never the skills’ content)", cost: "one call for all profiles, again only when one changes" },
-      art: { name: "Wall art", what: "A pixel-art poster celebrates each real milestone (100 cards, a finished chain…).", sends: "milestone kind, tier, count, project, date", detail: "the milestone (kind, tier, count, project name, date)", cost: "one call per batch of milestones" },
-      seating: { name: "Seating", what: "Suggests who sits next to whom, from the real hand-offs between agents and your instructions.", sends: "agent names, hand-off counts, your instructions", detail: "agent names, number of hand-offs between them, your instructions", cost: "one call per request" },
-      thoughts: { name: "Thought bubbles", what: "A short bubble above an agent at work sums up what it is really doing.", sends: "agent, role, running card title, tool names, minutes", detail: "name, role, title of the running card, names of the tools used and minutes on the card", cost: "at most one call a minute overall" }
+      recruit: { calls: "1 call (2 at most)", name: "Assisted recruitment", what: "Describe the mission in one sentence and the model fills in the recruitment form: name, title, description, bot type, starting point, skills to keep and a written personality. Nothing is created until you click “Recruit”.", sends: "mission, bots, bot types, reserved names", detail: "the mission; for each bot, its name, description and the names of its own skills; the bot types; the reserved names. Never an existing SOUL", cost: "one call, two when the description is too long. Light model" },
+      revise: { calls: "1 call", name: "Bot revision", what: "Rewrites a bot’s description for routing (what it takes on, what it delivers, what it does not take on). Only the description changes, when you click “Apply”.", sends: "this bot, name and description of the others", detail: "this bot’s name, description and own skill names; the name and description of the others", cost: "one call. Light model" },
+      campaign: { calls: "1 call", name: "Propose a graph", what: "Proposes a draft graph in the campaign editor, checked like a hand-made draft. Nothing is created until you click “Create”.", sends: "objective, notes, bots (name, description), limits", detail: "the objective, your notes, the name and description of each bot, the limits (40 cards, 8 phases, length of titles and instructions)", cost: "one call. Strong model" },
+      cardbody: { calls: "1 call", name: "Rewrite the instructions", what: "Rewrites the instructions for one card in the draft: scope, steps, out of scope, criteria, proof. No invented facts: check paths and figures.", sends: "objective, one card in the draft, its bot", detail: "the objective; the title, bot and instructions of this card; the name and description of that bot", cost: "one call. Strong model" },
+      lint: { calls: "1 call", name: "Review before launch", what: "Reads the draft before it is created: up to 8 remarks. Advice only: none of them blocks “Create”.", sends: "draft cards, bots, prices of pinned models", detail: "the cards of this draft (reference, phase, title, bot, model, dependencies, instructions), the name and description of each bot, the price of pinned models", cost: "one call. Light model" },
+      decor: { calls: "1 call per request", name: "Decorator", what: "Describe a style: walls, wainscot, floor, the view from the windows, sofa, furniture and desks are set for you.", sends: "the style you type", detail: "the style you type", cost: "one call per request" },
+      outfits: { calls: "1 call, redone when a profile changes", name: "Custom outfits", what: "Each agent is dressed for its role in your setup, with an outfit from the catalog (a stylish designer, a director in shirtsleeves…). A role you picked yourself always wins.", sends: "name, description, skill names", detail: "name, description and skill names of each agent (never the skills’ content)", cost: "one call for all profiles, again only when one changes" },
+      art: { calls: "1 call per batch of milestones", name: "Wall art", what: "A pixel-art poster celebrates each real milestone (100 cards, a finished chain…).", sends: "milestone kind, tier, count, project, date", detail: "the milestone (kind, tier, count, project name, date)", cost: "one call per batch of milestones" },
+      seating: { calls: "1 call per request", name: "Seating", what: "Suggests who sits next to whom, from the real hand-offs between agents and your instructions.", sends: "agent names, hand-off counts, your instructions", detail: "agent names, number of hand-offs between them, your instructions", cost: "one call per request" },
+      thoughts: { calls: "1 call a minute at most", name: "Thought bubbles", what: "A short bubble above an agent at work sums up what it is really doing.", sends: "agent, role, running card title, tool names, minutes", detail: "name, role, title of the running card, names of the tools used and minutes on the card", cost: "at most one call a minute overall" }
     },
     state: { off: "Off", ready: "Ready", unavailable: "No model", outdated: "Update agent half", cap: "Cap reached", error: "Last call failed" },
     capReached: {
@@ -7725,6 +7727,8 @@ var es = {
   llm: {
     title: "Funciones LLM",
     hint: "Decoración: el modelo embellece la oficina. Trabajo: rellena un borrador que tú revisas; no se crea, modifica ni lanza nada sin tu clic. Cada función tiene su interruptor, todas desactivadas al principio, y dice qué envía y cuánto cuesta.",
+    pay: "Opcional. Tu proveedor de modelos factura cada llamada; todo está desactivado por defecto y no se envía nada sin tu clic.",
+    groupOutdated: "Estas funciones necesitan una parte Agente más reciente. Actualiza Officecraft y reinicia Hermes.",
     unavailable: "Las funciones LLM necesitan la parte Agente de Officecraft, actualizada y reiniciada con el gateway.",
     month: "Este mes",
     spendUsd: (usd, cap) => `${usd} $ de ${cap} $ · estimación`,
@@ -8031,16 +8035,16 @@ var es = {
       allRead: "Todas las tarjetas marcadas como revisadas."
     },
     f: {
-      recruit: { name: "Reclutamiento asistido", what: "Una frase de misión y el modelo rellena el formulario de reclutamiento: nombre, título, descripción, tipo de bot, punto de partida, skills conservados, personalidad redactada. No se crea nada antes de «Reclutar».", sends: "misión, bots, tipos de bot, nombres reservados", detail: "la misión; de cada bot, nombre, descripción y nombres de sus skills propios; los tipos de bot; los nombres reservados. Nunca un SOUL existente", cost: "1 llamada, 2 si la descripción es demasiado larga. Modelo ligero" },
-      revise: { name: "Revisión de un bot", what: "Reescribe la descripción de un bot para que el kanban le asigne bien las tarjetas (qué acepta, qué entrega, qué no acepta). Solo cambia la descripción, al pulsar «Aplicar».", sends: "este bot, nombre y descripción de los demás", detail: "nombre, descripción y nombres de los skills propios de este bot; nombre y descripción de los demás", cost: "1 llamada. Modelo ligero" },
-      campaign: { name: "Proponer un grafo", what: "Propone un borrador de grafo en el editor de campañas, comprobado como un borrador hecho a mano. No se crea nada antes de «Crear».", sends: "objetivo, notas, bots (nombre, descripción), límites", detail: "el objetivo, tus notas, el nombre y la descripción de cada bot, los límites (40 tarjetas, 8 fases, longitud de títulos e instrucciones)", cost: "1 llamada. Modelo potente" },
-      cardbody: { name: "Reescribir las instrucciones", what: "Reescribe las instrucciones de una tarjeta del borrador: alcance, pasos, fuera de alcance, criterios, prueba. Sin datos inventados: comprueba rutas y cifras.", sends: "objetivo, una tarjeta del borrador, su bot", detail: "el objetivo; título, bot e instrucciones de esta tarjeta del borrador; el nombre y la descripción de ese bot", cost: "1 llamada. Modelo potente" },
-      lint: { name: "Revisión antes de lanzar", what: "Revisa el borrador antes de crearlo: 8 observaciones como máximo. Solo consejos: ninguna bloquea «Crear».", sends: "tarjetas, bots, precios de modelos fijados", detail: "las tarjetas de este borrador (referencia, fase, título, bot, modelo, dependencias, instrucciones), el nombre y la descripción de cada bot, el precio de los modelos fijados", cost: "1 llamada. Modelo ligero" },
-      decor: { name: "Decorador", what: "Describe un estilo: paredes, friso, suelo, vista desde las ventanas, sofá, muebles y escritorios se ajustan por ti.", sends: "el estilo que escribes", detail: "el estilo que escribes", cost: "una llamada por petición" },
-      outfits: { name: "Vestuario a medida", what: "Cada agente se viste según su rol en tu configuración, elegido en el catálogo de vestuario (el diseñador elegante, la dirección en camisa…). Un rol elegido a mano siempre prevalece.", sends: "nombre, descripción, nombres de skills", detail: "nombre, descripción y nombres de los skills de cada agente (nunca su contenido)", cost: "una llamada para todos los perfiles, otra solo cuando uno cambia" },
-      art: { name: "Obras murales", what: "Un cartel de pixel art celebra cada hito real (100 tarjetas, una cadena terminada…).", sends: "tipo de hito, nivel, cantidad, proyecto, fecha", detail: "el hito (tipo, nivel, cantidad, nombre del proyecto, fecha)", cost: "una llamada por lote de hitos" },
-      seating: { name: "Distribución", what: "Propone quién se sienta junto a quién, según los traspasos reales entre agentes y tus indicaciones.", sends: "nombres de agentes, traspasos, tus indicaciones", detail: "nombres de los agentes, número de traspasos entre ellos, tus indicaciones", cost: "una llamada por petición" },
-      thoughts: { name: "Burbujas de pensamiento", what: "Una burbuja corta sobre un agente trabajando resume lo que hace de verdad.", sends: "agente, rol, tarjeta en curso, herramientas, minutos", detail: "nombre, rol, título de la tarjeta en curso, nombres de las herramientas usadas y minutos en la tarjeta", cost: "como máximo una llamada por minuto en total" }
+      recruit: { calls: "1 llamada (2 como máximo)", name: "Reclutamiento asistido", what: "Una frase de misión y el modelo rellena el formulario de reclutamiento: nombre, título, descripción, tipo de bot, punto de partida, skills conservados, personalidad redactada. No se crea nada antes de «Reclutar».", sends: "misión, bots, tipos de bot, nombres reservados", detail: "la misión; de cada bot, nombre, descripción y nombres de sus skills propios; los tipos de bot; los nombres reservados. Nunca un SOUL existente", cost: "1 llamada, 2 si la descripción es demasiado larga. Modelo ligero" },
+      revise: { calls: "1 llamada", name: "Revisión de un bot", what: "Reescribe la descripción de un bot para que el kanban le asigne bien las tarjetas (qué acepta, qué entrega, qué no acepta). Solo cambia la descripción, al pulsar «Aplicar».", sends: "este bot, nombre y descripción de los demás", detail: "nombre, descripción y nombres de los skills propios de este bot; nombre y descripción de los demás", cost: "1 llamada. Modelo ligero" },
+      campaign: { calls: "1 llamada", name: "Proponer un grafo", what: "Propone un borrador de grafo en el editor de campañas, comprobado como un borrador hecho a mano. No se crea nada antes de «Crear».", sends: "objetivo, notas, bots (nombre, descripción), límites", detail: "el objetivo, tus notas, el nombre y la descripción de cada bot, los límites (40 tarjetas, 8 fases, longitud de títulos e instrucciones)", cost: "1 llamada. Modelo potente" },
+      cardbody: { calls: "1 llamada", name: "Reescribir las instrucciones", what: "Reescribe las instrucciones de una tarjeta del borrador: alcance, pasos, fuera de alcance, criterios, prueba. Sin datos inventados: comprueba rutas y cifras.", sends: "objetivo, una tarjeta del borrador, su bot", detail: "el objetivo; título, bot e instrucciones de esta tarjeta del borrador; el nombre y la descripción de ese bot", cost: "1 llamada. Modelo potente" },
+      lint: { calls: "1 llamada", name: "Revisión antes de lanzar", what: "Revisa el borrador antes de crearlo: 8 observaciones como máximo. Solo consejos: ninguna bloquea «Crear».", sends: "tarjetas, bots, precios de modelos fijados", detail: "las tarjetas de este borrador (referencia, fase, título, bot, modelo, dependencias, instrucciones), el nombre y la descripción de cada bot, el precio de los modelos fijados", cost: "1 llamada. Modelo ligero" },
+      decor: { calls: "1 llamada por petición", name: "Decorador", what: "Describe un estilo: paredes, friso, suelo, vista desde las ventanas, sofá, muebles y escritorios se ajustan por ti.", sends: "el estilo que escribes", detail: "el estilo que escribes", cost: "una llamada por petición" },
+      outfits: { calls: "1 llamada; se repite si cambia un perfil", name: "Vestuario a medida", what: "Cada agente se viste según su rol en tu configuración, elegido en el catálogo de vestuario (el diseñador elegante, la dirección en camisa…). Un rol elegido a mano siempre prevalece.", sends: "nombre, descripción, nombres de skills", detail: "nombre, descripción y nombres de los skills de cada agente (nunca su contenido)", cost: "una llamada para todos los perfiles, otra solo cuando uno cambia" },
+      art: { calls: "1 llamada por lote de hitos", name: "Obras murales", what: "Un cartel de pixel art celebra cada hito real (100 tarjetas, una cadena terminada…).", sends: "tipo de hito, nivel, cantidad, proyecto, fecha", detail: "el hito (tipo, nivel, cantidad, nombre del proyecto, fecha)", cost: "una llamada por lote de hitos" },
+      seating: { calls: "1 llamada por petición", name: "Distribución", what: "Propone quién se sienta junto a quién, según los traspasos reales entre agentes y tus indicaciones.", sends: "nombres de agentes, traspasos, tus indicaciones", detail: "nombres de los agentes, número de traspasos entre ellos, tus indicaciones", cost: "una llamada por petición" },
+      thoughts: { calls: "1 llamada por minuto como máximo", name: "Burbujas de pensamiento", what: "Una burbuja corta sobre un agente trabajando resume lo que hace de verdad.", sends: "agente, rol, tarjeta en curso, herramientas, minutos", detail: "nombre, rol, título de la tarjeta en curso, nombres de las herramientas usadas y minutos en la tarjeta", cost: "como máximo una llamada por minuto en total" }
     },
     state: { off: "Desactivada", ready: "Lista", unavailable: "Sin modelo", outdated: "Parte Agente por actualizar", cap: "Límite alcanzado", error: "Última llamada fallida" },
     capReached: {
@@ -9478,6 +9482,8 @@ var fr = {
   llm: {
     title: "Fonctions LLM",
     hint: "Décor : le modèle embellit le bureau. Travail : il remplit un brouillon que vous relisez ; rien n’est créé, modifié ni lancé sans votre clic. Chaque fonction a son interrupteur (toutes désactivées par défaut) et indique ce qu’elle envoie et ce qu’elle coûte.",
+    pay: "Optionnel. Chaque appel est facturé par votre fournisseur de modèle ; tout est désactivé par défaut, rien ne part sans votre clic.",
+    groupOutdated: "Ces fonctions attendent une partie agent plus récente. Mettez à jour Officecraft puis redémarrez Hermes.",
     unavailable: "Les fonctions LLM nécessitent la partie agent d’Officecraft, à jour et redémarrée avec le gateway.",
     month: "Ce mois-ci",
     spendUsd: (usd, cap) => `${usd} $ sur ${cap} $ · estimation`,
@@ -9784,16 +9790,16 @@ var fr = {
       allRead: "Toutes les cartes sont marquées comme relues."
     },
     f: {
-      recruit: { name: "Recrutement assisté", what: "Une phrase de mission, et le modèle remplit le formulaire de recrutement : nom, titre, description, type de bot, point de départ, skills conservés, personnalité rédigée. Rien n’est créé avant « Recruter ».", sends: "mission, bots, types de bot, noms réservés", detail: "la mission ; pour chaque bot, nom, description et noms de ses skills propres ; les types de bot ; les noms réservés. Jamais un SOUL existant", cost: "1 appel, 2 si la description est trop longue. Modèle léger" },
-      revise: { name: "Révision d’un bot", what: "Réécrit la description d’un bot pour l’attribution des cartes (ce qu’il prend, ce qu’il livre, ce qu’il ne prend pas). Seule la description change, sur « Appliquer ».", sends: "ce bot, nom et description des autres", detail: "nom, description et noms des skills propres de ce bot ; nom et description des autres", cost: "1 appel. Modèle léger" },
-      campaign: { name: "Proposer un graphe", what: "Propose un brouillon de graphe dans l’éditeur de campagne, contrôlé comme un brouillon fait à la main. Rien n’est créé avant « Créer ».", sends: "objectif, notes, bots (nom, description), limites", detail: "l’objectif, vos notes, le nom et la description de chaque bot, les limites (40 cartes, 8 phases, longueur des titres et des consignes)", cost: "1 appel. Modèle fort" },
-      cardbody: { name: "Réécrire les consignes", what: "Réécrit les consignes d’une carte du brouillon : périmètre, étapes, hors périmètre, critères, preuve. Rien n’est inventé en principe : vérifiez tout de même chemins et chiffres.", sends: "objectif, une carte du brouillon, son bot", detail: "l’objectif ; titre, bot et consignes de cette carte du brouillon ; le nom et la description de ce bot", cost: "1 appel. Modèle fort" },
-      lint: { name: "Relecture avant lancement", what: "Relit le brouillon avant la création : 8 remarques au plus. Des conseils : aucune ne bloque « Créer ».", sends: "cartes du brouillon, bots, prix des modèles imposés", detail: "les cartes de ce brouillon (référence, phase, titre, bot, modèle, dépendances, consignes), le nom et la description de chaque bot, le prix des modèles imposés", cost: "1 appel. Modèle léger" },
-      decor: { name: "Décorateur", what: "Décrivez un style : murs, lambris, sol, vue par les fenêtres, canapé, meubles et bureaux sont réglés pour vous.", sends: "le style que vous tapez", detail: "le style que vous tapez", cost: "un appel par demande" },
-      outfits: { name: "Tenues sur mesure", what: "Chaque agent est habillé selon son rôle dans votre équipe, choisi dans le catalogue de tenues (le designer stylé, la direction en chemise…). Un rôle choisi à la main l’emporte toujours.", sends: "nom, description, noms des skills", detail: "nom, description et noms des skills de chaque agent (jamais le contenu des skills)", cost: "un appel pour tous les profils, renouvelé seulement quand l’un change" },
-      art: { name: "Œuvres murales", what: "Une affiche pixel art célèbre chaque vrai jalon (100 cartes, chaîne terminée…).", sends: "type de jalon, palier, nombre, projet, date", detail: "le jalon (type, palier, nombre, nom du projet, date)", cost: "un appel par lot de jalons" },
-      seating: { name: "Agencement", what: "Propose qui s’assoit à côté de qui, d’après les vrais passages de relais entre agents et vos consignes.", sends: "noms des agents, relais, vos consignes", detail: "noms des agents, nombre de relais entre eux, vos consignes", cost: "un appel par demande" },
-      thoughts: { name: "Bulles de pensée", what: "Une courte bulle au-dessus d’un agent au travail résume ce qu’il fait vraiment.", sends: "agent, rôle, carte en cours, noms d’outils, durée", detail: "nom, rôle, titre de la carte en cours, noms des outils utilisés et minutes passées sur la carte", cost: "au plus un appel par minute en tout" }
+      recruit: { calls: "1 appel (2 au plus)", name: "Recrutement assisté", what: "Une phrase de mission, et le modèle remplit le formulaire de recrutement : nom, titre, description, type de bot, point de départ, skills conservés, personnalité rédigée. Rien n’est créé avant « Recruter ».", sends: "mission, bots, types de bot, noms réservés", detail: "la mission ; pour chaque bot, nom, description et noms de ses skills propres ; les types de bot ; les noms réservés. Jamais un SOUL existant", cost: "1 appel, 2 si la description est trop longue. Modèle léger" },
+      revise: { calls: "1 appel", name: "Révision d’un bot", what: "Réécrit la description d’un bot pour l’attribution des cartes (ce qu’il prend, ce qu’il livre, ce qu’il ne prend pas). Seule la description change, sur « Appliquer ».", sends: "ce bot, nom et description des autres", detail: "nom, description et noms des skills propres de ce bot ; nom et description des autres", cost: "1 appel. Modèle léger" },
+      campaign: { calls: "1 appel", name: "Proposer un graphe", what: "Propose un brouillon de graphe dans l’éditeur de campagne, contrôlé comme un brouillon fait à la main. Rien n’est créé avant « Créer ».", sends: "objectif, notes, bots (nom, description), limites", detail: "l’objectif, vos notes, le nom et la description de chaque bot, les limites (40 cartes, 8 phases, longueur des titres et des consignes)", cost: "1 appel. Modèle fort" },
+      cardbody: { calls: "1 appel", name: "Réécrire les consignes", what: "Réécrit les consignes d’une carte du brouillon : périmètre, étapes, hors périmètre, critères, preuve. Rien n’est inventé en principe : vérifiez tout de même chemins et chiffres.", sends: "objectif, une carte du brouillon, son bot", detail: "l’objectif ; titre, bot et consignes de cette carte du brouillon ; le nom et la description de ce bot", cost: "1 appel. Modèle fort" },
+      lint: { calls: "1 appel", name: "Relecture avant lancement", what: "Relit le brouillon avant la création : 8 remarques au plus. Des conseils : aucune ne bloque « Créer ».", sends: "cartes du brouillon, bots, prix des modèles imposés", detail: "les cartes de ce brouillon (référence, phase, titre, bot, modèle, dépendances, consignes), le nom et la description de chaque bot, le prix des modèles imposés", cost: "1 appel. Modèle léger" },
+      decor: { calls: "1 appel par demande", name: "Décorateur", what: "Décrivez un style : murs, lambris, sol, vue par les fenêtres, canapé, meubles et bureaux sont réglés pour vous.", sends: "le style que vous tapez", detail: "le style que vous tapez", cost: "un appel par demande" },
+      outfits: { calls: "1 appel, refait si un profil change", name: "Tenues sur mesure", what: "Chaque agent est habillé selon son rôle dans votre équipe, choisi dans le catalogue de tenues (le designer stylé, la direction en chemise…). Un rôle choisi à la main l’emporte toujours.", sends: "nom, description, noms des skills", detail: "nom, description et noms des skills de chaque agent (jamais le contenu des skills)", cost: "un appel pour tous les profils, renouvelé seulement quand l’un change" },
+      art: { calls: "1 appel par lot de jalons", name: "Œuvres murales", what: "Une affiche pixel art célèbre chaque vrai jalon (100 cartes, chaîne terminée…).", sends: "type de jalon, palier, nombre, projet, date", detail: "le jalon (type, palier, nombre, nom du projet, date)", cost: "un appel par lot de jalons" },
+      seating: { calls: "1 appel par demande", name: "Agencement", what: "Propose qui s’assoit à côté de qui, d’après les vrais passages de relais entre agents et vos consignes.", sends: "noms des agents, relais, vos consignes", detail: "noms des agents, nombre de relais entre eux, vos consignes", cost: "un appel par demande" },
+      thoughts: { calls: "1 appel par minute au plus", name: "Bulles de pensée", what: "Une courte bulle au-dessus d’un agent au travail résume ce qu’il fait vraiment.", sends: "agent, rôle, carte en cours, noms d’outils, durée", detail: "nom, rôle, titre de la carte en cours, noms des outils utilisés et minutes passées sur la carte", cost: "au plus un appel par minute en tout" }
     },
     state: { off: "Désactivée", ready: "Prête", unavailable: "Aucun modèle", outdated: "Partie agent à mettre à jour", cap: "Plafond atteint", error: "Dernier appel en échec" },
     capReached: {
@@ -23785,8 +23791,27 @@ function featureRow(state2, feature, failed = null) {
     cap: capReached(state2, feature)
   };
 }
+var SHARED_STATES = Object.freeze(["outdated", "unavailable"]);
+function groupNotice(rows) {
+  const counts = {};
+  for (const r of rows) if (SHARED_STATES.includes(r.state)) counts[r.state] = (counts[r.state] ?? 0) + 1;
+  const shared = SHARED_STATES.filter((k) => counts[k] >= 2);
+  return { notice: shared.includes("outdated") ? "outdated" : null, rows: rows.map((r) => ({ ...r, quiet: shared.includes(r.state) })) };
+}
+var chipKey = (row) => `${row.lane}:${row.route.kind === "model" ? `${row.route.provider}/${row.route.model}` : "host"}`;
+function chipRows(rows) {
+  const counts = /* @__PURE__ */ new Map();
+  for (const r of rows) counts.set(chipKey(r), (counts.get(chipKey(r)) ?? 0) + 1);
+  if (counts.size <= 1) return /* @__PURE__ */ new Set();
+  const common = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  return new Set(rows.filter((r) => chipKey(r) !== common).map((r) => r.key));
+}
 function settingsView(state2, list = { state: "idle", choices: [] }, failed = {}) {
   const rows = (f) => featureRow(state2, f, failed[f]?.kind === "failed" ? failed[f] : null);
+  const work = groupNotice(LLM_WORK.map(rows));
+  const decor = groupNotice(LLM_FEATURES.map(rows));
+  const chips = chipRows([...work.rows, ...decor.rows]);
+  const mark = (r) => ({ ...r, chip: chips.has(r.key) });
   return {
     override: state2.override,
     granted: canChoose(state2),
@@ -23797,7 +23822,8 @@ function settingsView(state2, list = { state: "idle", choices: [] }, failed = {}
     chosen: modelsSet(state2),
     selects: Object.fromEntries(LLM_LANES.map((l) => [l, laneSelect(state2, l, list)])),
     list: { state: list.state, count: list.choices.length, fallback: LIST_FALLBACKS.includes(list.state) ? list.state : null },
-    groups: { work: LLM_WORK.map(rows), decor: LLM_FEATURES.map(rows) },
+    groups: { work: work.rows.map(mark), decor: decor.rows.map(mark) },
+    notices: { work: work.notice, decor: decor.notice },
     on: LLM_ALL.filter((f) => state2.settings.features[f] === true).length,
     of: LLM_ALL.length
   };
@@ -24112,16 +24138,23 @@ function SettingsFormLlm({ actions = null }) {
     } else if (f === "seating" && actions?.onSeating && st === "ready") action = /* @__PURE__ */ jsx41("button", { type: "button", className: "oc-sx-btn", "data-llm-open-seating": true, onClick: actions.onSeating, children: t("llm.seating.open") });
     const status = done2 ? done2.kind === "done" ? f === "art" ? t("llm.art.done", done2.fiche?.posters?.length ?? 0) : t("llm.outfits.done", done2.fiche?.outfits?.length ?? 0) : t(`llm.reason.${done2.reason}`) : "";
     const cost = done2 && costKind(done2) === "known" ? ` ${t("llm.decor.costKnown", formatUsd(done2.costUsd, t.lang))}` : done2 && costKind(done2) === "unknown" ? ` ${t("llm.decor.costUnknown")}` : "";
-    const warn = st === "cap" && hit ? t(`llm.capReached.${hit}`) : st === "unavailable" ? t("llm.noModel") : st === "error" && !done2 ? t("llm.lastError") : "";
-    return /* @__PURE__ */ jsxs37("div", { className: "oc-lm-row", role: "group", "aria-label": name, "data-llm-feature": f, "data-state": st, "data-on": row.on ? "true" : "false", children: [
+    const warn = st === "cap" && hit ? t(`llm.capReached.${hit}`) : st === "error" && !done2 ? t("llm.lastError") : "";
+    const pill = st !== "off" && !row.quiet;
+    return /* @__PURE__ */ jsxs37("div", { className: "oc-lm-row", role: "group", "aria-label": name, "data-llm-feature": f, "data-state": st, "data-on": row.on ? "true" : "false", "data-quiet": row.quiet ? "true" : void 0, children: [
       /* @__PURE__ */ jsxs37("span", { className: "oc-lm-mc", children: [
         /* @__PURE__ */ jsxs37("span", { className: "oc-sx-name", children: [
           /* @__PURE__ */ jsx41("label", { htmlFor: `${id}-${f}`, id: `${id}-${f}-n`, children: name }),
-          /* @__PURE__ */ jsx41("span", { className: "oc-sx-state", "data-tone": STATE_TONE[st], "data-llm-state": true, id: `${id}-${f}-s`, children: t(`llm.state.${st}`) })
+          pill ? /* @__PURE__ */ jsx41("span", { className: "oc-sx-state", "data-tone": STATE_TONE[st], "data-llm-state": true, id: `${id}-${f}-s`, children: t(`llm.state.${st}`) }) : null
         ] }),
-        /* @__PURE__ */ jsx41("small", { id: `${id}-${f}-d`, "data-llm-sends": true, children: t("llm.sends", t(`llm.f.${f}.sends`)) })
+        /* @__PURE__ */ jsxs37("small", { id: `${id}-${f}-d`, "data-llm-sends": true, children: [
+          t("llm.sends", t(`llm.f.${f}.sends`)),
+          /* @__PURE__ */ jsxs37("span", { className: "oc-lm-calls", "data-llm-calls": true, children: [
+            " · ",
+            t(`llm.f.${f}.calls`)
+          ] })
+        ] })
       ] }),
-      /* @__PURE__ */ jsx41("span", { className: "oc-lm-lc", children: /* @__PURE__ */ jsx41(LaneChip, { row, t }) }),
+      /* @__PURE__ */ jsx41("span", { className: "oc-lm-lc", children: row.chip ? /* @__PURE__ */ jsx41(LaneChip, { row, t }) : null }),
       /* @__PURE__ */ jsx41("span", { className: "oc-lm-ac", children: action }),
       /* @__PURE__ */ jsxs37("span", { className: "oc-lm-ctl", children: [
         /* @__PURE__ */ jsxs37(HelpTip, { name, children: [
@@ -24138,7 +24171,7 @@ function SettingsFormLlm({ actions = null }) {
           {
             id: `${id}-${f}`,
             labelledBy: `${id}-${f}-n`,
-            describedBy: `${id}-${f}-s ${id}-${f}-d`,
+            describedBy: pill ? `${id}-${f}-s ${id}-${f}-d` : `${id}-${f}-d`,
             checked: row.on,
             disabled: !row.switchable,
             ...held(saving),
@@ -24158,6 +24191,7 @@ function SettingsFormLlm({ actions = null }) {
   };
   return /* @__PURE__ */ jsxs37("div", { "data-llm": true, "data-llm-override": view.override, children: [
     title,
+    /* @__PURE__ */ jsx41("p", { className: "oc-lm-pay", "data-llm-pay": true, children: t("llm.pay") }),
     !state2.available ? /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn", role: "status", "data-llm-nomodel": true, children: t("llm.noModel") }) : null,
     /* @__PURE__ */ jsxs37("div", { className: "oc-lm-top", "data-llm-top": true, "data-grant": view.granted ? "yes" : "no", children: [
       /* @__PURE__ */ jsxs37("div", { className: "oc-lm-bud", "data-llm-spend": true, "data-mode": spend.mode, children: [
@@ -24255,6 +24289,7 @@ function SettingsFormLlm({ actions = null }) {
         /* @__PURE__ */ jsx41("span", { className: "n", children: t(`llm.groups.${g}.note`) }),
         /* @__PURE__ */ jsx41("span", { className: "ln", "aria-hidden": "true" })
       ] }),
+      view.notices[g] ? /* @__PURE__ */ jsx41("p", { className: "oc-sx-warn oc-lm-gn", role: "status", "data-llm-group-notice": view.notices[g], children: t("llm.groupOutdated") }) : null,
       view.groups[g].map(renderRow)
     ] }, g)) }),
     error ? /* @__PURE__ */ jsx41("p", { ref: errorRef, className: "oc-sx-warn", role: "alert", "data-llm-error-save": true, children: t(error === "capInvalid" ? "llm.capInvalid" : "llm.saveFailed") }) : null
@@ -24674,9 +24709,7 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 .oc-sx-fx>*{margin-top:8px}
 .oc-sx-fx>*:empty{margin:0}
 /* the gauge and the two models on top, the ten functions in two groups of rows, each row = name + state + « Sends », lane chip, action, « ? » + switch */
-/* the LLM tab is the widest and tallest of the window (1040 px, nothing to scroll at 1440 x 900); the other tabs keep the window they had */
-.oc-sd:has([data-llm]){width:min(1040px,calc(100vw - 16px))}
-.oc-sd:has([data-llm]) .oc-sf-in{height:min(760px,calc(100dvh - 160px))}
+/* the window keeps ONE size whichever tab is open (a window that grows when a tab opens moves the tab list from under the pointer): the size of the tallest tab that fits the screen, the rest scrolls inside */
 .oc-lm-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px 16px;align-items:start;border:1px solid ${EDGE};border-radius:12px;padding:8px 12px;margin:4px 0 0;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET4} 7%, ${CARD}), ${CARD} 60%)}
 .oc-lm-wide{grid-column:1 / -1;margin:0}
 .oc-lm-load{color:${TEXT3};font-size:12px}
@@ -24707,14 +24740,20 @@ ${ringed(".oc-lm-ib:focus-visible")}
 .oc-lm-g .n{font-weight:500;color:${TEXT3}}
 .oc-lm-g .ln{flex:1 1 auto;height:1px;background:${HAIR}}
 .oc-lm-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) max-content max-content max-content;column-gap:12px;align-items:center;min-height:40px;padding:2px 0;border-bottom:1px solid ${HAIR}}
-.oc-lm-mc{display:flex;flex-direction:column;min-width:0}
+.oc-lm-mc{grid-column:1;display:flex;flex-direction:column;min-width:0}
+.oc-lm-pay{margin:8px 0 0;color:var(--ui-text-secondary);font-size:12.5px;line-height:16px}
+.oc-lm-gn{margin:8px 0 0}
+.oc-lm-row[data-quiet="true"]{opacity:.62}
+.oc-lm-calls{white-space:nowrap}
 /* the « ? » of a feature sits at the right end of its row: its note opens under it, right-aligned */
 .oc-lm-row .oc-sx-tip{left:auto;right:0}
 .oc-lm-mc .oc-sx-name{flex-wrap:wrap}
 .oc-lm-mc small{font-size:12px;line-height:16px;color:${TEXT3}}
 .oc-lm-lc,.oc-lm-ac{display:flex;align-items:center}
-.oc-lm-ac:empty{display:none}
-.oc-lm-ctl{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.oc-lm-lc{grid-column:2}
+.oc-lm-ac{grid-column:3}
+.oc-lm-ac:empty,.oc-lm-lc:empty{display:none}
+.oc-lm-ctl{grid-column:4;display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .oc-lm-fx{grid-column:1 / -1;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .oc-lm-fx:empty,.oc-lm-fx>*:empty{display:none}
 .oc-lm-fx:not(:has(*:not(:empty))){display:none}
@@ -24725,7 +24764,8 @@ ${ringed(".oc-lm-ib:focus-visible")}
 .oc-lm-lane.host{border-style:dashed}
 @container (max-width:640px){
   .oc-lm-top{grid-template-columns:minmax(0,1fr)}
-  .oc-lm-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"mc ctl" "lc ac";gap:4px 8px;padding:8px 0}
+  .oc-lm-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"mc ctl" "lc ac";gap:0 8px;padding:8px 0}
+  .oc-lm-lc,.oc-lm-ac{margin-top:4px}
   .oc-lm-mc{grid-area:mc}.oc-lm-ctl{grid-area:ctl;align-self:start}.oc-lm-lc{grid-area:lc}.oc-lm-ac{grid-area:ac;justify-content:flex-end}
 }
 .oc-sx-state{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px solid ${EDGE};font-size:11px;font-weight:600;white-space:nowrap}
@@ -24733,7 +24773,7 @@ ${ringed(".oc-lm-ib:focus-visible")}
 .oc-sx-state[data-tone="warn"]{border-color:color-mix(in oklab, ${ORANGE8} 60%, ${EDGE});background:color-mix(in oklab, ${ORANGE8} 14%, transparent)}
 .oc-sx-state[data-tone="off"]{color:var(--ui-text-secondary)}
 
-.oc-sd{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(780px,calc(100vw - 16px));max-height:calc(100dvh - 32px);padding:0;border:1px solid ${EDGE};border-radius:14px;background:${CARD};color:var(--foreground);overflow:hidden;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 30%, transparent)}
+.oc-sd{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(860px,calc(100vw - 16px));max-height:calc(100dvh - 32px);padding:0;border:1px solid ${EDGE};border-radius:14px;background:${CARD};color:var(--foreground);overflow:hidden;box-shadow:0 24px 60px color-mix(in oklab, var(--foreground) 30%, transparent)}
 .oc-sd[open]{display:flex;flex-direction:column;animation:oc-sd-in .18s ease both}
 .oc-sd::backdrop{background:color-mix(in oklab, var(--foreground) 40%, transparent)}
 .oc-sd-h{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid ${EDGE};flex:0 0 auto}
@@ -24744,7 +24784,7 @@ ${ringed(".oc-lm-ib:focus-visible")}
 ${ringed(".oc-sd-x:focus-visible")}
 .oc-sd-b{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .oc-sd .oc-sf{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-.oc-sd .oc-sf-in{flex:1 1 auto;height:min(560px,calc(100dvh - 160px))}
+.oc-sd .oc-sf-in{flex:1 1 auto;height:min(620px,calc(100dvh - 160px))}
 .oc-sd .oc-sf-panel{overflow-y:auto;overscroll-behavior:contain}
 .oc-sd-f{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid ${EDGE};flex:0 0 auto}
 .oc-sd-f .grow{flex:1 1 auto}
@@ -25015,7 +25055,7 @@ function SettingsDialog({ onClose, llm = null, href = null, sheet = false }) {
         ] }),
         /* @__PURE__ */ jsx44("div", { className: "oc-sd-b", children: /* @__PURE__ */ jsx44(SettingsForm, { llm }) }),
         /* @__PURE__ */ jsxs40("footer", { className: "oc-sd-f", children: [
-          href ? /* @__PURE__ */ jsxs40("button", { type: "button", className: "oc-sx-link", "data-settings-link": true, onClick: () => {
+          href ? /* @__PURE__ */ jsxs40("button", { type: "button", className: "oc-sx-link", "data-settings-link": true, title: t("settings.openInHermesTip"), onClick: () => {
             onClose();
             sdk3.host.navigate(href);
           }, children: [

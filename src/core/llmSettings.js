@@ -100,9 +100,44 @@ export function featureRow(state, feature, failed = null) {
   }
 }
 
+/** The states that can hit several functions for ONE reason (an older agent half, no model offered): said once for the group, never row by row. */
+export const SHARED_STATES = Object.freeze(['outdated', 'unavailable'])
+
+/**
+ * What a group says once. `notice`: the state shared by at least two of its rows (`outdated`: the agent half is older than the page), which
+ * gets one banner with the action; the rows of such a state are `quiet` (dimmed, no pill of their own). `unavailable` (Hermes offers no
+ * model) already has its single banner at the top of the tab, so its rows are only quiet. A state on ONE row stays on that row.
+ */
+export function groupNotice(rows) {
+  const counts = {}
+  for (const r of rows) if (SHARED_STATES.includes(r.state)) counts[r.state] = (counts[r.state] ?? 0) + 1
+  const shared = SHARED_STATES.filter(k => counts[k] >= 2)
+  return { notice: shared.includes('outdated') ? 'outdated' : null, rows: rows.map(r => ({ ...r, quiet: shared.includes(r.state) })) }
+}
+
+/** What a row's model chip says (its lane and the model, or Hermes' own): the comparison key of `chipRows`. */
+export const chipKey = row => `${row.lane}:${row.route.kind === 'model' ? `${row.route.provider}/${row.route.model}` : 'host'}`
+
+/**
+ * The keys of the rows whose model chip says something. The chip is the model a function takes; when it is the same on every row (the choice
+ * of a model is not possible: every row says « light · Hermes ») it says nothing and none is drawn. When two kinds exist, the one most
+ * rows have is the default and is not repeated: only the rows that differ from it carry a chip.
+ */
+export function chipRows(rows) {
+  const counts = new Map()
+  for (const r of rows) counts.set(chipKey(r), (counts.get(chipKey(r)) ?? 0) + 1)
+  if (counts.size <= 1) return new Set()
+  const common = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0]
+  return new Set(rows.filter(r => chipKey(r) !== common).map(r => r.key))
+}
+
 /** The whole tab, as one value. `list` = `modelChoices(opts)`; `failed` = `{ [feature]: answer }` of the last calls made from the form. */
 export function settingsView(state, list = { state: 'idle', choices: [] }, failed = {}) {
   const rows = f => featureRow(state, f, failed[f]?.kind === 'failed' ? failed[f] : null)
+  const work = groupNotice(LLM_WORK.map(rows))
+  const decor = groupNotice(LLM_FEATURES.map(rows))
+  const chips = chipRows([...work.rows, ...decor.rows])
+  const mark = r => ({ ...r, chip: chips.has(r.key) })
   return {
     override: state.override,
     granted: canChoose(state),
@@ -113,7 +148,8 @@ export function settingsView(state, list = { state: 'idle', choices: [] }, faile
     chosen: modelsSet(state),
     selects: Object.fromEntries(LLM_LANES.map(l => [l, laneSelect(state, l, list)])),
     list: { state: list.state, count: list.choices.length, fallback: LIST_FALLBACKS.includes(list.state) ? list.state : null },
-    groups: { work: LLM_WORK.map(rows), decor: LLM_FEATURES.map(rows) },
+    groups: { work: work.rows.map(mark), decor: decor.rows.map(mark) },
+    notices: { work: work.notice, decor: decor.notice },
     on: LLM_ALL.filter(f => state.settings.features[f] === true).length,
     of: LLM_ALL.length
   }
