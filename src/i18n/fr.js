@@ -96,7 +96,7 @@ export const fr = {
     moreHeads: n => `+${n} autre${n === 1 ? '' : 's'} en tête`,
     loop: 'Ces cartes s’attendent les unes les autres : la file tourne en rond.',
     longer: 'La file remonte plus loin que ce que le bureau suit.',
-    waited: (n, atLeast) => `${atLeast ? 'Au moins ' : ''}${n} ${n === 1 ? 'bot attend' : 'bots attendent'} cette carte :`,
+    waited: (n, atLeast, cards = 1) => `${atLeast ? 'Au moins ' : ''}${n} ${n === 1 ? 'bot attend' : 'bots attendent'} ${cards > 1 ? 'ses cartes' : 'cette carte'} :`,
     holds: (n, bots, atLeast) => `Retient ${atLeast ? 'au moins ' : ''}${n} ${bots ? (n === 1 ? 'bot' : 'bots') : (n === 1 ? 'carte' : 'cartes')}`,
     holdsTip: 'Des cartes attendent celle-ci, directement ou après une autre : la décider fait avancer la file.'
   },

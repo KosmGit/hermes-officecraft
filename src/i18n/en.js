@@ -94,7 +94,7 @@ export const en = {
     moreHeads: n => `+${n} more at the head`,
     loop: 'These cards wait for each other: the queue goes round in a circle.',
     longer: 'The queue goes further back than the office follows.',
-    waited: (n, atLeast) => `${atLeast ? 'At least ' : ''}${n} ${n === 1 ? 'bot waits' : 'bots wait'} for this card:`,
+    waited: (n, atLeast, cards = 1) => `${atLeast ? 'At least ' : ''}${n} ${n === 1 ? 'bot waits' : 'bots wait'} for ${cards > 1 ? 'its cards' : 'this card'}:`,
     holds: (n, bots, atLeast) => `Holds back ${atLeast ? 'at least ' : ''}${n} ${bots ? (n === 1 ? 'bot' : 'bots') : (n === 1 ? 'card' : 'cards')}`,
     holdsTip: 'Cards wait for this one, directly or after another: deciding it lets the queue move.'
   },

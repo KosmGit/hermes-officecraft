@@ -93,7 +93,7 @@ export const es = {
     moreHeads: n => `+${n} más al frente`,
     loop: 'Estas tarjetas se esperan unas a otras: la cola da vueltas.',
     longer: 'La cola llega más lejos de lo que la oficina sigue.',
-    waited: (n, atLeast) => `${atLeast ? 'Al menos ' : ''}${n} ${n === 1 ? 'bot espera' : 'bots esperan'} esta tarjeta:`,
+    waited: (n, atLeast, cards = 1) => `${atLeast ? 'Al menos ' : ''}${n} ${n === 1 ? 'bot espera' : 'bots esperan'} ${cards > 1 ? 'sus tarjetas' : 'esta tarjeta'}:`,
     holds: (n, bots, atLeast) => `Retiene ${atLeast ? 'al menos ' : ''}${n} ${bots ? (n === 1 ? 'bot' : 'bots') : (n === 1 ? 'tarjeta' : 'tarjetas')}`,
     holdsTip: 'Hay tarjetas que esperan a esta, directamente o tras otra: decidirla hace avanzar la cola.'
   },

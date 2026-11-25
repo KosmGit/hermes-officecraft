@@ -216,13 +216,17 @@ export function holdsBack(index, board, id, team = null) {
   return { cards: cards.length, bots: namesOf(cards, start.assignee).filter(n => !team || team.has(n)), capped }
 }
 
-/** The bots that wait behind the cards of a bot (not its own): { bots: [name], capped }, the nearest first, only the bots of `team`. */
+/**
+ * The bots that wait behind the cards of a bot (not its own): { bots: [name], cards: n, capped }, the nearest first, only the bots of `team`.
+ * `cards` = how many of its cards something waits behind. Only the cards that wait for nothing themselves count (a card of its own that is
+ * waiting is not the work the others are held by: the head of that queue is).
+ */
 export function waitersOf(index, name, team = null) {
   const mine = []
-  for (const c of index.cards.values()) if (c.assignee === name && !DONE.has(c.status) && index.children.has(c.key)) mine.push(c)
-  if (!mine.length) return { bots: [], capped: false }
+  for (const c of index.cards.values()) if (c.assignee === name && !DONE.has(c.status) && !isWaiting(index, c) && index.children.has(c.key)) mine.push(c)
+  if (!mine.length) return { bots: [], cards: 0, capped: false }
   const { cards, capped } = behindOf(index, mine.sort(byOldest))
-  return { bots: namesOf(cards, name).filter(n => !team || team.has(n)), capped }
+  return { bots: namesOf(cards, name).filter(n => !team || team.has(n)), cards: mine.length, capped }
 }
 
 /* ---------- the sheet of a bot ---------- */
@@ -265,9 +269,9 @@ export function queueView(office, agent, nowMs = 0, index = waitIndex(office?.bo
       upstream: namesOf(chain.upstream, agent.name).filter(n => team.has(n))
     }
   }
-  const { bots, capped } = waitersOf(index, agent.name, team)
+  const { bots, cards, capped } = waitersOf(index, agent.name, team)
   if (!bots.length) return null
-  return { kind: 'waited', bots: bots.slice(0, QUEUE_NAMES_MAX), more: Math.max(0, bots.length - QUEUE_NAMES_MAX), count: bots.length, capped }
+  return { kind: 'waited', bots: bots.slice(0, QUEUE_NAMES_MAX), more: Math.max(0, bots.length - QUEUE_NAMES_MAX), count: bots.length, cards, capped }
 }
 
 /**

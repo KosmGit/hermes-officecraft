@@ -48,7 +48,7 @@ export function queueLines(view, t, nowMs, formatSpan) {
 /** `queueView` of a bot others wait for -> « 3 bots wait for this card: a, b, c +N », or null. `labelOf(name)` gives the name to show. */
 export function waitedLine(view, t, labelOf) {
   if (view?.kind !== 'waited') return null
-  return { lead: t('queue.waited', view.count, view.capped), names: view.bots.slice(0, QUEUE_NAMES_MAX).map(labelOf), more: view.more }
+  return { lead: t('queue.waited', view.count, view.capped, view.cards), names: view.bots.slice(0, QUEUE_NAMES_MAX).map(labelOf), more: view.more }
 }
 
 /** What a blocked card holds back, for the decision's card: { text, names, more, tip } or null when nothing waits behind it. */

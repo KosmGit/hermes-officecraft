@@ -4241,10 +4241,10 @@ function holdsBack(index, board, id, team = null) {
 }
 function waitersOf(index, name, team = null) {
   const mine = [];
-  for (const c of index.cards.values()) if (c.assignee === name && !DONE.has(c.status) && index.children.has(c.key)) mine.push(c);
-  if (!mine.length) return { bots: [], capped: false };
+  for (const c of index.cards.values()) if (c.assignee === name && !DONE.has(c.status) && !isWaiting(index, c) && index.children.has(c.key)) mine.push(c);
+  if (!mine.length) return { bots: [], cards: 0, capped: false };
   const { cards, capped } = behindOf(index, mine.sort(byOldest));
-  return { bots: namesOf(cards, name).filter((n) => !team || team.has(n)), capped };
+  return { bots: namesOf(cards, name).filter((n) => !team || team.has(n)), cards: mine.length, capped };
 }
 var CARD_TITLE_MAX = 160;
 function queueView(office, agent, nowMs = 0, index = waitIndex(office?.boards)) {
@@ -4275,9 +4275,9 @@ function queueView(office, agent, nowMs = 0, index = waitIndex(office?.boards)) 
       upstream: namesOf(chain.upstream, agent.name).filter((n) => team.has(n))
     };
   }
-  const { bots, capped } = waitersOf(index, agent.name, team);
+  const { bots, cards, capped } = waitersOf(index, agent.name, team);
   if (!bots.length) return null;
-  return { kind: "waited", bots: bots.slice(0, QUEUE_NAMES_MAX), more: Math.max(0, bots.length - QUEUE_NAMES_MAX), count: bots.length, capped };
+  return { kind: "waited", bots: bots.slice(0, QUEUE_NAMES_MAX), more: Math.max(0, bots.length - QUEUE_NAMES_MAX), count: bots.length, cards, capped };
 }
 function waitsOn(agent, labelOf2 = (n) => n) {
   const card = Array.isArray(agent?.queued) ? agent.queued[0] : null;
@@ -5088,7 +5088,7 @@ var en = {
     moreHeads: (n) => `+${n} more at the head`,
     loop: "These cards wait for each other: the queue goes round in a circle.",
     longer: "The queue goes further back than the office follows.",
-    waited: (n, atLeast) => `${atLeast ? "At least " : ""}${n} ${n === 1 ? "bot waits" : "bots wait"} for this card:`,
+    waited: (n, atLeast, cards = 1) => `${atLeast ? "At least " : ""}${n} ${n === 1 ? "bot waits" : "bots wait"} for ${cards > 1 ? "its cards" : "this card"}:`,
     holds: (n, bots, atLeast) => `Holds back ${atLeast ? "at least " : ""}${n} ${bots ? n === 1 ? "bot" : "bots" : n === 1 ? "card" : "cards"}`,
     holdsTip: "Cards wait for this one, directly or after another: deciding it lets the queue move."
   },
@@ -6871,7 +6871,7 @@ var es = {
     moreHeads: (n) => `+${n} más al frente`,
     loop: "Estas tarjetas se esperan unas a otras: la cola da vueltas.",
     longer: "La cola llega más lejos de lo que la oficina sigue.",
-    waited: (n, atLeast) => `${atLeast ? "Al menos " : ""}${n} ${n === 1 ? "bot espera" : "bots esperan"} esta tarjeta:`,
+    waited: (n, atLeast, cards = 1) => `${atLeast ? "Al menos " : ""}${n} ${n === 1 ? "bot espera" : "bots esperan"} ${cards > 1 ? "sus tarjetas" : "esta tarjeta"}:`,
     holds: (n, bots, atLeast) => `Retiene ${atLeast ? "al menos " : ""}${n} ${bots ? n === 1 ? "bot" : "bots" : n === 1 ? "tarjeta" : "tarjetas"}`,
     holdsTip: "Hay tarjetas que esperan a esta, directamente o tras otra: decidirla hace avanzar la cola."
   },
@@ -8655,7 +8655,7 @@ var fr = {
     moreHeads: (n) => `+${n} autre${n === 1 ? "" : "s"} en tête`,
     loop: "Ces cartes s’attendent les unes les autres : la file tourne en rond.",
     longer: "La file remonte plus loin que ce que le bureau suit.",
-    waited: (n, atLeast) => `${atLeast ? "Au moins " : ""}${n} ${n === 1 ? "bot attend" : "bots attendent"} cette carte :`,
+    waited: (n, atLeast, cards = 1) => `${atLeast ? "Au moins " : ""}${n} ${n === 1 ? "bot attend" : "bots attendent"} ${cards > 1 ? "ses cartes" : "cette carte"} :`,
     holds: (n, bots, atLeast) => `Retient ${atLeast ? "au moins " : ""}${n} ${bots ? n === 1 ? "bot" : "bots" : n === 1 ? "carte" : "cartes"}`,
     holdsTip: "Des cartes attendent celle-ci, directement ou après une autre : la décider fait avancer la file."
   },
@@ -19308,7 +19308,7 @@ function queueLines(view, t, nowMs, formatSpan2) {
 }
 function waitedLine(view, t, labelOf2) {
   if (view?.kind !== "waited") return null;
-  return { lead: t("queue.waited", view.count, view.capped), names: view.bots.slice(0, QUEUE_NAMES_MAX).map(labelOf2), more: view.more };
+  return { lead: t("queue.waited", view.count, view.capped, view.cards), names: view.bots.slice(0, QUEUE_NAMES_MAX).map(labelOf2), more: view.more };
 }
 function holdsLine(held2, t, labelOf2) {
   if (!held2 || !(held2.cards > 0)) return null;
