@@ -3611,6 +3611,16 @@ function formatMessage(facts, lang4 = "en", { label = "Officecraft", platform = 
 // src/core/notify.js
 var NOTIFY_TYPES = Object.freeze(["decision", "silent", "gateway", "cron", "campaign", "review", "llm_cap", "trophy"]);
 var LEGACY_TYPES = Object.freeze(NOTIFY_TYPES.slice(0, 4));
+var NOTIFY_GROUPS = Object.freeze([
+  Object.freeze({ id: "waiting", types: Object.freeze(["decision", "review", "campaign"]) }),
+  Object.freeze({ id: "faults", types: Object.freeze(["silent", "gateway", "cron"]) }),
+  Object.freeze({ id: "info", types: Object.freeze(["llm_cap", "trophy"]) })
+]);
+var notifyOnCount = (state2) => state2?.types ? { on: NOTIFY_TYPES.filter((type) => state2.types[type] === true).length, of: NOTIFY_TYPES.length } : null;
+var notifyTabBadge = (query) => !query || query.isError ? null : notifyOnCount(query.data ?? null);
+var choosesBetweenRecipients = (state2) => state2.targets.length >= 2;
+var chipsOnHelpLine = (state2) => state2.targets.length > 0 && state2.targets.length <= 2;
+var recipientsNote = (state2) => state2.targets.length === 0 ? ["noTarget", "addAppNote"] : state2.targets.length === 1 ? ["oneRecipient"] : ["addAppNote"];
 var MAX_ROUTES = 4;
 var DEFAULT_QUIET = Object.freeze({ enabled: false, from: "22:00", to: "07:00", urgent: Object.freeze([]) });
 var TEST_WAIT_S = 60;
@@ -5663,6 +5673,7 @@ var en = {
       trophy: "Only sent while the office is open."
     },
     recipients: "Recipients",
+    group: { waiting: "Needs you", faults: "Failures", info: "Info" },
     types: "Types",
     sameForAll: "Same for all",
     sameForAllHint: "One recipient for every type.",
@@ -7417,6 +7428,7 @@ var es = {
       trophy: "Solo se envía con la oficina abierta."
     },
     recipients: "Destinatarios",
+    group: { waiting: "Te espera", faults: "Fallos", info: "Información" },
     types: "Tipos",
     sameForAll: "El mismo para todo",
     sameForAllHint: "Un destinatario para todos los tipos.",
@@ -9172,6 +9184,7 @@ var fr = {
       trophy: "Envoyé seulement quand le bureau est ouvert."
     },
     recipients: "Destinataires",
+    group: { waiting: "Vous attend", faults: "Pannes", info: "Infos" },
     types: "Types",
     sameForAll: "Le même pour tous",
     sameForAllHint: "Un destinataire pour tous les types.",
@@ -24383,6 +24396,7 @@ function SettingsFormNotify() {
   };
   const typeName = (type) => t(`notify.type.${type}`);
   const noRoute = typesWithoutRoute(state2);
+  const inline = chipsOnHelpLine(state2);
   const shared = sharedRoute(state2);
   const allEmpty = NOTIFY_TYPES.every((type) => state2.routes[type].length === 0);
   const words = Object.fromEntries(["mark", "board", "decision", "silent", "cron", "campaign", "review", "trophy"].map((k) => [k, t(`notify.sample.${k}`)]));
@@ -24435,7 +24449,7 @@ function SettingsFormNotify() {
         target2.key
       );
     }),
-    state2.targets.length > 0 ? /* @__PURE__ */ jsx42(
+    choosesBetweenRecipients(state2) ? /* @__PURE__ */ jsx42(
       SettingsRow,
       {
         id: "officecraft-notify-all",
@@ -24461,46 +24475,60 @@ function SettingsFormNotify() {
         )
       }
     ) : null,
-    /* @__PURE__ */ jsx42(
-      SettingsRow,
-      {
-        id: "officecraft-notify-add",
-        group: true,
-        label: state2.targets.length === 0 ? t("notify.noTarget") : state2.targets.length === 1 ? t("notify.oneRecipient") : t("notify.addAppNote"),
-        help: state2.targets.length < 2 ? t("notify.addAppNote") : null,
-        helpRole: state2.targets.length === 0 ? "status" : void 0,
-        control: () => canOpenHermes() ? /* @__PURE__ */ jsxs38("button", { type: "button", className: "oc-sx-link", "data-notify-add": true, onClick: () => host3.navigate(MESSAGING_PATH), children: [
-          t("notify.addApp"),
-          /* @__PURE__ */ jsx42(SettingsIcon, { id: "ext", size: 14 })
-        ] }) : null
-      }
-    ),
+    /* @__PURE__ */ jsxs38("p", { className: "oc-nt-note", "data-notify-note": true, role: state2.targets.length === 0 ? "status" : void 0, children: [
+      /* @__PURE__ */ jsx42("span", { children: recipientsNote(state2).map((k) => t(`notify.${k}`)).join(" ") }),
+      canOpenHermes() ? /* @__PURE__ */ jsxs38("button", { type: "button", className: "oc-sx-link", "data-notify-add": true, onClick: () => host3.navigate(MESSAGING_PATH), children: [
+        t("notify.addApp"),
+        /* @__PURE__ */ jsx42(SettingsIcon, { id: "ext", size: 14 })
+      ] }) : null
+    ] }),
     /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", children: t("notify.types") }),
-    NOTIFY_TYPES.map((type) => /* @__PURE__ */ jsxs38("div", { className: "oc-sx-row oc-nt-type", "data-notify-type": type, "data-on": state2.types[type], children: [
-      /* @__PURE__ */ jsxs38("div", { className: "oc-sx-lab", children: [
-        /* @__PURE__ */ jsx42("span", { className: "oc-sx-name", children: /* @__PURE__ */ jsx42("label", { htmlFor: `officecraft-notify-${type}`, children: typeName(type) }) }),
-        /* @__PURE__ */ jsx42("small", { id: `officecraft-notify-${type}-help`, children: t(`notify.typeHint.${type}`) })
+    NOTIFY_GROUPS.map((group) => /* @__PURE__ */ jsxs38("section", { className: "oc-nt-grp", "aria-labelledby": `officecraft-notify-g-${group.id}`, "data-notify-group": group.id, children: [
+      /* @__PURE__ */ jsxs38("h5", { className: "oc-lm-g", id: `officecraft-notify-g-${group.id}`, children: [
+        t(`notify.group.${group.id}`),
+        /* @__PURE__ */ jsx42("span", { className: "ln", "aria-hidden": "true" })
       ] }),
-      /* @__PURE__ */ jsx42("div", { className: "oc-sx-ctl", children: /* @__PURE__ */ jsx42(Switch, { id: `officecraft-notify-${type}`, describedBy: `officecraft-notify-${type}-help`, checked: state2.types[type], ...held(saving), onChange: hold(saving, (checked) => apply({ types: { [type]: checked } })) }) }),
-      state2.targets.length > 0 ? /* @__PURE__ */ jsx42("div", { className: "oc-nt-chips", role: "group", "aria-label": `${typeName(type)}: ${t("notify.recipients")}`, children: state2.targets.map((target2) => {
-        const on = state2.routes[type].includes(target2.key);
-        const full = !on && state2.routes[type].length >= state2.max;
-        return /* @__PURE__ */ jsx42(
-          Chip2,
-          {
-            checked: on,
-            disabled: full,
-            busy: saving,
-            title: full ? t("notify.maxRoutes", state2.max) : void 0,
-            "data-notify-route": `${type}:${target2.key}`,
-            onChange: () => apply({ routes: { [type]: toggleRoute(state2, type, target2.key) } }),
-            children: whoOf(t, target2)
-          },
-          target2.key
-        );
-      }) }) : null,
-      noRoute.includes(type) ? /* @__PURE__ */ jsx42("p", { className: "oc-sx-warn", role: "status", "data-notify-noroute": type, children: t("notify.noRoute") }) : null
-    ] }, type)),
+      group.types.map((type) => {
+        const chips = state2.targets.length > 0 ? /* @__PURE__ */ jsx42("div", { className: "oc-nt-chips", role: "group", "aria-label": `${typeName(type)}: ${t("notify.recipients")}`, children: state2.targets.map((target2) => {
+          const on = state2.routes[type].includes(target2.key);
+          const full = !on && state2.routes[type].length >= state2.max;
+          return /* @__PURE__ */ jsx42(
+            Chip2,
+            {
+              checked: on,
+              disabled: full,
+              busy: saving,
+              title: full ? t("notify.maxRoutes", state2.max) : void 0,
+              "data-notify-route": `${type}:${target2.key}`,
+              onChange: () => apply({ routes: { [type]: toggleRoute(state2, type, target2.key) } }),
+              children: whoOf(t, target2)
+            },
+            target2.key
+          );
+        }) }) : null;
+        return /* @__PURE__ */ jsxs38("div", { className: "oc-sx-row oc-nt-type", "data-notify-type": type, "data-on": state2.types[type], "data-chips": inline ? "help" : "own", children: [
+          /* @__PURE__ */ jsxs38("div", { className: "oc-sx-lab", children: [
+            /* @__PURE__ */ jsx42("span", { className: "oc-sx-name", children: /* @__PURE__ */ jsx42("label", { htmlFor: `officecraft-notify-${type}`, children: typeName(type) }) }),
+            /* @__PURE__ */ jsxs38("span", { className: "oc-nt-line", children: [
+              /* @__PURE__ */ jsx42("small", { id: `officecraft-notify-${type}-help`, children: t(`notify.typeHint.${type}`) }),
+              inline ? chips : null
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx42("div", { className: "oc-sx-ctl", children: /* @__PURE__ */ jsx42(Switch, { id: `officecraft-notify-${type}`, describedBy: `officecraft-notify-${type}-help`, checked: state2.types[type], ...held(saving), onChange: hold(saving, (checked) => apply({ types: { [type]: checked } })) }) }),
+          inline ? null : chips,
+          noRoute.includes(type) ? /* @__PURE__ */ jsx42("p", { className: "oc-sx-warn", role: "status", "data-notify-noroute": type, children: t("notify.noRoute") }) : null
+        ] }, type);
+      })
+    ] }, group.id)),
+    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
+    preview ? /* @__PURE__ */ jsxs38("div", { "data-notify-preview-box": true, children: [
+      /* @__PURE__ */ jsx42(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
+      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment22, { children: [
+        /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
+        /* @__PURE__ */ jsx42(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
+      ] }) : null,
+      /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.note") })
+    ] }) : /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", "data-notify-preview-empty": true, children: t("notify.preview.empty") }),
     /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-quiet-title": true, children: t("notify.quiet.title") }),
     /* @__PURE__ */ jsx42(
       SettingsRow,
@@ -24576,15 +24604,6 @@ function SettingsFormNotify() {
         /* @__PURE__ */ jsx42("span", { children: sentence2 ? t("notify.quiet.summary", sentence2.from, sentence2.to, urgentNames) : t("notify.quiet.empty") })
       ] })
     ] }) : null,
-    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
-    preview ? /* @__PURE__ */ jsxs38("div", { "data-notify-preview-box": true, children: [
-      /* @__PURE__ */ jsx42(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
-      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment22, { children: [
-        /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
-        /* @__PURE__ */ jsx42(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
-      ] }) : null,
-      /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.note") })
-    ] }) : /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", "data-notify-preview-empty": true, children: t("notify.preview.empty") }),
     error ? /* @__PURE__ */ jsx42("p", { ref: errorRef, className: "oc-sx-warn", role: "alert", "data-notify-error": true, children: t(error === "unknown_target" ? "notify.unknownTarget" : "notify.saveFailed") }) : null
   ] });
 }
@@ -24678,6 +24697,14 @@ ${ringed(".oc-sx-cap summary:focus-visible")}
 .oc-nt-sub{display:flex;align-items:center;gap:8px;margin:20px 0 0;padding-top:12px;border-top:1px solid ${EDGE};font-size:13px;font-weight:600;color:var(--foreground)}
 .oc-nt-sub svg{color:var(--ui-accent)}
 .oc-nt-chips{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.oc-nt-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.oc-nt-line small{display:inline}
+.oc-nt-line .oc-nt-chips{flex:0 0 auto}
+.oc-nt-line .oc-nt-chip span{min-height:24px;padding:0 8px;font-size:11.5px}
+.oc-nt-type{padding:8px 0}
+.oc-nt-grp .oc-lm-g{margin-top:12px}
+.oc-nt-note{display:flex;flex-wrap:wrap;align-items:center;gap:0 12px;margin:8px 0 0;color:${TEXT3};font-size:12px;line-height:16px}
+.oc-nt-note .oc-sx-link{min-height:28px;font-size:12px}
 .oc-nt-chip{position:relative;display:inline-flex;max-width:100%}
 .oc-nt-chip input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
 .oc-nt-chip span{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;max-width:100%;min-height:28px;padding:0 12px;border:1px solid ${FIELD_EDGE};border-radius:14px;background:${CARD};color:var(--ui-text-secondary);font-size:12px;font-weight:500;line-height:16px;overflow-wrap:anywhere}
@@ -24852,7 +24879,7 @@ function SettingsForm({ llm = null }) {
   const motion = useValue3($motionPref);
   const night = useValue3($nightPref);
   const detected = resolveLocale("auto", useAppLocale(), systemLocales());
-  const count2 = llmTabBadge(useLlm());
+  const counts = { llm: llmTabBadge(useLlm()), notify: notifyTabBadge(useNotify()) };
   useEffect26(() => {
     document.getElementById(`${base}-tab-${tab}`)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
   }, [base, tab]);
@@ -24883,7 +24910,7 @@ function SettingsForm({ llm = null }) {
           children: [
             /* @__PURE__ */ jsx43(SettingsIcon, { id: TAB_ICON[code] }),
             /* @__PURE__ */ jsx43("span", { className: "oc-sf-lb", children: t(`settings.tab.${code}`) }),
-            code === "llm" && count2 ? /* @__PURE__ */ jsx43("span", { className: "oc-sf-bd", "data-llm-count": true, children: `${count2.on}/${count2.of}` }) : null
+            counts[code] ? /* @__PURE__ */ jsx43("span", { className: "oc-sf-bd", ...{ [`data-${code}-count`]: "" }, children: `${counts[code].on}/${counts[code].of}` }) : null
           ]
         },
         code

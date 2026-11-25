@@ -4,7 +4,9 @@ import { useEffect, useId, useState } from 'react'
 import { LIGHT_PREFS, MOTION_PREFS } from '../core/daylight.js'
 import { SUPPORTED_LOCALES, resolveLocale } from '../core/locale.js'
 import { SETTINGS_TABS, llmTabBadge, tabAfterKey, tabOf } from '../core/settings.js'
+import { notifyTabBadge } from '../core/notify.js'
 import { useLlm } from '../data/llm.js'
+import { useNotify } from '../data/notify.js'
 import { $gameMode, $languagePref, $lightPref, $motionPref, $nightPref, setGameMode, setLanguagePref, setLightPref, setMotionPref, setNightPref } from '../data/prefs.js'
 import { ENDONYMS } from '../i18n/index.js'
 import { SettingsFormLlm } from './SettingsFormLlm.jsx'
@@ -48,7 +50,7 @@ export function SettingsForm({ llm = null }) {
   const motion = useValue($motionPref)
   const night = useValue($nightPref)
   const detected = resolveLocale('auto', useAppLocale(), systemLocales())
-  const count = llmTabBadge(useLlm())
+  const counts = { llm: llmTabBadge(useLlm()), notify: notifyTabBadge(useNotify()) }
   // on a narrow strip (it scrolls) the chosen tab is brought into view
   useEffect(() => { document.getElementById(`${base}-tab-${tab}`)?.scrollIntoView?.({ inline: 'nearest', block: 'nearest' }) }, [base, tab])
 
@@ -71,7 +73,7 @@ export function SettingsForm({ llm = null }) {
               aria-selected={tab === code} aria-controls={`${base}-panel`} tabIndex={tab === code ? 0 : -1} onClick={() => setTab(code)}>
               <SettingsIcon id={TAB_ICON[code]} />
               <span className="oc-sf-lb">{t(`settings.tab.${code}`)}</span>
-              {code === 'llm' && count ? <span className="oc-sf-bd" data-llm-count>{`${count.on}/${count.of}`}</span> : null}
+              {counts[code] ? <span className="oc-sf-bd" {...{ [`data-${code}-count`]: '' }}>{`${counts[code].on}/${counts[code].of}`}</span> : null}
             </button>
           ))}
         </div>

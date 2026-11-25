@@ -10,6 +10,31 @@ import { QUIET_SYMBOL, SYMBOLS } from './notifyWords.js'
 export const NOTIFY_TYPES = Object.freeze(['decision', 'silent', 'gateway', 'cron', 'campaign', 'review', 'llm_cap', 'trophy'])
 /** The four first types: the only ones an old server (and an old saved board) knows. */
 export const LEGACY_TYPES = Object.freeze(NOTIFY_TYPES.slice(0, 4))
+
+/**
+ * The eight types in three groups, by what the user does about them: what waits for them (decisions, refused reviews, campaigns), what is
+ * broken (silent agents, the gateway, scheduled jobs), what is only information (the LLM cap, trophies). Every type is in exactly one.
+ */
+export const NOTIFY_GROUPS = Object.freeze([
+  Object.freeze({ id: 'waiting', types: Object.freeze(['decision', 'review', 'campaign']) }),
+  Object.freeze({ id: 'faults', types: Object.freeze(['silent', 'gateway', 'cron']) }),
+  Object.freeze({ id: 'info', types: Object.freeze(['llm_cap', 'trophy']) })
+])
+
+/** How many types are switched on, out of how many: the badge of the Notifications tab, like the one of the LLM tab. null while unread. */
+export const notifyOnCount = state => (state?.types ? { on: NOTIFY_TYPES.filter(type => state.types[type] === true).length, of: NOTIFY_TYPES.length } : null)
+
+/** The badge from the read of /notify (a React Query result): nothing while it fails or has not answered, never the count of a stale answer. */
+export const notifyTabBadge = query => (!query || query.isError ? null : notifyOnCount(query.data ?? null))
+
+/** « The same for all » and the value « Per type » mean something only with two recipients or more: with one there is nothing to choose between. */
+export const choosesBetweenRecipients = state => state.targets.length >= 2
+
+/** With two recipients or fewer the recipient chips sit on the help line of the type; with more they take a line of their own. */
+export const chipsOnHelpLine = state => state.targets.length > 0 && state.targets.length <= 2
+
+/** The note under the recipients: which sentence (nothing connected, one messaging app, several) says where the connection is made. */
+export const recipientsNote = state => (state.targets.length === 0 ? ['noTarget', 'addAppNote'] : state.targets.length === 1 ? ['oneRecipient'] : ['addAppNote'])
 export const MAX_ROUTES = 4
 export const DEFAULT_QUIET = Object.freeze({ enabled: false, from: '22:00', to: '07:00', urgent: Object.freeze([]) })
 export const TEST_WAIT_S = 60

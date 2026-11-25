@@ -890,6 +890,7 @@ export const es = {
       trophy: 'Solo se envía con la oficina abierta.'
     },
     recipients: 'Destinatarios',
+    group: { waiting: 'Te espera', faults: 'Fallos', info: 'Información' },
     types: 'Tipos',
     sameForAll: 'El mismo para todo',
     sameForAllHint: 'Un destinatario para todos los tipos.',

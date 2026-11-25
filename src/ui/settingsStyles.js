@@ -95,6 +95,14 @@ ${ringed('.oc-sx-cap summary:focus-visible')}
 .oc-nt-sub{display:flex;align-items:center;gap:8px;margin:20px 0 0;padding-top:12px;border-top:1px solid ${EDGE};font-size:13px;font-weight:600;color:var(--foreground)}
 .oc-nt-sub svg{color:var(--ui-accent)}
 .oc-nt-chips{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.oc-nt-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.oc-nt-line small{display:inline}
+.oc-nt-line .oc-nt-chips{flex:0 0 auto}
+.oc-nt-line .oc-nt-chip span{min-height:24px;padding:0 8px;font-size:11.5px}
+.oc-nt-type{padding:8px 0}
+.oc-nt-grp .oc-lm-g{margin-top:12px}
+.oc-nt-note{display:flex;flex-wrap:wrap;align-items:center;gap:0 12px;margin:8px 0 0;color:${TEXT3};font-size:12px;line-height:16px}
+.oc-nt-note .oc-sx-link{min-height:28px;font-size:12px}
 .oc-nt-chip{position:relative;display:inline-flex;max-width:100%}
 .oc-nt-chip input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
 .oc-nt-chip span{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;max-width:100%;min-height:28px;padding:0 12px;border:1px solid ${FIELD_EDGE};border-radius:14px;background:${CARD};color:var(--ui-text-secondary);font-size:12px;font-weight:500;line-height:16px;overflow-wrap:anywhere}

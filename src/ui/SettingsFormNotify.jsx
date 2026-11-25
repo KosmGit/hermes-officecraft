@@ -2,7 +2,7 @@ import { host } from '@hermes/plugin-sdk'
 import { useEffect, useRef, useState } from 'react'
 
 import {
-  NOTIFY_TYPES, changeBody, cooldownUntil, hourChoices, previewOf, previewPieces, previewPlatform, quietSentence, sameForAll, sharedRoute,
+  NOTIFY_GROUPS, NOTIFY_TYPES, changeBody, chipsOnHelpLine, choosesBetweenRecipients, cooldownUntil, hourChoices, previewOf, previewPieces, previewPlatform, quietSentence, recipientsNote, sameForAll, sharedRoute,
   testState, testView, toggleRoute, typesWithoutRoute
 } from '../core/notify.js'
 import { timeText } from '../core/format.js'
@@ -121,6 +121,7 @@ export function SettingsFormNotify() {
 
   const typeName = type => t(`notify.type.${type}`)
   const noRoute = typesWithoutRoute(state)
+  const inline = chipsOnHelpLine(state)
   const shared = sharedRoute(state)
   const allEmpty = NOTIFY_TYPES.every(type => state.routes[type].length === 0)
   const words = Object.fromEntries(['mark', 'board', 'decision', 'silent', 'cron', 'campaign', 'review', 'trophy'].map(k => [k, t(`notify.sample.${k}`)]))
@@ -160,7 +161,7 @@ export function SettingsFormNotify() {
             )} />
         )
       })}
-      {state.targets.length > 0 ? (
+      {choosesBetweenRecipients(state) ? (
         <SettingsRow id="officecraft-notify-all" label={t('notify.sameForAll')} help={t('notify.sameForAllHint')}
           control={({ id, describedBy }) => (
             <select id={id} className="oc-fc" data-notify-all aria-describedby={describedBy} value={shared ?? (allEmpty ? '' : '__mixed')} {...held(saving)} style={selectStyle}
@@ -171,42 +172,68 @@ export function SettingsFormNotify() {
             </select>
           )} />
       ) : null}
-      <SettingsRow id="officecraft-notify-add" group label={state.targets.length === 0 ? t('notify.noTarget') : state.targets.length === 1 ? t('notify.oneRecipient') : t('notify.addAppNote')}
-        help={state.targets.length < 2 ? t('notify.addAppNote') : null} helpRole={state.targets.length === 0 ? 'status' : undefined}
-        control={() => (canOpenHermes() ? (
+      <p className="oc-nt-note" data-notify-note role={state.targets.length === 0 ? 'status' : undefined}>
+        <span>{recipientsNote(state).map(k => t(`notify.${k}`)).join(' ')}</span>
+        {canOpenHermes() ? (
           <button type="button" className="oc-sx-link" data-notify-add onClick={() => host.navigate(MESSAGING_PATH)}>
             {t('notify.addApp')}
             <SettingsIcon id="ext" size={14} />
           </button>
-        ) : null)} />
+        ) : null}
+      </p>
 
       <h4 className="oc-nt-sub">{t('notify.types')}</h4>
-      {NOTIFY_TYPES.map(type => (
-        <div key={type} className="oc-sx-row oc-nt-type" data-notify-type={type} data-on={state.types[type]}>
-          <div className="oc-sx-lab">
-            <span className="oc-sx-name"><label htmlFor={`officecraft-notify-${type}`}>{typeName(type)}</label></span>
-            <small id={`officecraft-notify-${type}-help`}>{t(`notify.typeHint.${type}`)}</small>
-          </div>
-          <div className="oc-sx-ctl">
-            <Switch id={`officecraft-notify-${type}`} describedBy={`officecraft-notify-${type}-help`} checked={state.types[type]} {...held(saving)} onChange={hold(saving, checked => apply({ types: { [type]: checked } }))} />
-          </div>
-          {state.targets.length > 0 ? (
-            <div className="oc-nt-chips" role="group" aria-label={`${typeName(type)}: ${t('notify.recipients')}`}>
-              {state.targets.map(target => {
-                const on = state.routes[type].includes(target.key)
-                const full = !on && state.routes[type].length >= state.max
-                return (
-                  <Chip key={target.key} checked={on} disabled={full} busy={saving} title={full ? t('notify.maxRoutes', state.max) : undefined} data-notify-route={`${type}:${target.key}`}
-                    onChange={() => apply({ routes: { [type]: toggleRoute(state, type, target.key) } })}>
-                    {whoOf(t, target)}
-                  </Chip>
-                )
-              })}
-            </div>
-          ) : null}
-          {noRoute.includes(type) ? <p className="oc-sx-warn" role="status" data-notify-noroute={type}>{t('notify.noRoute')}</p> : null}
-        </div>
+      {NOTIFY_GROUPS.map(group => (
+        <section key={group.id} className="oc-nt-grp" aria-labelledby={`officecraft-notify-g-${group.id}`} data-notify-group={group.id}>
+          <h5 className="oc-lm-g" id={`officecraft-notify-g-${group.id}`}>{t(`notify.group.${group.id}`)}<span className="ln" aria-hidden="true" /></h5>
+          {group.types.map(type => {
+            const chips = state.targets.length > 0 ? (
+              <div className="oc-nt-chips" role="group" aria-label={`${typeName(type)}: ${t('notify.recipients')}`}>
+                {state.targets.map(target => {
+                  const on = state.routes[type].includes(target.key)
+                  const full = !on && state.routes[type].length >= state.max
+                  return (
+                    <Chip key={target.key} checked={on} disabled={full} busy={saving} title={full ? t('notify.maxRoutes', state.max) : undefined} data-notify-route={`${type}:${target.key}`}
+                      onChange={() => apply({ routes: { [type]: toggleRoute(state, type, target.key) } })}>
+                      {whoOf(t, target)}
+                    </Chip>
+                  )
+                })}
+              </div>
+            ) : null
+            return (
+              <div key={type} className="oc-sx-row oc-nt-type" data-notify-type={type} data-on={state.types[type]} data-chips={inline ? 'help' : 'own'}>
+                <div className="oc-sx-lab">
+                  <span className="oc-sx-name"><label htmlFor={`officecraft-notify-${type}`}>{typeName(type)}</label></span>
+                  <span className="oc-nt-line">
+                    <small id={`officecraft-notify-${type}-help`}>{t(`notify.typeHint.${type}`)}</small>
+                    {inline ? chips : null}
+                  </span>
+                </div>
+                <div className="oc-sx-ctl">
+                  <Switch id={`officecraft-notify-${type}`} describedBy={`officecraft-notify-${type}-help`} checked={state.types[type]} {...held(saving)} onChange={hold(saving, checked => apply({ types: { [type]: checked } }))} />
+                </div>
+                {inline ? null : chips}
+                {noRoute.includes(type) ? <p className="oc-sx-warn" role="status" data-notify-noroute={type}>{t('notify.noRoute')}</p> : null}
+              </div>
+            )
+          })}
+        </section>
       ))}
+
+      <h4 className="oc-nt-sub" data-notify-preview-title>{t('notify.preview.title')}</h4>
+      {preview ? (
+        <div data-notify-preview-box>
+          <Bubble text={preview.text} data-notify-preview lang={t.lang} />
+          {preview.quietText ? (
+            <>
+              <p className="oc-nt-cap">{t('notify.preview.summary')}</p>
+              <Bubble text={preview.quietText} data-notify-preview-quiet lang={t.lang} />
+            </>
+          ) : null}
+          <p className="oc-nt-cap">{t('notify.preview.note')}</p>
+        </div>
+      ) : <p className="oc-nt-cap" data-notify-preview-empty>{t('notify.preview.empty')}</p>}
 
       <h4 className="oc-nt-sub" data-notify-quiet-title>{t('notify.quiet.title')}</h4>
       <SettingsRow id="officecraft-notify-quiet" label={t('notify.quiet.on')} help={t('notify.quiet.onHint')}
@@ -247,20 +274,6 @@ export function SettingsFormNotify() {
           </p>
         </>
       ) : null}
-
-      <h4 className="oc-nt-sub" data-notify-preview-title>{t('notify.preview.title')}</h4>
-      {preview ? (
-        <div data-notify-preview-box>
-          <Bubble text={preview.text} data-notify-preview lang={t.lang} />
-          {preview.quietText ? (
-            <>
-              <p className="oc-nt-cap">{t('notify.preview.summary')}</p>
-              <Bubble text={preview.quietText} data-notify-preview-quiet lang={t.lang} />
-            </>
-          ) : null}
-          <p className="oc-nt-cap">{t('notify.preview.note')}</p>
-        </div>
-      ) : <p className="oc-nt-cap" data-notify-preview-empty>{t('notify.preview.empty')}</p>}
 
       {error ? <p ref={errorRef} className="oc-sx-warn" role="alert" data-notify-error>{t(error === 'unknown_target' ? 'notify.unknownTarget' : 'notify.saveFailed')}</p> : null}
     </div>

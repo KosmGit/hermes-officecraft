@@ -893,6 +893,7 @@ export const fr = {
       trophy: 'Envoyé seulement quand le bureau est ouvert.'
     },
     recipients: 'Destinataires',
+    group: { waiting: 'Vous attend', faults: 'Pannes', info: 'Infos' },
     types: 'Types',
     sameForAll: 'Le même pour tous',
     sameForAllHint: 'Un destinataire pour tous les types.',

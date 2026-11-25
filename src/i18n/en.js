@@ -891,6 +891,7 @@ export const en = {
       trophy: 'Only sent while the office is open.'
     },
     recipients: 'Recipients',
+    group: { waiting: 'Needs you', faults: 'Failures', info: 'Info' },
     types: 'Types',
     sameForAll: 'Same for all',
     sameForAllHint: 'One recipient for every type.',
