@@ -21947,6 +21947,18 @@ var PAGE_CSS = `
 // src/ui/ProjectDock.jsx
 import { useLayoutEffect as useLayoutEffect9, useRef as useRef23 } from "react";
 
+// src/core/dock.js
+function fitDockRow(el) {
+  const fits2 = () => el.scrollWidth <= el.clientWidth + 1;
+  el.removeAttribute("data-compact");
+  el.removeAttribute("data-over");
+  if (fits2()) return "full";
+  el.setAttribute("data-compact", "");
+  if (fits2()) return "compact";
+  el.setAttribute("data-over", "");
+  return "over";
+}
+
 // src/ui/Legend.jsx
 import { useEffect as useEffect19, useId as useId18, useRef as useRef22, useState as useState20 } from "react";
 import { jsx as jsx31, jsxs as jsxs27 } from "react/jsx-runtime";
@@ -22050,11 +22062,7 @@ function ProjectDock({ boards, project: project2, onProject, picked, sceneAgent,
     const el = row.current;
     if (!el) return void 0;
     const fit = () => {
-      el.removeAttribute("data-compact");
-      el.removeAttribute("data-over");
-      if (el.scrollWidth <= el.clientWidth + 1) return;
-      el.setAttribute("data-compact", "");
-      if (el.scrollWidth > el.clientWidth + 1) el.setAttribute("data-over", "");
+      fitDockRow(el);
     };
     fit();
     if (typeof ResizeObserver !== "function") return void 0;

@@ -437,6 +437,25 @@ test('the dock has a fixed height and never wraps: selecting an agent cannot mov
   assert.match(narrow, /\.ux-dock\{[^}]*height:80px/, 'a narrow pane: two rows of 28 px, always')
 })
 
+test('fitDockRow: the counts go first, then the row scrolls and fades; a row that fits again gets its counts back', async () => {
+  const { fitDockRow } = await import('../../src/core/dock.js')
+  // a fake row: `full` px of content with the counts, `compact` px without them, `room` px of room
+  const row = (full, compact, room) => {
+    const attrs = new Set()
+    return { attrs, clientWidth: room, get scrollWidth() { return attrs.has('data-compact') ? compact : full }, setAttribute: k => attrs.add(k), removeAttribute: k => attrs.delete(k) }
+  }
+  const a = row(400, 300, 500)
+  assert.equal(fitDockRow(a), 'full'); assert.deepEqual([...a.attrs], [])
+  const b = row(600, 450, 500)
+  assert.equal(fitDockRow(b), 'compact'); assert.deepEqual([...b.attrs], ['data-compact'])
+  const c = row(900, 700, 500)
+  assert.equal(fitDockRow(c), 'over'); assert.deepEqual([...c.attrs].sort(), ['data-compact', 'data-over'])
+  c.clientWidth = 1000   // the selection left the row (panel shown again): measured anew, the counts come back
+  assert.equal(fitDockRow(c), 'full'); assert.deepEqual([...c.attrs], [])
+  assert.equal(fitDockRow(row(501, 300, 500)), 'full', '1 px of rounding is not an overflow')
+  assert.match(readFileSync(new URL('../../src/ui/ProjectDock.jsx', import.meta.url), 'utf8'), /fitDockRow\(el\)/, 'the dock uses it')
+})
+
 test('the dock keeps its row: the selected agent is described once (only with the panel hidden), the legend is a named button', () => {
   const dock = readFileSync(new URL('../../src/ui/ProjectDock.jsx', import.meta.url), 'utf8')
   assert.match(dock, /\{picked && showSel \? \(/, 'the block of the selected agent shows with the panel hidden only')

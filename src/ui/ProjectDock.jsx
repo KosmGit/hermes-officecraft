@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 
+import { fitDockRow } from '../core/dock.js'
 import { Icon, Ring } from './icons.jsx'
 import { Legend } from './Legend.jsx'
 import { Portrait } from './Portrait.jsx'
@@ -35,13 +36,7 @@ export function ProjectDock({ boards, project, onProject, picked, sceneAgent, re
   useLayoutEffect(() => {
     const el = row.current
     if (!el) return undefined
-    const fit = () => {
-      el.removeAttribute('data-compact')
-      el.removeAttribute('data-over')
-      if (el.scrollWidth <= el.clientWidth + 1) return
-      el.setAttribute('data-compact', '')
-      if (el.scrollWidth > el.clientWidth + 1) el.setAttribute('data-over', '')
-    }
+    const fit = () => { fitDockRow(el) }
     fit()
     if (typeof ResizeObserver !== 'function') return undefined
     const ro = new ResizeObserver(fit)
