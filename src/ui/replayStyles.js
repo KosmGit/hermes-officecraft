@@ -21,8 +21,6 @@ export const REPLAY_CSS = `
 .oc-rp-exit:focus-visible,.oc-rp-win button:focus-visible,.oc-rp-step:focus-visible,.oc-fact:focus-visible,.oc-nt-tile:focus-visible,.oc-rp-sel:focus-visible{${RING_FOCUS}}
 /* the scene of a replay wears the replay's colour on its own frame, with the moment in its corner: a past office cannot be
    taken for the present even when the banner is out of sight (the eye is on the scene) */
-.oc-col[data-replaying]{position:relative}
-.oc-col[data-replaying] .oc-box{border:2px solid var(--ui-accent);box-shadow:inset 0 0 0 3px color-mix(in oklab, var(--ui-accent) 22%, transparent)}
 /* the list view (narrow pane) sits right under the banner: its frame is enough, the moment is not said twice in a short column */
 .oc-rp-tag:has(+ .oc-box.oc-listing){display:none}
 .oc-rp-tag{position:absolute;top:8px;left:8px;z-index:4;display:inline-flex;align-items:center;gap:6px;max-width:calc(100% - 16px);box-sizing:border-box;padding:3px 9px;border:1px solid var(--ui-accent);border-radius:999px;background:${CARD};color:var(--foreground);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;box-shadow:0 1px 3px color-mix(in oklab, var(--foreground) 18%, transparent)}

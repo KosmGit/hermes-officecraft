@@ -70,7 +70,6 @@ ${ringed('.oc-sx-btn:focus-visible')}
 .oc-sx-link{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:4px 0;text-align:left;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;line-height:16px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 ${ringed('.oc-sx-link:focus-visible')}
 
-.oc-sx-budget{position:relative;display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;align-items:center;margin:8px 0;padding:12px;border:1px solid color-mix(in oklab, ${VIOLET} 30%, ${EDGE});border-radius:12px;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET} 12%, ${CARD}), ${CARD})}
 .oc-sx-gauge{display:block;width:88px;height:88px}
 .oc-sx-gauge circle{fill:none;stroke-width:9}
 .oc-sx-gauge .bg{stroke:color-mix(in oklab, var(--foreground) 14%, ${CARD})}
@@ -78,9 +77,6 @@ ${ringed('.oc-sx-link:focus-visible')}
 .oc-sx-gauge[data-hit="true"] .fg{stroke:${ORANGE}}
 .oc-sx-gauge text{fill:var(--foreground);font:700 14px ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
 .oc-sx-gauge .u{fill:${TEXT3};font:500 10px ui-monospace,SFMono-Regular,Menlo,monospace}
-.oc-sx-bud{min-width:0}
-.oc-sx-bud .oc-sx-name{font-size:14px}
-.oc-sx-bud small{display:block;color:${TEXT3};font-size:12px}
 .oc-sx-cap{margin-top:8px}
 .oc-sx-cap summary{display:inline-flex;align-items:center;gap:4px;min-height:24px;color:var(--ui-accent);font-size:12.5px;cursor:pointer;list-style:none}
 .oc-sx-cap summary::-webkit-details-marker{display:none}
@@ -123,16 +119,6 @@ ${ringed('.oc-sx-cap summary:focus-visible')}
 .oc-sx-row:has(+ .oc-nt-sub){border-bottom:0}
 .oc-nt-type .oc-sx-warn{flex:1 0 100%;margin:0}
 .oc-nt-cap{margin:12px 0 0;color:${TEXT3};font-size:12px;line-height:16px}
-.oc-nt-test{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.oc-sx-feat{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 0;border-bottom:1px solid ${HAIR}}
-.oc-sx-fi{grid-row:1 / 3;display:grid;place-items:center;width:36px;height:36px;border-radius:9px;color:${VIOLET};background:color-mix(in oklab, ${VIOLET} 13%, ${CARD});border:1px solid color-mix(in oklab, ${VIOLET} 30%, ${EDGE})}
-.oc-sx-feat[data-state="off"] .oc-sx-fi{color:${TEXT3};background:color-mix(in oklab, var(--foreground) 6%, ${CARD});border-color:${EDGE}}
-.oc-sx-feat .oc-sx-name{grid-column:2;flex-wrap:wrap}
-.oc-sx-feat small{grid-column:2;color:${TEXT3};font-size:12px}
-.oc-sx-feat .oc-sx-ctl{grid-row:1 / 3;grid-column:3}
-.oc-sx-fx{grid-column:2 / -1;display:flex;flex-direction:column;align-items:flex-start}
-.oc-sx-fx>*{margin-top:8px}
-.oc-sx-fx>*:empty{margin:0}
 /* the gauge and the two models on top, the ten functions in two groups of rows, each row = name + state + « Sends », lane chip, action, « ? » + switch */
 /* the window keeps ONE size whichever tab is open (a window that grows when a tab opens moves the tab list from under the pointer): the size of the tallest tab that fits the screen, the rest scrolls inside */
 .oc-lm-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px 16px;align-items:start;border:1px solid ${EDGE};border-radius:12px;padding:8px 12px;margin:4px 0 0;background:linear-gradient(135deg, color-mix(in oklab, ${VIOLET} 7%, ${CARD}), ${CARD} 60%)}

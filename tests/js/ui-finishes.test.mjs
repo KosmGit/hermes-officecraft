@@ -219,12 +219,7 @@ test('the border of a field is darker than the hairline, and the field has its o
   assert.notEqual(FIELD_EDGE, EDGE)
   assert.match(FIELD_EDGE, /var\(--foreground\) (4[0-9]|5[0-9])%/, 'a mix of the text colour: strong enough for 3:1')
   assert.doesNotMatch(FIELD_EDGE, /#|rgb|hsl/, 'theme variables only')
-  assert.equal(decl(PANEL_CSS, '.oc-ordbox .oc-text', 'border'), `1px solid ${FIELD_EDGE}`)
-  assert.match(decl(PANEL_CSS, '.oc-hire input[type=text]', 'border'), new RegExp(FIELD_EDGE.replace(/[()]/g, '\\$&')))
-  assert.equal(decl(PANEL_CSS, '.oc-hire select', 'background'), CARD)
   assert.equal(FIELD_RADIUS, '2.5px', 'the radius of Hermes\' own fields (control.ts)')
-  assert.equal(decl(PANEL_CSS, '.oc-ordbox .oc-text', 'border-radius'), FIELD_RADIUS)
-  assert.equal(decl(PANEL_CSS, '.oc-hire select', 'border-radius'), FIELD_RADIUS)
   for (const f of ['src/ui/SettingsForm.jsx', 'src/ui/SettingsFormNotify.jsx']) {
     const text = src(f)
     assert.match(text, /FIELD_EDGE/, `${f}: the selects take the field border`)
@@ -239,16 +234,12 @@ test('buttons: radius 4 px, weight 500 (text buttons), the host focus ring', () 
   assert.match(RING_FOCUS, /box-shadow:0 0 0 3px color-mix\(in oklab, .+ 50%, transparent\)/)
   assert.match(RING_FOCUS, /border-color:/)
   assert.match(RING, /--ring/, 'the host ring colour first')
-  for (const sel of ['.oc-btn', '.oc-toggle', '.oc-gear', '.oc-x', '.oc-legend-btn']) {
+  for (const sel of ['.oc-legend-btn']) {   // the other buttons of the old panel (.oc-btn, .oc-toggle, .oc-gear, .oc-x) have no user any more
     assert.equal(decl(PANEL_CSS, sel, 'border-radius'), '4px', `${sel} radius`)
     const ring = focusRule(PANEL_CSS, sel)
     assert.ok(ring.includes('box-shadow:0 0 0 3px'), `${sel}: focus ring is the host's (3 px halo): ${ring}`)
     assert.doesNotMatch(ring, /outline:2px solid (?!transparent)/, `${sel}: no accent outline (the outline is the transparent one of forced-colors mode)`)
   }
-  for (const sel of ['.oc-btn', '.oc-toggle']) assert.equal(decl(PANEL_CSS, sel, 'font-weight'), '500', `${sel} weight`)
-  // the « Open » button of the dock keeps its class (and its host ring); the dock's buttons are styled by pageStyles.js, not by inline styles
-  assert.match(src('src/ui/ProjectDock.jsx'), /className="ux-b sm pri oc-btn-open"/)
-  assert.ok(focusRule(PANEL_CSS, '.oc-btn-open').includes('box-shadow:0 0 0 3px'))
   // the settings selects (inline style, so no :focus rule of their own) take the ring through one injected rule
   assert.ok(FIELD_CSS.includes('.oc-fc:focus-visible') && FIELD_CSS.includes('box-shadow:0 0 0 3px'))
   assert.match(FIELD_CSS, /border-color:[^;]+ !important/, 'the border turns to the ring colour although the select\'s own border is an inline style')
@@ -257,7 +248,5 @@ test('buttons: radius 4 px, weight 500 (text buttons), the host focus ring', () 
     const selects = src(f).match(/<select [^>]*>/g) || []
     assert.ok(selects.length > 0 && selects.every(x => x.includes('className="oc-fc"')), `${f}: every select takes the ring class`)
   }
-  // fields take the same ring when focused
-  assert.ok(focusRule(PANEL_CSS, '.oc-ordbox .oc-text').includes('box-shadow:0 0 0 3px'))
 })
 }

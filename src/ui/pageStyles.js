@@ -230,8 +230,6 @@ export const PAGE_CSS = `
 .ux-dc-o .ux-b.cx .short{display:none}
 .ux-dc-o .ux-b.sm:not(.ico){padding:0 8px}
 .ux-ch-extra{display:flex;flex-wrap:wrap;gap:8px}
-.ux-slot:empty{display:none}
-.ux-slot{display:block}
 /* the confirmation, the draft and the 6 s window live IN the card */
 .ux-cf{display:flex;flex-direction:column;gap:8px;padding:8px 12px;border-radius:8px;background:color-mix(in oklab, var(--foreground) 4%, ${CARD});border:1px solid ${EDGE};animation:ux-in .14s ease both}
 .ux-cf p{margin:0;font-size:12.5px;overflow-wrap:anywhere}
