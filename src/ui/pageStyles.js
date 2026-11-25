@@ -12,6 +12,8 @@ const T3 = 'color-mix(in oklab, var(--ui-text-secondary) 55%, var(--ui-text-tert
 const ORANGE = 'var(--ui-orange, var(--ui-accent))'
 const GREEN = 'var(--ui-green, var(--ui-accent))'
 const RED = 'var(--ui-red, var(--destructive, var(--ui-orange)))'
+// the solid fill of the decisions pill: the orange pulled toward the page background, so the text colour (the theme's foreground, dark on a light page and light on a dark one) keeps 4.5:1 in both themes (measured on the real page)
+const ORANGE_FILL = `color-mix(in oklab, ${ORANGE} 62%, var(--background, Canvas))`
 const ink = hue => `color-mix(in oklab, ${hue} 55%, var(--foreground))`
 
 export const PAGE_CSS = `
@@ -77,24 +79,28 @@ export const PAGE_CSS = `
 .ux-lvp b{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
 .ux-lvp:hover{border-color:var(--ui-accent)}
 .ux-lvp.working b{color:${ink('var(--ui-accent)')}}
-.ux-lvp.warn{border-color:color-mix(in oklab, ${ORANGE} 60%, ${EDGE});background:color-mix(in oklab, ${ORANGE} 9%, ${CARD})}
-.ux-lvp.warn b{color:${ink(ORANGE)}}
+.ux-lvp.warn{border-color:${ORANGE_FILL};background:${ORANGE_FILL};color:var(--foreground)}
+.ux-lvp.warn b{color:inherit}
+.ux-lvp.warn:hover{border-color:var(--foreground)}
 .ux-pulse{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:var(--ui-accent);animation:ux-pulse 2s ease-out infinite}
 .ux-pulse.off{animation:none;background:${T3}}
 @keyframes ux-pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab, var(--ui-accent) 55%, transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
 .ux-sp{flex:1 1 auto;min-width:0}
-/* the game badge: three segments of the same structure (icon + value over its caption), centred on one axis, 40 px */
-.ux-game{display:inline-flex;align-items:stretch;flex:0 0 auto;box-sizing:border-box;height:32px;padding:0;border:1px solid color-mix(in oklab, ${ORANGE} 35%, ${EDGE});border-radius:12px;overflow:hidden;background:linear-gradient(180deg, color-mix(in oklab, ${ORANGE} 9%, ${CARD}), ${CARD});color:var(--foreground);font:inherit;cursor:pointer;text-align:left}
-.ux-game:hover{border-color:${ORANGE}}
+/* the game badge, discreet (the decisions come first; orange is the colour of « waits for you »): a neutral border and no tint. Under 1500 px one compact segment
+   (trophy + « lvl 2 · 12/35 »); from 1500 px three segments of the same structure (icon + value over its caption), centred on one axis, 32 px */
+.ux-game{display:inline-flex;align-items:stretch;flex:0 0 auto;box-sizing:border-box;height:32px;padding:0;border:1px solid ${EDGE};border-radius:12px;overflow:hidden;background:${CARD};color:var(--foreground);font:inherit;cursor:pointer;text-align:left}
+.ux-game:hover{border-color:${T2}}
 .ux-gs{display:inline-flex;align-items:center;gap:8px;padding:0 12px;white-space:nowrap;min-height:0}
-.ux-gs + .ux-gs{border-left:1px solid color-mix(in oklab, ${ORANGE} 22%, ${EDGE})}
+.ux-gs.wide{display:none}
+.ux-gs.wide + .ux-gs.wide{border-left:1px solid ${EDGE}}
+.ux-gs.cmp b{font-size:12.5px;line-height:14px;font-weight:600}
 .ux-g2{display:flex;flex-direction:column;justify-content:center;gap:1px}
 .ux-g2 b{font-size:12.5px;line-height:14px;font-weight:700}
 .ux-g2 b .of{font-weight:500;color:${T3}}
 .ux-g2 small{font-size:11px;line-height:12px;color:${T3}}
 .ux-g2b{display:flex;align-items:center;gap:8px;line-height:12px}
 .ux-mbar{display:block;flex:0 0 auto;width:56px;height:4px;border-radius:2px;background:${SUNKEN};overflow:hidden}
-.ux-mbar i{display:block;height:100%;background:linear-gradient(90deg, ${ORANGE}, color-mix(in oklab, ${ORANGE} 60%, ${RED}))}
+.ux-mbar i{display:block;height:100%;background:${T2}}
 .ux-acts{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 .ux-acts .sep{width:1px;height:24px;background:${EDGE};margin:0 4px}
 .ux-acts .only-n{display:none}
@@ -374,6 +380,11 @@ export const PAGE_CSS = `
   .ux-panel{align-self:start;max-height:100%;min-height:min(100%,320px)}
   .ux-dk-l .ux-pj:not(.all){flex:1 0 auto;max-width:260px}   /* from their content width, never shrunk (the row scrolls instead of cutting a name) */
   .ux-dk-l .ux-pj .n{margin-left:auto}
+  .ux-gs.cmp{display:none}
+  .ux-gs.wide{display:inline-flex}
+}
+/* the actions are named from 1280 px of pane (the compact badge pays for it); under that they are icons, their words stay in aria-label and title */
+@container ux (min-width: 1280px){
   .ux-acts .ux-b .lb{display:inline}
   .ux-acts .ux-b:not(.ico){width:auto;padding:0 12px}
 }
@@ -390,10 +401,8 @@ export const PAGE_CSS = `
   .ux-kpis-wide{display:none}
 }
 @container ux (max-width: 1180px){ .ux-pj.all b{display:none} }
-/* with the host sidebar open (1024 / 1280 px windows) the header has no room for everything: the streak leaves it first, so the actions
-   and the gear stay whole (it stays in the badge's name and in the trophies window) */
-@container ux (max-width: 1100px){ .ux-game .ux-gs[data-streak]{display:none} }
-@container ux (max-width: 980px){ .ux-gs.lvl .ux-g2{display:none} .ux-lvp.working .w{display:none} .ux-lvp.working{padding:0 8px;gap:4px} .ux-top{gap:8px} .ux-acts{gap:4px} .ux-acts .sep{margin:0} }
+/* a pane under 980 px (a 1024 window with the host sidebar open): tighter gaps. The word of the « working » pill stays: the badge is compact and has no caption to give up first */
+@container ux (max-width: 980px){ .ux-top{gap:8px} .ux-acts{gap:4px} .ux-acts .sep{margin:0} }
 /* ---------- a narrow pane (<= 700 px): one view at a time, the bar at the bottom ---------- */
 @container ux (max-width: 700px){
   .ux-top{gap:8px;min-height:40px}
@@ -403,7 +412,7 @@ export const PAGE_CSS = `
   .ux-live .ux-lvp:not(.dec){display:none}
   .ux-game{height:32px}
   .ux-game .ux-gs:not(:first-child){display:none}
-  .ux-game .ux-g2{display:none}
+  .ux-game .ux-g2,.ux-game .ux-gs.cmp b{display:none}
   .ux-acts .ux-b:not(.keep){display:none}
   .ux-acts .sep{display:none}
   .ux-acts .only-n{display:inline-flex}

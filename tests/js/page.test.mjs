@@ -382,14 +382,20 @@ test('a silent agent\'s label says its name and the code of the card that went s
   assert.deepEqual(labelOf(bare, taskTag(bare, NOW)), { name: 'qa', code: '' })
 })
 
-// the real webapp, host sidebar open: header 732 px (1024 window) and 988 px (1280 window); its content needed 764 and 1007 px, the gear was cut.
-// Measured with the streak segment folded: the actions end on the header's edge at 1024, 1280 (EN, ES) and nothing changes at 1440 (1148 px).
-test('the streak leaves the header before the actions run past it (container of 988 px folds it, 1148 px keeps it)', async () => {
+// the real webapp, host sidebar open: header 732 px (1024 window) and 988 px (1280 window); the full badge (level bar, trophies, streak) needed 764 and 1007 px, the gear was cut.
+// The streak used to leave first; now the badge is ONE compact segment under 1500 px of pane (the streak, the level name and the bar exist only in the wide badge).
+test('the streak, the level bar and the captions exist only in the wide badge (from 1500 px); under it the badge is one compact segment', async () => {
   const { PAGE_CSS } = await import('../../src/ui/pageStyles.js')
-  const rules = [...PAGE_CSS.matchAll(/@container ux \(max-width: (\d+)px\)\{([^}]*\.ux-gs\[data-streak\]\{display:none\}[^}]*)\}/g)]
-  assert.ok(rules.length, 'a container rule folds the streak segment')
-  const at = Math.max(...rules.map(m => Number(m[1])))
-  assert.ok(at >= 988 && at < 1148, `folds at ${at}: the 1280 px window with the sidebar (988) folds it, the 1440 one (1148) keeps it`)
+  const hdr = readFileSync(new URL('../../src/ui/PageHeader.jsx', import.meta.url), 'utf8')
+  assert.match(hdr, /className="ux-gs wide" data-game data-streak=\{streak\}/)
+  assert.match(hdr, /className="ux-gs lvl wide"/)
+  assert.match(hdr, /className="ux-gs wide" data-game data-trophy-count/)
+  assert.match(hdr, /className="ux-gs cmp" data-game data-badge-compact/)
+  assert.match(PAGE_CSS, /\.ux-gs\.wide\{display:none\}/, 'folded by default')
+  const wide = PAGE_CSS.match(/@container ux \(min-width: 1500px\)\{([\s\S]*?)\n\}/)[1]
+  assert.match(wide, /\.ux-gs\.cmp\{display:none\}/)
+  assert.match(wide, /\.ux-gs\.wide\{display:inline-flex\}/)
+  assert.ok(!/ux-gs\[data-streak\]/.test(PAGE_CSS), 'no container rule is needed to fold the streak any more')
 })
 
 // AX tree of the real webapp: under 1180 px of pane the word « All » is hidden by the container query, the button kept no name

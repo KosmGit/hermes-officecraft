@@ -8,8 +8,10 @@ import { WhyButton } from './Why.jsx'
 import { useT } from './useT.js'
 
 /**
- * The entry of the trophies in the header: three segments of the same structure (icon + value over its caption), 32 px like the buttons beside it, one axis:
- * « Campus · lvl 4 » on a bar and `247/1000`, `22/35` over « trophies », `10 d` over « streak ». Each segment's tooltip says what it counts.
+ * The entry of the trophies in the header, discreet: the decisions are what the header puts first. Under 1500 px of pane ONE compact
+ * segment, the trophy and « lvl 2 · 12/35 » (the level, the trophies unlocked); from 1500 px three segments of the same structure
+ * (icon + value over its caption), 32 px like the buttons beside it, one axis: « Campus · lvl 4 » on a bar and `247/1000`, `22/35` over
+ * « trophies », `10 d` over « streak ». A neutral border: orange is the colour of « waits for you ». Each segment's tooltip says what it counts.
  * Every part carries `data-game`: sober mode renders none of it. Opens the showcase window (level, trophies on their shelves, postcard).
  */
 function GameBadge({ game, onOpen, t }) {
@@ -21,7 +23,11 @@ function GameBadge({ game, onOpen, t }) {
   const name = t(`game.levelName.${lvl.name}`)
   return (
     <button type="button" className="ux-game" data-game data-badge aria-haspopup="dialog" title={t('ux.badge.tip')} aria-label={t('ux.badge.open', [`${name}, ${t('ux.badge.level', lvl.level)}`, t('ux.badge.trophiesTip', got, total), streak > 0 ? t('ux.badge.streakLabel', streak) : ''].filter(Boolean).join(', '))} onClick={onOpen}>
-      <span className="ux-gs lvl" data-game data-level={lvl.level} data-level-name={lvl.name} title={t('ux.badge.levelTip', lvl.done, lvl.next)}>
+      <span className="ux-gs cmp" data-game data-badge-compact title={`${t('ux.badge.levelTip', lvl.done, lvl.next)} · ${t('ux.badge.trophiesTip', got, total)}`}>
+        <PixelIcon id="chain" size={20} />
+        <b className="ux-mono">{t('ux.badge.level', lvl.level)} · {got}/{total}</b>
+      </span>
+      <span className="ux-gs lvl wide" data-game data-level={lvl.level} data-level-name={lvl.name} title={t('ux.badge.levelTip', lvl.done, lvl.next)}>
         <PixelIcon id="office" size={20} />
         <span className="ux-g2">
           <b>{name} · {t('ux.badge.level', lvl.level)}</b>
@@ -31,12 +37,12 @@ function GameBadge({ game, onOpen, t }) {
           </span>
         </span>
       </span>
-      <span className="ux-gs" data-game data-trophy-count title={t('ux.badge.trophiesTip', got, total)}>
+      <span className="ux-gs wide" data-game data-trophy-count title={t('ux.badge.trophiesTip', got, total)}>
         <PixelIcon id="chain" size={20} />
         <span className="ux-g2"><b className="ux-mono">{got}<span className="of">/{total}</span></b><small>{t('ux.badge.trophies')}</small></span>
       </span>
       {streak > 0 ? (
-        <span className="ux-gs" data-game data-streak={streak} title={t('game.streakTip')}>
+        <span className="ux-gs wide" data-game data-streak={streak} title={t('game.streakTip')}>
           <PixelIcon id="flame" size={20} />
           <span className="ux-g2"><b className="ux-mono">{t('ux.badge.days', streak)}</b><small>{t('ux.badge.streak')}</small></span>
         </span>

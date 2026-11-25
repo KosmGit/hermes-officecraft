@@ -144,10 +144,11 @@ function block(css, head) {
   return null
 }
 
-test('header: words from 1500 px of pane, never a clipped gear: the title and the word of the decisions pill give way first', () => {
-  const wide = block(PAGE_CSS, '@container ux (min-width: 1500px)')
-  assert.match(wide, /\.ux-acts \.ux-b \.lb\{display:inline\}/, 'the words of the buttons come back from 1500 px')
-  assert.ok(!/\.lb/.test(block(PAGE_CSS, '@container ux (max-width: 1320px)')), 'they no longer fold at 1320 px: French and Spanish need about 1445 px')
+test('header: words from 1280 px of pane (the compact badge pays for it), never a clipped gear: the title and the word of the decisions pill give way first', () => {
+  const named = block(PAGE_CSS, '@container ux (min-width: 1280px)')
+  assert.match(named, /\.ux-acts \.ux-b \.lb\{display:inline\}/, 'the words of the buttons come back from 1280 px')
+  assert.ok(!/\.lb/.test(block(PAGE_CSS, '@container ux (min-width: 1500px)')), 'and not only from 1500 px, as they did')
+  assert.ok(!/\.lb/.test(block(PAGE_CSS, '@container ux (max-width: 1320px)')), 'they do not fold again at 1320 px')
   assert.ok(has(rule(PAGE_CSS, '.ux-acts .ux-b .lb'), 'display', 'none'), 'icons are the default')
   // what may not shrink, and what may
   assert.ok(has(rule(PAGE_CSS, '.ux-acts'), 'flex', '0 0 auto'), 'the actions and the gear keep their width')
