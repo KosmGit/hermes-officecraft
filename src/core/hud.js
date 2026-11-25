@@ -223,6 +223,7 @@ export function legendRows(halo, { workingMs, staleMs, activeMs }) {
     { state: 'waiting', rgb: halo.waiting || null, hint: 'legend.waiting', arg: null },
     { state: 'stale', rgb: halo.stale || null, hint: 'legend.stale', arg: mins(staleMs) },
     { state: 'active', rgb: halo.active || null, hint: 'legend.active', arg: mins(activeMs) },
+    { state: 'queued', rgb: halo.queued || null, hint: 'legend.queued', arg: null },
     { state: 'idle', rgb: halo.idle || null, hint: 'legend.rest', arg: null }
   ]
 }

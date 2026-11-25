@@ -4084,9 +4084,218 @@ var isGatewayDown = (state2) => DOWN_STATES.includes(state2);
 var isGatewayDegraded = (state2) => state2 === "degraded";
 var isGatewayUp = (state2) => state2 === "running";
 
+// src/core/queue.js
+var DONE = /* @__PURE__ */ new Set(["done", "archived"]);
+var QUEUE_DEPTH_MAX = 12;
+var QUEUE_CARDS_MAX = 200;
+var QUEUE_LINKS_MAX = 2e3;
+var QUEUE_NAMES_MAX = 3;
+var QUEUE_PARENTS_MAX = 2;
+var cardKey = (board, id) => `${board}/${id}`;
+var byText = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+function toLinks(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const l of raw) {
+    if (!Array.isArray(l) || typeof l[0] !== "string" || typeof l[1] !== "string" || !l[0] || !l[1] || l[0] === l[1]) continue;
+    out.push([l[0], l[1]]);
+    if (out.length >= QUEUE_LINKS_MAX) break;
+  }
+  return out;
+}
+function waitIndex(boards) {
+  const cards = /* @__PURE__ */ new Map();
+  const parents = /* @__PURE__ */ new Map();
+  const children = /* @__PURE__ */ new Map();
+  const add = (map, k, card) => {
+    const list = map.get(k);
+    if (!list) map.set(k, [card]);
+    else if (!list.some((c) => c.key === card.key)) list.push(card);
+  };
+  for (const b of Array.isArray(boards) ? boards : []) {
+    if (!Array.isArray(b?.links) || !b.links.length) continue;
+    const byId = new Map((b.tasks || []).map((t) => [t.id, t]));
+    const card = (t) => {
+      const k = cardKey(b.slug, t.id);
+      if (!cards.has(k)) cards.set(k, { key: k, board: b.slug, id: t.id, title: oneLine2(t.title), status: t.status, assignee: t.assignee || null, createdMs: t.createdMs ?? null, startedMs: t.startedMs ?? null, heartbeatMs: t.heartbeatMs ?? null });
+      return cards.get(k);
+    };
+    for (const [p, c] of b.links) {
+      const P = byId.get(p);
+      const C = byId.get(c);
+      if (!P || !C || P === C || DONE.has(P.status) || DONE.has(C.status)) continue;
+      const pc = card(P);
+      const cc = card(C);
+      add(parents, cc.key, pc);
+      add(children, pc.key, cc);
+    }
+  }
+  const byKey = (a, b) => byText(a.key, b.key);
+  for (const list of parents.values()) list.sort(byKey);
+  for (const list of children.values()) list.sort(byKey);
+  return { cards, parents, children };
+}
+var isWaiting = (index, card) => card?.status === "todo" && (index.parents.get(card.key)?.length ?? 0) > 0;
+var byOldest = (a, b) => (a.createdMs ?? Infinity) - (b.createdMs ?? Infinity) || byText(a.key, b.key);
+function waitingByBot(index) {
+  const out = /* @__PURE__ */ new Map();
+  for (const [k, ps] of index.parents) {
+    const card = index.cards.get(k);
+    if (!card || card.status !== "todo" || !card.assignee) continue;
+    if (!out.has(card.assignee)) out.set(card.assignee, []);
+    out.get(card.assignee).push({ ...card, parents: ps });
+  }
+  for (const list of out.values()) list.sort(byOldest);
+  return out;
+}
+function queuedState(state2, { running = 0, blocked = 0, queued = 0 } = {}) {
+  if (!(queued > 0) || running > 0 || blocked > 0) return state2;
+  return state2 === "idle" || state2 === "active" ? "queued" : state2;
+}
+function headFact(card, nowMs) {
+  switch (card?.status) {
+    case "blocked":
+      return { kind: "waiting" };
+    case "running": {
+      const ms2 = cardSilentMs(card, nowMs);
+      return ms2 ? { kind: "silent", ms: ms2 } : { kind: "working", sinceMs: card.startedMs || null };
+    }
+    case "ready":
+    case "todo":
+      return { kind: "ready" };
+    case "triage":
+      return { kind: "triage" };
+    default:
+      return { kind: "other" };
+  }
+}
+var HEAD_RANK = { waiting: 0, silent: 1, working: 2, ready: 3, triage: 4, other: 5 };
+function chainOf(index, card, nowMs = 0, { depthMax = QUEUE_DEPTH_MAX, cardsMax = QUEUE_CARDS_MAX } = {}) {
+  const parents = index.parents.get(card.key) || [];
+  const depthOf2 = /* @__PURE__ */ new Map([[card.key, 0]]);
+  const upstream = [];
+  const heads = [];
+  let frontier = [card];
+  let capped = false;
+  for (let depth = 1; frontier.length; depth++) {
+    const next = [];
+    for (const at of frontier) {
+      for (const p of index.parents.get(at.key) || []) {
+        if (depthOf2.has(p.key)) continue;
+        if (depthOf2.size >= cardsMax) {
+          capped = true;
+          continue;
+        }
+        depthOf2.set(p.key, depth);
+        upstream.push(p);
+        if (isWaiting(index, p)) next.push(p);
+        else heads.push({ card: p, depth, fact: headFact(p, nowMs) });
+      }
+    }
+    if (depth >= depthMax) {
+      capped = capped || next.length > 0;
+      break;
+    }
+    frontier = next;
+  }
+  heads.sort((a, b) => HEAD_RANK[a.fact.kind] - HEAD_RANK[b.fact.kind] || a.depth - b.depth || byText(a.card.key, b.card.key));
+  return { card, parents, heads, upstream, loop: heads.length === 0 && !capped && upstream.length > 0, capped };
+}
+function behindOf(index, starts, { depthMax = QUEUE_DEPTH_MAX, cardsMax = QUEUE_CARDS_MAX } = {}) {
+  const seen = new Set(starts.map((c) => c.key));
+  const out = [];
+  let frontier = starts;
+  let capped = false;
+  for (let depth = 1; frontier.length; depth++) {
+    const next = [];
+    for (const at of frontier) {
+      for (const c of index.children.get(at.key) || []) {
+        if (seen.has(c.key)) continue;
+        if (seen.size >= cardsMax) {
+          capped = true;
+          continue;
+        }
+        seen.add(c.key);
+        next.push(c);
+        if (isWaiting(index, c)) out.push(c);
+      }
+    }
+    if (depth >= depthMax) {
+      capped = capped || next.length > 0;
+      break;
+    }
+    frontier = next;
+  }
+  return { cards: out, capped };
+}
+var namesOf = (cards, skip = null) => {
+  const out = [];
+  for (const c of cards) if (c.assignee && c.assignee !== skip && !out.includes(c.assignee)) out.push(c.assignee);
+  return out;
+};
+function holdsBack(index, board, id, team = null) {
+  const start = index.cards.get(cardKey(board, id));
+  if (!start) return { cards: 0, bots: [], capped: false };
+  const { cards, capped } = behindOf(index, [start]);
+  return { cards: cards.length, bots: namesOf(cards, start.assignee).filter((n) => !team || team.has(n)), capped };
+}
+function waitersOf(index, name, team = null) {
+  const mine = [];
+  for (const c of index.cards.values()) if (c.assignee === name && !DONE.has(c.status) && index.children.has(c.key)) mine.push(c);
+  if (!mine.length) return { bots: [], capped: false };
+  const { cards, capped } = behindOf(index, mine.sort(byOldest));
+  return { bots: namesOf(cards, name).filter((n) => !team || team.has(n)), capped };
+}
+var CARD_TITLE_MAX = 160;
+function queueView(office, agent, nowMs = 0, index = waitIndex(office?.boards)) {
+  if (!agent) return null;
+  const agents = new Map((office?.agents || []).map((a) => [a.name, a]));
+  const team = new Set(agents.keys());
+  const whoOf2 = (card) => {
+    if (!card.assignee) return { name: "", label: "", kind: "none" };
+    const a = agents.get(card.assignee);
+    return a ? { name: a.name, label: a.label || a.name, kind: "bot" } : { name: card.assignee, label: card.assignee, kind: "outside" };
+  };
+  const trim = (card) => ({ board: card.board, id: card.id, title: oneLine2(card.title).slice(0, CARD_TITLE_MAX), status: card.status });
+  if (agent.state === "queued") {
+    const main = (waitingByBot(index).get(agent.name) || [])[0];
+    if (!main) return null;
+    const chain = chainOf(index, main, nowMs);
+    const head = chain.heads[0] || null;
+    return {
+      kind: "queued",
+      card: trim(main),
+      waits: chain.parents.slice(0, QUEUE_PARENTS_MAX).map((p) => ({ card: trim(p), who: whoOf2(p) })),
+      waitsMore: Math.max(0, chain.parents.length - QUEUE_PARENTS_MAX),
+      head: head ? { card: trim(head.card), who: whoOf2(head.card), fact: head.fact } : null,
+      headsMore: Math.max(0, chain.heads.length - 1),
+      position: head ? head.depth : null,
+      loop: chain.loop,
+      capped: chain.capped,
+      upstream: namesOf(chain.upstream, agent.name).filter((n) => team.has(n))
+    };
+  }
+  const { bots, capped } = waitersOf(index, agent.name, team);
+  if (!bots.length) return null;
+  return { kind: "waited", bots: bots.slice(0, QUEUE_NAMES_MAX), more: Math.max(0, bots.length - QUEUE_NAMES_MAX), count: bots.length, capped };
+}
+function waitsOn(agent, labelOf2 = (n) => n) {
+  const card = Array.isArray(agent?.queued) ? agent.queued[0] : null;
+  if (!card) return [];
+  return namesOf(card.parents || [], agent.name).map(labelOf2).slice(0, QUEUE_PARENTS_MAX);
+}
+function ordinalText(n, lang4) {
+  const k = Math.max(1, Math.floor(Number(n) || 1));
+  if (lang4 === "fr") return k === 1 ? "1ᵉʳ" : `${k}ᵉ`;
+  if (lang4 === "es") return `${k}.º`;
+  const tens = k % 100;
+  const suffix = tens >= 11 && tens <= 13 ? "th" : { 1: "st", 2: "nd", 3: "rd" }[k % 10] || "th";
+  return `${k}${suffix}`;
+}
+
 // src/core/office.js
 var BLOCK_REASON_MAX = 280;
-var DONE = /* @__PURE__ */ new Set(["done", "archived"]);
+var DONE2 = /* @__PURE__ */ new Set(["done", "archived"]);
 var OK_RUN = /* @__PURE__ */ new Set(["ok", "success", "completed", "succeeded"]);
 function toBoard(raw) {
   const tasks = (Array.isArray(raw?.tasks) ? raw.tasks : []).filter((t) => t && typeof t === "object" && str2(t.id) && str2(t.status)).map((t) => ({
@@ -4110,8 +4319,10 @@ function toBoard(raw) {
   }));
   const counts = {};
   for (const t of tasks) counts[t.status] = (counts[t.status] || 0) + 1;
-  const open = tasks.filter((t) => !DONE.has(t.status));
+  const open = tasks.filter((t) => !DONE2.has(t.status));
   return {
+    // the links that still hold a card back (`/live`: [parent id, child id], ids only); [] from an agent half that does not serve them, and in a replay
+    links: toLinks(raw?.links),
     slug: str2(raw?.slug) || "board",
     // when the board was created (kanban boards metadata); the game layer dates « builder » with it
     createdMs: toMs(raw?.createdAt),
@@ -4140,6 +4351,7 @@ function homeBoard(seats) {
 function buildOffice(desks, live, nowMs = Date.now()) {
   const full = Boolean(live && live.ok !== false && Array.isArray(live.boards));
   const boards = full ? uniqueSlugs(live.boards.map(toBoard)) : [];
+  const waiting = waitingByBot(waitIndex(boards));
   const agents = (Array.isArray(desks) ? desks : []).map((desk) => {
     const mine = [];
     const seats = /* @__PURE__ */ new Map();
@@ -4164,8 +4376,10 @@ function buildOffice(desks, live, nowMs = Date.now()) {
       if (blocked.length) state2 = "waiting";
       else if (silentMs) state2 = "stale";
     }
+    const queued = waiting.get(desk.name) || [];
+    state2 = queuedState(state2, { running: running.length, blocked: blocked.length, queued: queued.length });
     const quiet2 = quietCards(runningCards({ running }, nowMs), state2);
-    return { ...desk, state: state2, silentMs, home, mine, blocked, running, quiet: quiet2 };
+    return { ...desk, state: state2, silentMs, home, mine, blocked, running, quiet: quiet2, queued };
   });
   const hall = agents.filter((a) => !a.home);
   return { mode: full ? "full" : "roster", agents, boards, hall, ops: full ? toOps(live.ops) : null };
@@ -4196,7 +4410,7 @@ function toOps(raw) {
   return { gateway, crons };
 }
 function summarizeOffice(office) {
-  const c = { total: office.agents.length, working: 0, active: 0, waiting: 0, stale: 0, idle: 0, new: 0, unknown: 0 };
+  const c = { total: office.agents.length, working: 0, active: 0, waiting: 0, stale: 0, queued: 0, idle: 0, new: 0, unknown: 0 };
   for (const a of office.agents) c[a.state] = (c[a.state] || 0) + 1;
   c.blocked = office.boards.reduce((n, b) => n + b.blocked.length, 0);
   c.open = office.boards.reduce((n, b) => n + b.open.length, 0);
@@ -4823,6 +5037,7 @@ var en = {
     idle: "Idle",
     waiting: "Waiting for you",
     stale: "Silent",
+    queued: "Queued",
     new: "No sessions yet",
     unknown: "Unknown"
   },
@@ -4852,7 +5067,30 @@ var en = {
     active: (mins) => `one of your sessions in the last ${mins} min`,
     rest: "no halo: nothing recent",
     waitName: "Orange “!” sign",
-    waitSign: "the agent is working, but one of its cards is blocked: a decision is yours"
+    waitSign: "the agent is working, but one of its cards is blocked: a decision is yours",
+    queued: "a card of theirs waits for a colleague’s work: not at rest, and nothing for you to decide"
+  },
+  // a card that waits for another card (a `todo` card whose parent is not finished): who it waits for, who is at the head of the queue
+  queue: {
+    tip: (names) => `behind ${names}`,
+    waits: "Waits for:",
+    head: "At the head of the queue:",
+    more: (n) => `+${n}`,
+    rank: (ord) => `${ord} behind`,
+    noAssignee: "a card with no assignee",
+    outside: (name) => `a card of ${name}, who is not on the team`,
+    working: (span2) => `working for ${span2}`,
+    workingNow: "working",
+    waiting: "who needs you",
+    silent: (span2) => `silent for ${span2}`,
+    ready: "ready, not started yet",
+    triage: "waiting to be specified",
+    moreHeads: (n) => `+${n} more at the head`,
+    loop: "These cards wait for each other: the queue goes round in a circle.",
+    longer: "The queue goes further back than the office follows.",
+    waited: (n, atLeast) => `${atLeast ? "At least " : ""}${n} ${n === 1 ? "bot waits" : "bots wait"} for this card:`,
+    holds: (n, bots, atLeast) => `Holds back ${atLeast ? "at least " : ""}${n} ${bots ? n === 1 ? "bot" : "bots" : n === 1 ? "card" : "cards"}`,
+    holdsTip: "Cards wait for this one, directly or after another: deciding it lets the queue move."
   },
   panel: {
     title: "Details",
@@ -6582,6 +6820,7 @@ var es = {
     idle: "En reposo",
     waiting: "Te espera",
     stale: "En silencio",
+    queued: "En cola",
     new: "Sin sesiones",
     unknown: "Desconocido"
   },
@@ -6611,7 +6850,30 @@ var es = {
     active: (mins) => `una de tus sesiones en los últimos ${mins} min`,
     rest: "sin halo: nada reciente",
     waitName: "Señal « ! » naranja",
-    waitSign: "el agente trabaja, pero una de sus tarjetas está bloqueada: te toca decidir"
+    waitSign: "el agente trabaja, pero una de sus tarjetas está bloqueada: te toca decidir",
+    queued: "una de sus tarjetas espera el trabajo de un compañero: no es reposo, y no hay nada que decidir"
+  },
+  // una tarjeta que espera a otra (una tarjeta `todo` cuyo padre no ha terminado): a quién espera, quién va al frente de la cola
+  queue: {
+    tip: (names) => `detrás de ${names}`,
+    waits: "Espera a:",
+    head: "Al frente de la cola:",
+    more: (n) => `+${n}`,
+    rank: (ord) => `${ord} detrás`,
+    noAssignee: "una tarjeta sin asignar",
+    outside: (name) => `una tarjeta de ${name}, que no está en el equipo`,
+    working: (span2) => `trabajando desde hace ${span2}`,
+    workingNow: "trabajando",
+    waiting: "que te espera",
+    silent: (span2) => `en silencio desde hace ${span2}`,
+    ready: "lista, aún sin empezar",
+    triage: "por precisar",
+    moreHeads: (n) => `+${n} más al frente`,
+    loop: "Estas tarjetas se esperan unas a otras: la cola da vueltas.",
+    longer: "La cola llega más lejos de lo que la oficina sigue.",
+    waited: (n, atLeast) => `${atLeast ? "Al menos " : ""}${n} ${n === 1 ? "bot espera" : "bots esperan"} esta tarjeta:`,
+    holds: (n, bots, atLeast) => `Retiene ${atLeast ? "al menos " : ""}${n} ${bots ? n === 1 ? "bot" : "bots" : n === 1 ? "tarjeta" : "tarjetas"}`,
+    holdsTip: "Hay tarjetas que esperan a esta, directamente o tras otra: decidirla hace avanzar la cola."
   },
   panel: {
     title: "Detalles",
@@ -8342,6 +8604,7 @@ var fr = {
     idle: "Au repos",
     waiting: "Vous attend",
     stale: "Silencieux",
+    queued: "En file",
     new: "Aucune session",
     unknown: "Inconnu"
   },
@@ -8371,7 +8634,30 @@ var fr = {
     active: (mins) => `une de vos sessions il y a moins de ${mins} min`,
     rest: "pas de halo : rien de récent",
     waitName: "Signe « ! » orange",
-    waitSign: "l’agent travaille, mais une de ses cartes est bloquée : une décision vous revient"
+    waitSign: "l’agent travaille, mais une de ses cartes est bloquée : une décision vous revient",
+    queued: "une de ses cartes attend le travail d’un collègue : ce n’est pas du repos, et rien n’est à décider"
+  },
+  // une carte qui attend une autre carte (une carte `todo` dont un parent n’est pas fini) : qui elle attend, qui est en tête de file
+  queue: {
+    tip: (names) => `derrière ${names}`,
+    waits: "Attend :",
+    head: "En tête de file :",
+    more: (n) => `+${n}`,
+    rank: (ord) => `${ord} derrière`,
+    noAssignee: "une carte sans assigné",
+    outside: (name) => `une carte de ${name}, hors de l’équipe`,
+    working: (span2) => `au travail depuis ${span2}`,
+    workingNow: "au travail",
+    waiting: "qui vous attend",
+    silent: (span2) => `silencieux depuis ${span2}`,
+    ready: "prête, pas encore lancée",
+    triage: "à préciser",
+    moreHeads: (n) => `+${n} autre${n === 1 ? "" : "s"} en tête`,
+    loop: "Ces cartes s’attendent les unes les autres : la file tourne en rond.",
+    longer: "La file remonte plus loin que ce que le bureau suit.",
+    waited: (n, atLeast) => `${atLeast ? "Au moins " : ""}${n} ${n === 1 ? "bot attend" : "bots attendent"} cette carte :`,
+    holds: (n, bots, atLeast) => `Retient ${atLeast ? "au moins " : ""}${n} ${bots ? n === 1 ? "bot" : "bots" : n === 1 ? "carte" : "cartes"}`,
+    holdsTip: "Des cartes attendent celle-ci, directement ou après une autre : la décider fait avancer la file."
   },
   panel: {
     title: "Détails",
@@ -10104,7 +10390,7 @@ var RULES_V2 = Object.freeze({
 var finite2 = (v) => typeof v === "number" && Number.isFinite(v);
 var by2 = (a, b) => a - b;
 var liveTasks = (b) => (b?.tasks || []).filter((t) => t && t.status !== "archived");
-var cardKey = (board, id) => `${board}/${id}`;
+var cardKey2 = (board, id) => `${board}/${id}`;
 var dayNo = (ms2) => {
   const d = new Date(ms2);
   return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY_MS3);
@@ -10213,7 +10499,7 @@ function chains(ctx) {
 var maxCompleted = (tasks) => Math.max(...tasks.map((t) => t.completedMs).filter(finite2));
 function smooth(ctx) {
   if (!ctx.hasLinks) return { value: 0, unavailable: true };
-  const blocked = new Set(ctx.events.filter((e) => e.kind === "blocked").map((e) => cardKey(e.board, e.task)));
+  const blocked = new Set(ctx.events.filter((e) => e.kind === "blocked").map((e) => cardKey2(e.board, e.task)));
   const goal = RULES_V2.smoothCards;
   let best = 0;
   let hit = null;
@@ -10228,7 +10514,7 @@ function smooth(ctx) {
       if (memo2.has(id)) return memo2.get(id);
       const t = tasks.get(id);
       let res = { len: 0, at: null, d: null };
-      if (t && t.status === "done" && finite2(t.completedMs) && !blocked.has(cardKey(b.slug, id)) && !seen.has(id)) {
+      if (t && t.status === "done" && finite2(t.completedMs) && !blocked.has(cardKey2(b.slug, id)) && !seen.has(id)) {
         seen.add(id);
         let top = null;
         for (const p of parents.get(id) || []) {
@@ -10349,11 +10635,11 @@ function multimodel(ctx) {
 }
 function rescue(ctx) {
   const tasks = /* @__PURE__ */ new Map();
-  for (const b of ctx.boards) for (const t of liveTasks(b)) tasks.set(cardKey(b.slug, t.id), t);
+  for (const b of ctx.boards) for (const t of liveTasks(b)) tasks.set(cardKey2(b.slug, t.id), t);
   const since = /* @__PURE__ */ new Map();
   let hit = null;
   for (const e of ctx.events) {
-    const k = cardKey(e.board, e.task);
+    const k = cardKey2(e.board, e.task);
     if (e.kind === "blocked") {
       if (!since.has(k)) since.set(k, e.ms);
     } else if ((e.kind === "unblocked" || e.kind === "completed") && since.has(k)) {
@@ -10394,7 +10680,7 @@ function ontime(ctx) {
   if (!ctx.hasRunTask) return { value: 0, unavailable: true };
   const seen = /* @__PURE__ */ new Set();
   const list = ctx.runs.map((r) => {
-    const k = cardKey(r.board, r.task);
+    const k = cardKey2(r.board, r.task);
     const retry = seen.has(k);
     seen.add(k);
     return { ok: r.outcome !== "timed_out" && !retry, ms: r.endedMs };
@@ -10403,8 +10689,8 @@ function ontime(ctx) {
   return { value: hit != null ? best : Math.min(best, RULES_V2.ontimeRuns - 1), ms: hit, fact: ["game.fact.ontime", RULES_V2.ontimeRuns] };
 }
 function firstpass(ctx) {
-  const changed = new Set(ctx.events.filter((e) => e.kind === "changes_requested").map((e) => cardKey(e.board, e.task)));
-  const list = ctx.cards.filter((c) => isReviewCard(c.title, ctx.roleOf(c.assignee))).map((c) => ({ ok: !changed.has(cardKey(c.board, c.id)), ms: c.completedMs }));
+  const changed = new Set(ctx.events.filter((e) => e.kind === "changes_requested").map((e) => cardKey2(e.board, e.task)));
+  const list = ctx.cards.filter((c) => isReviewCard(c.title, ctx.roleOf(c.assignee))).map((c) => ({ ok: !changed.has(cardKey2(c.board, c.id)), ms: c.completedMs }));
   const { best, hit } = streakOf(list, RULES_V2.firstpassCards);
   return { value: hit != null ? best : Math.min(best, RULES_V2.firstpassCards - 1), ms: hit, fact: ["game.fact.firstpass", RULES_V2.firstpassCards] };
 }
@@ -10422,7 +10708,7 @@ function noqueue(ctx) {
     for (let d = dayNo(b + RULES_V2.noqueueMs), end = dayNo(e), n = 0; d <= end && n < 800; d++, n++) bad.add(d);
   };
   for (const e of ctx.events) {
-    const k = cardKey(e.board, e.task);
+    const k = cardKey2(e.board, e.task);
     if (e.kind === "blocked") {
       if (!since.has(k)) since.set(k, e.ms);
     } else if ((e.kind === "unblocked" || e.kind === "completed") && since.has(k)) {
@@ -10430,7 +10716,7 @@ function noqueue(ctx) {
       since.delete(k);
     }
   }
-  for (const b of ctx.boards) for (const t of liveTasks(b)) if (t.status === "blocked" && since.has(cardKey(b.slug, t.id))) over(since.get(cardKey(b.slug, t.id)), ctx.now);
+  for (const b of ctx.boards) for (const t of liveTasks(b)) if (t.status === "blocked" && since.has(cardKey2(b.slug, t.id))) over(since.get(cardKey2(b.slug, t.id)), ctx.now);
   const active = /* @__PURE__ */ new Set([...ctx.events.map((e) => dayNo(e.ms)), ...ctx.runs.map((r) => dayNo(r.endedMs))]);
   const clean = new Set([...active].filter((d) => !bad.has(d) && d < ctx.today));
   const { best, hit } = dayRun(clean, RULES_V2.noqueueDays);
@@ -10514,7 +10800,7 @@ function twin(ctx) {
 }
 function fastlane(ctx) {
   if (!ctx.hasRunTask) return { value: 0, unavailable: true };
-  const blocked = new Set(ctx.events.filter((e) => e.kind === "blocked").map((e) => cardKey(e.board, e.task)));
+  const blocked = new Set(ctx.events.filter((e) => e.kind === "blocked").map((e) => cardKey2(e.board, e.task)));
   let hit = null;
   for (const b of ctx.boards) {
     const byCard = /* @__PURE__ */ new Map();
@@ -10522,7 +10808,7 @@ function fastlane(ctx) {
     for (const t of liveTasks(b)) {
       if (t.status !== "done" || !finite2(t.createdMs) || !finite2(t.completedMs)) continue;
       const dt = t.completedMs - t.createdMs;
-      if (dt < 0 || dt >= RULES_V2.fastlaneMs || blocked.has(cardKey(b.slug, t.id))) continue;
+      if (dt < 0 || dt >= RULES_V2.fastlaneMs || blocked.has(cardKey2(b.slug, t.id))) continue;
       const runs = byCard.get(t.id) || [];
       if (!runs.length || !runs.every((r) => r.outcome === "completed")) continue;
       if (!hit || t.completedMs < hit.at) hit = { at: t.completedMs, board: b.slug, minutes: Math.max(1, Math.floor(dt / 6e4)) };
@@ -11585,6 +11871,7 @@ function legendRows(halo2, { workingMs, staleMs, activeMs }) {
     { state: "waiting", rgb: halo2.waiting || null, hint: "legend.waiting", arg: null },
     { state: "stale", rgb: halo2.stale || null, hint: "legend.stale", arg: mins(staleMs) },
     { state: "active", rgb: halo2.active || null, hint: "legend.active", arg: mins(activeMs) },
+    { state: "queued", rgb: halo2.queued || null, hint: "legend.queued", arg: null },
     { state: "idle", rgb: halo2.idle || null, hint: "legend.rest", arg: null }
   ];
 }
@@ -13271,6 +13558,7 @@ function agentSprite(a, facing, frame, seatKind, opt = {}) {
   const st = a.state;
   if (art && st === "new") return jacket(O, facing);
   const typing = st === "working";
+  const calm = art && st === "queued";
   const sleepy = st === "idle" && a.sleepy;
   const bob = typing && frame % 2 ? -1 : 0;
   const droop = art && st === "stale" ? facing === "back" ? 3 : 2 : 0;
@@ -13320,6 +13608,14 @@ function agentSprite(a, facing, frame, seatKind, opt = {}) {
     const wv = frame % 4 < 2 ? 0 : 1;
     arms.rect(6, -27, 7, -13, sl[1]).rect(-8, -14, -7, -8, sl[1]);
     hands.rect(5 + wv, -31, 8 + wv, -28, sk[0]).rect(-8, -7, -7, -6, sk[0]);
+  } else if (calm) {
+    if (facing === "front") {
+      arms.rect(-8, -14, -7, -10, sl[1]).rect(6, -14, 7, -10, sl[1]).rect(-7, -10, -3, -9, sl[1]).rect(2, -10, 6, -9, sl[1]);
+      hands.rect(-3, -10, -1, -9, sk[0]).rect(0, -10, 2, -9, sk[0]);
+    } else {
+      arms.rect(-8, -14, -7, -10, sl[1]).rect(6, -14, 7, -10, sl[1]);
+      hands.rect(-8, -9, -7, -8, sk[0]).rect(6, -9, 7, -8, sk[0]);
+    }
   } else if (typing || st === "active") {
     const l = typing && frame % 2 ? -1 : 0;
     const r = typing && frame % 2 ? 0 : -1;
@@ -14045,11 +14341,13 @@ function plant(px, x, y, big, o = {}) {
   }
   s.blit(px, Math.round(cx), Math.round(cy - 2));
 }
-var HALO = { working: [77, 140, 255], waiting: [242, 165, 22], active: [47, 174, 107], stale: [150, 156, 170] };
-function halo(px, x, y, state2, frame) {
-  const c = HALO[state2];
+var HALO = { working: [77, 140, 255], waiting: [242, 165, 22], active: [47, 174, 107], stale: [150, 156, 170], queued: [74, 190, 196] };
+var haloOf = (state2, art = true) => state2 === "queued" && !art ? void 0 : HALO[state2];
+var STEADY = /* @__PURE__ */ new Set(["active", "queued"]);
+function halo(px, x, y, state2, frame, art = true) {
+  const c = haloOf(state2, art);
   if (!c) return;
-  const beat = state2 !== "active" && frame % 4 < 2;
+  const beat = !STEADY.has(state2) && frame % 4 < 2;
   const r2 = 0.5 + (beat ? 0.05 : 0);
   const r1 = r2 - 0.11;
   const [cx, cy] = px.P(x, y);
@@ -14209,7 +14507,7 @@ function drawScene(layout2, base, model, frame = 0, opts = null) {
   const incidents = incidentBoardsOf(decor);
   const has = (id) => hasAchievement(decor, id);
   const ring = (x, y, state2) => {
-    const c = E(art ? HALO[state2] || RING_REST : accent);
+    const c = E(art ? haloOf(state2) || RING_REST : accent);
     const pts = [P(x - 0.42, y - 0.42), P(x + 0.42, y - 0.42), P(x + 0.42, y + 0.42), P(x - 0.42, y + 0.42)];
     for (let i = 0; i < 4; i++) px.line(pts[i], pts[(i + 1) % 4], c);
   };
@@ -14220,7 +14518,7 @@ function drawScene(layout2, base, model, frame = 0, opts = null) {
     const Y0 = Math.round(ay);
     const lit2 = art && night && facing === "front" && !kind ? screenLight(a.state) : null;
     const put2 = () => {
-      if (HALO[a.state]) spr.aura(px, X0, Y0, HALO[a.state], a.state === "active" || frame % 4 < 2);
+      if (haloOf(a.state, art)) spr.aura(px, X0, Y0, haloOf(a.state, art), a.state === "active" || a.state === "queued" || frame % 4 < 2);
       spr.blit(px, X0, Y0, GREY_STATES.has(a.state) && !(art && a.state === "new"), lit2 ? { c: lit2, a: 0.1, y0: -30, y1: -8 } : void 0);
     };
     if (wash) washed(px, { x0: X0 - 24, y0: Y0 - 50, x1: X0 + 24, y1: Y0 + 12 }, null, night, put2);
@@ -14278,7 +14576,7 @@ function drawScene(layout2, base, model, frame = 0, opts = null) {
     const r0 = p.seats.filter((s) => s.row === 0);
     const r1 = p.seats.filter((s) => s.row === 1);
     for (const s of r0) {
-      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame);
+      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame, art);
       drawChairBack(px, s.x, s.y, -1, art ? p.hue : null);
       drawChairSeat(px, s.x, s.y);
       if (s.agent && s.agent.name === selected) ring(s.x, s.y, s.agent.state);
@@ -14311,7 +14609,7 @@ function drawScene(layout2, base, model, frame = 0, opts = null) {
       deskProps(px, s.x, TY2 + TD - 0.36, s.agent, 1, sober, art ? frame : null, art && cupOff(pileOf(s.agent)));
     }
     for (const s of r1) {
-      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame);
+      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame, art);
       drawChairSeat(px, s.x, s.y);
       if (s.agent && s.agent.name === selected) ring(s.x, s.y, s.agent.state);
       const hung = art && s.agent?.state === "new";
@@ -14329,7 +14627,7 @@ function drawScene(layout2, base, model, frame = 0, opts = null) {
   box(px, L0 + 0.5, 1.75, 0, 2.8, 0.7, 7, { t: PAL.sofaT, l: PAL.sofa, r: PAL.sofaD });
   box(px, L0 + 0.35, 1.45, 0, 0.18, 1, 11, { t: PAL.sofaT, l: PAL.sofa, r: PAL.sofaD });
   box(px, L0 + 3.27, 1.45, 0, 0.18, 1, 11, { t: PAL.sofaT, l: PAL.sofa, r: PAL.sofaD });
-  for (const s of lounge.seats) halo(px, s.x, s.y + (s.kind === "sofa" ? 0.35 : 0), s.agent.state, frame);
+  for (const s of lounge.seats) halo(px, s.x, s.y + (s.kind === "sofa" ? 0.35 : 0), s.agent.state, frame, art);
   for (const s of lounge.seats.filter((s2) => s2.kind === "sofa")) {
     if (s.agent.name === selected) ring(s.x, s.y, s.agent.state);
     spriteAt(s.agent, s.x, s.y, 6, "front", "sofa", Boolean(dim?.hall));
@@ -14389,6 +14687,7 @@ var STATE_ICONS = Object.freeze({
   waiting: ["...###...", "...###...", "...###...", "...###...", "...###...", "....#....", ".........", "...###...", "...###..."],
   idle: ["#####....", "...##....", "..##.....", ".##......", "#####....", ".....####", "......##.", ".....##..", ".....####"],
   stale: ["#########", ".#######.", "..#####..", "...###...", "....#....", "...#.#...", "..#...#..", ".#.###.#.", "#########"],
+  queued: [".........", ".........", ".###.###.", "#...#...#", "#...#...#", "#...#...#", ".###.###.", ".........", "........."],
   new: ["..#...#..", "..#...#..", ".#######.", ".#######.", ".#######.", "..#####..", "...###...", "....#....", "....#...."],
   unknown: ["..#####..", ".##...##.", ".##...##.", "......##.", "....###..", "....#....", ".........", "....#....", "....#...."]
 });
@@ -14838,6 +15137,7 @@ var FIELD_CSS = `.oc-fc:focus-visible{outline:2px solid transparent;border-color
 var SUNKEN = "var(--ui-bg-sunken, color-mix(in oklab, var(--foreground) 7%, transparent))";
 var ON_ACCENT = "var(--ui-accent-fg, var(--background, Canvas))";
 var VIOLET = "var(--ui-violet, color-mix(in oklab, color-mix(in oklch, var(--ui-purple, var(--ui-accent)), color-mix(in oklch, var(--ui-blue, var(--ui-accent)) 81%, var(--ui-red, var(--ui-accent)))) 88%, var(--foreground)))";
+var COOL = "color-mix(in oklch, var(--ui-green, var(--ui-accent)) 50%, var(--ui-accent))";
 
 // src/ui/dialogStyles.js
 var SOFT = "color-mix(in oklab, var(--ui-text-secondary) 60%, var(--ui-text-tertiary))";
@@ -18971,6 +19271,57 @@ function SoulStep({ n, draft, set, assist, from }) {
 // src/ui/SidePanel.jsx
 import { useMemo as useMemo9 } from "react";
 
+// src/core/queueText.js
+function factText(fact, t, formatSpan2, nowMs) {
+  switch (fact?.kind) {
+    case "waiting":
+      return t("queue.waiting");
+    case "silent":
+      return t("queue.silent", formatSpan2(fact.ms));
+    case "working":
+      return fact.sinceMs && nowMs > fact.sinceMs ? t("queue.working", formatSpan2(nowMs - fact.sinceMs)) : t("queue.workingNow");
+    case "ready":
+      return t("queue.ready");
+    case "triage":
+      return t("queue.triage");
+    default:
+      return "";
+  }
+}
+var whoText = (who, t) => who.kind === "none" ? t("queue.noAssignee") : who.kind === "outside" ? t("queue.outside", who.name) : who.label;
+function queueLines(view, t, nowMs, formatSpan2) {
+  if (view?.kind !== "queued") return null;
+  const head = view.head;
+  const rank = head && view.position >= 2 ? t("queue.rank", ordinalText(view.position, t.lang)) : "";
+  return {
+    waits: { items: view.waits.map((w) => ({ who: whoText(w.who, t), title: w.card.title })), more: view.waitsMore },
+    head: head ? {
+      who: whoText(head.who, t),
+      fact: factText(head.fact, t, formatSpan2, nowMs),
+      rank,
+      more: view.headsMore ? t("queue.moreHeads", view.headsMore) : "",
+      board: head.card.board,
+      decide: head.fact.kind === "waiting"
+    } : null,
+    note: view.loop ? t("queue.loop") : view.capped ? t("queue.longer") : ""
+  };
+}
+function waitedLine(view, t, labelOf2) {
+  if (view?.kind !== "waited") return null;
+  return { lead: t("queue.waited", view.count, view.capped), names: view.bots.slice(0, QUEUE_NAMES_MAX).map(labelOf2), more: view.more };
+}
+function holdsLine(held2, t, labelOf2) {
+  if (!held2 || !(held2.cards > 0)) return null;
+  const bots = held2.bots.length > 0;
+  const n = bots ? held2.bots.length : held2.cards;
+  return {
+    text: t("queue.holds", n, bots, held2.capped),
+    names: held2.bots.slice(0, QUEUE_NAMES_MAX).map(labelOf2),
+    more: Math.max(0, held2.bots.length - QUEUE_NAMES_MAX),
+    tip: t("queue.holdsTip")
+  };
+}
+
 // src/ui/PixelBadge.jsx
 import { jsx as jsx14 } from "react/jsx-runtime";
 var ART = [".#.#.#.", "#######", ".#...#.", "##.#.##", ".#...#.", "#######", ".#.#.#."];
@@ -19244,7 +19595,42 @@ function CardRow({ c, nowMs, t }) {
     c.title && c.title !== c.code ? /* @__PURE__ */ jsx19("span", { className: "one", children: c.title }) : null
   ] });
 }
-var ORDER2 = { waiting: 0, working: 1, stale: 2, active: 3, idle: 4, new: 5, unknown: 6 };
+var ORDER2 = { waiting: 0, working: 1, stale: 2, active: 3, queued: 4, idle: 5, new: 6, unknown: 7 };
+function QueueBlock({ lines, waited, onDecide, t }) {
+  if (!lines && !waited) return null;
+  return /* @__PURE__ */ jsx19("div", { className: "ux-ag-q", "data-insp-queue": lines ? "queued" : "waited", role: "group", "aria-label": t("state.queued"), children: lines ? /* @__PURE__ */ jsxs16(Fragment12, { children: [
+    /* @__PURE__ */ jsxs16("p", { "data-queue-waits": true, children: [
+      /* @__PURE__ */ jsx19("span", { className: "k", children: t("queue.waits") }),
+      lines.waits.items.map((it, i) => /* @__PURE__ */ jsxs16("span", { className: "it", children: [
+        /* @__PURE__ */ jsx19("b", { children: it.who }),
+        it.title ? /* @__PURE__ */ jsxs16("i", { children: [
+          " · ",
+          it.title
+        ] }) : null,
+        i < lines.waits.items.length - 1 ? "," : ""
+      ] }, i)),
+      lines.waits.more ? /* @__PURE__ */ jsx19("span", { className: "mo", children: t("queue.more", lines.waits.more) }) : null
+    ] }),
+    lines.head ? /* @__PURE__ */ jsxs16("p", { "data-queue-head": true, children: [
+      /* @__PURE__ */ jsx19("span", { className: "k", children: t("queue.head") }),
+      /* @__PURE__ */ jsxs16("span", { className: "it", children: [
+        /* @__PURE__ */ jsx19("b", { children: lines.head.who }),
+        lines.head.fact ? `, ${lines.head.fact}` : ""
+      ] }),
+      lines.head.more ? /* @__PURE__ */ jsx19("span", { className: "mo", children: lines.head.more }) : null,
+      lines.head.rank ? /* @__PURE__ */ jsxs16("span", { className: "rk", "data-queue-rank": true, children: [
+        "· ",
+        lines.head.rank
+      ] }) : null,
+      lines.head.decide && onDecide ? /* @__PURE__ */ jsx19("button", { type: "button", className: "ux-b sm pri", "data-decide": true, "data-queue-decide": true, onClick: () => onDecide(lines.head.board), children: t("ux.agent.decide") }) : null
+    ] }) : null,
+    lines.note ? /* @__PURE__ */ jsx19("small", { "data-queue-note": true, children: lines.note }) : null
+  ] }) : /* @__PURE__ */ jsxs16("p", { "data-queue-waited": true, children: [
+    /* @__PURE__ */ jsx19("span", { className: "k", children: waited.lead }),
+    /* @__PURE__ */ jsx19("span", { className: "it", children: waited.names.join(", ") }),
+    waited.more ? /* @__PURE__ */ jsx19("span", { className: "mo", children: t("queue.more", waited.more) }) : null
+  ] }) });
+}
 function StateTag({ state: state2, t }) {
   return /* @__PURE__ */ jsxs16("span", { className: `ux-st ux-st-${state2}`, children: [
     /* @__PURE__ */ jsx19("span", { className: "ux-sdot", "aria-hidden": "true" }),
@@ -19252,7 +19638,8 @@ function StateTag({ state: state2, t }) {
   ] });
 }
 function Roster({ office, sceneBy, project: project2, selected, onPick, t }) {
-  const list = office.agents.filter((a) => !project2 || a.home === project2).sort((a, b) => (ORDER2[a.state] ?? 7) - (ORDER2[b.state] ?? 7) || a.name.localeCompare(b.name, "en"));
+  const labelBy = (name) => office.agents.find((x) => x.name === name)?.label || name;
+  const list = office.agents.filter((a) => !project2 || a.home === project2).sort((a, b) => (ORDER2[a.state] ?? 8) - (ORDER2[b.state] ?? 8) || a.name.localeCompare(b.name, "en"));
   return /* @__PURE__ */ jsxs16(Fragment12, { children: [
     /* @__PURE__ */ jsx19("div", { className: "ux-pbar", children: /* @__PURE__ */ jsxs16("span", { className: "lbl", children: [
       t("ux.agent.team", list.length),
@@ -19263,7 +19650,13 @@ function Roster({ office, sceneBy, project: project2, selected, onPick, t }) {
       sceneBy.get(a.name) ? /* @__PURE__ */ jsx19(Portrait, { agent: sceneBy.get(a.name) }) : null,
       /* @__PURE__ */ jsx19("span", { className: "nm", title: a.label || a.name, children: a.label || a.name }),
       /* @__PURE__ */ jsx19(ProjectChip, { slug: a.home }),
-      /* @__PURE__ */ jsx19(StateTag, { state: a.state, t }),
+      a.state === "queued" ? /* @__PURE__ */ jsxs16("span", { className: "ux-qcell", children: [
+        /* @__PURE__ */ jsx19(StateTag, { state: "queued", t }),
+        waitsOn(a, labelBy).length ? /* @__PURE__ */ jsxs16("span", { className: "ux-qby", "data-queue-by": true, title: t("queue.tip", waitsOn(a, labelBy).join(", ")), children: [
+          "← ",
+          waitsOn(a, labelBy).join(", ")
+        ] }) : null
+      ] }) : /* @__PURE__ */ jsx19(StateTag, { state: a.state, t }),
       waitSign(a) ? /* @__PURE__ */ jsxs16("span", { className: "ux-wait", "data-wait": true, title: t("waitTip", a.blocked.length), children: [
         /* @__PURE__ */ jsx19(StateIcon, { state: "waiting" }),
         /* @__PURE__ */ jsx19("span", { className: "ux-vh", children: t("waitTip", a.blocked.length) })
@@ -19279,6 +19672,10 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
   const models = modelOf(agent);
   const i = inspectorOf(agent, { nowMs, history, models, roleId: dressed.role, grade });
   const ml = modelLines(i.model, i.current?.code ?? "");
+  const qv = queueView(office, agent, nowMs);
+  const queued = qv?.kind === "queued" ? queueLines(qv, t, nowMs, formatSpan) : null;
+  const labelOf2 = (name) => office.agents.find((a) => a.name === name)?.label || name;
+  const waited = qv?.kind === "waited" ? waitedLine(qv, t, labelOf2) : null;
   const why = frozen ? t("replay.noAction") : canOpen ? t("openSession", i.label) : t("noSession", i.label);
   const bot = bots?.get(agent.name) ?? null;
   return /* @__PURE__ */ jsxs16("section", { "data-insp": true, "data-agent-of": i.name, "aria-label": t("insp.title"), children: [
@@ -19313,6 +19710,7 @@ function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, onOpen, 
         i.waitingMore ? /* @__PURE__ */ jsx19("small", { children: t("insp.more", i.waitingMore) }) : null
       ] })
     ) : null,
+    /* @__PURE__ */ jsx19(QueueBlock, { lines: queued, waited, onDecide, t }),
     /* @__PURE__ */ jsxs16("dl", { className: "ux-kv", children: [
       /* @__PURE__ */ jsx19("dt", { children: t("ux.agent.project") }),
       /* @__PURE__ */ jsx19("dd", { children: agent.home ? /* @__PURE__ */ jsx19(ProjectChip, { slug: agent.home }) : /* @__PURE__ */ jsx19("span", { children: t("ux.agent.common") }) }),
@@ -19413,7 +19811,7 @@ function Clamped({ text: text3, className, tip, more, less, button, children }) 
     cut3 || whole ? /* @__PURE__ */ jsx20("button", { type: "button", className: "ux-lnk ux-dc-more", ...button, "aria-expanded": whole, "aria-controls": id, onClick: () => setWhole((v) => !v), children: whole ? less : more }) : null
   ] });
 }
-function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false, kind, code, title, summary: summary2, reason = null, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target: target2, unverified, children, t }) {
+function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false, kind, code, title, summary: summary2, reason = null, detail = null, holds = null, sinceMs, ageTip, nowMs, agent, whoText: whoText2 = null, sceneAgent, open, target: target2, unverified, children, t }) {
   const style = useProjectStyle(board);
   const old = isOld({ sinceMs }, nowMs);
   const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || "none"}`) : "";
@@ -19435,10 +19833,18 @@ function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false, kind,
       t("ux.dec.reason"),
       " "
     ] }) }) : null,
+    holds ? /* @__PURE__ */ jsxs17("p", { className: "ux-dc-holds", "data-holds": true, title: holds.tip, children: [
+      /* @__PURE__ */ jsx20(StateIcon, { state: "queued" }),
+      /* @__PURE__ */ jsx20("span", { children: holds.text }),
+      holds.names.length ? /* @__PURE__ */ jsxs17("span", { className: "nm", children: [
+        holds.names.join(", "),
+        holds.more ? ` ${t("queue.more", holds.more)}` : ""
+      ] }) : null
+    ] }) : null,
     /* @__PURE__ */ jsxs17("div", { className: "ux-dc-who", children: [
       sceneAgent ? /* @__PURE__ */ jsx20(Portrait, { agent: sceneAgent }) : null,
-      /* @__PURE__ */ jsx20("span", { className: "nm", children: whoText ?? who }),
-      role && !whoText ? /* @__PURE__ */ jsxs17("span", { className: "role", children: [
+      /* @__PURE__ */ jsx20("span", { className: "nm", children: whoText2 ?? who }),
+      role && !whoText2 ? /* @__PURE__ */ jsxs17("span", { className: "role", children: [
         "· ",
         role
       ] }) : null,
@@ -19608,6 +20014,9 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
   const view = useMemo6(() => inboxView(items, approvals), [items, approvals]);
   const rows = useMemo6(() => decisionRows(view, office), [view, office]);
   const shown = useMemo6(() => onlyProject(rows, project2), [rows, project2]);
+  const waits = useMemo6(() => waitIndex(office.boards), [office]);
+  const team = useMemo6(() => new Set(office.agents.map((a) => a.name)), [office]);
+  const labelOf2 = (name) => office.agents.find((a) => a.name === name)?.label || name;
   const o = orders && isBusy(orders.state) ? orders.state.order : null;
   const targeted = (c) => Boolean(o && o.board === c.board && o.task === c.id);
   const grouped = sort === "project" && !project2;
@@ -19629,6 +20038,7 @@ function DecisionsTab({ office, history, orders, writes, openCard, approvals = [
         code: guard ? t("campaign.kind") : c.code,
         title: guard ? guardName(c.fullTitle ?? c.title) : c.title || c.id,
         reason: guard ? null : c.reason ?? null,
+        holds: holdsLine(holdsBack(waits, c.board, c.id, team), t, labelOf2),
         whoText: guard ? c.head ? t("campaign.decision.head", c.campaignSize ?? "?") : t("campaign.decision.phase", guardName(c.fullTitle ?? c.title)) : null,
         sinceMs: row.sinceMs,
         ageTip: age2,
@@ -20468,6 +20878,8 @@ var SCENE_CSS = `
 .oc-s-waiting .oc-chip{border-color:var(--ui-orange, var(--ui-accent))}
 .oc-s-waiting .oc-dot{color:color-mix(in oklab, ${ORANGE3} 75%, var(--foreground))}
 .oc-s-stale .oc-chip{border-style:dashed}
+.oc-s-queued .oc-chip{border-color:color-mix(in oklab, ${COOL} 60%, ${EDGE})}
+.oc-s-queued .oc-dot{color:color-mix(in oklab, ${COOL} 75%, var(--foreground))}
 .oc-s-new .oc-chip,.oc-s-unknown .oc-chip{opacity:.75}
 .oc-station:hover,.oc-station[aria-pressed="true"],.oc-station:focus-visible{z-index:2}
 .oc-station:hover .oc-chip,.oc-station[aria-pressed="true"] .oc-chip,.oc-station:focus-visible .oc-chip{transform:translateX(-50%) translateY(-2px)}
@@ -20478,6 +20890,10 @@ var SCENE_CSS = `
 .oc-s-waiting{--sel:${ORANGE3}}
 .oc-s-active{--sel:var(--ui-green, var(--ui-accent))}
 .oc-s-stale{--sel:var(--ui-text-tertiary)}
+.oc-s-queued{--sel:${COOL}}
+/* the bots a selected bot in the queue waits for, up to the head of the queue: a dashed ring in the hue of the state (the selection itself is a solid one) */
+.oc-station[data-upstream] .oc-chip,.oc-lrow[data-upstream] .oc-chip{border-color:${COOL};border-style:dashed}
+.oc-station[data-upstream],.oc-lrow[data-upstream]{z-index:2;box-shadow:0 0 0 2px color-mix(in oklab, ${COOL} 70%, transparent);background:color-mix(in oklab, ${COOL} 14%, transparent)}
 .oc-station[aria-pressed="true"] .oc-chip{border-color:var(--sel)}
 .oc-station[aria-pressed="true"]{box-shadow:0 0 0 2px var(--sel);background:color-mix(in oklab, var(--sel) 12%, transparent)}
 .oc-zone{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:8px;font:inherit;font-size:11px;line-height:1;white-space:nowrap;
@@ -20699,7 +21115,7 @@ function usePageVisible() {
   }, []);
   return visible;
 }
-function agentFacts(a, t, nowMs, badge) {
+function agentFacts(a, t, nowMs, badge, labelBy = (n) => n) {
   const state2 = t(`state.${a.state}`);
   const when = a.lastActivityMs ? t("lastActivity", t.ago(a.lastActivityMs)) : t("noActivity");
   const pin = badge ? `. ${t("badge.label", badge.code, badge.card)}` : "";
@@ -20710,7 +21126,8 @@ function agentFacts(a, t, nowMs, badge) {
   const quiet2 = quietTip(tag, t);
   const more = [cards, quiet2].filter(Boolean).map((x) => `. ${x}`).join("");
   const wait = tag?.wait ? t("waitTip", tag.wait) : "";
-  const said = wait ? `${state2}, ${wait}` : state2;
+  const by4 = a.state === "queued" ? waitsOn(a, labelBy).join(", ") : "";
+  const said = wait ? `${state2}, ${wait}` : by4 ? `${state2}, ${t("queue.tip", by4)}` : state2;
   return { state: state2, code: codeText(lab.code, lab.more, t), quiet: lab.quiet === true, wait: lab.wait === true, tag: full, cardsText: cards, quietText: quiet2, label: `${a.label || a.name} — ${said}. ${when}${pin}${more}`, tip: [said, full, cards, quiet2].filter(Boolean).join(" · ") };
 }
 function Island({ board, hall, count: count2, dim, active, onPick, t }) {
@@ -20791,6 +21208,12 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
   const asScene = view.mode === "scene";
   const S = view.scale;
   const byName2 = useMemo11(() => new Map(office.agents.map((a) => [a.name, a])), [office]);
+  const labelBy = (name) => byName2.get(name)?.label || name;
+  const upstream = useMemo11(() => {
+    const sel = selected ? byName2.get(selected) : null;
+    const v = sel?.state === "queued" ? queueView(office, sel, nowMs) : null;
+    return v?.upstream?.length ? new Set(v.upstream) : null;
+  }, [office, byName2, selected, nowMs]);
   const faceBy = useMemo11(() => new Map(model.agents.map((a) => [a.name, a])), [model]);
   const live = useRef20(null);
   const dim = useMemo11(() => dimOf(filter, layout2), [filter, layout2]);
@@ -21038,7 +21461,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
       const agent = byName2.get(a.name);
       if (!agent) return null;
       const badge = badgeBy.get(a.name) || null;
-      const f = agentFacts(agent, t, nowMs, badge);
+      const f = agentFacts(agent, t, nowMs, badge, labelBy);
       const thought = thoughts?.[a.name] ?? null;
       const [x, y] = at(a.sx, a.sy);
       const below = a.below;
@@ -21053,6 +21476,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
           "data-model-badge": badge ? "" : void 0,
           "data-outfit": outfitTip(a.name) ? "model" : void 0,
           "data-dim": filter && agent.home !== filter && selected !== a.name ? "" : void 0,
+          "data-upstream": upstream?.has(a.name) ? "" : void 0,
           title: [[f.tip, grades?.[a.name] ? t("game.gradeTip", t(`game.grade.${grades[a.name].id}`)) : ""].filter(Boolean).join(" · "), outfitTip(a.name)].filter(Boolean).join(" — "),
           "aria-pressed": selected === a.name,
           "aria-label": f.label,
@@ -21197,7 +21621,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
           const agent = byName2.get(a.name);
           if (!agent) return null;
           const badge = badgeBy.get(a.name) || null;
-          const f = agentFacts(agent, t, nowMs, badge);
+          const f = agentFacts(agent, t, nowMs, badge, labelBy);
           return /* @__PURE__ */ jsxs25(
             "button",
             {
@@ -21210,6 +21634,7 @@ function OfficeScene({ office, profiles, nowMs, night, selected, onSelect, onOpe
               "aria-label": f.label,
               title: [f.tag, grades?.[a.name] ? t("game.gradeTip", t(`game.grade.${grades[a.name].id}`)) : "", badge ? badgeText(badge) : "", f.cardsText, f.quietText].filter(Boolean).join(" — ") || void 0,
               "data-dim": filter && agent.home !== filter && selected !== a.name ? "" : void 0,
+              "data-upstream": upstream?.has(a.name) ? "" : void 0,
               onClick: fire(onSelect, a.name),
               onDoubleClick: fire(onOpen, a.name),
               children: [
@@ -21496,10 +21921,10 @@ var PAGE_CSS = `
 .ux-prjx:hover .ux-i{color:var(--foreground)}
 .ux-sdot{display:inline-block;width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:currentColor}
 .ux-st{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;white-space:nowrap}
-.ux-st-working{color:${ink4("var(--ui-accent)")}}.ux-st-waiting{color:${ink4(ORANGE4)}}.ux-st-active{color:${ink4(GREEN3)}}.ux-st-idle,.ux-st-new,.ux-st-unknown,.ux-st-stale{color:${T32}}
+.ux-st-working{color:${ink4("var(--ui-accent)")}}.ux-st-waiting{color:${ink4(ORANGE4)}}.ux-st-active{color:${ink4(GREEN3)}}.ux-st-queued{color:${ink4(COOL)}}.ux-st-idle,.ux-st-new,.ux-st-unknown,.ux-st-stale{color:${T32}}
 /* same grammar as the legend of the halos: resting (no halo) = empty ring, silent = filled grey disc */
 .ux-st-idle .ux-sdot,.ux-st-new .ux-sdot,.ux-st-unknown .ux-sdot{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
-.ux-st-working .ux-sdot{background:var(--ui-accent)}.ux-st-waiting .ux-sdot{background:${ORANGE4}}.ux-st-active .ux-sdot{background:${GREEN3}}
+.ux-st-working .ux-sdot{background:var(--ui-accent)}.ux-st-waiting .ux-sdot{background:${ORANGE4}}.ux-st-active .ux-sdot{background:${GREEN3}}.ux-st-queued .ux-sdot{background:${COOL}}
 /* ---------- header: one row ---------- */
 .ux-top{display:flex;align-items:center;gap:16px;min-height:44px;flex:0 0 auto;min-width:0}
 .ux-brand{display:flex;align-items:center;gap:12px;flex:0 1 auto;min-width:32px}
@@ -21649,6 +22074,9 @@ var PAGE_CSS = `
 .ux-dc-r.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-s{margin:0;font-size:12px;line-height:1.4;color:${T22};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-c{margin:0;min-width:0;font-size:11.5px;line-height:1.4;color:${T22};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
+.ux-dc-holds{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin:0;min-width:0;font-size:12px;color:${ink4(COOL)};font-weight:600}
+.ux-dc-holds .oc-sti{color:${ink4(COOL)}}
+.ux-dc-holds .nm{color:${T22};font-weight:400;min-width:0;overflow-wrap:anywhere}
 .ux-dc-who{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:${T22}}
 .ux-dc-who .oc-portrait{width:20px;height:20px;border-radius:5px;border:0}
 .ux-dc-who .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -21718,6 +22146,15 @@ var PAGE_CSS = `
 .ux-ag-wr .hd{display:flex;align-items:center;gap:8px;min-width:0}
 .ux-ag-wr .hd b{font-size:12px}
 .ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
+/* a card that waits for a colleague's: who it waits for, and what is at the head of the queue (the hue is the calm, cool one of the state) */
+.ux-ag-q{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${COOL} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${COOL} 8%, transparent);display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
+.ux-ag-q p{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0;min-width:0;overflow-wrap:anywhere}
+.ux-ag-q .k{color:${ink4(COOL)};font-weight:600}
+.ux-ag-q .it{min-width:0}
+.ux-ag-q .it b{font-weight:600}
+.ux-ag-q .it i{font-style:normal;color:${T22}}
+.ux-ag-q .rk,.ux-ag-q .mo,.ux-ag-q small{color:${T32};font-size:11.5px}
+.ux-ag-q .dc{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .ux-rosterb{display:grid;grid-template-columns:24px minmax(0,112px) minmax(0,1fr) 112px 20px;align-items:center;column-gap:8px;width:100%;min-width:0;min-height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
@@ -21730,13 +22167,17 @@ var PAGE_CSS = `
 .ux-rosterb .ux-prj{grid-column:3;justify-self:start;max-width:100%;min-width:0}
 .ux-rosterb .ux-st{grid-column:4;justify-self:start;white-space:nowrap;font-size:11.5px}
 .ux-rosterb .ux-wait{grid-column:5}
+/* « En file ← atlas »: the state and the colleague it waits for share the state's column; the name is cut before the word */
+.ux-rosterb .ux-qcell{grid-column:4;display:flex;align-items:center;gap:4px;min-width:0;font-size:11.5px}
+.ux-rosterb .ux-qcell .ux-st{flex:0 0 auto;font-size:inherit}
+.ux-rosterb .ux-qby{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${T32}}
 /* a side panel under 420 px (always, at the usual 330-400): the project goes under the name, and the state keeps its column */
 @container uxp (max-width: 419px){
   .ux-rosterb{grid-template-columns:24px minmax(0,1fr) 112px 20px;grid-template-rows:auto auto;row-gap:4px;min-height:56px;padding:8px}
   .ux-rosterb .oc-portrait{grid-row:1 / 3}
   .ux-rosterb .nm{grid-column:2;grid-row:1}
   .ux-rosterb .ux-prj{grid-column:2 / 5;grid-row:2}
-  .ux-rosterb .ux-st{grid-column:3;grid-row:1}
+  .ux-rosterb .ux-st,.ux-rosterb .ux-qcell{grid-column:3;grid-row:1}
   .ux-rosterb .ux-wait{grid-column:4;grid-row:1}
 }
 /* the « a decision waits for you » sign beside the state of a bot at work: same tinted square as the scene's label */
@@ -22225,7 +22666,7 @@ import { useMemo as useMemo13 } from "react";
 import { Fragment as Fragment19, jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
 var STATUS3 = new Set(CARD_STATUSES);
 var MAX_ROWS = 120;
-function factText(e, t) {
+function factText2(e, t) {
   if (e.group === "order") return t(`orders.verb.${e.kind}`) || e.kind;
   if (e.group === "cron") return t("replay.fact.cron", e.result === "done");
   if (e.group === "session") return t("replay.fact.session", e.extra);
@@ -22347,7 +22788,7 @@ function ReplayPanel({ replay, office, summary: summary2, entries, atMs, nowMs, 
         view.rows.length ? /* @__PURE__ */ jsx35("ul", { className: "oc-facts", "aria-label": t("replay.journal.title"), children: view.rows.map((e, i) => /* @__PURE__ */ jsx35("li", { "data-future": e.future ? "" : void 0, "data-now": i === nowIndex ? "" : void 0, "aria-current": i === nowIndex ? "true" : void 0, children: /* @__PURE__ */ jsxs31("button", { type: "button", className: "oc-fact", "data-fact": true, "data-source": e.source, "data-kind": e.kind, "data-group": e.group, "data-ms": e.ms, title: e.future ? `${t("replay.journal.go")} (${t("replay.journal.future")})` : t("replay.journal.go"), onClick: () => onAt(e.ms), children: [
           /* @__PURE__ */ jsx35("time", { dateTime: new Date(e.ms).toISOString(), children: clockLabel(e.ms, t.lang, { day }) }),
           /* @__PURE__ */ jsxs31("span", { className: "oc-fact-main", children: [
-            /* @__PURE__ */ jsx35("span", { className: "oc-fk", children: factText(e, t) }),
+            /* @__PURE__ */ jsx35("span", { className: "oc-fk", children: factText2(e, t) }),
             e.group === "order" && e.result ? /* @__PURE__ */ jsxs31(Fragment19, { children: [
               " ",
               /* @__PURE__ */ jsx35("span", { className: "oc-tag", children: t(`orders.result.${e.result}`) })

@@ -5,6 +5,7 @@ import { roleOf } from '../scene/index.js'
 import { Icon } from './icons.jsx'
 import { Portrait } from './Portrait.jsx'
 import { ProjectChip, useProjectStyle } from './ProjectChip.jsx'
+import { StateIcon } from './StateIcon.jsx'
 
 /**
  * A text cut to two lines with an ellipsis, and a button that opens it whole (the `title` tooltip alone reaches neither a keyboard nor a
@@ -41,9 +42,10 @@ function Clamped({ text, className, tip, more, less, button, children }) {
  * the title); the line of the agent (portrait, name, role) with the age at its end (orange past 24 h); then whatever the caller puts below
  * (the orders, a confirmation, the 6 s window). One card = one decision.
  * A title or a reason longer than its two lines is cut with an ellipsis and a button opens it whole.
+ * What a blocked card holds back (the bots whose card waits behind it, src/core/queue.js) is one line of its own, between the reason and the agent.
  * The reason is written by a bot: it is drawn as text (never a link, never markup), and it is neither a `title` nor part of a button's name.
  */
-export function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false, kind, code, title, summary, reason = null, detail = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target, unverified, children, t }) {
+export function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false, kind, code, title, summary, reason = null, detail = null, holds = null, sinceMs, ageTip, nowMs, agent, whoText = null, sceneAgent, open, target, unverified, children, t }) {
   const style = useProjectStyle(board)
   const old = isOld({ sinceMs }, nowMs)   // the rule of the age is src/core/decisions.js' (one place, tested)
   const role = sceneAgent ? t(`role.${roleOf(sceneAgent).role || 'none'}`) : ''
@@ -70,6 +72,13 @@ export function DecisionFrame({ id, attrs = {}, board, grouped, filtered = false
         <Clamped text={reason} className="ux-dc-r" more={t('ux.dec.reasonMore')} less={t('ux.dec.reasonLess')} button={{ 'data-dc-more-reason': '' }}>
           <span className="ux-vh">{t('ux.dec.reason')}{' '}</span>
         </Clamped>
+      ) : null}
+      {holds ? (
+        <p className="ux-dc-holds" data-holds title={holds.tip}>
+          <StateIcon state="queued" />
+          <span>{holds.text}</span>
+          {holds.names.length ? <span className="nm">{holds.names.join(', ')}{holds.more ? ` ${t('queue.more', holds.more)}` : ''}</span> : null}
+        </p>
       ) : null}
       <div className="ux-dc-who">
         {sceneAgent ? <Portrait agent={sceneAgent} /> : null}

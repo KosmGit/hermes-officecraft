@@ -45,6 +45,7 @@ export const fr = {
     idle: 'Au repos',
     waiting: 'Vous attend',
     stale: 'Silencieux',
+    queued: 'En file',
     new: 'Aucune session',
     unknown: 'Inconnu'
   },
@@ -74,7 +75,30 @@ export const fr = {
     active: mins => `une de vos sessions il y a moins de ${mins} min`,
     rest: 'pas de halo : rien de récent',
     waitName: 'Signe « ! » orange',
-    waitSign: 'l’agent travaille, mais une de ses cartes est bloquée : une décision vous revient'
+    waitSign: 'l’agent travaille, mais une de ses cartes est bloquée : une décision vous revient',
+    queued: 'une de ses cartes attend le travail d’un collègue : ce n’est pas du repos, et rien n’est à décider'
+  },
+  // une carte qui attend une autre carte (une carte `todo` dont un parent n’est pas fini) : qui elle attend, qui est en tête de file
+  queue: {
+    tip: names => `derrière ${names}`,
+    waits: 'Attend :',
+    head: 'En tête de file :',
+    more: n => `+${n}`,
+    rank: ord => `${ord} derrière`,
+    noAssignee: 'une carte sans assigné',
+    outside: name => `une carte de ${name}, hors de l’équipe`,
+    working: span => `au travail depuis ${span}`,
+    workingNow: 'au travail',
+    waiting: 'qui vous attend',
+    silent: span => `silencieux depuis ${span}`,
+    ready: 'prête, pas encore lancée',
+    triage: 'à préciser',
+    moreHeads: n => `+${n} autre${n === 1 ? '' : 's'} en tête`,
+    loop: 'Ces cartes s’attendent les unes les autres : la file tourne en rond.',
+    longer: 'La file remonte plus loin que ce que le bureau suit.',
+    waited: (n, atLeast) => `${atLeast ? 'Au moins ' : ''}${n} ${n === 1 ? 'bot attend' : 'bots attendent'} cette carte :`,
+    holds: (n, bots, atLeast) => `Retient ${atLeast ? 'au moins ' : ''}${n} ${bots ? (n === 1 ? 'bot' : 'bots') : (n === 1 ? 'carte' : 'cartes')}`,
+    holdsTip: 'Des cartes attendent celle-ci, directement ou après une autre : la décider fait avancer la file.'
   },
   panel: {
     title: 'Détails',

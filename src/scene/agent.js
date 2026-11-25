@@ -2,6 +2,7 @@
    working  types (arms alternate, blue crystal shimmers)     waiting  waves, "!" bubble
    active   hands on the desk, green crystal, blinks           stale    grey, "?" bubble (a running card went silent)
    idle     arms down (sleepy: eyes closed, head sagging)      new      grey, nothing running yet
+   queued   (art only) upright, hands folded in front: its card waits for a colleague's
    unknown  grey, "..." bubble (no session data: the office never guesses)
    With opt.art: idle leans back, hands behind the head, under a "zz"; stale hangs its head; new is an empty chair with the
    agent's jacket on it; working has a bubble of running dots where the page hides the crystal. */
@@ -28,6 +29,7 @@ export function agentSprite(a, facing, frame, seatKind, opt = {}) {
   const st = a.state
   if (art && st === 'new') return jacket(O, facing)   // nobody has sat here yet
   const typing = st === 'working'
+  const calm = art && st === 'queued'
   const sleepy = st === 'idle' && a.sleepy
   const bob = typing && frame % 2 ? -1 : 0
   const droop = art && st === 'stale' ? (facing === 'back' ? 3 : 2) : 0   // silent = the head hangs
@@ -77,6 +79,15 @@ export function agentSprite(a, facing, frame, seatKind, opt = {}) {
     const wv = frame % 4 < 2 ? 0 : 1
     arms.rect(6, -27, 7, -13, sl[1]).rect(-8, -14, -7, -8, sl[1])
     hands.rect(5 + wv, -31, 8 + wv, -28, sk[0]).rect(-8, -7, -7, -6, sk[0])
+  } else if (calm) {
+    // hands folded in front of it, upright: it is not working, it is not resting, it waits for its turn (the first art direction never knew this state)
+    if (facing === 'front') {
+      arms.rect(-8, -14, -7, -10, sl[1]).rect(6, -14, 7, -10, sl[1]).rect(-7, -10, -3, -9, sl[1]).rect(2, -10, 6, -9, sl[1])
+      hands.rect(-3, -10, -1, -9, sk[0]).rect(0, -10, 2, -9, sk[0])
+    } else {
+      arms.rect(-8, -14, -7, -10, sl[1]).rect(6, -14, 7, -10, sl[1])
+      hands.rect(-8, -9, -7, -8, sk[0]).rect(6, -9, 7, -8, sk[0])
+    }
   } else if (typing || st === 'active') {
     const l = typing && frame % 2 ? -1 : 0
     const r = typing && frame % 2 ? 0 : -1

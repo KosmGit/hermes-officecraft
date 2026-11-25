@@ -9,6 +9,8 @@
  *            a silent run is reclaimed by the dispatcher, a decision is not)
  *   stale    a card of theirs is `running` but its heartbeat is > 5 min old
  *            (never shown as working: the office must not lie)
+ *   queued   (a bot with no session of the moment) a card of theirs waits for an unfinished parent card, and none runs or is blocked
+ *            (src/core/queue.js; replaces `idle` and `active` only)
  *   active   a human session touched in the last 10 min
  *   idle     has sessions, none recent       new: never ran       unknown: no session fields
  *
@@ -18,6 +20,7 @@
  */
 import { STALE_AFTER_MS, quietCards, runningCards } from './cards.js'
 import { isGatewayDegraded, isGatewayDown, isGatewayUp } from './gateway.js'
+import { queuedState, toLinks, waitIndex, waitingByBot } from './queue.js'
 import { toMs } from './time.js'
 import { cutWords, lastTouch, num, oneLine, str } from './util.js'
 
@@ -54,6 +57,8 @@ export function toBoard(raw) {
   for (const t of tasks) counts[t.status] = (counts[t.status] || 0) + 1
   const open = tasks.filter(t => !DONE.has(t.status))
   return {
+    // the links that still hold a card back (`/live`: [parent id, child id], ids only); [] from an agent half that does not serve them, and in a replay
+    links: toLinks(raw?.links),
     slug: str(raw?.slug) || 'board',
     // when the board was created (kanban boards metadata); the game layer dates « builder » with it
     createdMs: toMs(raw?.createdAt),
@@ -98,6 +103,7 @@ export function homeBoard(seats) {
 export function buildOffice(desks, live, nowMs = Date.now()) {
   const full = Boolean(live && live.ok !== false && Array.isArray(live.boards))
   const boards = full ? uniqueSlugs(live.boards.map(toBoard)) : []
+  const waiting = waitingByBot(waitIndex(boards))   // bot -> its cards that wait for an unfinished parent (src/core/queue.js)
   const agents = (Array.isArray(desks) ? desks : []).map(desk => {
     const mine = []
     const seats = new Map()   // board slug -> { slug, ts: newest card of the agent there, running: a card of theirs runs there }
@@ -123,8 +129,11 @@ export function buildOffice(desks, live, nowMs = Date.now()) {
       if (blocked.length) state = 'waiting'
       else if (silentMs) state = 'stale'
     }
+    // the cards of theirs that wait for someone else's work: `queued` is a state only for a bot with nothing running or blocked and no live session
+    const queued = waiting.get(desk.name) || []
+    state = queuedState(state, { running: running.length, blocked: blocked.length, queued: queued.length })
     const quiet = quietCards(runningCards({ running }, nowMs), state)
-    return { ...desk, state, silentMs, home, mine, blocked, running, quiet }
+    return { ...desk, state, silentMs, home, mine, blocked, running, quiet, queued }
   })
   const hall = agents.filter(a => !a.home)
   return { mode: full ? 'full' : 'roster', agents, boards, hall, ops: full ? toOps(live.ops) : null }
@@ -160,7 +169,7 @@ export function toOps(raw) {
 }
 
 export function summarizeOffice(office) {
-  const c = { total: office.agents.length, working: 0, active: 0, waiting: 0, stale: 0, idle: 0, new: 0, unknown: 0 }
+  const c = { total: office.agents.length, working: 0, active: 0, waiting: 0, stale: 0, queued: 0, idle: 0, new: 0, unknown: 0 }
   for (const a of office.agents) c[a.state] = (c[a.state] || 0) + 1
   c.blocked = office.boards.reduce((n, b) => n + b.blocked.length, 0)
   c.open = office.boards.reduce((n, b) => n + b.open.length, 0)

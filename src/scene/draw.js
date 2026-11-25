@@ -6,7 +6,7 @@ import { DESK_Z, SEAT_Z, TD } from './constants.js'
 import { beacon, bell, extinguisher, mascot, movingBox, nightLight, pumpkin, trophyCabinetLeft, xmasTree } from './decor.js'
 import { floorProps } from './floorprops.js'
 import { cupOff, drawPile, pileOf } from './pile.js'
-import { HALO, deskProps, drawChairBack, drawChairSeat, drawMonitor, halo, meetingTable, plant, screenGlow, screenLight, steam } from './furniture.js'
+import { deskProps, drawChairBack, drawChairSeat, drawMonitor, halo, haloOf, meetingTable, plant, screenGlow, screenLight, steam } from './furniture.js'
 import { mailRoom, pendingDecisions, powerCut, powerPanel, shiftBoard, yourDesk } from './infra.js'
 import { achievementIds, gatewayDown, hasAchievement, incidentBoardsOf } from './model.js'
 import { PAL, lookOf } from './palette.js'
@@ -99,7 +99,7 @@ export function drawScene(layout, base, model, frame = 0, opts = null) {
   // the selection square takes the agent's state hue (same as its floor halo); a state without halo (resting, new) gets a neutral light grey.
   // classic keeps the accent ring of the first art direction, pixel for pixel.
   const ring = (x, y, state) => {
-    const c = E(art ? HALO[state] || RING_REST : accent)
+    const c = E(art ? haloOf(state) || RING_REST : accent)
     const pts = [P(x - 0.42, y - 0.42), P(x + 0.42, y - 0.42), P(x + 0.42, y + 0.42), P(x - 0.42, y + 0.42)]
     for (let i = 0; i < 4; i++) px.line(pts[i], pts[(i + 1) % 4], c)
   }
@@ -111,7 +111,7 @@ export function drawScene(layout, base, model, frame = 0, opts = null) {
     // at night, who sits before a lit screen has its light on the face and the chest (front row: the screen is between it and us)
     const lit = art && night && facing === 'front' && !kind ? screenLight(a.state) : null
     const put = () => {
-      if (HALO[a.state]) spr.aura(px, X0, Y0, HALO[a.state], a.state === 'active' || frame % 4 < 2)
+      if (haloOf(a.state, art)) spr.aura(px, X0, Y0, haloOf(a.state, art), a.state === 'active' || a.state === 'queued' || frame % 4 < 2)
       spr.blit(px, X0, Y0, GREY_STATES.has(a.state) && !(art && a.state === 'new'), lit ? { c: lit, a: 0.1, y0: -30, y1: -8 } : undefined)
     }
     if (wash) washed(px, { x0: X0 - 24, y0: Y0 - 50, x1: X0 + 24, y1: Y0 + 12 }, null, night, put)
@@ -164,7 +164,7 @@ export function drawScene(layout, base, model, frame = 0, opts = null) {
     const r0 = p.seats.filter(s => s.row === 0)
     const r1 = p.seats.filter(s => s.row === 1)
     for (const s of r0) {
-      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame)
+      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame, art)
       drawChairBack(px, s.x, s.y, -1, art ? p.hue : null)
       drawChairSeat(px, s.x, s.y)
       if (s.agent && s.agent.name === selected) ring(s.x, s.y, s.agent.state)
@@ -193,7 +193,7 @@ export function drawScene(layout, base, model, frame = 0, opts = null) {
     }
 
     for (const s of r1) {
-      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame)
+      if (s.agent) halo(px, s.x, s.y, s.agent.state, frame, art)
       drawChairSeat(px, s.x, s.y)
       if (s.agent && s.agent.name === selected) ring(s.x, s.y, s.agent.state)
       const hung = art && s.agent?.state === 'new'   // the jacket hangs on the chair's back, not behind it
@@ -210,7 +210,7 @@ export function drawScene(layout, base, model, frame = 0, opts = null) {
   box(px, L0 + 0.5, 1.75, 0, 2.8, 0.7, 7, { t: PAL.sofaT, l: PAL.sofa, r: PAL.sofaD })
   box(px, L0 + 0.35, 1.45, 0, 0.18, 1.0, 11, { t: PAL.sofaT, l: PAL.sofa, r: PAL.sofaD })
   box(px, L0 + 3.27, 1.45, 0, 0.18, 1.0, 11, { t: PAL.sofaT, l: PAL.sofa, r: PAL.sofaD })
-  for (const s of lounge.seats) halo(px, s.x, s.y + (s.kind === 'sofa' ? 0.35 : 0), s.agent.state, frame)
+  for (const s of lounge.seats) halo(px, s.x, s.y + (s.kind === 'sofa' ? 0.35 : 0), s.agent.state, frame, art)
   for (const s of lounge.seats.filter(s => s.kind === 'sofa')) {
     if (s.agent.name === selected) ring(s.x, s.y, s.agent.state)
     spriteAt(s.agent, s.x, s.y, 6, 'front', 'sofa', Boolean(dim?.hall))

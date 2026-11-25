@@ -42,6 +42,7 @@ export const es = {
     idle: 'En reposo',
     waiting: 'Te espera',
     stale: 'En silencio',
+    queued: 'En cola',
     new: 'Sin sesiones',
     unknown: 'Desconocido'
   },
@@ -71,7 +72,30 @@ export const es = {
     active: mins => `una de tus sesiones en los últimos ${mins} min`,
     rest: 'sin halo: nada reciente',
     waitName: 'Señal « ! » naranja',
-    waitSign: 'el agente trabaja, pero una de sus tarjetas está bloqueada: te toca decidir'
+    waitSign: 'el agente trabaja, pero una de sus tarjetas está bloqueada: te toca decidir',
+    queued: 'una de sus tarjetas espera el trabajo de un compañero: no es reposo, y no hay nada que decidir'
+  },
+  // una tarjeta que espera a otra (una tarjeta `todo` cuyo padre no ha terminado): a quién espera, quién va al frente de la cola
+  queue: {
+    tip: names => `detrás de ${names}`,
+    waits: 'Espera a:',
+    head: 'Al frente de la cola:',
+    more: n => `+${n}`,
+    rank: ord => `${ord} detrás`,
+    noAssignee: 'una tarjeta sin asignar',
+    outside: name => `una tarjeta de ${name}, que no está en el equipo`,
+    working: span => `trabajando desde hace ${span}`,
+    workingNow: 'trabajando',
+    waiting: 'que te espera',
+    silent: span => `en silencio desde hace ${span}`,
+    ready: 'lista, aún sin empezar',
+    triage: 'por precisar',
+    moreHeads: n => `+${n} más al frente`,
+    loop: 'Estas tarjetas se esperan unas a otras: la cola da vueltas.',
+    longer: 'La cola llega más lejos de lo que la oficina sigue.',
+    waited: (n, atLeast) => `${atLeast ? 'Al menos ' : ''}${n} ${n === 1 ? 'bot espera' : 'bots esperan'} esta tarjeta:`,
+    holds: (n, bots, atLeast) => `Retiene ${atLeast ? 'al menos ' : ''}${n} ${bots ? (n === 1 ? 'bot' : 'bots') : (n === 1 ? 'tarjeta' : 'tarjetas')}`,
+    holdsTip: 'Hay tarjetas que esperan a esta, directamente o tras otra: decidirla hace avanzar la cola.'
   },
   panel: {
     title: 'Detalles',

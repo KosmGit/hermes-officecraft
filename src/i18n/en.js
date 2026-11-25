@@ -43,6 +43,7 @@ export const en = {
     idle: 'Idle',
     waiting: 'Waiting for you',
     stale: 'Silent',
+    queued: 'Queued',
     new: 'No sessions yet',
     unknown: 'Unknown'
   },
@@ -72,7 +73,30 @@ export const en = {
     active: mins => `one of your sessions in the last ${mins} min`,
     rest: 'no halo: nothing recent',
     waitName: 'Orange “!” sign',
-    waitSign: 'the agent is working, but one of its cards is blocked: a decision is yours'
+    waitSign: 'the agent is working, but one of its cards is blocked: a decision is yours',
+    queued: 'a card of theirs waits for a colleague’s work: not at rest, and nothing for you to decide'
+  },
+  // a card that waits for another card (a `todo` card whose parent is not finished): who it waits for, who is at the head of the queue
+  queue: {
+    tip: names => `behind ${names}`,
+    waits: 'Waits for:',
+    head: 'At the head of the queue:',
+    more: n => `+${n}`,
+    rank: ord => `${ord} behind`,
+    noAssignee: 'a card with no assignee',
+    outside: name => `a card of ${name}, who is not on the team`,
+    working: span => `working for ${span}`,
+    workingNow: 'working',
+    waiting: 'who needs you',
+    silent: span => `silent for ${span}`,
+    ready: 'ready, not started yet',
+    triage: 'waiting to be specified',
+    moreHeads: n => `+${n} more at the head`,
+    loop: 'These cards wait for each other: the queue goes round in a circle.',
+    longer: 'The queue goes further back than the office follows.',
+    waited: (n, atLeast) => `${atLeast ? 'At least ' : ''}${n} ${n === 1 ? 'bot waits' : 'bots wait'} for this card:`,
+    holds: (n, bots, atLeast) => `Holds back ${atLeast ? 'at least ' : ''}${n} ${bots ? (n === 1 ? 'bot' : 'bots') : (n === 1 ? 'card' : 'cards')}`,
+    holdsTip: 'Cards wait for this one, directly or after another: deciding it lets the queue move.'
   },
   panel: {
     title: 'Details',

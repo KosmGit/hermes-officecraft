@@ -13,6 +13,7 @@ import { TW2 } from '../scene/constants.js'
 import { pileTip } from '../scene/pile.js'
 import { Ring } from './icons.jsx'
 import { PixelBadge } from './PixelBadge.jsx'
+import { queueView, waitsOn } from '../core/queue.js'
 import { cardsTip, codeText, quietTip, tagText } from './cardFacts.js'
 import { Face, StateIcon } from './StateIcon.jsx'
 import { useProjectStyle } from './ProjectChip.jsx'
@@ -118,7 +119,7 @@ export function usePageVisible() {
  * What an agent's label shows: its NAME and the CARD CODE, nothing else. The state word, the time on the card and the number of
  * cards waiting went to the tooltip (`tip`) and to the screen reader (`label`); the grade stays on the label of a roomy scene.
  */
-function agentFacts(a, t, nowMs, badge) {
+function agentFacts(a, t, nowMs, badge, labelBy = n => n) {
   const state = t(`state.${a.state}`)
   const when = a.lastActivityMs ? t('lastActivity', t.ago(a.lastActivityMs)) : t('noActivity')
   const pin = badge ? `. ${t('badge.label', badge.code, badge.card)}` : ''
@@ -133,7 +134,9 @@ function agentFacts(a, t, nowMs, badge) {
   const more = [cards, quiet].filter(Boolean).map(x => `. ${x}`).join('')
   // a bot at work with a blocked card: « Au travail, une décision vous attend » (the sign beside its state, and the words for the screen reader)
   const wait = tag?.wait ? t('waitTip', tag.wait) : ''
-  const said = wait ? `${state}, ${wait}` : state
+  // a bot in the queue says whom it waits for: « Queued, behind atlas »
+  const by = a.state === 'queued' ? waitsOn(a, labelBy).join(', ') : ''
+  const said = wait ? `${state}, ${wait}` : by ? `${state}, ${t('queue.tip', by)}` : state
   return { state, code: codeText(lab.code, lab.more, t), quiet: lab.quiet === true, wait: lab.wait === true, tag: full, cardsText: cards, quietText: quiet, label: `${a.label || a.name} — ${said}. ${when}${pin}${more}`, tip: [said, full, cards, quiet].filter(Boolean).join(' · ') }
 }
 
@@ -237,6 +240,13 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
   const asScene = view.mode === 'scene'
   const S = view.scale
   const byName = useMemo(() => new Map(office.agents.map(a => [a.name, a])), [office])
+  const labelBy = name => byName.get(name)?.label || name
+  // a selected bot in the queue: the bots it waits for, up to the head of the queue, are marked on their labels (and only then: the room stays readable)
+  const upstream = useMemo(() => {
+    const sel = selected ? byName.get(selected) : null
+    const v = sel?.state === 'queued' ? queueView(office, sel, nowMs) : null
+    return v?.upstream?.length ? new Set(v.upstream) : null
+  }, [office, byName, selected, nowMs])
   const faceBy = useMemo(() => new Map(model.agents.map(a => [a.name, a])), [model])   // the scene's agents carry the outfit
 
   // latest values for the frame painter (it runs from a timer, outside React's render)
@@ -475,7 +485,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
       const agent = byName.get(a.name)
       if (!agent) return null
       const badge = badgeBy.get(a.name) || null
-      const f = agentFacts(agent, t, nowMs, badge)
+      const f = agentFacts(agent, t, nowMs, badge, labelBy)
       const thought = thoughts?.[a.name] ?? null   // only an agent at work has one (src/core/thoughts.js thoughtsShown)
       const [x, y] = at(a.sx, a.sy)
       const below = a.below
@@ -490,6 +500,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
           data-model-badge={badge ? '' : undefined}
           data-outfit={outfitTip(a.name) ? 'model' : undefined}
           data-dim={filter && agent.home !== filter && selected !== a.name ? '' : undefined}
+          data-upstream={upstream?.has(a.name) ? '' : undefined}
           title={[[f.tip, grades?.[a.name] ? t('game.gradeTip', t(`game.grade.${grades[a.name].id}`)) : ''].filter(Boolean).join(' · '), outfitTip(a.name)].filter(Boolean).join(' — ')}
           aria-pressed={selected === a.name}
           aria-label={f.label}
@@ -627,7 +638,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
               const agent = byName.get(a.name)
               if (!agent) return null
               const badge = badgeBy.get(a.name) || null
-              const f = agentFacts(agent, t, nowMs, badge)
+              const f = agentFacts(agent, t, nowMs, badge, labelBy)
               return (
                 <button
                   key={a.name}
@@ -640,6 +651,7 @@ export function OfficeScene({ office, profiles, nowMs, night, selected, onSelect
                   aria-label={f.label}
                   title={[f.tag, grades?.[a.name] ? t('game.gradeTip', t(`game.grade.${grades[a.name].id}`)) : '', badge ? badgeText(badge) : '', f.cardsText, f.quietText].filter(Boolean).join(' — ') || undefined}
                   data-dim={filter && agent.home !== filter && selected !== a.name ? '' : undefined}
+          data-upstream={upstream?.has(a.name) ? '' : undefined}
                   onClick={fire(onSelect, a.name)}
                   onDoubleClick={fire(onOpen, a.name)}
                 >

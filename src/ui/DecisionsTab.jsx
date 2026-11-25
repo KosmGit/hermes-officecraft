@@ -3,6 +3,8 @@ import { useMemo } from 'react'
 import { guardName } from '../core/campaign.js'
 import { decisionRows, groupRows, onlyProject } from '../core/decisions.js'
 import { boardsKnown, inboxItems, inboxView } from '../core/panel.js'
+import { holdsBack, waitIndex } from '../core/queue.js'
+import { holdsLine } from '../core/queueText.js'
 import { isBusy } from '../core/orders.js'
 import { ApprovalRow } from './Approvals.jsx'
 import { DecisionFrame } from './DecisionCard.jsx'
@@ -62,6 +64,10 @@ export function DecisionsTab({ office, history, orders, writes, openCard, approv
   const rows = useMemo(() => decisionRows(view, office), [view, office])
   const shown = useMemo(() => onlyProject(rows, project), [rows, project])
   // the card an order is counting / travelling for stays marked, so the floating bar's « t_… » points at something on screen
+  // what a blocked card holds back: the cards that wait behind it and the bots that own them (src/core/queue.js)
+  const waits = useMemo(() => waitIndex(office.boards), [office])
+  const team = useMemo(() => new Set(office.agents.map(a => a.name)), [office])
+  const labelOf = name => office.agents.find(a => a.name === name)?.label || name
   const o = orders && isBusy(orders.state) ? orders.state.order : null
   const targeted = c => Boolean(o && o.board === c.board && o.task === c.id)
   const grouped = sort === 'project' && !project
@@ -84,6 +90,7 @@ export function DecisionsTab({ office, history, orders, writes, openCard, approv
         code={guard ? t('campaign.kind') : c.code}
         title={guard ? guardName(c.fullTitle ?? c.title) : c.title || c.id}
         reason={guard ? null : c.reason ?? null}
+        holds={holdsLine(holdsBack(waits, c.board, c.id, team), t, labelOf)}
         whoText={guard ? (c.head ? t('campaign.decision.head', c.campaignSize ?? '?') : t('campaign.decision.phase', guardName(c.fullTitle ?? c.title))) : null}
         sinceMs={row.sinceMs}
         ageTip={age}

@@ -116,12 +116,17 @@ export function plant(px, x, y, big, o = {}) {
 }
 
 /** State halo on the floor (RTS-style): blue = working (pulses), amber = waiting on you (pulses), green = active, grey = silent. */
-export const HALO = { working: [77, 140, 255], waiting: [242, 165, 22], active: [47, 174, 107], stale: [150, 156, 170] }
+export const HALO = { working: [77, 140, 255], waiting: [242, 165, 22], active: [47, 174, 107], stale: [150, 156, 170], queued: [74, 190, 196] }
 
-export function halo(px, x, y, state, frame) {
-  const c = HALO[state]
+/** The halo of a state in the room. `queued` belongs to the second art direction only: the first one never knew it and stays pixel for pixel what it was. */
+export const haloOf = (state, art = true) => (state === 'queued' && !art ? undefined : HALO[state])
+/** Calm states do not pulse: a bot that is not doing anything right now (a recent session, a place in the queue) has a steady ring. */
+const STEADY = new Set(['active', 'queued'])
+
+export function halo(px, x, y, state, frame, art = true) {
+  const c = haloOf(state, art)
   if (!c) return
-  const beat = state !== 'active' && frame % 4 < 2
+  const beat = !STEADY.has(state) && frame % 4 < 2
   const r2 = 0.5 + (beat ? 0.05 : 0)
   const r1 = r2 - 0.11
   const [cx, cy] = px.P(x, y)

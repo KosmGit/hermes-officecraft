@@ -2,7 +2,7 @@
  * Stylesheet of the scene HUD (labels over the canvas, list view). Pseudo-classes and media queries cannot be
  * inline, so this is injected once as a <style>. Theme variables only: no literal colour (those live in src/scene/).
  */
-import { CARD as SURFACE, EDGE } from './tokens.js'
+import { CARD as SURFACE, COOL, EDGE } from './tokens.js'
 
 // 94 %: at night a more transparent label lets the darkened room show through and pulls its text under 4.5:1
 const CARD = `color-mix(in oklab, ${SURFACE} 94%, transparent)`
@@ -55,6 +55,8 @@ export const SCENE_CSS = `
 .oc-s-waiting .oc-chip{border-color:var(--ui-orange, var(--ui-accent))}
 .oc-s-waiting .oc-dot{color:color-mix(in oklab, ${ORANGE} 75%, var(--foreground))}
 .oc-s-stale .oc-chip{border-style:dashed}
+.oc-s-queued .oc-chip{border-color:color-mix(in oklab, ${COOL} 60%, ${EDGE})}
+.oc-s-queued .oc-dot{color:color-mix(in oklab, ${COOL} 75%, var(--foreground))}
 .oc-s-new .oc-chip,.oc-s-unknown .oc-chip{opacity:.75}
 .oc-station:hover,.oc-station[aria-pressed="true"],.oc-station:focus-visible{z-index:2}
 .oc-station:hover .oc-chip,.oc-station[aria-pressed="true"] .oc-chip,.oc-station:focus-visible .oc-chip{transform:translateX(-50%) translateY(-2px)}
@@ -65,6 +67,10 @@ export const SCENE_CSS = `
 .oc-s-waiting{--sel:${ORANGE}}
 .oc-s-active{--sel:var(--ui-green, var(--ui-accent))}
 .oc-s-stale{--sel:var(--ui-text-tertiary)}
+.oc-s-queued{--sel:${COOL}}
+/* the bots a selected bot in the queue waits for, up to the head of the queue: a dashed ring in the hue of the state (the selection itself is a solid one) */
+.oc-station[data-upstream] .oc-chip,.oc-lrow[data-upstream] .oc-chip{border-color:${COOL};border-style:dashed}
+.oc-station[data-upstream],.oc-lrow[data-upstream]{z-index:2;box-shadow:0 0 0 2px color-mix(in oklab, ${COOL} 70%, transparent);background:color-mix(in oklab, ${COOL} 14%, transparent)}
 .oc-station[aria-pressed="true"] .oc-chip{border-color:var(--sel)}
 .oc-station[aria-pressed="true"]{box-shadow:0 0 0 2px var(--sel);background:color-mix(in oklab, var(--sel) 12%, transparent)}
 .oc-zone{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:8px;font:inherit;font-size:11px;line-height:1;white-space:nowrap;

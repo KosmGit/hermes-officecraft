@@ -2,6 +2,8 @@ import { formatSpan, waitSign } from '../core/hud.js'
 import { outfitSource } from '../core/llm.js'
 import { boardsKnown, inspectorOf, modelLines, untitledKey } from '../core/panel.js'
 import { modelOf } from '../core/models.js'
+import { queueView, waitsOn } from '../core/queue.js'
+import { queueLines, waitedLine } from '../core/queueText.js'
 import { roleOf } from '../scene/index.js'
 import { Icon } from './icons.jsx'
 import { PixelBadge } from './PixelBadge.jsx'
@@ -31,7 +33,41 @@ function CardRow({ c, nowMs, t }) {
   )
 }
 
-const ORDER = { waiting: 0, working: 1, stale: 2, active: 3, idle: 4, new: 5, unknown: 6 }
+const ORDER = { waiting: 0, working: 1, stale: 2, active: 3, queued: 4, idle: 5, new: 6, unknown: 7 }
+
+/** « Waits for: atlas · title » then the head of the queue and what it is doing (with « Decide » when that is a decision of yours), or who waits for this bot's card. */
+function QueueBlock({ lines, waited, onDecide, t }) {
+  if (!lines && !waited) return null
+  return (
+    <div className="ux-ag-q" data-insp-queue={lines ? 'queued' : 'waited'} role="group" aria-label={t('state.queued')}>
+      {lines ? (
+        <>
+          <p data-queue-waits>
+            <span className="k">{t('queue.waits')}</span>
+            {lines.waits.items.map((it, i) => <span key={i} className="it"><b>{it.who}</b>{it.title ? <i> · {it.title}</i> : null}{i < lines.waits.items.length - 1 ? ',' : ''}</span>)}
+            {lines.waits.more ? <span className="mo">{t('queue.more', lines.waits.more)}</span> : null}
+          </p>
+          {lines.head ? (
+            <p data-queue-head>
+              <span className="k">{t('queue.head')}</span>
+              <span className="it"><b>{lines.head.who}</b>{lines.head.fact ? `, ${lines.head.fact}` : ''}</span>
+              {lines.head.more ? <span className="mo">{lines.head.more}</span> : null}
+              {lines.head.rank ? <span className="rk" data-queue-rank>· {lines.head.rank}</span> : null}
+              {lines.head.decide && onDecide ? <button type="button" className="ux-b sm pri" data-decide data-queue-decide onClick={() => onDecide(lines.head.board)}>{t('ux.agent.decide')}</button> : null}
+            </p>
+          ) : null}
+          {lines.note ? <small data-queue-note>{lines.note}</small> : null}
+        </>
+      ) : (
+        <p data-queue-waited>
+          <span className="k">{waited.lead}</span>
+          <span className="it">{waited.names.join(', ')}</span>
+          {waited.more ? <span className="mo">{t('queue.more', waited.more)}</span> : null}
+        </p>
+      )}
+    </div>
+  )
+}
 
 function StateTag({ state, t }) {
   return <span className={`ux-st ux-st-${state}`}><span className="ux-sdot" aria-hidden="true" />{t(`state.${state}`)}</span>
@@ -39,9 +75,10 @@ function StateTag({ state, t }) {
 
 /** No agent selected: the team as a list, the ones that need you first, one click for the detail. */
 function Roster({ office, sceneBy, project, selected, onPick, t }) {
+  const labelBy = name => office.agents.find(x => x.name === name)?.label || name
   const list = office.agents
     .filter(a => !project || a.home === project)
-    .sort((a, b) => (ORDER[a.state] ?? 7) - (ORDER[b.state] ?? 7) || a.name.localeCompare(b.name, 'en'))
+    .sort((a, b) => (ORDER[a.state] ?? 8) - (ORDER[b.state] ?? 8) || a.name.localeCompare(b.name, 'en'))
   return (
     <>
       <div className="ux-pbar"><span className="lbl">{t('ux.agent.team', list.length)} · {t('ux.agent.pick')}</span></div>
@@ -52,7 +89,12 @@ function Roster({ office, sceneBy, project, selected, onPick, t }) {
               {sceneBy.get(a.name) ? <Portrait agent={sceneBy.get(a.name)} /> : null}
               <span className="nm" title={a.label || a.name}>{a.label || a.name}</span>
               <ProjectChip slug={a.home} />
-              <StateTag state={a.state} t={t} />
+              {a.state === 'queued' ? (
+                <span className="ux-qcell">
+                  <StateTag state="queued" t={t} />
+                  {waitsOn(a, labelBy).length ? <span className="ux-qby" data-queue-by title={t('queue.tip', waitsOn(a, labelBy).join(', '))}>← {waitsOn(a, labelBy).join(', ')}</span> : null}
+                </span>
+              ) : <StateTag state={a.state} t={t} />}
               {waitSign(a) ? <span className="ux-wait" data-wait title={t('waitTip', a.blocked.length)}><StateIcon state="waiting" /><span className="ux-vh">{t('waitTip', a.blocked.length)}</span></span> : null}
             </button>
           </li>
@@ -75,6 +117,11 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
   const models = modelOf(agent)
   const i = inspectorOf(agent, { nowMs, history, models, roleId: dressed.role, grade })
   const ml = modelLines(i.model, i.current?.code ?? '')
+  // the queue: who this bot's card waits for and what is at the head of it; or, for a bot others wait for, who they are (src/core/queue.js)
+  const qv = queueView(office, agent, nowMs)
+  const queued = qv?.kind === 'queued' ? queueLines(qv, t, nowMs, formatSpan) : null
+  const labelOf = name => office.agents.find(a => a.name === name)?.label || name
+  const waited = qv?.kind === 'waited' ? waitedLine(qv, t, labelOf) : null
   const why = frozen ? t('replay.noAction') : canOpen ? t('openSession', i.label) : t('noSession', i.label)   // in a replay the button is off because the past is read-only, not for want of a session
   const bot = bots?.get(agent.name) ?? null   // the roster's description of this bot (office.agents do not carry it)
   return (
@@ -105,6 +152,7 @@ export function AgentTab({ office, agent, sceneAgent, sceneBy, history, nowMs, o
           {i.waitingMore ? <small>{t('insp.more', i.waitingMore)}</small> : null}
         </div>
       ) : null}
+      <QueueBlock lines={queued} waited={waited} onDecide={onDecide} t={t} />
       <dl className="ux-kv">
         <dt>{t('ux.agent.project')}</dt>
         <dd>{agent.home ? <ProjectChip slug={agent.home} /> : <span>{t('ux.agent.common')}</span>}</dd>

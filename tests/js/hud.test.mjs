@@ -380,20 +380,20 @@ test('the scene keeps its model while the fingerprint is unchanged (no layout, n
 })
 
 // The legend of the halos. Colours are the scene's own (HALO), words translated.
-test('the legend lists the five states with the colours the scene draws, and the windows of the real rules', () => {
+test('the legend lists the six states with the colours the scene draws, and the windows of the real rules', () => {
   const rows = legendRows(HALO, { workingMs: WORKER_LIVE_WINDOW_MS, staleMs: STALE_AFTER_MS, activeMs: RECENT_WINDOW_MS })
-  assert.deepEqual(rows.map(r => r.state), ['working', 'waiting', 'stale', 'active', 'idle'])
+  assert.deepEqual(rows.map(r => r.state), ['working', 'waiting', 'stale', 'active', 'queued', 'idle'])
   for (const r of rows.filter(r => r.state !== 'idle')) assert.deepEqual(r.rgb, HALO[r.state], `${r.state} uses the scene's own halo colour`)
   assert.equal(rows.find(r => r.state === 'idle').rgb, null, 'a resting agent has no halo')
-  assert.deepEqual(rows.map(r => r.arg), [2, null, 5, 10, null])
-  assert.equal(new Set(rows.filter(r => r.rgb).map(r => r.rgb.join())).size, 4, 'four distinct colours')
+  assert.deepEqual(rows.map(r => r.arg), [2, null, 5, 10, null, null])
+  assert.equal(new Set(rows.filter(r => r.rgb).map(r => r.rgb.join())).size, 5, 'five distinct colours')
 })
 
 test('legend words exist in en, fr and es, with the minutes interpolated', () => {
   for (const lang of ['en', 'fr', 'es']) {
-    for (const k of ['button', 'title', 'waiting', 'rest']) assert.ok(translate(messages, lang, `legend.${k}`, []).length > 3, `${lang} legend.${k}`)
+    for (const k of ['button', 'title', 'waiting', 'rest', 'queued']) assert.ok(translate(messages, lang, `legend.${k}`, []).length > 3, `${lang} legend.${k}`)
     for (const k of ['working', 'stale', 'active']) assert.match(translate(messages, lang, `legend.${k}`, [7]), /7/, `${lang} legend.${k}`)
-    for (const s of ['working', 'waiting', 'stale', 'active', 'idle']) assert.ok(translate(messages, lang, `state.${s}`, []).length > 2)
+    for (const s of ['working', 'waiting', 'stale', 'active', 'queued', 'idle']) assert.ok(translate(messages, lang, `state.${s}`, []).length > 2)
   }
   const page = src('src/ui/OfficePage.jsx')
   assert.match(src('src/ui/ProjectDock.jsx'), /<Legend \/>/)   // the dock under the scene holds it

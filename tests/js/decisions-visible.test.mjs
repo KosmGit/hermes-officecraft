@@ -95,7 +95,7 @@ test('the sign is drawn with the state icons of the scene (no character), the st
 
 test('the accessible name says it, in the three languages; the legend has the entry', () => {
   const scene = src('src/ui/OfficeScene.jsx')
-  assert.match(scene, /const said = wait \? `\$\{state\}, \$\{wait\}` : state/)
+  assert.match(scene, /const said = wait \? `\$\{state\}, \$\{wait\}` : by \? `\$\{state\}, \$\{t\('queue\.tip', by\)\}` : state/)
   assert.match(scene, /label: `\$\{a\.label \|\| a\.name\} — \$\{said\}\./)
   assert.match(src('src/ui/Legend.jsx'), /data-legend-sign="wait"/)
   const one = { en: 'a decision is waiting for you', fr: 'une décision vous attend', es: 'una decisión te espera' }
@@ -221,7 +221,7 @@ test('reason: drawn as text only, with its own unfolding; never a title, a link 
   const tab = src('src/ui/DecisionsTab.jsx')
   assert.match(card, /<Clamped text=\{reason\} className="ux-dc-r"/, 'two lines, unfolded like the title')
   assert.match(card, /<p ref=\{ref\} id=\{id\} className=\{`\$\{className\}\$\{whole \? ' whole' : ''\}`\} title=\{tip\}>\{children\}\{text\}<\/p>/, 'the text is a child of a paragraph')
-  assert.doesNotMatch(card.slice(card.indexOf('{reason ? ('), card.indexOf('<div className="ux-dc-who">')), /tip=|title=/, 'no tooltip on the reason')
+  assert.doesNotMatch(card.slice(card.indexOf('{reason ? ('), card.indexOf('{holds ? (')), /tip=|title=/, 'no tooltip on the reason')
   assert.doesNotMatch(card, /dangerouslySetInnerHTML|innerHTML|<a\s|href=/)
   assert.match(tab, /reason=\{guard \? null : c\.reason \?\? null\}/)
   // the names of the buttons that open it never contain it

@@ -225,7 +225,7 @@ test('in the scene: jackets on the chairs of « new » agents are not people at 
 })
 
 test('state signs: one 9 x 9 shape per state, all different, an unknown state falls back to « ? »', () => {
-  const states = ['working', 'active', 'waiting', 'idle', 'stale', 'new', 'unknown']
+  const states = ['working', 'active', 'waiting', 'idle', 'stale', 'queued', 'new', 'unknown']
   assert.deepEqual(Object.keys(STATE_ICONS).sort(), [...states].sort())
   for (const st of states) {
     assert.equal(STATE_ICONS[st].length, STATE_ICON_SIZE)

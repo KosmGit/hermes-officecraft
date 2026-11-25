@@ -5,7 +5,7 @@
  * (src/ui/ProjectChip.jsx). 4 px grid: margins, gaps, paddings and control heights are multiples of 4 (traits of 1-2 px apart).
  * Container queries follow the PANE the plugin gets (not the window): the same widths as src/core/tabs.js (700), then 980 and 1320.
  */
-import { CARD, EDGE, ON_ACCENT, RING_FOCUS, SUNKEN, VIOLET } from './tokens.js'
+import { CARD, COOL, EDGE, ON_ACCENT, RING_FOCUS, SUNKEN, VIOLET } from './tokens.js'
 
 const T2 = 'var(--ui-text-secondary)'
 const T3 = 'color-mix(in oklab, var(--ui-text-secondary) 55%, var(--ui-text-tertiary))'   // holds 4.5:1 on the card, both themes
@@ -63,10 +63,10 @@ export const PAGE_CSS = `
 .ux-prjx:hover .ux-i{color:var(--foreground)}
 .ux-sdot{display:inline-block;width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:currentColor}
 .ux-st{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;white-space:nowrap}
-.ux-st-working{color:${ink('var(--ui-accent)')}}.ux-st-waiting{color:${ink(ORANGE)}}.ux-st-active{color:${ink(GREEN)}}.ux-st-idle,.ux-st-new,.ux-st-unknown,.ux-st-stale{color:${T3}}
+.ux-st-working{color:${ink('var(--ui-accent)')}}.ux-st-waiting{color:${ink(ORANGE)}}.ux-st-active{color:${ink(GREEN)}}.ux-st-queued{color:${ink(COOL)}}.ux-st-idle,.ux-st-new,.ux-st-unknown,.ux-st-stale{color:${T3}}
 /* same grammar as the legend of the halos: resting (no halo) = empty ring, silent = filled grey disc */
 .ux-st-idle .ux-sdot,.ux-st-new .ux-sdot,.ux-st-unknown .ux-sdot{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
-.ux-st-working .ux-sdot{background:var(--ui-accent)}.ux-st-waiting .ux-sdot{background:${ORANGE}}.ux-st-active .ux-sdot{background:${GREEN}}
+.ux-st-working .ux-sdot{background:var(--ui-accent)}.ux-st-waiting .ux-sdot{background:${ORANGE}}.ux-st-active .ux-sdot{background:${GREEN}}.ux-st-queued .ux-sdot{background:${COOL}}
 /* ---------- header: one row ---------- */
 .ux-top{display:flex;align-items:center;gap:16px;min-height:44px;flex:0 0 auto;min-width:0}
 .ux-brand{display:flex;align-items:center;gap:12px;flex:0 1 auto;min-width:32px}
@@ -216,6 +216,9 @@ export const PAGE_CSS = `
 .ux-dc-r.whole{display:block;-webkit-line-clamp:unset;overflow:visible}
 .ux-dc-s{margin:0;font-size:12px;line-height:1.4;color:${T2};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .ux-dc-c{margin:0;min-width:0;font-size:11.5px;line-height:1.4;color:${T2};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
+.ux-dc-holds{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin:0;min-width:0;font-size:12px;color:${ink(COOL)};font-weight:600}
+.ux-dc-holds .oc-sti{color:${ink(COOL)}}
+.ux-dc-holds .nm{color:${T2};font-weight:400;min-width:0;overflow-wrap:anywhere}
 .ux-dc-who{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:${T2}}
 .ux-dc-who .oc-portrait{width:20px;height:20px;border-radius:5px;border:0}
 .ux-dc-who .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -285,6 +288,15 @@ export const PAGE_CSS = `
 .ux-ag-wr .hd{display:flex;align-items:center;gap:8px;min-width:0}
 .ux-ag-wr .hd b{font-size:12px}
 .ux-ag-wt{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
+/* a card that waits for a colleague's: who it waits for, and what is at the head of the queue (the hue is the calm, cool one of the state) */
+.ux-ag-q{margin:0 0 12px;padding:8px 12px;border:1px solid color-mix(in oklab, ${COOL} 45%, ${EDGE});border-radius:8px;background:color-mix(in oklab, ${COOL} 8%, transparent);display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
+.ux-ag-q p{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0;min-width:0;overflow-wrap:anywhere}
+.ux-ag-q .k{color:${ink(COOL)};font-weight:600}
+.ux-ag-q .it{min-width:0}
+.ux-ag-q .it b{font-weight:600}
+.ux-ag-q .it i{font-style:normal;color:${T2}}
+.ux-ag-q .rk,.ux-ag-q .mo,.ux-ag-q small{color:${T3};font-size:11.5px}
+.ux-ag-q .dc{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ux-lnk{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0;border:0;background:none;color:var(--ui-accent);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ux-roster{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .ux-rosterb{display:grid;grid-template-columns:24px minmax(0,112px) minmax(0,1fr) 112px 20px;align-items:center;column-gap:8px;width:100%;min-width:0;min-height:40px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--foreground);font:inherit;text-align:left;cursor:pointer}
@@ -297,13 +309,17 @@ export const PAGE_CSS = `
 .ux-rosterb .ux-prj{grid-column:3;justify-self:start;max-width:100%;min-width:0}
 .ux-rosterb .ux-st{grid-column:4;justify-self:start;white-space:nowrap;font-size:11.5px}
 .ux-rosterb .ux-wait{grid-column:5}
+/* « En file ← atlas »: the state and the colleague it waits for share the state's column; the name is cut before the word */
+.ux-rosterb .ux-qcell{grid-column:4;display:flex;align-items:center;gap:4px;min-width:0;font-size:11.5px}
+.ux-rosterb .ux-qcell .ux-st{flex:0 0 auto;font-size:inherit}
+.ux-rosterb .ux-qby{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${T3}}
 /* a side panel under 420 px (always, at the usual 330-400): the project goes under the name, and the state keeps its column */
 @container uxp (max-width: 419px){
   .ux-rosterb{grid-template-columns:24px minmax(0,1fr) 112px 20px;grid-template-rows:auto auto;row-gap:4px;min-height:56px;padding:8px}
   .ux-rosterb .oc-portrait{grid-row:1 / 3}
   .ux-rosterb .nm{grid-column:2;grid-row:1}
   .ux-rosterb .ux-prj{grid-column:2 / 5;grid-row:2}
-  .ux-rosterb .ux-st{grid-column:3;grid-row:1}
+  .ux-rosterb .ux-st,.ux-rosterb .ux-qcell{grid-column:3;grid-row:1}
   .ux-rosterb .ux-wait{grid-column:4;grid-row:1}
 }
 /* the « a decision waits for you » sign beside the state of a bot at work: same tinted square as the scene's label */
