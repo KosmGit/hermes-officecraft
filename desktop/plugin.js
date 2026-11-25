@@ -15090,6 +15090,12 @@ var DIALOG_TAIL = `
   .oc-dg-fa{margin-left:0;width:100%;justify-content:flex-end}
   .oc-dg-f{align-items:stretch}
   .oc-dg-sum{display:none}
+  /* a footer with the requests link (the recruitment): the risk note, then the buttons, then the link and « draft kept » - the secondary line never comes before the buttons */
+  .oc-dg-f:has(.oc-dg-fm){flex-direction:column;flex-wrap:nowrap}
+  .oc-dg-f:has(.oc-dg-fm) > .oc-dg-fs{display:contents}
+  .oc-dg-f:has(.oc-dg-fm) .oc-dg-fn{order:0}
+  .oc-dg-f:has(.oc-dg-fm) > .oc-dg-fa{order:1}
+  .oc-dg-f:has(.oc-dg-fm) .oc-dg-fm{order:2}
 }
 @media (pointer:coarse){
   .oc-dg-x{width:40px;height:40px}
@@ -21796,6 +21802,7 @@ var PAGE_CSS = `
   [data-inbox] > .ux-pbar.flt{order:0;flex:1 0 100%;margin:0 0 12px}
   [data-inbox] > .ux-pbar:not(.flt) + div{display:contents}
   [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp{order:0;flex:1 1 120px;min-width:0;margin:0}
+  [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp .ln{display:none}   /* the name of the project gets the room the rule would take */
   [data-inbox] > .ux-pbar:not(.flt) + div > ul{order:2;flex:1 0 100%;margin-top:8px}
   [data-inbox] > .ux-pbar:not(.flt) + ul{margin-top:12px}
   .ux-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex:0 0 auto;margin:0 -16px -12px;border-top:1px solid ${EDGE};background:${CARD}}
@@ -24562,6 +24569,15 @@ function SettingsFormNotify() {
         /* @__PURE__ */ jsx42(SettingsIcon, { id: "ext", size: 14 })
       ] }) : null
     ] }),
+    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
+    preview ? /* @__PURE__ */ jsxs38("div", { "data-notify-preview-box": true, children: [
+      /* @__PURE__ */ jsx42(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
+      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment23, { children: [
+        /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
+        /* @__PURE__ */ jsx42(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
+      ] }) : null,
+      /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.note") })
+    ] }) : /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", "data-notify-preview-empty": true, children: t("notify.preview.empty") }),
     /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", children: t("notify.types") }),
     NOTIFY_GROUPS.map((group) => /* @__PURE__ */ jsxs38("section", { className: "oc-nt-grp", "aria-labelledby": `officecraft-notify-g-${group.id}`, "data-notify-group": group.id, children: [
       /* @__PURE__ */ jsxs38("h5", { className: "oc-lm-g", id: `officecraft-notify-g-${group.id}`, children: [
@@ -24600,15 +24616,6 @@ function SettingsFormNotify() {
         ] }, type);
       })
     ] }, group.id)),
-    /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-preview-title": true, children: t("notify.preview.title") }),
-    preview ? /* @__PURE__ */ jsxs38("div", { "data-notify-preview-box": true, children: [
-      /* @__PURE__ */ jsx42(Bubble, { text: preview.text, "data-notify-preview": true, lang: t.lang }),
-      preview.quietText ? /* @__PURE__ */ jsxs38(Fragment23, { children: [
-        /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.summary") }),
-        /* @__PURE__ */ jsx42(Bubble, { text: preview.quietText, "data-notify-preview-quiet": true, lang: t.lang })
-      ] }) : null,
-      /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", children: t("notify.preview.note") })
-    ] }) : /* @__PURE__ */ jsx42("p", { className: "oc-nt-cap", "data-notify-preview-empty": true, children: t("notify.preview.empty") }),
     /* @__PURE__ */ jsx42("h4", { className: "oc-nt-sub", "data-notify-quiet-title": true, children: t("notify.quiet.title") }),
     /* @__PURE__ */ jsx42(
       SettingsRow,

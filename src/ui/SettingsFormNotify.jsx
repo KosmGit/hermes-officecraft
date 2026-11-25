@@ -182,6 +182,20 @@ export function SettingsFormNotify() {
         ) : null}
       </p>
 
+      <h4 className="oc-nt-sub" data-notify-preview-title>{t('notify.preview.title')}</h4>
+      {preview ? (
+        <div data-notify-preview-box>
+          <Bubble text={preview.text} data-notify-preview lang={t.lang} />
+          {preview.quietText ? (
+            <>
+              <p className="oc-nt-cap">{t('notify.preview.summary')}</p>
+              <Bubble text={preview.quietText} data-notify-preview-quiet lang={t.lang} />
+            </>
+          ) : null}
+          <p className="oc-nt-cap">{t('notify.preview.note')}</p>
+        </div>
+      ) : <p className="oc-nt-cap" data-notify-preview-empty>{t('notify.preview.empty')}</p>}
+
       <h4 className="oc-nt-sub">{t('notify.types')}</h4>
       {NOTIFY_GROUPS.map(group => (
         <section key={group.id} className="oc-nt-grp" aria-labelledby={`officecraft-notify-g-${group.id}`} data-notify-group={group.id}>
@@ -220,20 +234,6 @@ export function SettingsFormNotify() {
           })}
         </section>
       ))}
-
-      <h4 className="oc-nt-sub" data-notify-preview-title>{t('notify.preview.title')}</h4>
-      {preview ? (
-        <div data-notify-preview-box>
-          <Bubble text={preview.text} data-notify-preview lang={t.lang} />
-          {preview.quietText ? (
-            <>
-              <p className="oc-nt-cap">{t('notify.preview.summary')}</p>
-              <Bubble text={preview.quietText} data-notify-preview-quiet lang={t.lang} />
-            </>
-          ) : null}
-          <p className="oc-nt-cap">{t('notify.preview.note')}</p>
-        </div>
-      ) : <p className="oc-nt-cap" data-notify-preview-empty>{t('notify.preview.empty')}</p>}
 
       <h4 className="oc-nt-sub" data-notify-quiet-title>{t('notify.quiet.title')}</h4>
       <SettingsRow id="officecraft-notify-quiet" label={t('notify.quiet.on')} help={t('notify.quiet.onHint')}

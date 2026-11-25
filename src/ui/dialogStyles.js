@@ -289,6 +289,12 @@ const DIALOG_TAIL = `
   .oc-dg-fa{margin-left:0;width:100%;justify-content:flex-end}
   .oc-dg-f{align-items:stretch}
   .oc-dg-sum{display:none}
+  /* a footer with the requests link (the recruitment): the risk note, then the buttons, then the link and « draft kept » - the secondary line never comes before the buttons */
+  .oc-dg-f:has(.oc-dg-fm){flex-direction:column;flex-wrap:nowrap}
+  .oc-dg-f:has(.oc-dg-fm) > .oc-dg-fs{display:contents}
+  .oc-dg-f:has(.oc-dg-fm) .oc-dg-fn{order:0}
+  .oc-dg-f:has(.oc-dg-fm) > .oc-dg-fa{order:1}
+  .oc-dg-f:has(.oc-dg-fm) .oc-dg-fm{order:2}
 }
 @media (pointer:coarse){
   .oc-dg-x{width:40px;height:40px}

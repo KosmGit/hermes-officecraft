@@ -434,6 +434,7 @@ export const PAGE_CSS = `
   [data-inbox] > .ux-pbar.flt{order:0;flex:1 0 100%;margin:0 0 12px}
   [data-inbox] > .ux-pbar:not(.flt) + div{display:contents}
   [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp{order:0;flex:1 1 120px;min-width:0;margin:0}
+  [data-inbox] > .ux-pbar:not(.flt) + div > .ux-grp .ln{display:none}   /* the name of the project gets the room the rule would take */
   [data-inbox] > .ux-pbar:not(.flt) + div > ul{order:2;flex:1 0 100%;margin-top:8px}
   [data-inbox] > .ux-pbar:not(.flt) + ul{margin-top:12px}
   .ux-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));flex:0 0 auto;margin:0 -16px -12px;border-top:1px solid ${EDGE};background:${CARD}}

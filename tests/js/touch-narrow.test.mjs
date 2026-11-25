@@ -119,6 +119,7 @@ test('a narrow pane: the decisions panel has no second frame, the sort shares th
   assert.match(narrow, /\[data-inbox\] > \.ux-pbar:not\(\.flt\) \+ div\{display:contents\}/, 'the first group sits in the same flex line as the sort')
   assert.match(narrow, /\.ux-pbar:not\(\.flt\) \+ div > \.ux-grp\{order:0;flex:1 1 120px;/, 'and wraps below it when there is no room for both')
   assert.match(narrow, /\.ux-seg \.short\{display:inline\}/, 'the sort says « Project / Oldest » there')
+  assert.match(narrow, /\.ux-grp \.ln\{display:none\}/, 'the project name keeps the room the rule would take')
   const tail = css.slice(css.indexOf('@container ux (max-width: 1320px){'), css.indexOf('@container ux (max-width: 1180px)'))
   assert.match(tail, /\.ux-dc-o \.ux-b\.cx \.short\{display:inline\}/, 'the 1024 px panel (328 px) gets « Cancel »')
   const tab = src('ui/DecisionsTab.jsx')
@@ -132,4 +133,14 @@ test('the count of agents at work sits on the « Office » entry of the bottom b
   assert.match(bar, /t\('ux\.pill\.workingLabel', working\)/, 'a screen reader hears « n at work », not a bare number')
   assert.match(src('ui/OfficePage.jsx'), /<TabBar [^>]*working=\{counts\.working\}/)
   assert.match(strip(PAGE_CSS), /\.ux-bar \.ux-n\.work\{background:/)
+})
+
+test('the recruitment footer at 380 px: the risk note, then the buttons, then the requests link (the link never comes before the buttons)', () => {
+  const css = strip(DIALOG_CSS)
+  const small = css.slice(css.indexOf('@media (max-width:560px){'))
+  assert.match(small, /\.oc-dg-f:has\(\.oc-dg-fm\)\{flex-direction:column;flex-wrap:nowrap\}/)
+  assert.match(small, /\.oc-dg-f:has\(\.oc-dg-fm\) > \.oc-dg-fs\{display:contents\}/)
+  assert.match(small, /\.oc-dg-f:has\(\.oc-dg-fm\) \.oc-dg-fn\{order:0\}/)
+  assert.match(small, /\.oc-dg-f:has\(\.oc-dg-fm\) > \.oc-dg-fa\{order:1\}/)
+  assert.match(small, /\.oc-dg-f:has\(\.oc-dg-fm\) \.oc-dg-fm\{order:2\}/)
 })

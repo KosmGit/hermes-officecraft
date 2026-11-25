@@ -54,7 +54,7 @@ test('one messaging app: no « same for all » (nothing to choose between), chip
   assert.deepEqual(recipientsNote(two), ['addAppNote'])
 })
 
-test('the form: the groups, the note, the inline chips and the order (types, then the preview, then the quiet hours)', () => {
+test('the form: the groups, the note, the inline chips and the order (recipients, the preview, the types, the quiet hours)', () => {
   const form = src('ui/SettingsFormNotify.jsx')
   assert.match(form, /NOTIFY_GROUPS\.map\(group =>/)
   assert.match(form, /choosesBetweenRecipients\(state\) \? \(\s*<SettingsRow id="officecraft-notify-all"/, 'the list « same for all » only with a choice to make')
@@ -63,8 +63,8 @@ test('the form: the groups, the note, the inline chips and the order (types, the
   assert.match(form, /data-chips=\{inline \? 'help' : 'own'\}/)
   assert.match(form, /\{inline \? chips : null\}/)
   const at = k => form.indexOf(k)
-  assert.ok(at("data-notify-recipients") < at("notify.types") && at("notify.types") < at("data-notify-preview-title") && at("data-notify-preview-title") < at("data-notify-quiet-title"),
-    'the preview sits right under the types it previews, not at the bottom of the tab')
+  assert.ok(at("data-notify-recipients") < at("data-notify-preview-title") && at("data-notify-preview-title") < at("notify.types") && at("notify.types") < at("data-notify-quiet-title"),
+    'the preview sits above the types, in view while they are switched (it was the last thing of the tab, a scroll away from them)')
   const settings = src('ui/SettingsForm.jsx')
   assert.match(settings, /notifyTabBadge\(useNotify\(\)\)/, 'the tab reads its badge from the whole query, like the LLM one')
 })
