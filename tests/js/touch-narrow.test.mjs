@@ -72,6 +72,7 @@ test('the settings: the switch is 48 x 28 (48 x 40 to the finger), segments, but
   assert.equal(decls(body, '.oc-sx-sw:checked::after').transform, 'translateX(20px)', 'the knob travels the longer track')
   assert.equal(decls(body, '.oc-sx-seg span').height, '40px')
   assert.equal(decls(body, '.oc-sx-btn')['min-height'], '40px')
+  assert.equal(decls(body, '.oc-lm-row')['min-height'], '52px', 'two rows of functions: their « ? » and switches are 8 px apart')
   assert.equal(decls(body, '.oc-sf-tab').height, '40px')
   assert.equal(decls(body, '.oc-sd-x').width, '40px')
   assert.equal(decls(body, '.oc-sx-help::after').inset, '-9px', '24 px with a 1 px border: 22 + 18 = 40')

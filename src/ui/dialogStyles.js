@@ -298,6 +298,9 @@ const DIALOG_TAIL = `
   .oc-dg input[type=text],.oc-dg input[type=search],.oc-dg input:not([type]),.oc-dg textarea,.oc-dg select{min-height:40px}
   .oc-dg-seg button,.oc-dg-seg label{height:40px}
   .oc-lm-mk{min-height:40px;min-width:40px}
+  .oc-lm-box{gap:20px}
+  .oc-lm-ar .oc-btn{height:40px}
+  .oc-dg-fl > .oc-dg-lab:has(.oc-dg-help){margin-bottom:16px}
 }
 `
 

@@ -15099,6 +15099,9 @@ var DIALOG_TAIL = `
   .oc-dg input[type=text],.oc-dg input[type=search],.oc-dg input:not([type]),.oc-dg textarea,.oc-dg select{min-height:40px}
   .oc-dg-seg button,.oc-dg-seg label{height:40px}
   .oc-lm-mk{min-height:40px;min-width:40px}
+  .oc-lm-box{gap:20px}
+  .oc-lm-ar .oc-btn{height:40px}
+  .oc-dg-fl > .oc-dg-lab:has(.oc-dg-help){margin-bottom:16px}
 }
 `;
 var DIALOG_CSS = DIALOG_HEAD + LM_CSS + DIALOG_TAIL;
@@ -24947,6 +24950,8 @@ ${ringed(".oc-sd-x:focus-visible")}
   .oc-fc,.oc-lm-sel,.oc-sx-capg input{height:40px!important}
   .oc-nt-chip span,.oc-nt-line .oc-nt-chip span{min-height:40px}
   .oc-sx-row,.oc-lm-row{row-gap:8px}
+  .oc-lm-row{min-height:52px}   /* the « ? » and the switch of a row are 40 px, 8 px from those of the next row */
+  .oc-lm-grant,.oc-lm-cmd{gap:20px}
 }
 @media (prefers-reduced-motion:reduce){
   .oc-sd[open]{animation:none}

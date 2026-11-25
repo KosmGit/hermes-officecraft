@@ -268,6 +268,8 @@ ${ringed('.oc-sd-x:focus-visible')}
   .oc-fc,.oc-lm-sel,.oc-sx-capg input{height:40px!important}
   .oc-nt-chip span,.oc-nt-line .oc-nt-chip span{min-height:40px}
   .oc-sx-row,.oc-lm-row{row-gap:8px}
+  .oc-lm-row{min-height:52px}   /* the « ? » and the switch of a row are 40 px, 8 px from those of the next row */
+  .oc-lm-grant,.oc-lm-cmd{gap:20px}
 }
 @media (prefers-reduced-motion:reduce){
   .oc-sd[open]{animation:none}
