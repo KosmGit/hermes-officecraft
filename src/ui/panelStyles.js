@@ -240,5 +240,11 @@ export const PANEL_CSS = `
 .oc-fsw li{display:flex;align-items:center;gap:6px;min-width:0;font-size:11.5px}
 .oc-fsw i{flex:0 0 auto;width:22px;height:16px;border-radius:3px;border:1px solid ${FIELD_EDGE}}
 .oc-fiche p{margin:0;font-size:11.5px}
+@media (pointer:coarse){
+  .oc-gear,.oc-x{width:40px;height:40px}
+  .oc-toggle,.oc-set-link{min-height:40px}
+  .oc-legend-btn{position:relative}
+  .oc-legend-btn::after{content:"";position:absolute;inset:-8px}
+}
 @media (max-width:560px){.oc-hbody{grid-template-columns:minmax(0,1fr)}.oc-hprev{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left}.oc-hire{padding:12px}}
 `

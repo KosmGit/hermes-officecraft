@@ -422,6 +422,28 @@ export const PAGE_CSS = `
   .ux-panel{border-radius:12px}
 }
 @container ux (max-width: 420px){ .ux-brand h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)} }
+/* ---------- a finger (pointer: coarse): 40 px at least for every target, 8 px between two of them; nothing changes under a mouse ----------
+   Last of the sheet: it follows the container rules above it, so a size they set for a narrow pane does not win back. A control that is
+   smaller to the eye (the « ? », the « open » icon) keeps its look and gets its 40 px from a ::after that reaches 8 px, 6 px beyond it. */
+@media (pointer:coarse){
+  .ux-top{min-height:48px}
+  .ux-acts{gap:8px}
+  .ux-b,.ux-b.sm{height:40px;min-width:40px}
+  .ux-b.ico,.ux-b.sm.ico{width:40px}
+  .ux-lvp,.ux-al,.ux-game{height:40px}
+  .ux-game{min-width:40px}
+  .ux-pj,.ux-prjx{height:40px}
+  .ux-tab{height:44px}
+  .ux-seg button{height:40px;padding:0 12px}
+  .ux-lnk{min-height:40px}
+  .ux-roster{gap:8px}
+  .ux-pbar{gap:8px 16px}
+  .ux-pop.menu{gap:8px}
+  .ux-pop.menu button{height:44px}
+  .ux-help::after,.ux-b.sm.ico.ghost.op::after{content:"";position:absolute;inset:-8px}
+  .ux-b.sm.ico.ghost.op{position:relative;width:28px;min-width:28px;height:28px}
+  .ux-b.sm.ico.ghost.op::after{inset:-6px}
+}
 @media (prefers-reduced-motion: reduce){
   .ux *,.ux *::before,.ux *::after{animation:none!important;transition:none!important}
   .ux-cd .bar{transform:scaleX(.5)}

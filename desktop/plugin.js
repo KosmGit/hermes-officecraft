@@ -15085,6 +15085,15 @@ var DIALOG_TAIL = `
   .oc-dg-f{align-items:stretch}
   .oc-dg-sum{display:none}
 }
+@media (pointer:coarse){
+  .oc-dg-x{width:40px;height:40px}
+  .oc-dg-help{position:relative}
+  .oc-dg-help::after{content:"";position:absolute;inset:-8px}
+  .oc-dg .oc-btn,.oc-dg-link,.oc-dg-pill,.oc-rp-chip,.oc-mp-opt,.oc-mp-off > summary{min-height:40px}
+  .oc-dg input[type=text],.oc-dg input[type=search],.oc-dg input:not([type]),.oc-dg textarea,.oc-dg select{min-height:40px}
+  .oc-dg-seg button,.oc-dg-seg label{height:40px}
+  .oc-lm-mk{min-height:40px;min-width:40px}
+}
 `;
 var DIALOG_CSS = DIALOG_HEAD + LM_CSS + DIALOG_TAIL;
 
@@ -21756,6 +21765,28 @@ var PAGE_CSS = `
   .ux-panel{border-radius:12px}
 }
 @container ux (max-width: 420px){ .ux-brand h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)} }
+/* ---------- a finger (pointer: coarse): 40 px at least for every target, 8 px between two of them; nothing changes under a mouse ----------
+   Last of the sheet: it follows the container rules above it, so a size they set for a narrow pane does not win back. A control that is
+   smaller to the eye (the « ? », the « open » icon) keeps its look and gets its 40 px from a ::after that reaches 8 px, 6 px beyond it. */
+@media (pointer:coarse){
+  .ux-top{min-height:48px}
+  .ux-acts{gap:8px}
+  .ux-b,.ux-b.sm{height:40px;min-width:40px}
+  .ux-b.ico,.ux-b.sm.ico{width:40px}
+  .ux-lvp,.ux-al,.ux-game{height:40px}
+  .ux-game{min-width:40px}
+  .ux-pj,.ux-prjx{height:40px}
+  .ux-tab{height:44px}
+  .ux-seg button{height:40px;padding:0 12px}
+  .ux-lnk{min-height:40px}
+  .ux-roster{gap:8px}
+  .ux-pbar{gap:8px 16px}
+  .ux-pop.menu{gap:8px}
+  .ux-pop.menu button{height:44px}
+  .ux-help::after,.ux-b.sm.ico.ghost.op::after{content:"";position:absolute;inset:-8px}
+  .ux-b.sm.ico.ghost.op{position:relative;width:28px;min-width:28px;height:28px}
+  .ux-b.sm.ico.ghost.op::after{inset:-6px}
+}
 @media (prefers-reduced-motion: reduce){
   .ux *,.ux *::before,.ux *::after{animation:none!important;transition:none!important}
   .ux-cd .bar{transform:scaleX(.5)}
@@ -24768,7 +24799,7 @@ ${ringed(".oc-lm-ib:focus-visible")}
 .oc-lm-g .ln{flex:1 1 auto;height:1px;background:${HAIR}}
 .oc-lm-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) max-content max-content max-content;column-gap:12px;align-items:center;min-height:40px;padding:2px 0;border-bottom:1px solid ${HAIR}}
 .oc-lm-mc{grid-column:1;display:flex;flex-direction:column;min-width:0}
-.oc-lm-pay{margin:8px 0 0;color:var(--ui-text-secondary);font-size:12.5px;line-height:16px}
+.oc-lm-pay{margin:8px 0 0;padding-left:8px;border-left:3px solid ${VIOLET4};color:var(--foreground);font-size:12.5px;line-height:16px}
 .oc-lm-gn{margin:8px 0 0}
 .oc-lm-row[data-quiet="true"]{opacity:.62}
 .oc-lm-calls{white-space:nowrap}
@@ -24811,7 +24842,7 @@ ${ringed(".oc-lm-ib:focus-visible")}
 ${ringed(".oc-sd-x:focus-visible")}
 .oc-sd-b{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .oc-sd .oc-sf{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-.oc-sd .oc-sf-in{flex:1 1 auto;height:min(620px,calc(100dvh - 160px))}
+.oc-sd .oc-sf-in{flex:1 1 auto;height:min(600px,calc(100dvh - 160px))}
 .oc-sd .oc-sf-panel{overflow-y:auto;overscroll-behavior:contain}
 .oc-sd-f{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid ${EDGE};flex:0 0 auto}
 .oc-sd-f .grow{flex:1 1 auto}
@@ -24835,6 +24866,9 @@ ${ringed(".oc-sd-x:focus-visible")}
 }
 @container (max-width:420px){
   .oc-sf-bd{display:none}
+  /* three tabs share the strip: without their icons the three labels fit a 380 px screen, so none is pushed out of it */
+  .oc-sf-tab{flex:1 1 auto;justify-content:center}
+  .oc-sf-tab svg{display:none}
 }
 @container (max-width:340px){
   .oc-sf-nav{gap:2px}
@@ -24843,6 +24877,23 @@ ${ringed(".oc-sd-x:focus-visible")}
 }
 @media (max-width:560px){
   .oc-sd-f .oc-sd-saved{display:none}
+}
+@media (pointer:coarse){
+  .oc-sd-x,.oc-lm-ib{width:40px;height:40px}
+  .oc-sf-tab{height:40px}
+  .oc-sx-help{position:relative}
+  .oc-sx-help::after{content:"";position:absolute;inset:-8px}
+  .oc-sx-name{gap:16px}
+  .oc-sx-ctl,.oc-lm-ctl{gap:16px}
+  .oc-sx-sw{width:48px;height:28px;border-radius:14px}
+  .oc-sx-sw::after{top:3px;left:3px;width:20px;height:20px}
+  .oc-sx-sw:checked::after{transform:translateX(20px)}
+  .oc-sx-seg span{height:40px}
+  .oc-sx-btn,.oc-sx-link,.oc-sd-f .oc-sx-btn{min-height:40px}
+  .oc-sx-cap summary{min-height:40px}
+  .oc-fc,.oc-lm-sel,.oc-sx-capg input{height:40px!important}
+  .oc-nt-chip span,.oc-nt-line .oc-nt-chip span{min-height:40px}
+  .oc-sx-row,.oc-lm-row{row-gap:8px}
 }
 @media (prefers-reduced-motion:reduce){
   .oc-sd[open]{animation:none}
@@ -25418,6 +25469,12 @@ var PANEL_CSS = `
 .oc-fsw li{display:flex;align-items:center;gap:6px;min-width:0;font-size:11.5px}
 .oc-fsw i{flex:0 0 auto;width:22px;height:16px;border-radius:3px;border:1px solid ${FIELD_EDGE}}
 .oc-fiche p{margin:0;font-size:11.5px}
+@media (pointer:coarse){
+  .oc-gear,.oc-x{width:40px;height:40px}
+  .oc-toggle,.oc-set-link{min-height:40px}
+  .oc-legend-btn{position:relative}
+  .oc-legend-btn::after{content:"";position:absolute;inset:-8px}
+}
 @media (max-width:560px){.oc-hbody{grid-template-columns:minmax(0,1fr)}.oc-hprev{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left}.oc-hire{padding:12px}}
 `;
 

@@ -166,7 +166,7 @@ ${ringed('.oc-lm-ib:focus-visible')}
 .oc-lm-g .ln{flex:1 1 auto;height:1px;background:${HAIR}}
 .oc-lm-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) max-content max-content max-content;column-gap:12px;align-items:center;min-height:40px;padding:2px 0;border-bottom:1px solid ${HAIR}}
 .oc-lm-mc{grid-column:1;display:flex;flex-direction:column;min-width:0}
-.oc-lm-pay{margin:8px 0 0;color:var(--ui-text-secondary);font-size:12.5px;line-height:16px}
+.oc-lm-pay{margin:8px 0 0;padding-left:8px;border-left:3px solid ${VIOLET};color:var(--foreground);font-size:12.5px;line-height:16px}
 .oc-lm-gn{margin:8px 0 0}
 .oc-lm-row[data-quiet="true"]{opacity:.62}
 .oc-lm-calls{white-space:nowrap}
@@ -209,7 +209,7 @@ ${ringed('.oc-lm-ib:focus-visible')}
 ${ringed('.oc-sd-x:focus-visible')}
 .oc-sd-b{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .oc-sd .oc-sf{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-.oc-sd .oc-sf-in{flex:1 1 auto;height:min(620px,calc(100dvh - 160px))}
+.oc-sd .oc-sf-in{flex:1 1 auto;height:min(600px,calc(100dvh - 160px))}
 .oc-sd .oc-sf-panel{overflow-y:auto;overscroll-behavior:contain}
 .oc-sd-f{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid ${EDGE};flex:0 0 auto}
 .oc-sd-f .grow{flex:1 1 auto}
@@ -233,6 +233,9 @@ ${ringed('.oc-sd-x:focus-visible')}
 }
 @container (max-width:420px){
   .oc-sf-bd{display:none}
+  /* three tabs share the strip: without their icons the three labels fit a 380 px screen, so none is pushed out of it */
+  .oc-sf-tab{flex:1 1 auto;justify-content:center}
+  .oc-sf-tab svg{display:none}
 }
 @container (max-width:340px){
   .oc-sf-nav{gap:2px}
@@ -241,6 +244,23 @@ ${ringed('.oc-sd-x:focus-visible')}
 }
 @media (max-width:560px){
   .oc-sd-f .oc-sd-saved{display:none}
+}
+@media (pointer:coarse){
+  .oc-sd-x,.oc-lm-ib{width:40px;height:40px}
+  .oc-sf-tab{height:40px}
+  .oc-sx-help{position:relative}
+  .oc-sx-help::after{content:"";position:absolute;inset:-8px}
+  .oc-sx-name{gap:16px}
+  .oc-sx-ctl,.oc-lm-ctl{gap:16px}
+  .oc-sx-sw{width:48px;height:28px;border-radius:14px}
+  .oc-sx-sw::after{top:3px;left:3px;width:20px;height:20px}
+  .oc-sx-sw:checked::after{transform:translateX(20px)}
+  .oc-sx-seg span{height:40px}
+  .oc-sx-btn,.oc-sx-link,.oc-sd-f .oc-sx-btn{min-height:40px}
+  .oc-sx-cap summary{min-height:40px}
+  .oc-fc,.oc-lm-sel,.oc-sx-capg input{height:40px!important}
+  .oc-nt-chip span,.oc-nt-line .oc-nt-chip span{min-height:40px}
+  .oc-sx-row,.oc-lm-row{row-gap:8px}
 }
 @media (prefers-reduced-motion:reduce){
   .oc-sd[open]{animation:none}
