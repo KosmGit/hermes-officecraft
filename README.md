@@ -28,7 +28,7 @@ Officecraft draws your Hermes profiles as people in an isometric office, one isl
 | **Campaigns** | Compose a graph of cards, preview it, create it in one write. A guard card holds everything until you press *Launch*. |
 | **Recruit** | Create a new bot from the office: identity, starting point, model and provider. |
 | **Replay & Resources** | Put the office back as it was last night; read tokens, calls and costs as Hermes recorded them. |
-| **Notifications** | Decisions, silences, gateway, scheduled jobs and more, on the messaging apps Hermes already serves. Off by default. |
+| **Notifications** | Decisions, silent agents, the Hermes gateway, scheduled jobs and more, on the messaging apps Hermes already serves. Off by default. |
 | **Game layer** | 35 trophies, an office level and agent grades, all recomputed from your real history. One switch turns it off. |
 | **LLM functions** | Ten optional helpers (draft a recruitment, propose a campaign graph, decorate the office…). All off by default, capped per month, and a model never creates anything without your click. |
 

@@ -83,3 +83,11 @@ test('« Mixed » is « Per type »; the gateway and the silences have their pla
     assert.ok(m.typeHint.gateway.length <= 60, `${lang} typeHint.gateway`)
   }
 })
+
+test('the README names the notification types with the words of the interface (« silent agents », not the old « silences »)', () => {
+  const readme = readFileSync(new URL('../../README.md', import.meta.url), 'utf8')
+  const row = readme.split('\n').find(l => l.startsWith('| **Notifications** |')) ?? ''
+  assert.ok(row, 'the Notifications row of the README')
+  assert.match(row.toLowerCase(), new RegExp(messages.en.notify.type.silent.toLowerCase()))
+  assert.doesNotMatch(row, /\bsilences\b/i)
+})
